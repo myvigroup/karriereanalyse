@@ -7,15 +7,20 @@ export default async function AnalysePage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
-  const { data: fields } = await supabase
-    .from('competency_fields')
-    .select('*, competency_questions(*)')
-    .order('sort_order');
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
 
-  const { data: results } = await supabase
-    .from('analysis_results')
-    .select('*, competency_fields(title, icon, slug)')
-    .eq('user_id', user.id);
+  // Load existing analysis session if any
+  const { data: existingSession } = await supabase
+    .from('analysis_sessions')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  return <AnalyseClient fields={fields || []} existingResults={results || []} userId={user.id} />;
+  return <AnalyseClient profile={profile} existingSession={existingSession} userId={user.id} />;
 }
