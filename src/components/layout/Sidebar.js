@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { AUDIO_INTROS, AUDIO_TTS_FALLBACKS } from '@/lib/audio-config';
-import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: '◻' },
@@ -255,9 +254,6 @@ export default function Sidebar({ profile }) {
           </>
         )}
       </nav>
-
-      {/* Theme Toggle */}
-      <ThemeToggle />
 
       {/* Logout */}
       <button onClick={handleLogout} style={{

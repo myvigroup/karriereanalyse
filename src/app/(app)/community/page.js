@@ -1,8 +1,8 @@
-import { createServerClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import CommunityClient from './CommunityClient';
 
 export default async function CommunityPage() {
-  const supabase = await createServerClient();
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
