@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 const SYSTEM_PROMPT = `Du bist der KI-Coach des Karriere-Instituts — ein erfahrener Karriereberater für den deutschsprachigen Markt.
 
@@ -26,6 +27,11 @@ export async function POST(request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+    const rateCheck = await checkRateLimit(supabase, user.id, 'coach-chat');
+    if (!rateCheck.allowed) {
+      return NextResponse.json({ error: 'Rate limit erreicht. Versuche es sp\u00E4ter erneut.', remaining: 0 }, { status: 429 });
+    }
+
     const { chatId, message, contextType } = await request.json();
     if (!message) return NextResponse.json({ error: 'No message' }, { status: 400 });
 
@@ -47,6 +53,11 @@ export async function POST(request) {
       .eq('user_id', user.id)
       .order('date', { ascending: false })
       .limit(3);
+    const { data: completedCourses } = await supabase
+      .from('lesson_progress')
+      .select('lesson_id')
+      .eq('user_id', user.id)
+      .eq('completed', true);
     const { data: decisionSession } = await supabase
       .from('decision_sessions')
       .select('result_label, score_stay, score_exit')
@@ -73,7 +84,8 @@ Top-Stärken: ${topStrengths || 'Keine Analyse vorhanden'}
 Entwicklungsfelder: ${weaknesses || 'Keine Analyse vorhanden'}
 Entscheidungs-Kompass: ${decisionSession?.result_label || 'Nicht durchgeführt'} (Bleiben: ${decisionSession?.score_stay || '?'}%, Wechseln: ${decisionSession?.score_exit || '?'}%)
 Aktuelle Bewerbungen: ${(recentApps || []).map(a => `${a.company_name} (${a.status})`).join(', ') || 'Keine'}
-Letzte Gehaltsverhandlungen: ${(salaryLogs || []).map(s => `${s.event_type}: gefordert €${s.my_ask}, erhalten €${s.final_result}`).join('; ') || 'Keine'}`;
+Letzte Gehaltsverhandlungen: ${(salaryLogs || []).map(s => `${s.event_type}: gefordert €${s.my_ask}, erhalten €${s.final_result}`).join('; ') || 'Keine'}
+Abgeschlossene Kurse: ${(completedCourses || []).length} Lektionen`;
 
     // Load chat history
     let history = [];

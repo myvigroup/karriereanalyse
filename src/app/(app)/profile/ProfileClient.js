@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { getLevel, getLevelProgress } from '@/lib/career-logic';
+import InfoTooltip from '@/components/ui/InfoTooltip';
 
 export default function ProfileClient({ profile: initialProfile, userBadges, allBadges, analysisSession, lessonsCompleted, certificates, userId }) {
   const supabase = createClient();
@@ -42,7 +43,7 @@ export default function ProfileClient({ profile: initialProfile, userBadges, all
   return (
     <div className="page-container animate-in">
       <div style={{ marginBottom: 32 }}>
-        <h1 className="page-title">Mein Profil</h1>
+        <h1 className="page-title">Mein Profil<InfoTooltip moduleId="profile" profile={profile} /></h1>
         <p className="page-subtitle">Einstellungen, Badges & Statistiken</p>
       </div>
 
@@ -187,6 +188,39 @@ export default function ProfileClient({ profile: initialProfile, userBadges, all
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Einstellungen */}
+      <div className="card" style={{ marginTop: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Einstellungen</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <button
+            className="btn btn-secondary"
+            style={{ justifyContent: 'flex-start', fontSize: 13 }}
+            onClick={async () => {
+              await supabase.from('profiles').update({ tour_completed: false, tour_step: 0 }).eq('id', userId);
+              window.location.reload();
+            }}
+          >
+            {'\u{1F3AF}'} Tour nochmal starten
+          </button>
+          <a href="/api/data-export" className="btn btn-secondary" style={{ justifyContent: 'flex-start', fontSize: 13, textDecoration: 'none', color: 'inherit' }}>
+            {'\u{1F4E5}'} Meine Daten herunterladen (DSGVO)
+          </a>
+          <button
+            className="btn btn-ghost"
+            style={{ justifyContent: 'flex-start', fontSize: 13, color: 'var(--ki-error)' }}
+            onClick={async () => {
+              if (!confirm('Bist du sicher? Alle deine Daten werden unwiderruflich gel\u00F6scht.')) return;
+              if (!confirm('Letzte Warnung: Dies kann NICHT r\u00FCckg\u00E4ngig gemacht werden.')) return;
+              await supabase.rpc('delete_user_data', { target_user_id: userId });
+              await supabase.auth.signOut();
+              window.location.href = '/auth/login';
+            }}
+          >
+            {'\u{1F5D1}\uFE0F'} Konto und alle Daten l\u00F6schen
+          </button>
         </div>
       </div>
     </div>

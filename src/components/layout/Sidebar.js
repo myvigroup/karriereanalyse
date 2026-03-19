@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { AUDIO_INTROS, AUDIO_TTS_FALLBACKS } from '@/lib/audio-config';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: '◻' },
@@ -22,9 +23,11 @@ const NAV_ITEMS = [
 ];
 
 const ADMIN_ITEMS = [
-  { label: 'Coaching-Cockpit', path: '/admin/coaching', icon: '⊕' },
-  { label: 'Nutzerverwaltung', path: '/admin/users', icon: '⊞' },
-  { label: 'Kursverwaltung', path: '/admin/courses', icon: '⊡' },
+  { label: 'Coaching-Cockpit', path: '/admin/coaching', icon: '\u2295' },
+  { label: 'Nutzerverwaltung', path: '/admin/users', icon: '\u229E' },
+  { label: 'Kursverwaltung', path: '/admin/courses', icon: '\u22A1' },
+  { label: 'Analytics', path: '/admin/analytics', icon: '\u{1F4C8}' },
+  { label: 'Meine Klienten', path: '/coach-dashboard', icon: '📋' },
 ];
 
 export default function Sidebar({ profile }) {
@@ -35,6 +38,7 @@ export default function Sidebar({ profile }) {
 
   const [notifications, setNotifications] = useState([]);
   const [showNotifs, setShowNotifs] = useState(false);
+  const [playingAudio, setPlayingAudio] = useState(null);
   const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
@@ -64,6 +68,57 @@ export default function Sidebar({ profile }) {
     window.location.href = '/auth/login';
   }
 
+  const playIntro = (path, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (playingAudio) {
+      playingAudio.pause();
+      setPlayingAudio(null);
+      return;
+    }
+    const audioUrl = AUDIO_INTROS[path];
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audio.onended = () => setPlayingAudio(null);
+      audio.onerror = () => {
+        // Fallback to TTS
+        const text = AUDIO_TTS_FALLBACKS[path];
+        if (text && window.speechSynthesis) {
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'de-DE';
+          utterance.rate = 0.95;
+          utterance.onend = () => setPlayingAudio(null);
+          window.speechSynthesis.speak(utterance);
+          setPlayingAudio({ pause: () => window.speechSynthesis.cancel() });
+        } else {
+          setPlayingAudio(null);
+        }
+      };
+      audio.play().catch(() => {
+        const text = AUDIO_TTS_FALLBACKS[path];
+        if (text && window.speechSynthesis) {
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'de-DE';
+          utterance.rate = 0.95;
+          utterance.onend = () => setPlayingAudio(null);
+          window.speechSynthesis.speak(utterance);
+          setPlayingAudio({ pause: () => window.speechSynthesis.cancel() });
+        }
+      });
+      setPlayingAudio(audio);
+    } else {
+      const text = AUDIO_TTS_FALLBACKS[path];
+      if (text && window.speechSynthesis) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'de-DE';
+        utterance.rate = 0.95;
+        utterance.onend = () => setPlayingAudio(null);
+        window.speechSynthesis.speak(utterance);
+        setPlayingAudio({ pause: () => window.speechSynthesis.cancel() });
+      }
+    }
+  };
+
   const linkStyle = (path) => ({
     display: 'flex', alignItems: 'center', gap: 12,
     padding: '10px 16px', borderRadius: 'var(--r-md)',
@@ -75,7 +130,7 @@ export default function Sidebar({ profile }) {
   });
 
   return (
-    <aside style={{
+    <aside data-tour-sidebar="" className="sidebar" style={{
       width: 240, minHeight: '100vh', background: 'var(--ki-card)',
       borderRight: '1px solid var(--ki-border)', display: 'flex', flexDirection: 'column',
       padding: '24px 12px', position: 'fixed', left: 0, top: 0,
@@ -86,6 +141,7 @@ export default function Sidebar({ profile }) {
           <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', color: 'var(--ki-red)', textTransform: 'uppercase' }}>Karriere-Institut</div>
           <div style={{ position: 'relative' }}>
             <button
+              data-tour-notifications=""
               onClick={() => setShowNotifs(!showNotifs)}
               style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--ki-text-secondary)', position: 'relative', padding: 4 }}
             >
@@ -161,12 +217,27 @@ export default function Sidebar({ profile }) {
 
       {/* Navigation */}
       <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {NAV_ITEMS.map(item => (
-          <a key={item.path} href={item.path} style={linkStyle(item.path)}>
+        {NAV_ITEMS.map(item => {
+          const tourAttr = item.path === '/dashboard' ? { 'data-tour-dashboard': '' }
+            : item.path === '/coach' ? { 'data-tour-coach': '' }
+            : item.path === '/analyse' ? { 'data-tour-analyse': '' }
+            : item.path === '/profile' ? { 'data-tour-profile': '' }
+            : {};
+          return (
+          <a key={item.path} href={item.path} style={linkStyle(item.path)} {...tourAttr}>
             <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>{item.icon}</span>
-            {item.label}
+            <span style={{ flex: 1 }}>{item.label}</span>
+            {AUDIO_INTROS[item.path] && (
+              <span
+                onClick={(e) => playIntro(item.path, e)}
+                style={{ fontSize: 12, opacity: 0.4, cursor: 'pointer', transition: 'opacity var(--t-fast)' }}
+                onMouseEnter={e => e.target.style.opacity = 1}
+                onMouseLeave={e => e.target.style.opacity = 0.4}
+              >{'\u{1F50A}'}</span>
+            )}
           </a>
-        ))}
+          );
+        })}
 
         {isAdmin && (
           <>

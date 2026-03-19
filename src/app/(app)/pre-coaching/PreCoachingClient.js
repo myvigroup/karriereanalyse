@@ -1,6 +1,8 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { awardPoints } from '@/lib/gamification';
+import InfoTooltip from '@/components/ui/InfoTooltip';
 
 const STATUS_CONFIG = {
   missing: { label: 'Fehlt', color: 'var(--grey-4)', bg: 'var(--ki-bg-alt)', icon: '○' },
@@ -16,6 +18,12 @@ export default function PreCoachingClient({ documents: initial, userId }) {
   const [uploading, setUploading] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [expandedAI, setExpandedAI] = useState(null);
+  const [showMerge, setShowMerge] = useState(false);
+  const [selectedDocs, setSelectedDocs] = useState([]);
+  const [merging, setMerging] = useState(false);
+  const [activeFilter, setActiveFilter] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
+  const dropZoneRef = useRef(null);
 
   const required = docs.filter(d => d.is_required);
   const accepted = docs.filter(d => d.status === 'accepted').length;
@@ -39,6 +47,7 @@ export default function PreCoachingClient({ documents: initial, userId }) {
       if (updateError) throw updateError;
 
       setDocs(prev => prev.map(d => d.id === doc.id ? { ...d, status: 'pending', file_name: file.name, file_path: path } : d));
+      await awardPoints(userId, 30);
     } catch (err) {
       console.error('Upload failed:', err);
     }
@@ -63,12 +72,117 @@ export default function PreCoachingClient({ documents: initial, userId }) {
     setAnalyzing(false);
   };
 
+  const handleMerge = async () => {
+    setMerging(true);
+    try {
+      const res = await fetch('/api/merge-documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ document_ids: selectedDocs }),
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Bewerbungsmappe.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+        setShowMerge(false);
+      }
+    } catch (err) {
+      console.error('Merge failed:', err);
+    }
+    setMerging(false);
+  };
+
+  const DOC_TYPE_FILTERS = [
+    { key: 'cv',          label: 'Lebenslauf',  icon: '📄' },
+    { key: 'certificate', label: 'Zeugnisse',   icon: '📜' },
+    { key: 'zertifikat',  label: 'Zertifikate', icon: '🎓' },
+    { key: 'reference',   label: 'Referenzen',  icon: '📋' },
+    { key: 'cover_letter',label: 'Anschreiben', icon: '📝' },
+  ];
+
+  const filteredDocs = activeFilter ? docs.filter(d => d.doc_type === activeFilter) : docs;
+
+  // Global drag-and-drop: find first uploadable doc and upload the dropped file
+  const handleGlobalDrop = useCallback(async (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer?.files?.[0];
+    if (!file) return;
+    const target = filteredDocs.find(d => d.status === 'missing' || d.status === 'rejected');
+    if (target) await handleUpload(target, file);
+  }, [filteredDocs, handleUpload]);
+
   return (
     <div className="page-container" style={{ maxWidth: 700 }}>
-      <h1 className="page-title">Dokumenten-Safe</h1>
+      <h1 className="page-title">Dokumenten-Safe <InfoTooltip moduleId="pre-coaching" profile={null} /></h1>
       <p className="page-subtitle" style={{ marginBottom: 24 }}>
         {allDone ? 'Dein Profil ist komplett!' : `Noch ${total - accepted} Dokument${total - accepted !== 1 ? 'e' : ''} bis zum Profil-Check`}
       </p>
+
+      {/* Video Placeholder */}
+      <div className="card" style={{ aspectRatio: '16/9', maxHeight: 200, background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
+        <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(204,20,38,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>▶</div>
+        <div style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>Der perfekte Lebenslauf 2025</div>
+        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>Verfügbar ab April 2026</div>
+      </div>
+
+      {/* Global Drag & Drop Zone */}
+      <div
+        ref={dropZoneRef}
+        onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={handleGlobalDrop}
+        style={{
+          marginBottom: 24,
+          padding: '28px 20px',
+          border: `2px dashed ${dragOver ? 'var(--ki-red)' : 'var(--grey-4)'}`,
+          borderRadius: 'var(--r-lg)',
+          background: dragOver ? 'rgba(204,20,38,0.04)' : 'var(--ki-bg-alt)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          gap: 10, cursor: 'pointer', transition: 'all var(--t-fast)',
+        }}
+        onClick={() => {
+          const target = filteredDocs.find(d => d.status === 'missing' || d.status === 'rejected');
+          if (target) dropZoneRef.current?.querySelector('input[type="file"]')?.click();
+        }}
+      >
+        <div style={{ fontSize: 32 }}>📂</div>
+        <div style={{ fontWeight: 600, fontSize: 15 }}>Datei hier ablegen oder klicken</div>
+        <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>PDF, JPG, PNG, DOC/DOCX · Wird dem ersten offenen Slot zugewiesen</div>
+        <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style={{ display: 'none' }}
+          onChange={e => {
+            const file = e.target.files?.[0];
+            const target = filteredDocs.find(d => d.status === 'missing' || d.status === 'rejected');
+            if (file && target) handleUpload(target, file);
+          }} />
+      </div>
+
+      {/* Document Type Filter Cards */}
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
+        {DOC_TYPE_FILTERS.map(f => (
+          <button
+            key={f.key}
+            onClick={() => setActiveFilter(activeFilter === f.key ? null : f.key)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '8px 14px',
+              borderRadius: 'var(--r-md)',
+              border: `1.5px solid ${activeFilter === f.key ? 'var(--ki-red)' : 'var(--grey-4)'}`,
+              background: activeFilter === f.key ? 'rgba(204,20,38,0.06)' : 'var(--ki-bg-alt)',
+              color: activeFilter === f.key ? 'var(--ki-red)' : 'var(--ki-text)',
+              fontWeight: activeFilter === f.key ? 700 : 500,
+              fontSize: 13, cursor: 'pointer', transition: 'all var(--t-fast)',
+            }}
+          >
+            <span>{f.icon}</span>
+            <span>{f.label}</span>
+          </button>
+        ))}
+      </div>
 
       {/* Progress */}
       <div className="card" style={{ marginBottom: 24, padding: 20 }}>
@@ -88,7 +202,7 @@ export default function PreCoachingClient({ documents: initial, userId }) {
 
       {/* Document Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {docs.map(doc => {
+        {filteredDocs.map(doc => {
           const cfg = STATUS_CONFIG[doc.status] || STATUS_CONFIG.missing;
           const isCV = doc.doc_type === 'cv';
           const hasAI = doc.ai_analysis && Object.keys(doc.ai_analysis).length > 0;
@@ -182,6 +296,36 @@ export default function PreCoachingClient({ documents: initial, userId }) {
           Weiter zur Karriereanalyse →
         </a>
       </div>
+
+      <button className="btn btn-secondary" onClick={() => setShowMerge(true)} style={{ width: '100%', marginTop: 12 }}>
+        Bewerbungsmappe erstellen
+      </button>
+
+      {showMerge && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}
+          onClick={e => e.target === e.currentTarget && setShowMerge(false)}>
+          <div className="card" style={{ width: 480, maxWidth: '90vw' }}>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Bewerbungsmappe erstellen</h3>
+            <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>Wähle die Dokumente für deine Bewerbungsmappe:</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+              {docs.filter(d => d.file_path).map(doc => (
+                <label key={doc.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-md)', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={selectedDocs.includes(doc.id)}
+                    onChange={() => setSelectedDocs(prev => prev.includes(doc.id) ? prev.filter(id => id !== doc.id) : [...prev, doc.id])} />
+                  <span style={{ fontSize: 14 }}>{doc.doc_label}</span>
+                  <span style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginLeft: 'auto' }}>{doc.file_name}</span>
+                </label>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn btn-secondary" onClick={() => setShowMerge(false)} style={{ flex: 1 }}>Abbrechen</button>
+              <button className="btn btn-primary" onClick={handleMerge} disabled={selectedDocs.length === 0 || merging} style={{ flex: 1 }}>
+                {merging ? 'Wird erstellt...' : `${selectedDocs.length} Dokumente zusammenfügen`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

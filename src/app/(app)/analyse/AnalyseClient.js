@@ -2,6 +2,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { calculateFieldScore, calculateOverallScore, calculatePriorities, classifyScore, prepareRadarData } from '@/lib/career-logic';
+import { awardPoints } from '@/lib/gamification';
+import InfoTooltip from '@/components/ui/InfoTooltip';
+import EmptyState from '@/components/ui/EmptyState';
 
 // ============================================================
 // RADAR CHART (SVG)
@@ -51,13 +54,14 @@ function RadarChart({ data, size = 320 }) {
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function AnalyseClient({ fields, existingResults, userId, marketValuePercentile, selfAssessmentScore }) {
+export default function AnalyseClient({ fields, existingResults, userId, marketValuePercentile, selfAssessmentScore, profile }) {
   const supabase = createClient();
   const [phase, setPhase] = useState(existingResults?.length > 0 ? 'results' : 'intro'); // intro | quiz | results | quick
   const [currentFieldIdx, setCurrentFieldIdx] = useState(0);
   const [answers, setAnswers] = useState({}); // { fieldId: [1-10, 1-10, ...] }
   const [scores, setScores] = useState([]); // { fieldId, score, title, icon, slug }
   const [saving, setSaving] = useState(false);
+  const [showXpPill, setShowXpPill] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareForm, setShareForm] = useState({ name: '', email: '', anonymized: false });
   const [shareLink, setShareLink] = useState('');
@@ -135,6 +139,13 @@ export default function AnalyseClient({ fields, existingResults, userId, marketV
       prio_3_field: prios.prio3?.fieldId,
     });
 
+    // Award XP for first completed analysis
+    try {
+      await awardPoints(userId, 200, 'first_analysis');
+      setShowXpPill(true);
+      setTimeout(() => setShowXpPill(false), 3000);
+    } catch (_) {}
+
     setSaving(false);
     setPhase('results');
   };
@@ -162,6 +173,13 @@ export default function AnalyseClient({ fields, existingResults, userId, marketV
       user_id: userId, overall_score: overall,
       prio_1_field: prios.prio1?.fieldId, prio_2_field: prios.prio2?.fieldId, prio_3_field: prios.prio3?.fieldId,
     });
+    // Award XP for first completed analysis
+    try {
+      await awardPoints(userId, 200, 'first_analysis');
+      setShowXpPill(true);
+      setTimeout(() => setShowXpPill(false), 3000);
+    } catch (_) {}
+
     setSaving(false);
     setPhase('results');
   };
@@ -222,7 +240,7 @@ export default function AnalyseClient({ fields, existingResults, userId, marketV
   // QUICK ASSESSMENT
   if (phase === 'quick') return (
     <div className="page-container" style={{ maxWidth: 600 }}>
-      <h1 className="page-title">Schnell-Einstufung</h1>
+      <h1 className="page-title">Schnell-Einstufung</h1><InfoTooltip moduleId="analyse" profile={profile} />
       <p className="page-subtitle" style={{ marginBottom: 32 }}>Schätze dich in jedem Feld ein (0–100%)</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {(fields || []).map(f => (
@@ -323,6 +341,17 @@ export default function AnalyseClient({ fields, existingResults, userId, marketV
           <h1 style={{ fontSize: 36, fontWeight: 700, letterSpacing: '-0.04em' }}>Dein Ergebnis</h1>
           <div style={{ fontSize: 64, fontWeight: 700, color: 'var(--ki-red)', margin: '16px 0' }}>{Math.round(overall)}%</div>
           <p style={{ color: 'var(--ki-text-secondary)' }}>Gesamtscore über 13 Kompetenzfelder</p>
+          {showXpPill && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 12,
+              background: 'rgba(204,20,38,0.12)', border: '1px solid rgba(204,20,38,0.3)',
+              borderRadius: 'var(--r-pill)', padding: '6px 16px',
+              color: 'var(--ki-red)', fontWeight: 700, fontSize: 15,
+              animation: 'fadeIn var(--t-base)',
+            }}>
+              +200 XP
+            </div>
+          )}
         </div>
 
         <div className="grid-2" style={{ marginBottom: 40, alignItems: 'start' }}>
@@ -348,6 +377,13 @@ export default function AnalyseClient({ fields, existingResults, userId, marketV
           </div>
         </div>
 
+        {/* Video-Platzhalter */}
+        <div className="card" style={{ marginBottom: 32, aspectRatio: '16/9', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(204,20,38,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>▶</div>
+          <div style={{ color: 'white', fontSize: 16, fontWeight: 600 }}>Video-Erklärung: Wie liest du dein Radar-Chart?</div>
+          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>Verfügbar ab April 2026</div>
+        </div>
+
         {/* All Fields */}
         <div className="card" style={{ marginBottom: 32 }}>
           <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Alle Kompetenzfelder</h3>
@@ -365,6 +401,20 @@ export default function AnalyseClient({ fields, existingResults, userId, marketV
               </div>
             );
           })}
+        </div>
+
+        {/* Praxis-Aufgabe */}
+        <div className="card" style={{ marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-red)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Praxis-Aufgabe</div>
+            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Teile dein Ergebnis mit deinem Coach</div>
+            <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', margin: 0 }}>
+              Dein Coach kann dir helfen, deine Prioritäten in einen konkreten Aktionsplan umzuwandeln.
+            </p>
+          </div>
+          <a href="/coach" className="btn btn-primary" style={{ flexShrink: 0 }}>
+            Zum Coach →
+          </a>
         </div>
 
         {/* Impostor-Score Confidence Box */}

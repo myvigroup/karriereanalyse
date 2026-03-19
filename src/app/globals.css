@@ -195,9 +195,12 @@ a:hover { opacity: 0.85; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-lg); }
 
 @media (max-width: 768px) {
+  .sidebar { display: none; }
+  .mobile-nav { display: flex !important; }
+  .page-container { margin-left: 0; padding: var(--sp-md); }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
   .page-title { font-size: 28px; }
-  .page-container { padding: var(--sp-md); }
+  main { margin-left: 0 !important; padding-bottom: 80px; }
 }
 
 /* Glassmorphism card */
@@ -218,6 +221,16 @@ a:hover { opacity: 0.85; }
 .delay-2 { animation-delay: 0.1s; }
 .delay-3 { animation-delay: 0.15s; }
 .delay-4 { animation-delay: 0.2s; }
+
+/* Accessibility */
+:focus-visible {
+  outline: 2px solid var(--ki-red);
+  outline-offset: 2px;
+}
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--ki-red);
+  outline-offset: 2px;
+}
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }

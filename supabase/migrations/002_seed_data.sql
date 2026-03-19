@@ -134,18 +134,18 @@ INSERT INTO public.competency_questions (field_id, question_text, sort_order) VA
 -- ============================================================
 INSERT INTO public.courses (id, title, description, category, competency_field_id, market_value_impact, sort_order, is_published) VALUES
   ('d0000001-0000-0000-0000-000000000001', 'Personal Branding Masterclass', 'Werde sichtbar: LinkedIn, CV, Elevator Pitch & digitale Präsenz', 'Selbstmarketing', 'c0000001-0000-0000-0000-000000000001', 3200, 1, true),
-  ('d0000001-0000-0000-0000-000000000002', 'Leadership Excellence', 'Vom Fachexperten zur Führungskraft: Delegation, Vision & Impact', 'Führung', 'c0000001-0000-0000-0000-000000000002', 5500, 2, true),
-  ('d0000001-0000-0000-0000-000000000003', 'Kommunikation auf C-Level', 'Rhetorik, Storytelling & Executive Presence für Entscheider', 'Kommunikation', 'c0000001-0000-0000-0000-000000000003', 3800, 3, true),
-  ('d0000001-0000-0000-0000-000000000004', 'Gehaltsverhandlung Intensiv', 'Marktwert kennen, BATNA aufbauen, Gehalt verdoppeln', 'Verhandlung', 'c0000001-0000-0000-0000-000000000004', 8000, 4, true),
-  ('d0000001-0000-0000-0000-000000000005', 'Strategisches Netzwerken', 'Von Kontakten zu Karrierechancen: Networking für Top-Performer', 'Netzwerk', 'c0000001-0000-0000-0000-000000000005', 2800, 5, true),
-  ('d0000001-0000-0000-0000-000000000006', 'Expertise sichtbar machen', 'Thought Leadership, Fachvorträge & Zertifizierungsstrategie', 'Fachkompetenz', 'c0000001-0000-0000-0000-000000000006', 4200, 6, true),
-  ('d0000001-0000-0000-0000-000000000007', 'Digital & KI für Führungskräfte', 'KI-Tools, Datenanalyse & digitale Transformation verstehen', 'Digital', 'c0000001-0000-0000-0000-000000000007', 4500, 7, true),
-  ('d0000001-0000-0000-0000-000000000008', 'Produktivität & Deep Work', 'Zeitmanagement-Systeme, Fokus & High-Performance-Routinen', 'Produktivität', 'c0000001-0000-0000-0000-000000000008', 2200, 8, true),
-  ('d0000001-0000-0000-0000-000000000009', 'Resilienz & Mental Fitness', 'Stressresistenz aufbauen, Krisen meistern, nachhaltig performen', 'Resilienz', 'c0000001-0000-0000-0000-000000000009', 2500, 9, true),
-  ('d0000001-0000-0000-0000-000000000010', 'Innovation & Intrapreneurship', 'Kreative Problemlösung, Design Thinking & Projekte starten', 'Innovation', 'c0000001-0000-0000-0000-000000000010', 3500, 10, true),
-  ('d0000001-0000-0000-0000-000000000011', 'Strategisches Karrieredesign', 'Karrierepfade analysieren, Szenarien planen, Entscheidungen treffen', 'Strategie', 'c0000001-0000-0000-0000-000000000011', 4000, 11, true),
-  ('d0000001-0000-0000-0000-000000000012', 'International Career Accelerator', 'Global mindset, cross-cultural leadership & international mobility', 'International', 'c0000001-0000-0000-0000-000000000012', 3800, 12, true),
-  ('d0000001-0000-0000-0000-000000000013', 'Purpose & Career Alignment', 'Werte klären, Vision entwickeln, den richtigen Weg finden', 'Sinn & Ziel', 'c0000001-0000-0000-0000-000000000013', 2000, 13, true);
+  ('d0000002-0000-0000-0000-000000000002', 'Leadership Excellence', 'Vom Fachexperten zur Führungskraft: Delegation, Vision & Impact', 'Führung', 'c0000001-0000-0000-0000-000000000002', 5500, 2, true),
+  ('d0000003-0000-0000-0000-000000000003', 'Kommunikation auf C-Level', 'Rhetorik, Storytelling & Executive Presence für Entscheider', 'Kommunikation', 'c0000001-0000-0000-0000-000000000003', 3800, 3, true),
+  ('d0000004-0000-0000-0000-000000000004', 'Gehaltsverhandlung Intensiv', 'Marktwert kennen, BATNA aufbauen, Gehalt verdoppeln', 'Verhandlung', 'c0000001-0000-0000-0000-000000000004', 8000, 4, true),
+  ('d0000005-0000-0000-0000-000000000005', 'Strategisches Netzwerken', 'Von Kontakten zu Karrierechancen: Networking für Top-Performer', 'Netzwerk', 'c0000001-0000-0000-0000-000000000005', 2800, 5, true),
+  ('d0000006-0000-0000-0000-000000000006', 'Expertise sichtbar machen', 'Thought Leadership, Fachvorträge & Zertifizierungsstrategie', 'Fachkompetenz', 'c0000001-0000-0000-0000-000000000006', 4200, 6, true),
+  ('d0000007-0000-0000-0000-000000000007', 'Digital & KI für Führungskräfte', 'KI-Tools, Datenanalyse & digitale Transformation verstehen', 'Digital', 'c0000001-0000-0000-0000-000000000007', 4500, 7, true),
+  ('d0000008-0000-0000-0000-000000000008', 'Produktivität & Deep Work', 'Zeitmanagement-Systeme, Fokus & High-Performance-Routinen', 'Produktivität', 'c0000001-0000-0000-0000-000000000008', 2200, 8, true),
+  ('d0000009-0000-0000-0000-000000000009', 'Resilienz & Mental Fitness', 'Stressresistenz aufbauen, Krisen meistern, nachhaltig performen', 'Resilienz', 'c0000001-0000-0000-0000-000000000009', 2500, 9, true),
+  ('d0000010-0000-0000-0000-000000000010', 'Innovation & Intrapreneurship', 'Kreative Problemlösung, Design Thinking & Projekte starten', 'Innovation', 'c0000001-0000-0000-0000-000000000010', 3500, 10, true),
+  ('d0000011-0000-0000-0000-000000000011', 'Strategisches Karrieredesign', 'Karrierepfade analysieren, Szenarien planen, Entscheidungen treffen', 'Strategie', 'c0000001-0000-0000-0000-000000000011', 4000, 11, true),
+  ('d0000012-0000-0000-0000-000000000012', 'International Career Accelerator', 'Global mindset, cross-cultural leadership & international mobility', 'International', 'c0000001-0000-0000-0000-000000000012', 3800, 12, true),
+  ('d0000013-0000-0000-0000-000000000013', 'Purpose & Career Alignment', 'Werte klären, Vision entwickeln, den richtigen Weg finden', 'Sinn & Ziel', 'c0000001-0000-0000-0000-000000000013', 2000, 13, true);
 
 -- ============================================================
 -- 4. MODULE & LEKTIONEN (4 Lektionen pro Kurs = 52 total)
@@ -153,23 +153,23 @@ INSERT INTO public.courses (id, title, description, category, competency_field_i
 
 -- Personal Branding
 INSERT INTO public.modules (id, course_id, title, sort_order) VALUES
-  ('m0000001-0000-0000-0000-000000000001', 'd0000001-0000-0000-0000-000000000001', 'Personal Branding Grundlagen', 1);
+  ('a0000001-0000-0000-0000-000000000001', 'd0000001-0000-0000-0000-000000000001', 'Personal Branding Grundlagen', 1);
 
 INSERT INTO public.lessons (module_id, title, description, lesson_type, duration_min, market_value_impact, sort_order) VALUES
-  ('m0000001-0000-0000-0000-000000000001', 'Dein Elevator Pitch', 'In 30 Sekunden überzeugen: So formulierst du deinen persönlichen Pitch.', 'video', 12, 800, 1),
-  ('m0000001-0000-0000-0000-000000000001', 'LinkedIn-Profil Optimierung', 'Headline, Summary, Erfahrung: Jedes Element zählt für Headhunter.', 'lesson', 15, 900, 2),
-  ('m0000001-0000-0000-0000-000000000001', 'Der perfekte Lebenslauf', 'ATS-optimiert, visuell ansprechend, inhaltlich schlagkräftig.', 'lesson', 14, 800, 3),
-  ('m0000001-0000-0000-0000-000000000001', 'Praxis: Brand Audit', 'Analysiere deine aktuelle Online-Präsenz und identifiziere Lücken.', 'exercise', 18, 700, 4);
+  ('a0000001-0000-0000-0000-000000000001', 'Dein Elevator Pitch', 'In 30 Sekunden überzeugen: So formulierst du deinen persönlichen Pitch.', 'video', 12, 800, 1),
+  ('a0000001-0000-0000-0000-000000000001', 'LinkedIn-Profil Optimierung', 'Headline, Summary, Erfahrung: Jedes Element zählt für Headhunter.', 'lesson', 15, 900, 2),
+  ('a0000001-0000-0000-0000-000000000001', 'Der perfekte Lebenslauf', 'ATS-optimiert, visuell ansprechend, inhaltlich schlagkräftig.', 'lesson', 14, 800, 3),
+  ('a0000001-0000-0000-0000-000000000001', 'Praxis: Brand Audit', 'Analysiere deine aktuelle Online-Präsenz und identifiziere Lücken.', 'exercise', 18, 700, 4);
 
 -- Gehaltsverhandlung (als Beispiel für High-Impact)
 INSERT INTO public.modules (id, course_id, title, sort_order) VALUES
-  ('m0000001-0000-0000-0000-000000000004', 'd0000001-0000-0000-0000-000000000004', 'Gehaltsverhandlung Masterplan', 1);
+  ('a0000004-0000-0000-0000-000000000004', 'd0000001-0000-0000-0000-000000000004', 'Gehaltsverhandlung Masterplan', 1);
 
 INSERT INTO public.lessons (module_id, title, description, lesson_type, duration_min, market_value_impact, sort_order) VALUES
-  ('m0000001-0000-0000-0000-000000000004', 'Deinen Marktwert bestimmen', 'Gehaltsbenchmarks, Glassdoor, Kununu & persönliche Kalkulation.', 'video', 14, 2000, 1),
-  ('m0000001-0000-0000-0000-000000000004', 'BATNA & Verhandlungsstrategie', 'Die Harvard-Methode für Gehaltsverhandlungen.', 'lesson', 16, 2500, 2),
-  ('m0000001-0000-0000-0000-000000000004', 'Die Verhandlung führen', 'Timing, Anker, Gegenangebote & Schweigen als Waffe.', 'video', 13, 2000, 3),
-  ('m0000001-0000-0000-0000-000000000004', 'Praxis: Verhandlungssimulation', 'Bereite deine echte Verhandlung vor: Argumente, Zahlen & Haltung.', 'exercise', 20, 1500, 4);
+  ('a0000004-0000-0000-0000-000000000004', 'Deinen Marktwert bestimmen', 'Gehaltsbenchmarks, Glassdoor, Kununu & persönliche Kalkulation.', 'video', 14, 2000, 1),
+  ('a0000004-0000-0000-0000-000000000004', 'BATNA & Verhandlungsstrategie', 'Die Harvard-Methode für Gehaltsverhandlungen.', 'lesson', 16, 2500, 2),
+  ('a0000004-0000-0000-0000-000000000004', 'Die Verhandlung führen', 'Timing, Anker, Gegenangebote & Schweigen als Waffe.', 'video', 13, 2000, 3),
+  ('a0000004-0000-0000-0000-000000000004', 'Praxis: Verhandlungssimulation', 'Bereite deine echte Verhandlung vor: Argumente, Zahlen & Haltung.', 'exercise', 20, 1500, 4);
 
 -- ============================================================
 -- 5. BADGES

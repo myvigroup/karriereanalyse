@@ -2,6 +2,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { marketValueProgress } from '@/lib/career-logic';
+import { awardPoints } from '@/lib/gamification';
+import InfoTooltip from '@/components/ui/InfoTooltip';
+import EmptyState from '@/components/ui/EmptyState';
 
 // CountUp animation hook
 function useCountUp(target, duration = 1500) {
@@ -80,6 +83,18 @@ function AreaChart({ data, width = 600, height = 200 }) {
   );
 }
 
+// Industry comparison data
+const INDUSTRY_BENCHMARKS = {
+  it:          { label: 'IT/Tech',      avg: 72000, top: 110000 },
+  finance:     { label: 'Finance',      avg: 68000, top: 100000 },
+  consulting:  { label: 'Consulting',   avg: 65000, top: 95000  },
+  marketing:   { label: 'Marketing',    avg: 52000, top: 80000  },
+  industry:    { label: 'Industrie',    avg: 58000, top: 85000  },
+  healthcare:  { label: 'Healthcare',   avg: 55000, top: 82000  },
+  legal:       { label: 'Recht',        avg: 62000, top: 90000  },
+  other:       { label: 'Sonstiges',    avg: 54000, top: 78000  },
+};
+
 export default function MarktwertClient({ profile, log, progress, courses, userId }) {
   const supabase = createClient();
   const baseSalary = profile?.current_salary || 50000;
@@ -91,9 +106,40 @@ export default function MarktwertClient({ profile, log, progress, courses, userI
   const animatedValue = useCountUp(currentValue, 2000);
   const [editSalary, setEditSalary] = useState(false);
   const [salaryForm, setSalaryForm] = useState({ current: baseSalary, target: targetSalary });
+  const [appCount, setAppCount] = useState(0);
 
   const totalPotential = (courses || []).reduce((s, c) => s + (c.market_value_impact || 0), 0);
   const remainingPotential = totalPotential - skillBonus;
+
+  // Total lessons across all courses for masterclass progress
+  const totalLessons = (courses || []).reduce((s, c) =>
+    s + (c.modules || []).reduce((ms, m) => ms + (m.lessons?.length || 0), 0), 0);
+  const completedLessons = (progress || []).length;
+  const masterclassPct = totalLessons > 0 ? Math.min(100, Math.round((completedLessons / totalLessons) * 100)) : 0;
+
+  // Analyse done = at least one market_value_log entry exists
+  const analyseDone = (log || []).length > 0;
+
+  // Industry comparison
+  const industryKey = profile?.industry || 'other';
+  const benchmark = INDUSTRY_BENCHMARKS[industryKey] || INDUSTRY_BENCHMARKS.other;
+  const comparisonMax = Math.max(currentValue, benchmark.avg, benchmark.top) * 1.05;
+
+  // Award +75 XP on first marktwert page visit
+  useEffect(() => {
+    const key = `marktwert_visited_${userId}`;
+    if (typeof window !== 'undefined' && !localStorage.getItem(key)) {
+      localStorage.setItem(key, '1');
+      awardPoints(supabase, userId, 'VALUE_ASSESSMENT');
+    }
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch application count client-side
+  useEffect(() => {
+    if (!userId) return;
+    supabase.from('applications').select('id', { count: 'exact', head: true }).eq('user_id', userId)
+      .then(({ count }) => setAppCount(count || 0));
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Save salary settings
   const saveSalary = async () => {
@@ -106,7 +152,7 @@ export default function MarktwertClient({ profile, log, progress, courses, userI
 
   return (
     <div className="page-container">
-      <h1 className="page-title">Dein Marktwert</h1>
+      <h1 className="page-title">Dein Marktwert</h1><InfoTooltip moduleId="marktwert" profile={profile} />
       <p className="page-subtitle" style={{ marginBottom: 32 }}>Jede Lektion steigert deinen Wert</p>
 
       {/* Hero Value */}
@@ -170,6 +216,127 @@ export default function MarktwertClient({ profile, log, progress, courses, userI
       <div className="card animate-in" style={{ marginBottom: 24 }}>
         <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Marktwert-Verlauf</h3>
         <AreaChart data={log} />
+      </div>
+
+      {/* ── Challenges: Marktwert steigern ── */}
+      <div className="card animate-in" style={{ marginBottom: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Marktwert steigern</h3>
+        <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 20 }}>Deine Challenges der nächsten 7 Tage</p>
+
+        {/* Challenge 1 – Masterclass abschließen */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 18 }}>🎓</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>Masterclass abschließen</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="pill pill-grey" style={{ fontSize: 11 }}>7 Tage</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: masterclassPct >= 100 ? 'var(--ki-success)' : 'var(--ki-text-secondary)' }}>
+                {masterclassPct}%
+              </span>
+            </div>
+          </div>
+          <div style={{ height: 8, background: 'var(--grey-6)', borderRadius: 'var(--r-pill)', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${masterclassPct}%`, background: masterclassPct >= 100 ? 'var(--ki-success)' : 'var(--ki-red)', borderRadius: 'var(--r-pill)', transition: 'width 1.2s var(--ease-apple)' }} />
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 4 }}>
+            {completedLessons} von {totalLessons} Lektionen abgeschlossen
+          </div>
+        </div>
+
+        {/* Challenge 2 – Analyse durchführen */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 18 }}>📊</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>Marktwert-Analyse durchführen</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="pill pill-grey" style={{ fontSize: 11 }}>7 Tage</span>
+              {analyseDone
+                ? <span className="pill pill-green" style={{ fontSize: 11 }}>Erledigt</span>
+                : <span className="pill pill-grey" style={{ fontSize: 11 }}>Offen</span>}
+            </div>
+          </div>
+          <div style={{ height: 8, background: 'var(--grey-6)', borderRadius: 'var(--r-pill)', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: analyseDone ? '100%' : '0%', background: 'var(--ki-success)', borderRadius: 'var(--r-pill)', transition: 'width 1.2s var(--ease-apple)' }} />
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 4 }}>
+            {analyseDone ? 'Verlaufsdaten vorhanden – gut gemacht!' : 'Führe deine erste Marktwert-Analyse durch'}
+          </div>
+        </div>
+
+        {/* Challenge 3 – 3 Bewerbungen senden */}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 18 }}>✉️</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>3 Bewerbungen senden</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="pill pill-grey" style={{ fontSize: 11 }}>7 Tage</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: appCount >= 3 ? 'var(--ki-success)' : 'var(--ki-text-secondary)' }}>
+                {Math.min(appCount, 3)}/3
+              </span>
+            </div>
+          </div>
+          <div style={{ height: 8, background: 'var(--grey-6)', borderRadius: 'var(--r-pill)', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${Math.min(100, Math.round((appCount / 3) * 100))}%`, background: appCount >= 3 ? 'var(--ki-success)' : 'var(--ki-red)', borderRadius: 'var(--r-pill)', transition: 'width 1.2s var(--ease-apple)' }} />
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 4 }}>
+            {appCount >= 3 ? 'Challenge abgeschlossen!' : `Noch ${Math.max(0, 3 - appCount)} Bewerbung${3 - appCount === 1 ? '' : 'en'} ausstehend`}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Video Platzhalter ── */}
+      <div className="card" style={{ aspectRatio: '16/9', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
+        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(204,20,38,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>▶</div>
+        <div style={{ color: 'white', fontSize: 16, fontWeight: 600 }}>Was bestimmt deinen Marktwert?</div>
+        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>Verfügbar ab April 2026</div>
+      </div>
+
+      {/* ── Vergleich: Dein Marktwert vs. Branche ── */}
+      <div className="card animate-in" style={{ marginBottom: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Vergleich</h3>
+        <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 20 }}>
+          Dein Marktwert vs. Durchschnitt deiner Branche ({benchmark.label})
+        </p>
+
+        {/* My value bar */}
+        {[
+          { label: 'Dein Marktwert', value: currentValue, color: 'var(--ki-red)', bold: true },
+          { label: 'Branchendurchschnitt', value: benchmark.avg, color: 'var(--ki-text-secondary)', bold: false },
+          { label: 'Top 25% Branche', value: benchmark.top, color: 'var(--ki-success)', bold: false },
+        ].map(({ label, value, color, bold }) => (
+          <div key={label} style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+              <span style={{ fontSize: 13, fontWeight: bold ? 700 : 500, color: bold ? 'var(--ki-text)' : 'var(--ki-text-secondary)' }}>{label}</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color }}>{value >= 1000 ? `€${(value / 1000).toFixed(0)}k` : `€${value}`}</span>
+            </div>
+            <div style={{ height: 10, background: 'var(--grey-6)', borderRadius: 'var(--r-pill)', overflow: 'hidden' }}>
+              <div style={{
+                height: '100%',
+                width: `${Math.round((value / comparisonMax) * 100)}%`,
+                background: color,
+                borderRadius: 'var(--r-pill)',
+                transition: 'width 1.2s var(--ease-apple)',
+                opacity: bold ? 1 : 0.65,
+              }} />
+            </div>
+          </div>
+        ))}
+
+        {currentValue > benchmark.avg ? (
+          <div className="pill pill-green" style={{ display: 'inline-flex', marginTop: 4 }}>
+            Du liegst {Math.round(((currentValue - benchmark.avg) / benchmark.avg) * 100)}% über dem Branchendurchschnitt
+          </div>
+        ) : (
+          <div className="pill pill-red" style={{ display: 'inline-flex', marginTop: 4 }}>
+            Noch €{(benchmark.avg - currentValue).toLocaleString('de-DE')} unter dem Branchendurchschnitt
+          </div>
+        )}
       </div>
 
       {/* Completed Lessons with Impact */}
