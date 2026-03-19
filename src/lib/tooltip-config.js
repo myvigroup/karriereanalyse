@@ -18,12 +18,12 @@ const TOOLTIPS = {
     executive: { title: 'Executive Education', description: 'Strategische Weiterbildung f\u00FCr maximalen Impact.', cta_text: 'Ersten Kurs \u00F6ffnen', cta_link: '/masterclass' },
   },
   gehalt: {
-    standard: { title: 'Gehaltsdatenbank', description: 'Benchmarks nach Branche, Stadt und Erfahrung. Wisse was du wert bist.', cta_text: 'Gehalt vergleichen', cta_link: '/gehalt' },
-    executive: { title: 'Compensation Intelligence', description: 'Markt\u00FCbersicht und Verg\u00FCtungs-Benchmarks f\u00FCr dein Segment.', cta_text: 'Gehalt vergleichen', cta_link: '/gehalt' },
+    standard: { title: 'Gehaltsdatenbank', description: 'Orientiert am Entgeltatlas der Bundesagentur f\u00FCr Arbeit. Realistische Daten f\u00FCr 35+ Berufe.', cta_text: 'Gehalt recherchieren', cta_link: '/gehalt' },
+    executive: { title: 'Compensation Intelligence', description: 'Gehalts-Benchmarks nach Region, Erfahrung und Unternehmensgr\u00F6\u00DFe.', cta_text: 'Gehalt recherchieren', cta_link: '/gehalt' },
   },
   marktwert: {
-    standard: { title: 'Marktwert', description: 'Dein dynamischer Score steigt mit jeder Aktivit\u00E4t.', cta_text: 'Score pr\u00FCfen', cta_link: '/marktwert' },
-    executive: { title: 'Marktpositionierung', description: 'Dein strategischer Marktwert im Kontext deiner Branche.', cta_text: 'Score pr\u00FCfen', cta_link: '/marktwert' },
+    standard: { title: 'Dein Marktwert', description: 'Steigt durch echte Zertifikate des Karriere-Instituts. Entscheider erkennen deine Qualifikation.', cta_text: 'Score pr\u00FCfen', cta_link: '/marktwert' },
+    executive: { title: 'Marktpositionierung', description: 'Zertifikatsbasierter Score \u2014 signalisiert Kompetenz gegen\u00FCber Entscheidern.', cta_text: 'Score pr\u00FCfen', cta_link: '/marktwert' },
   },
   applications: {
     standard: { title: 'Bewerbungen', description: 'Kanban-Board mit KI-Assistent f\u00FCr Anschreiben.', cta_text: 'Erste Bewerbung anlegen', cta_link: '/applications' },
@@ -33,17 +33,13 @@ const TOOLTIPS = {
     standard: { title: 'Dokumenten-Safe', description: 'Upload, KI-CV-Check und Zeugnis-Decoder.', cta_text: 'CV hochladen', cta_link: '/pre-coaching' },
     executive: { title: 'Dokumenten-Safe', description: 'Zentrale Ablage mit intelligenter Analyse.', cta_text: 'CV hochladen', cta_link: '/pre-coaching' },
   },
-  'salary-log': {
-    standard: { title: 'Gehalts-Tagebuch', description: 'Tracke deine Erfolge f\u00FCr die n\u00E4chste Verhandlung.', cta_text: 'Ersten Win eintragen', cta_link: '/salary-log' },
-    executive: { title: 'Performance-Dossier', description: 'Dokumentiere Impact und Ergebnisse f\u00FCr Verhandlungen.', cta_text: 'Ersten Win eintragen', cta_link: '/salary-log' },
-  },
   network: {
-    standard: { title: 'Netzwerk', description: 'CRM mit Erinnerungen \u2014 pflege deine Kontakte.', cta_text: 'Ersten Kontakt anlegen', cta_link: '/network' },
+    standard: { title: 'Mein Netzwerk', description: 'Kontakt-Management mit Lern-Aspekt \u2014 dein Netzwerk ist dein Nettowert.', cta_text: 'Ersten Kontakt anlegen', cta_link: '/network' },
     executive: { title: 'Stakeholder Management', description: 'Strategisches Beziehungsmanagement f\u00FCr F\u00FChrungskr\u00E4fte.', cta_text: 'Ersten Kontakt anlegen', cta_link: '/network' },
   },
   branding: {
-    standard: { title: 'LinkedIn & Branding', description: 'Headline-Generator und Post-Templates f\u00FCr mehr Sichtbarkeit.', cta_text: 'Profil optimieren', cta_link: '/branding' },
-    executive: { title: 'Executive Branding', description: 'Thought Leadership und strategische Positionierung.', cta_text: 'Profil optimieren', cta_link: '/branding' },
+    standard: { title: 'Jobportale & Plattformen', description: 'Optimiere deine Pr\u00E4senz auf LinkedIn, XING, StepStone und mehr.', cta_text: 'Plattformen entdecken', cta_link: '/branding' },
+    executive: { title: 'Plattform-Strategie', description: 'Maximiere deine Sichtbarkeit auf allen relevanten Karriere-Plattformen.', cta_text: 'Plattformen entdecken', cta_link: '/branding' },
   },
   decision: {
     standard: { title: 'Entscheidungs-Kompass', description: 'Werte-basierte Entscheidungs-Matrix f\u00FCr klare Antworten.', cta_text: 'Werte definieren', cta_link: '/strategy/decision' },
@@ -56,6 +52,10 @@ const TOOLTIPS = {
   career: {
     standard: { title: 'Karrierepfad', description: 'Skill-Tree und Level-System \u2014 dein Weg nach oben.', cta_text: 'Pfad ansehen', cta_link: '/career' },
     executive: { title: 'Karriere-Roadmap', description: 'Strategische Entwicklung vom Leader zum Executive.', cta_text: 'Pfad ansehen', cta_link: '/career' },
+  },
+  community: {
+    standard: { title: 'Community', description: 'Dein Karriere-Netzwerk \u2014 poste, diskutiere und feiere Erfolge mit anderen Mitgliedern.', cta_text: 'Community entdecken', cta_link: '/community' },
+    executive: { title: 'Executive Community', description: 'Austausch mit F\u00FChrungskr\u00E4ften und Karriere-Experten.', cta_text: 'Community entdecken', cta_link: '/community' },
   },
   profile: {
     standard: { title: 'Profil', description: 'Deine digitale Identit\u00E4t. Halte es aktuell.', cta_text: 'Profil vervollst\u00E4ndigen', cta_link: '/profile' },

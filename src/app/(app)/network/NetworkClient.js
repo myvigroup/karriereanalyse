@@ -1,48 +1,124 @@
 'use client';
-import { useState, useMemo } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { awardPoints } from '@/lib/gamification';
-import InfoTooltip from '@/components/ui/InfoTooltip';
 
-const ROLE_OPTIONS = [
-  { key: 'mentor', label: 'Mentor', icon: '🧠' },
-  { key: 'headhunter', label: 'Headhunter', icon: '🔍' },
-  { key: 'ex_boss', label: 'Ex-Vorgesetzte/r', icon: '👔' },
-  { key: 'colleague', label: 'Kolleg/in', icon: '🤝' },
-  { key: 'friend', label: 'Sparringspartner', icon: '💬' },
-  { key: 'other', label: 'Sonstige', icon: '○' },
+import { useState, useMemo } from 'react';
+import { createClient }       from '@/lib/supabase/client';
+import { awardPoints }        from '@/lib/gamification';
+import InfoTooltip             from '@/components/ui/InfoTooltip';
+
+/* ------------------------------------------------------------------ */
+/*  Constants                                                          */
+/* ------------------------------------------------------------------ */
+
+const TAG_OPTIONS = [
+  { key: 'mentor',   label: 'Mentor',           icon: '\u{1F9E0}' },
+  { key: 'kollege',  label: 'Kollege',          icon: '\u{1F91D}' },
+  { key: 'hr',       label: 'HR',               icon: '\u{1F454}' },
+  { key: 'fuehrung', label: 'F\u00FChrungskraft', icon: '\u{1F451}' },
+  { key: 'branche',  label: 'Branche-Kontakt',  icon: '\u{1F3E2}' },
+  { key: 'freund',   label: 'Freund',           icon: '\u{1F4AC}' },
+  { key: 'coach',    label: 'Coach',            icon: '\u{1F3AF}' },
+  { key: 'referenz', label: 'Referenz',         icon: '\u2B50'    },
 ];
 
-const WEEKLY_GOAL = 3;
+const TAG_MAP = Object.fromEntries(TAG_OPTIONS.map(t => [t.key, t]));
+
+const EMPTY_FORM = {
+  first_name: '', last_name: '', company: '', role: '', phone: '',
+  email: '', city: '', linkedin_url: '', xing_url: '',
+  tags: [], relationship_strength: 0, how_met: '', notes: '',
+};
+
+const labelStyle = {
+  display: 'block',
+  fontSize: 13,
+  fontWeight: 600,
+  color: 'var(--ki-text-secondary)',
+  marginBottom: 4,
+};
+
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                            */
+/* ------------------------------------------------------------------ */
+
+function daysBetween(a, b) {
+  return Math.floor((b - a) / 86400000);
+}
 
 function getContactStatus(daysSince) {
   if (daysSince === null) return 'new';
-  if (daysSince <= 7) return 'fresh';
-  if (daysSince <= 30) return 'warm';
+  if (daysSince < 14)    return 'fresh';
+  if (daysSince <= 30)   return 'warm';
   return 'cold';
 }
 
-function statusPillClass(status) {
-  if (status === 'fresh') return 'pill pill-green';
-  if (status === 'warm') return 'pill pill-gold';
-  if (status === 'cold') return 'pill pill-red';
-  return 'pill pill-grey';
+function statusBorder(status) {
+  if (status === 'fresh') return '4px solid var(--ki-success)';
+  if (status === 'warm')  return '4px solid var(--ki-warning)';
+  if (status === 'cold')  return '4px solid var(--ki-error)';
+  return '4px solid var(--ki-border)';
 }
 
-function statusPillLabel(status, daysSince) {
-  if (status === 'new') return 'Neu';
-  if (status === 'fresh') return `vor ${daysSince}d`;
-  if (status === 'warm') return `vor ${daysSince}d`;
-  if (status === 'cold') return `vor ${daysSince}d`;
-  return '';
+function initials(name) {
+  return (name || '')
+    .split(' ')
+    .filter(Boolean)
+    .map(w => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
 }
 
-function statusColor(status) {
-  if (status === 'fresh') return 'var(--ki-success)';
-  if (status === 'warm') return 'var(--ki-warning)';
-  if (status === 'cold') return 'var(--ki-error)';
-  return 'var(--grey-4)';
+function initialsColor(name) {
+  let h = 0;
+  for (let i = 0; i < (name || '').length; i++) {
+    h = (name.charCodeAt(i) + ((h << 5) - h)) | 0;
+  }
+  return `hsl(${Math.abs(h) % 360}, 55%, 48%)`;
 }
+
+function calcNetworkScore(contacts) {
+  if (!contacts.length) return 0;
+  const now = Date.now();
+
+  const active = contacts.filter(c => {
+    const d = c.last_contact_date || c.last_contacted_at;
+    return d && daysBetween(new Date(d), new Date(now)) <= 30;
+  }).length;
+  const activeRatio = (active / contacts.length) * 40;
+
+  const allTags = new Set(contacts.flatMap(c => c.tags || []));
+  const tagDiv = (allTags.size / 8) * 30;
+
+  const freqs = contacts.map(c => {
+    const d = c.last_contact_date || c.last_contacted_at;
+    if (!d) return 0;
+    const diff = daysBetween(new Date(d), new Date(now));
+    if (diff <= 7)  return 1;
+    if (diff <= 14) return 0.75;
+    if (diff <= 30) return 0.4;
+    return 0;
+  });
+  const avgFreq = (freqs.reduce((a, b) => a + b, 0) / contacts.length) * 30;
+
+  return Math.min(100, Math.round(activeRatio + tagDiv + avgFreq));
+}
+
+function scoreColor(s) {
+  if (s >= 70) return 'var(--ki-success)';
+  if (s >= 40) return 'var(--ki-warning)';
+  return 'var(--ki-error)';
+}
+
+function timestamp() {
+  return new Date().toLocaleString('de-DE', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/*  StarRating                                                         */
+/* ------------------------------------------------------------------ */
 
 function StarRating({ value, onChange }) {
   const [hovered, setHovered] = useState(0);
@@ -51,11 +127,11 @@ function StarRating({ value, onChange }) {
       {[1, 2, 3, 4, 5].map(i => (
         <span
           key={i}
-          onClick={() => onChange(i)}
+          onClick={() => onChange?.(i)}
           onMouseEnter={() => setHovered(i)}
           onMouseLeave={() => setHovered(0)}
           style={{
-            cursor: 'pointer',
+            cursor: onChange ? 'pointer' : 'default',
             fontSize: 16,
             color: i <= (hovered || value || 0) ? 'var(--ki-warning)' : 'var(--grey-4)',
             transition: 'color 100ms',
@@ -68,694 +144,767 @@ function StarRating({ value, onChange }) {
   );
 }
 
-function ProgressRing({ value, max, size = 64, stroke = 6, color = 'var(--ki-red)' }) {
-  const r = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * r;
-  const progress = Math.min(value / max, 1);
-  const offset = circumference * (1 - progress);
-  return (
-    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--grey-5)" strokeWidth={stroke} />
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={r}
-        fill="none"
-        stroke={color}
-        strokeWidth={stroke}
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-        style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-      />
-    </svg>
-  );
-}
-
-function StakeholderMap({ contacts, onSelectContact, selectedId }) {
-  const WIDTH = 560;
-  const HEIGHT = 320;
-  const CX = WIDTH / 2;
-  const CY = HEIGHT / 2;
-
-  const displayed = contacts.slice(0, 12);
-  const angleStep = (2 * Math.PI) / Math.max(displayed.length, 1);
-  const ORBIT_R = 110;
-
-  return (
-    <svg
-      width="100%"
-      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-      style={{ display: 'block', overflow: 'visible' }}
-    >
-      {/* Orbit ring */}
-      <circle cx={CX} cy={CY} r={ORBIT_R} fill="none" stroke="var(--ki-border)" strokeDasharray="4 6" strokeWidth={1} />
-
-      {/* Connection lines */}
-      {displayed.map((c, i) => {
-        const angle = i * angleStep - Math.PI / 2;
-        const x = CX + ORBIT_R * Math.cos(angle);
-        const y = CY + ORBIT_R * Math.sin(angle);
-        const daysSince = c.last_contact_date
-          ? Math.floor((Date.now() - new Date(c.last_contact_date)) / 86400000)
-          : null;
-        const s = getContactStatus(daysSince);
-        return (
-          <line
-            key={`line-${c.id}`}
-            x1={CX} y1={CY}
-            x2={x} y2={y}
-            stroke={statusColor(s)}
-            strokeOpacity={0.25}
-            strokeWidth={1.5}
-          />
-        );
-      })}
-
-      {/* You - center */}
-      <circle cx={CX} cy={CY} r={28} fill="var(--ki-red)" />
-      <text x={CX} y={CY + 1} textAnchor="middle" dominantBaseline="middle" fill="white" fontSize={11} fontWeight={700} fontFamily="Instrument Sans, sans-serif">Du</text>
-
-      {/* Contact nodes */}
-      {displayed.map((c, i) => {
-        const angle = i * angleStep - Math.PI / 2;
-        const x = CX + ORBIT_R * Math.cos(angle);
-        const y = CY + ORBIT_R * Math.sin(angle);
-        const daysSince = c.last_contact_date
-          ? Math.floor((Date.now() - new Date(c.last_contact_date)) / 86400000)
-          : null;
-        const s = getContactStatus(daysSince);
-        const r = 10 + (c.relationship_strength || 1) * 2.5;
-        const isSelected = selectedId === c.id;
-        const initial = (c.name || '?')[0].toUpperCase();
-
-        return (
-          <g
-            key={c.id}
-            onClick={() => onSelectContact(isSelected ? null : c.id)}
-            style={{ cursor: 'pointer' }}
-          >
-            <circle
-              cx={x} cy={y} r={r + (isSelected ? 4 : 0)}
-              fill={statusColor(s)}
-              fillOpacity={isSelected ? 0.25 : 0.12}
-              stroke={statusColor(s)}
-              strokeWidth={isSelected ? 2.5 : 1.5}
-            />
-            <text
-              x={x} y={y + 0.5}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill={statusColor(s)}
-              fontSize={10}
-              fontWeight={700}
-              fontFamily="Instrument Sans, sans-serif"
-            >
-              {initial}
-            </text>
-            <text
-              x={x}
-              y={y + r + 10}
-              textAnchor="middle"
-              fill="var(--ki-text-secondary)"
-              fontSize={9}
-              fontFamily="Instrument Sans, sans-serif"
-            >
-              {c.name.split(' ')[0]}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
+/* ------------------------------------------------------------------ */
+/*  Main Component                                                     */
+/* ------------------------------------------------------------------ */
 
 export default function NetworkClient({ contacts: initial, userId }) {
   const supabase = createClient();
-  const [contacts, setContacts] = useState(initial || []);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newContact, setNewContact] = useState({ name: '', role: 'colleague', company: '', notes: '', linkedin_url: '', relationship_strength: 3 });
-  const [filter, setFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('last_contacted');
-  const [activeView, setActiveView] = useState('list'); // 'list' | 'map'
-  const [noteContactId, setNoteContactId] = useState(null);
-  const [noteText, setNoteText] = useState('');
-  const [selectedMapId, setSelectedMapId] = useState(null);
-  const [xpToast, setXpToast] = useState(null);
 
-  const today = new Date();
+  /* ---- state ---- */
+  const [contacts, setContacts]           = useState(initial || []);
+  const [search, setSearch]               = useState('');
+  const [sortBy, setSortBy]               = useState('last');
+  const [filterTags, setFilterTags]       = useState([]);
+  const [modalOpen, setModalOpen]         = useState(false);
+  const [editId, setEditId]               = useState(null);
+  const [form, setForm]                   = useState({ ...EMPTY_FORM });
+  const [noteModal, setNoteModal]         = useState(null);
+  const [noteText, setNoteText]           = useState('');
+  const [expandedNotes, setExpandedNotes] = useState({});
+  const [busy, setBusy]                   = useState(false);
 
-  const enriched = useMemo(() => {
-    const mapped = contacts.map(c => {
-      const lastDate = c.last_contact_date ? new Date(c.last_contact_date) : null;
-      const daysSince = lastDate ? Math.floor((today - lastDate) / 86400000) : null;
-      const status = getContactStatus(daysSince);
-      return { ...c, daysSince, status };
+  /* ---- derived ---- */
+  const now = Date.now();
+
+  const enriched = useMemo(() => contacts.map(c => {
+    const d = c.last_contact_date || c.last_contacted_at;
+    const daysSince = d ? daysBetween(new Date(d), new Date(now)) : null;
+    return { ...c, daysSince, status: getContactStatus(daysSince) };
+  }), [contacts, now]);
+
+  const filtered = useMemo(() => {
+    let list = enriched;
+
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(c =>
+        (c.name || '').toLowerCase().includes(q) ||
+        (c.company || '').toLowerCase().includes(q)
+      );
+    }
+
+    if (filterTags.length) {
+      list = list.filter(c => filterTags.some(t => (c.tags || []).includes(t)));
+    }
+
+    list = [...list].sort((a, b) => {
+      if (sortBy === 'stars') {
+        return (b.relationship_strength || 0) - (a.relationship_strength || 0);
+      }
+      const da = a.last_contact_date || a.last_contacted_at || a.created_at || '';
+      const db = b.last_contact_date || b.last_contacted_at || b.created_at || '';
+      return new Date(db) - new Date(da);
     });
-    const sorted = [...mapped];
-    if (sortBy === 'last_contacted') {
-      sorted.sort((a, b) => {
-        if (a.daysSince === null && b.daysSince === null) return 0;
-        if (a.daysSince === null) return 1;
-        if (b.daysSince === null) return -1;
-        return b.daysSince - a.daysSince;
-      });
-    } else if (sortBy === 'importance') {
-      sorted.sort((a, b) => (b.relationship_strength || 0) - (a.relationship_strength || 0));
+
+    return list;
+  }, [enriched, search, sortBy, filterTags]);
+
+  const stats = useMemo(() => {
+    const total    = contacts.length;
+    const active   = enriched.filter(c => c.status === 'fresh' || c.status === 'warm').length;
+    const inactive = total - active;
+    const tagCounts = {};
+    contacts.forEach(c => (c.tags || []).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; }));
+    const score = calcNetworkScore(contacts);
+    return { total, active, inactive, tagCounts, score };
+  }, [contacts, enriched]);
+
+  /* ---- helpers ---- */
+  const patch = (id, data) =>
+    setContacts(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
+
+  const f = (key, val) => setForm(p => ({ ...p, [key]: val }));
+
+  function openAdd() {
+    setEditId(null);
+    setForm({ ...EMPTY_FORM });
+    setModalOpen(true);
+  }
+
+  function openEdit(c) {
+    const [first, ...rest] = (c.name || '').split(' ');
+    setEditId(c.id);
+    setForm({
+      first_name: first || '',
+      last_name: rest.join(' '),
+      company: c.company || '',
+      role: c.role || '',
+      phone: c.phone || '',
+      email: c.email || '',
+      city: c.city || '',
+      linkedin_url: c.linkedin_url || '',
+      xing_url: c.xing_url || '',
+      tags: c.tags || [],
+      relationship_strength: c.relationship_strength || 0,
+      how_met: c.how_met || '',
+      notes: c.notes || '',
+    });
+    setModalOpen(true);
+  }
+
+  /* ---- CRUD ---- */
+
+  async function saveContact() {
+    if (!form.first_name.trim() || !form.last_name.trim() ||
+        !form.company.trim()    || !form.role.trim()) return;
+    setBusy(true);
+
+    const name = `${form.first_name.trim()} ${form.last_name.trim()}`;
+    const payload = {
+      user_id: userId,
+      name,
+      company: form.company.trim(),
+      role: form.role.trim(),
+      phone: form.phone.trim() || null,
+      email: form.email.trim() || null,
+      city: form.city.trim() || null,
+      linkedin_url: form.linkedin_url.trim() || null,
+      xing_url: form.xing_url.trim() || null,
+      tags: form.tags,
+      relationship_strength: form.relationship_strength,
+      how_met: form.how_met.trim() || null,
+      notes: form.notes.trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (editId) {
+      const { data, error } = await supabase
+        .from('contacts').update(payload).eq('id', editId).select().single();
+      if (!error && data) patch(editId, data);
+    } else {
+      payload.created_at = new Date().toISOString();
+      const { data, error } = await supabase
+        .from('contacts').insert(payload).select().single();
+      if (!error && data) {
+        setContacts(prev => [data, ...prev]);
+        awardPoints(userId, 20, 'contact_added');
+      }
     }
-    return sorted;
-  }, [contacts, sortBy]);
 
-  const filtered = filter === 'all'
-    ? enriched
-    : filter === 'reconnect'
-      ? enriched.filter(c => c.status === 'cold' || c.status === 'warm')
-      : enriched.filter(c => c.role === filter);
+    setModalOpen(false);
+    setBusy(false);
+  }
 
-  const coldCount = enriched.filter(c => c.status === 'cold').length;
-
-  // Weekly challenge: contacts contacted in the past 7 days
-  const weeklyContacted = useMemo(() => {
-    const cutoff = new Date(Date.now() - 7 * 86400000).toISOString();
-    return contacts.filter(c => c.last_contacted_at && c.last_contacted_at >= cutoff).length;
-  }, [contacts]);
-
-  const showXpToast = (pts) => {
-    setXpToast(pts);
-    setTimeout(() => setXpToast(null), 2500);
-  };
-
-  const handleAdd = async () => {
-    if (!newContact.name) return;
-    const { data } = await supabase.from('contacts').insert({ user_id: userId, ...newContact }).select().single();
-    if (data) {
-      setContacts(p => [...p, data]);
-      setShowAdd(false);
-      setNewContact({ name: '', role: 'colleague', company: '', notes: '', linkedin_url: '', relationship_strength: 3 });
-      const result = await awardPoints(supabase, userId, 'CONTACT_ADDED');
-      if (result?.awarded) showXpToast(result.awarded);
-    }
-  };
-
-  const handleDelete = async (id) => {
+  async function deleteContact(id) {
+    if (!confirm('Kontakt wirklich l\u00F6schen?')) return;
     await supabase.from('contacts').delete().eq('id', id);
-    setContacts(p => p.filter(c => c.id !== id));
-  };
+    setContacts(prev => prev.filter(c => c.id !== id));
+  }
 
-  const markContacted = async (id) => {
-    const now = new Date().toISOString().split('T')[0];
-    const nowFull = new Date().toISOString();
-    await supabase.from('contacts').update({ last_contact_date: now, last_contacted_at: nowFull }).eq('id', id);
-    setContacts(p => p.map(c => c.id === id ? { ...c, last_contact_date: now, last_contacted_at: nowFull } : c));
-  };
+  async function markContacted(id) {
+    const ts = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('contacts')
+      .update({ last_contact_date: ts, last_contacted_at: ts, updated_at: ts })
+      .eq('id', id).select().single();
+    if (!error && data) patch(id, data);
+    awardPoints(userId, 5, 'contact_pinged');
+  }
 
-  const handleSaveNote = async () => {
-    if (!noteContactId) return;
-    const now = new Date().toISOString().split('T')[0];
-    const nowFull = new Date().toISOString();
-    const existing = contacts.find(c => c.id === noteContactId);
-    const updatedNotes = noteText
-      ? `${existing?.notes ? existing.notes + '\n' : ''}[${now}] ${noteText}`
-      : existing?.notes || '';
-    await supabase.from('contacts').update({
-      last_contact_date: now,
-      last_contacted_at: nowFull,
-      notes: updatedNotes,
-    }).eq('id', noteContactId);
-    setContacts(p => p.map(c => c.id === noteContactId ? { ...c, last_contact_date: now, last_contacted_at: nowFull, notes: updatedNotes } : c));
-    setNoteContactId(null);
+  async function saveNote(id) {
+    if (!noteText.trim()) return;
+    const c = contacts.find(x => x.id === id);
+    const prev = c?.notes || '';
+    const entry = `[${timestamp()}] ${noteText.trim()}`;
+    const updated = prev ? `${prev}\n${entry}` : entry;
+    const { data, error } = await supabase
+      .from('contacts')
+      .update({ notes: updated, updated_at: new Date().toISOString() })
+      .eq('id', id).select().single();
+    if (!error && data) patch(id, data);
+    setNoteModal(null);
     setNoteText('');
-  };
+  }
 
-  const updateStrength = async (id, strength) => {
-    await supabase.from('contacts').update({ relationship_strength: strength }).eq('id', id);
-    setContacts(p => p.map(c => c.id === id ? { ...c, relationship_strength: strength } : c));
-  };
+  async function updateStars(id, val) {
+    const { data, error } = await supabase
+      .from('contacts')
+      .update({ relationship_strength: val, updated_at: new Date().toISOString() })
+      .eq('id', id).select().single();
+    if (!error && data) patch(id, data);
+  }
 
-  const handleIntroEmail = (c) => {
-    alert(`Intro-E-Mail für ${c.name} wird generiert...\n\n(Funktion in Kürze verfügbar)`);
-  };
+  function toggleTag(key) {
+    setFilterTags(p => p.includes(key) ? p.filter(t => t !== key) : [...p, key]);
+  }
+
+  function toggleFormTag(key) {
+    setForm(p => ({
+      ...p,
+      tags: p.tags.includes(key) ? p.tags.filter(t => t !== key) : [...p.tags, key],
+    }));
+  }
+
+  /* ================================================================ */
+  /*  Render                                                           */
+  /* ================================================================ */
 
   return (
     <div className="page-container">
 
-      {/* XP Toast */}
-      {xpToast && (
-        <div style={{
-          position: 'fixed', top: 24, right: 24, zIndex: 999,
-          background: 'var(--ki-success)', color: 'white',
-          padding: '10px 20px', borderRadius: 'var(--r-pill)',
-          fontWeight: 700, fontSize: 15,
-          boxShadow: 'var(--sh-lg)',
-          animation: 'fadeIn 0.3s ease',
-        }}>
-          +{xpToast} XP verdient!
-        </div>
-      )}
-
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+      {/* ============================================================ */}
+      {/*  1. Header                                                    */}
+      {/* ============================================================ */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+        flexWrap: 'wrap', gap: 12, marginBottom: 24,
+      }}>
         <div>
-          <h1 className="page-title">Netzwerk<InfoTooltip moduleId="network" profile={null} /></h1>
-          <p className="page-subtitle">
-            {contacts.length} Kontakte
-            {coldCount > 0 ? ` \u00b7 ${coldCount} Re-Connects f\u00e4llig` : ''}
-          </p>
+          <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            Mein Netzwerk <InfoTooltip moduleId="network" />
+          </h1>
+          <p className="page-subtitle">Dein Netzwerk ist dein Nettowert</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAdd(true)}>+ Kontakt</button>
+        <button className="btn btn-primary" onClick={openAdd}>
+          + Neuen Kontakt anlegen
+        </button>
       </div>
 
-      {/* Video-Platzhalter */}
-      <div className="card" style={{ marginBottom: 24, padding: 0, overflow: 'hidden' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, var(--ki-charcoal) 0%, #1a2829 100%)',
-          padding: '28px 32px',
-          display: 'flex', alignItems: 'center', gap: 20,
+      {/* ============================================================ */}
+      {/*  2. Warum Networking? Info Card                               */}
+      {/* ============================================================ */}
+      <div
+        className="card animate-in"
+        style={{ marginBottom: 28, background: 'var(--ki-bg-alt)', borderLeft: '4px solid var(--ki-red)' }}
+      >
+        <p style={{
+          fontStyle: 'italic', color: 'var(--ki-text)', marginBottom: 16,
+          fontSize: 15, lineHeight: 1.5,
         }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: '50%',
-            background: 'rgba(204,20,38,0.9)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 22, flexShrink: 0, cursor: 'pointer',
-            boxShadow: '0 0 0 4px rgba(255,255,255,0.15)',
-          }}>
-            ▶
-          </div>
-          <div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', fontWeight: 500, marginBottom: 4 }}>
-              Strategisches Networking
-            </div>
-            <div style={{ fontWeight: 700, fontSize: 17, color: 'white' }}>
-              Strategisches Networking f\u00fcr Introvertierte
-            </div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
-              14 Min. \u00b7 Karriere-Institut Akademie
-            </div>
-          </div>
-        </div>
-      </div>
+          &ldquo;80&#8201;% aller Stellen werden &uuml;ber Kontakte vergeben &mdash; nicht &uuml;ber Stellenanzeigen.&rdquo;
+        </p>
 
-      {/* Top row: Challenge + Stats */}
-      <div className="grid-2" style={{ marginBottom: 24 }}>
-        {/* Weekly Challenge */}
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            <ProgressRing
-              value={weeklyContacted}
-              max={WEEKLY_GOAL}
-              size={72}
-              stroke={7}
-              color={weeklyContacted >= WEEKLY_GOAL ? 'var(--ki-success)' : 'var(--ki-red)'}
-            />
-            <div style={{
-              position: 'absolute', inset: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 15, fontWeight: 700, color: weeklyContacted >= WEEKLY_GOAL ? 'var(--ki-success)' : 'var(--ki-text)',
-            }}>
-              {weeklyContacted}/{WEEKLY_GOAL}
-            </div>
+        <div className="grid-3" style={{ gap: 16, marginBottom: 16 }}>
+          <div style={{ textAlign: 'center' }}>
+            <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--ki-red)' }}>70&thinsp;%</span>
+            <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 4 }}>
+              der Jobs im verdeckten Arbeitsmarkt
+            </p>
           </div>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
-              Wochenziel: 3 Kontakte
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 8 }}>
-              {weeklyContacted >= WEEKLY_GOAL
-                ? 'Ziel erreicht! Gro\u00dfartig.'
-                : `Noch ${WEEKLY_GOAL - weeklyContacted} Kontakt${WEEKLY_GOAL - weeklyContacted !== 1 ? 'e' : ''} diese Woche.`}
-            </div>
-            {weeklyContacted >= WEEKLY_GOAL && (
-              <span className="pill pill-green">Geschafft!</span>
-            )}
+          <div style={{ textAlign: 'center' }}>
+            <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--ki-red)' }}>4x</span>
+            <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 4 }}>
+              h&ouml;here Chance f&uuml;r empfohlene Bewerber
+            </p>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--ki-red)' }}>3</span>
+            <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 4 }}>
+              Kontakte bis zum Traumjob (Durchschnitt)
+            </p>
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>Netzwerk-Status</div>
-          {[
-            { label: 'Aktiv (< 7d)', count: enriched.filter(c => c.status === 'fresh').length, cls: 'pill-green' },
-            { label: 'Warm (7-30d)', count: enriched.filter(c => c.status === 'warm').length, cls: 'pill-gold' },
-            { label: 'Kalt (> 30d)', count: enriched.filter(c => c.status === 'cold').length, cls: 'pill-red' },
-          ].map(({ label, count, cls }) => (
-            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>{label}</span>
-              <span className={`pill ${cls}`} style={{ fontSize: 12, padding: '2px 10px' }}>{count}</span>
-            </div>
-          ))}
+        <a href="/masterclass" style={{ color: 'var(--ki-red)', fontWeight: 600, fontSize: 14 }}>
+          &#9654; Networking E-Learning starten
+        </a>
+      </div>
+
+      {/* ============================================================ */}
+      {/*  3. Search + Sort Bar                                         */}
+      {/* ============================================================ */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 20 }}>
+        <input
+          className="input"
+          placeholder="Kontakt oder Firma suchen\u2026"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ flex: '1 1 240px', maxWidth: 360 }}
+        />
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button
+            className={`btn ${sortBy === 'last' ? 'btn-primary' : 'btn-ghost'}`}
+            style={{ fontSize: 13 }}
+            onClick={() => setSortBy('last')}
+          >
+            Zuletzt kontaktiert
+          </button>
+          <button
+            className={`btn ${sortBy === 'stars' ? 'btn-primary' : 'btn-ghost'}`}
+            style={{ fontSize: 13 }}
+            onClick={() => setSortBy('stars')}
+          >
+            Wichtigkeit
+          </button>
         </div>
       </div>
 
-      {/* View Toggle */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        <button
-          className={`btn ${activeView === 'list' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setActiveView('list')}
-          style={{ fontSize: 13, padding: '6px 16px' }}
-        >
-          Liste
-        </button>
-        <button
-          className={`btn ${activeView === 'map' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setActiveView('map')}
-          style={{ fontSize: 13, padding: '6px 16px' }}
-        >
-          Stakeholder-Map
-        </button>
+      {/* Tag filter pills */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 24 }}>
+        {TAG_OPTIONS.map(t => (
+          <button
+            key={t.key}
+            className={`pill ${filterTags.includes(t.key) ? 'pill-gold' : 'pill-grey'}`}
+            onClick={() => toggleTag(t.key)}
+            style={{ cursor: 'pointer', fontSize: 13 }}
+          >
+            {t.icon} {t.label}
+          </button>
+        ))}
+        {filterTags.length > 0 && (
+          <button
+            className="pill pill-red"
+            onClick={() => setFilterTags([])}
+            style={{ cursor: 'pointer', fontSize: 13 }}
+          >
+            Alle zur&uuml;cksetzen
+          </button>
+        )}
       </div>
 
-      {/* Stakeholder Map View */}
-      {activeView === 'map' && (
-        <div className="card animate-in" style={{ marginBottom: 24 }}>
-          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Dein Netzwerk</div>
-          <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
-            Kreisgr\u00f6\u00dfe = Beziehungsst\u00e4rke \u00b7 Farbe = letzter Kontakt
-          </p>
-          {contacts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--ki-text-secondary)' }}>
-              F\u00fcge Kontakte hinzu, um die Map zu sehen.
-            </div>
-          ) : (
-            <StakeholderMap
-              contacts={enriched}
-              onSelectContact={setSelectedMapId}
-              selectedId={selectedMapId}
-            />
-          )}
-          {selectedMapId && (() => {
-            const c = enriched.find(x => x.id === selectedMapId);
-            if (!c) return null;
-            const roleInfo = ROLE_OPTIONS.find(r => r.key === c.role) || ROLE_OPTIONS[5];
-            return (
-              <div style={{
-                marginTop: 16, padding: '12px 16px', borderRadius: 'var(--r-md)',
-                background: 'var(--ki-bg-alt)', display: 'flex', alignItems: 'center', gap: 12,
-              }}>
-                <span style={{ fontSize: 22 }}>{roleInfo.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontWeight: 700 }}>{c.name}</span>
-                  <span style={{ color: 'var(--ki-text-secondary)', fontSize: 13, marginLeft: 8 }}>
-                    {roleInfo.label}{c.company ? ` \u00b7 ${c.company}` : ''}
-                  </span>
-                </div>
-                <span className={statusPillClass(c.status)} style={{ fontSize: 12 }}>
-                  {c.daysSince === null ? 'Neu' : c.daysSince === 0 ? 'Heute' : `vor ${c.daysSince}d`}
-                </span>
-                <button className="btn btn-primary" onClick={() => markContacted(selectedMapId)} style={{ fontSize: 12, padding: '6px 14px' }}>
-                  Kontaktiert
-                </button>
-              </div>
-            );
-          })()}
-          {/* Legend */}
-          <div style={{ display: 'flex', gap: 16, marginTop: 16, flexWrap: 'wrap' }}>
-            {[
-              { color: 'var(--ki-success)', label: '< 7 Tage' },
-              { color: 'var(--ki-warning)', label: '7-30 Tage' },
-              { color: 'var(--ki-error)', label: '> 30 Tage' },
-              { color: 'var(--grey-4)', label: 'Neu' },
-            ].map(({ color, label }) => (
-              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--ki-text-secondary)' }}>
-                <span style={{ width: 10, height: 10, borderRadius: '50%', background: color, display: 'inline-block' }} />
-                {label}
-              </div>
-            ))}
-          </div>
+      {/* ============================================================ */}
+      {/*  4. Contact List                                              */}
+      {/* ============================================================ */}
+      {filtered.length === 0 && (
+        <div className="card" style={{
+          textAlign: 'center', padding: '40px 20px', color: 'var(--ki-text-tertiary)',
+        }}>
+          {contacts.length === 0
+            ? 'Noch keine Kontakte. Lege deinen ersten Kontakt an!'
+            : 'Keine Kontakte gefunden.'}
         </div>
       )}
 
-      {/* List View Controls */}
-      {activeView === 'list' && (
-        <>
-          {/* Sort */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 12, alignItems: 'center' }}>
-            <span style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>Sortierung:</span>
-            <button
-              className={`btn ${sortBy === 'last_contacted' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setSortBy('last_contacted')}
-              style={{ fontSize: 12, padding: '4px 10px' }}
-            >
-              Zuletzt kontaktiert
-            </button>
-            <button
-              className={`btn ${sortBy === 'importance' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setSortBy('importance')}
-              style={{ fontSize: 12, padding: '4px 10px' }}
-            >
-              Wichtigkeit
-            </button>
-          </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 40 }}>
+        {filtered.map((c, idx) => {
+          const border = statusBorder(c.status);
+          const notesOpen = expandedNotes[c.id];
 
-          {/* Filter */}
-          <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
-            {[
-              ['all', 'Alle'],
-              ['reconnect', `Re-Connect (${coldCount})`],
-              ...ROLE_OPTIONS.map(r => [r.key, `${r.icon} ${r.label}`]),
-            ].map(([key, label]) => (
-              <button
-                key={key}
-                className={`btn ${filter === key ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => setFilter(key)}
-                style={{ fontSize: 12, padding: '6px 12px' }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          return (
+            <div
+              key={c.id}
+              className="card animate-in"
+              style={{ borderLeft: border, animationDelay: `${idx * 40}ms`, padding: '20px 24px' }}
+            >
+              <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
-          {/* Contact Cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {filtered.map(c => {
-              const roleInfo = ROLE_OPTIONS.find(r => r.key === c.role) || ROLE_OPTIONS[5];
-              const showNote = noteContactId === c.id;
-              return (
-                <div key={c.id} className="card animate-in" style={{
-                  padding: 16,
-                  borderLeft: `3px solid ${statusColor(c.status)}`,
+                {/* Avatar */}
+                <div style={{
+                  width: 48, height: 48, borderRadius: '50%', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', fontWeight: 700,
+                  fontSize: 16, color: '#fff', flexShrink: 0,
+                  background: initialsColor(c.name),
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                    {/* Avatar */}
-                    <div style={{
-                      width: 42, height: 42, borderRadius: '50%',
-                      background: 'var(--ki-bg-alt)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 20, flexShrink: 0,
-                    }}>
-                      {roleInfo.icon}
-                    </div>
+                  {initials(c.name)}
+                </div>
 
-                    {/* Info */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                        <span style={{ fontWeight: 700, fontSize: 15 }}>{c.name}</span>
-                        {/* Last-contacted badge */}
-                        <span className={statusPillClass(c.status)} style={{ fontSize: 11, padding: '2px 8px' }}>
-                          {c.daysSince === null ? 'Neu' : c.daysSince === 0 ? 'Heute' : `vor ${c.daysSince}d`}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 1 }}>
-                        {roleInfo.label}{c.company ? ` \u00b7 ${c.company}` : ''}
-                      </div>
-                      {/* Star rating */}
-                      <div style={{ marginTop: 6 }}>
-                        <StarRating
-                          value={c.relationship_strength || 0}
-                          onChange={(v) => updateStrength(c.id, v)}
-                        />
-                      </div>
-                    </div>
+                {/* Info block */}
+                <div style={{ flex: 1, minWidth: 200 }}>
 
-                    {/* Actions */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end', flexShrink: 0 }}>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <button
-                          className="btn btn-secondary"
-                          onClick={() => markContacted(c.id)}
-                          style={{ fontSize: 11, padding: '4px 10px', whiteSpace: 'nowrap' }}
-                          title="Als kontaktiert markieren"
-                        >
-                          Kontaktiert
-                        </button>
-                        <button
-                          className="btn btn-ghost"
-                          onClick={() => {
-                            if (noteContactId === c.id) {
-                              setNoteContactId(null);
-                              setNoteText('');
-                            } else {
-                              setNoteContactId(c.id);
-                              setNoteText('');
-                            }
-                          }}
-                          style={{ fontSize: 11, padding: '4px 10px' }}
-                          title="Notiz hinzuf\u00fcgen"
-                        >
-                          Notiz
-                        </button>
-                        <button
-                          className="btn btn-ghost"
-                          onClick={() => handleIntroEmail(c)}
-                          style={{ fontSize: 11, padding: '4px 10px' }}
-                          title="Intro-E-Mail generieren"
-                        >
-                          E-Mail
-                        </button>
-                        <button
-                          className="btn btn-ghost"
-                          onClick={() => handleDelete(c.id)}
-                          style={{ fontSize: 13, padding: '4px 8px', color: 'var(--ki-text-tertiary)' }}
-                          title="L\u00f6schen"
-                        >
-                          &times;
-                        </button>
-                      </div>
-                    </div>
+                  {/* Name + stars + status pill */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <strong style={{ fontSize: 16 }}>{c.name}</strong>
+                    <StarRating value={c.relationship_strength} onChange={val => updateStars(c.id, val)} />
+                    {c.status === 'warm' && (
+                      <span className="pill pill-gold" style={{ fontSize: 11 }}>Bald melden!</span>
+                    )}
+                    {c.status === 'cold' && (
+                      <span className="pill pill-red" style={{ fontSize: 11 }}>Melde dich!</span>
+                    )}
                   </div>
 
-                  {/* Notes display */}
-                  {c.notes && !showNote && (
-                    <div style={{
-                      marginTop: 10, fontSize: 13,
-                      color: 'var(--ki-text-secondary)',
-                      paddingLeft: 54,
-                      whiteSpace: 'pre-line',
-                      borderTop: '1px solid var(--ki-border)',
-                      paddingTop: 8,
-                    }}>
-                      {c.notes}
+                  {/* Role | Company */}
+                  <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginTop: 2 }}>
+                    {c.role}{c.company ? ` | ${c.company}` : ''}
+                  </p>
+
+                  {/* Contact details row */}
+                  <div style={{
+                    display: 'flex', flexWrap: 'wrap', gap: '6px 18px',
+                    marginTop: 8, fontSize: 13, color: 'var(--ki-text-secondary)',
+                  }}>
+                    {c.phone && <span>&#9742; {c.phone}</span>}
+                    {c.email && <span>&#9993; {c.email}</span>}
+                    {c.city  && <span>&#x1F4CD; {c.city}</span>}
+                    {c.linkedin_url && (
+                      <a href={c.linkedin_url} target="_blank" rel="noopener noreferrer"
+                        style={{ color: 'var(--ki-red)' }}>
+                        LinkedIn
+                      </a>
+                    )}
+                    {c.xing_url && (
+                      <a href={c.xing_url} target="_blank" rel="noopener noreferrer"
+                        style={{ color: 'var(--ki-red)' }}>
+                        XING
+                      </a>
+                    )}
+                  </div>
+
+                  {/* Tags */}
+                  {(c.tags || []).length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                      {c.tags.map(t => {
+                        const tag = TAG_MAP[t];
+                        return tag ? (
+                          <span key={t} className="pill pill-grey" style={{ fontSize: 12 }}>
+                            {tag.icon} {tag.label}
+                          </span>
+                        ) : null;
+                      })}
                     </div>
                   )}
 
-                  {/* Inline note editor */}
-                  {showNote && (
-                    <div style={{ marginTop: 12, paddingLeft: 54, display: 'flex', gap: 8 }}>
-                      <textarea
-                        className="input"
-                        placeholder="Notiz eingeben..."
-                        rows={2}
-                        value={noteText}
-                        onChange={e => setNoteText(e.target.value)}
-                        autoFocus
-                        style={{ flex: 1, fontSize: 13, resize: 'vertical' }}
-                      />
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        <button
-                          className="btn btn-primary"
-                          onClick={handleSaveNote}
-                          style={{ fontSize: 12, padding: '6px 14px' }}
-                        >
-                          Speichern
-                        </button>
-                        <button
-                          className="btn btn-ghost"
-                          onClick={() => { setNoteContactId(null); setNoteText(''); }}
-                          style={{ fontSize: 12, padding: '6px 14px' }}
-                        >
-                          Abbrechen
-                        </button>
-                      </div>
+                  {/* How met */}
+                  {c.how_met && (
+                    <p style={{
+                      fontSize: 12, color: 'var(--ki-text-tertiary)',
+                      marginTop: 8, fontStyle: 'italic',
+                    }}>
+                      Kennengelernt: {c.how_met}
+                    </p>
+                  )}
+
+                  {/* Notes (expandable) */}
+                  {c.notes && (
+                    <div style={{ marginTop: 8 }}>
+                      <button
+                        className="btn btn-ghost"
+                        style={{ fontSize: 12, padding: '2px 6px' }}
+                        onClick={() => setExpandedNotes(p => ({ ...p, [c.id]: !p[c.id] }))}
+                      >
+                        {notesOpen ? 'Notizen ausblenden' : 'Notizen anzeigen'}
+                      </button>
+                      {notesOpen && (
+                        <pre style={{
+                          marginTop: 6, fontSize: 12, whiteSpace: 'pre-wrap',
+                          color: 'var(--ki-text-secondary)', background: 'var(--ki-bg-alt)',
+                          padding: 10, borderRadius: 'var(--r-md)', lineHeight: 1.5,
+                        }}>
+                          {c.notes}
+                        </pre>
+                      )}
                     </div>
+                  )}
+
+                  {/* Last contact info */}
+                  {c.daysSince !== null && (
+                    <p style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginTop: 8 }}>
+                      Letzter Kontakt: vor {c.daysSince} {c.daysSince === 1 ? 'Tag' : 'Tagen'}
+                    </p>
                   )}
                 </div>
-              );
-            })}
+
+                {/* Action buttons */}
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0, flexWrap: 'wrap' }}>
+                  <button
+                    className="btn btn-primary"
+                    style={{ fontSize: 13, padding: '6px 12px' }}
+                    onClick={() => markContacted(c.id)}
+                  >
+                    &#x1F4DE; Kontaktiert
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    style={{ fontSize: 13, padding: '6px 12px' }}
+                    onClick={() => { setNoteModal(c.id); setNoteText(''); }}
+                  >
+                    &#x1F4DD; Notiz
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 13, padding: '6px 12px' }}
+                    onClick={() => openEdit(c)}
+                  >
+                    &#x270F;&#xFE0F; Bearbeiten
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 13, padding: '6px 12px', color: 'var(--ki-error)' }}
+                    onClick={() => deleteContact(c.id)}
+                  >
+                    &#x1F5D1;
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ============================================================ */}
+      {/*  6. Netzwerk-Statistik                                        */}
+      {/* ============================================================ */}
+      {contacts.length > 0 && (
+        <div className="card animate-in" style={{ padding: 24 }}>
+          <h3 style={{ fontSize: 18, marginBottom: 16, color: 'var(--ki-text)' }}>
+            Netzwerk-Statistik
+          </h3>
+
+          <div className="grid-3" style={{ gap: 16, marginBottom: 20 }}>
+            <div style={{
+              textAlign: 'center', padding: 16,
+              background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-md)',
+            }}>
+              <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--ki-text)' }}>{stats.total}</span>
+              <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 4 }}>Kontakte gesamt</p>
+            </div>
+            <div style={{
+              textAlign: 'center', padding: 16,
+              background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-md)',
+            }}>
+              <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--ki-success)' }}>{stats.active}</span>
+              <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 4 }}>
+                Aktiv (&lt;30 Tage)
+              </p>
+            </div>
+            <div style={{
+              textAlign: 'center', padding: 16,
+              background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-md)',
+            }}>
+              <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--ki-error)' }}>{stats.inactive}</span>
+              <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 4 }}>
+                Inaktiv (&gt;30 Tage)
+              </p>
+            </div>
           </div>
 
-          {/* Empty State */}
-          {contacts.length === 0 && (
-            <div className="card" style={{ padding: 48, textAlign: 'center' }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>🤝</div>
-              <p style={{ color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
-                Dein Netzwerk ist dein Karriere-Kapital. F\u00fcge deine wichtigsten Kontakte hinzu.
-              </p>
-              <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
-                Ersten Kontakt hinzuf\u00fcgen
-              </button>
+          {/* Tag breakdown */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+            {TAG_OPTIONS.map(t => (
+              <span key={t.key} className="pill pill-grey" style={{ fontSize: 12 }}>
+                {t.icon} {t.label}: {stats.tagCounts[t.key] || 0}
+              </span>
+            ))}
+          </div>
+
+          {/* Networking Score bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Networking-Score</p>
+              <div style={{
+                height: 12, background: 'var(--ki-bg-alt)',
+                borderRadius: 'var(--r-pill)', overflow: 'hidden',
+              }}>
+                <div style={{
+                  width: `${stats.score}%`, height: '100%',
+                  background: scoreColor(stats.score),
+                  borderRadius: 'var(--r-pill)', transition: 'width 500ms ease',
+                }} />
+              </div>
             </div>
-          )}
-        </>
+            <span style={{
+              fontSize: 24, fontWeight: 700, color: scoreColor(stats.score),
+              minWidth: 56, textAlign: 'right',
+            }}>
+              {stats.score}%
+            </span>
+          </div>
+        </div>
       )}
 
-      {/* Add Contact Modal */}
-      {showAdd && (
+      {/* ============================================================ */}
+      {/*  Note Modal                                                   */}
+      {/* ============================================================ */}
+      {noteModal && (
         <div
           style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000, padding: 16,
           }}
-          onClick={e => e.target === e.currentTarget && setShowAdd(false)}
+          onClick={() => setNoteModal(null)}
         >
-          <div className="card animate-in" style={{ width: 480, maxWidth: '92vw' }}>
-            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Kontakt hinzuf\u00fcgen</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <input
-                className="input"
-                placeholder="Name *"
-                value={newContact.name}
-                onChange={e => setNewContact(p => ({ ...p, name: e.target.value }))}
-              />
-              <select
-                className="input"
-                value={newContact.role}
-                onChange={e => setNewContact(p => ({ ...p, role: e.target.value }))}
-              >
-                {ROLE_OPTIONS.map(r => (
-                  <option key={r.key} value={r.key}>{r.icon} {r.label}</option>
-                ))}
-              </select>
-              <input
-                className="input"
-                placeholder="Unternehmen"
-                value={newContact.company}
-                onChange={e => setNewContact(p => ({ ...p, company: e.target.value }))}
-              />
-              <input
-                className="input"
-                placeholder="LinkedIn-URL"
-                value={newContact.linkedin_url}
-                onChange={e => setNewContact(p => ({ ...p, linkedin_url: e.target.value }))}
-              />
-              <textarea
-                className="input"
-                placeholder="Notizen"
-                rows={2}
-                value={newContact.notes}
-                onChange={e => setNewContact(p => ({ ...p, notes: e.target.value }))}
-              />
+          <div
+            className="card"
+            style={{ maxWidth: 480, width: '100%', padding: 24 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ marginBottom: 12 }}>Notiz hinzuf&uuml;gen</h3>
+            <textarea
+              className="input"
+              rows={4}
+              placeholder="Notiz eingeben\u2026"
+              value={noteText}
+              onChange={e => setNoteText(e.target.value)}
+              style={{ width: '100%', resize: 'vertical', marginBottom: 16 }}
+            />
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button className="btn btn-ghost" onClick={() => setNoteModal(null)}>Abbrechen</button>
+              <button className="btn btn-primary" onClick={() => saveNote(noteModal)}>Speichern</button>
+            </div>
+          </div>
+        </div>
+      )}
 
-              {/* Relationship Strength in form */}
+      {/* ============================================================ */}
+      {/*  5. Add / Edit Contact Modal                                  */}
+      {/* ============================================================ */}
+      {modalOpen && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)',
+            display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+            zIndex: 1000, padding: 16, overflowY: 'auto',
+          }}
+          onClick={() => setModalOpen(false)}
+        >
+          <div
+            className="card"
+            style={{ maxWidth: 600, width: '100%', padding: 28, marginTop: 40, marginBottom: 40 }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal header */}
+            <div style={{
+              display: 'flex', justifyContent: 'space-between',
+              alignItems: 'center', marginBottom: 20,
+            }}>
+              <h3 style={{ fontSize: 18 }}>
+                {editId ? 'Kontakt bearbeiten' : 'Neuen Kontakt anlegen'}
+              </h3>
+              {!editId && (
+                <span className="pill pill-green" style={{ fontSize: 12 }}>+20 XP</span>
+              )}
+            </div>
+
+            {/* Vorname + Nachname */}
+            <div className="grid-2" style={{ gap: 12, marginBottom: 12 }}>
               <div>
-                <label style={{ fontSize: 13, color: 'var(--ki-text-secondary)', display: 'block', marginBottom: 6 }}>
-                  Beziehungsst\u00e4rke
-                </label>
-                <StarRating
-                  value={newContact.relationship_strength}
-                  onChange={v => setNewContact(p => ({ ...p, relationship_strength: v }))}
+                <label style={labelStyle}>Vorname *</label>
+                <input
+                  className="input" value={form.first_name}
+                  onChange={e => f('first_name', e.target.value)}
+                  placeholder="Max" style={{ width: '100%' }}
                 />
               </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-md)', fontSize: 13, color: 'var(--ki-text-secondary)' }}>
-                <span style={{ color: 'var(--ki-success)', fontWeight: 700 }}>+20 XP</span>
-                f\u00fcr jeden neuen Kontakt
+              <div>
+                <label style={labelStyle}>Nachname *</label>
+                <input
+                  className="input" value={form.last_name}
+                  onChange={e => f('last_name', e.target.value)}
+                  placeholder="Mustermann" style={{ width: '100%' }}
+                />
               </div>
+            </div>
 
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setShowAdd(false)}
-                  style={{ flex: 1 }}
-                >
-                  Abbrechen
-                </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={handleAdd}
-                  style={{ flex: 1 }}
-                >
-                  Hinzuf\u00fcgen
-                </button>
+            {/* Firma + Position */}
+            <div className="grid-2" style={{ gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={labelStyle}>Firma / Organisation *</label>
+                <input
+                  className="input" value={form.company}
+                  onChange={e => f('company', e.target.value)}
+                  placeholder="Muster GmbH" style={{ width: '100%' }}
+                />
               </div>
+              <div>
+                <label style={labelStyle}>Position / Rolle *</label>
+                <input
+                  className="input" value={form.role}
+                  onChange={e => f('role', e.target.value)}
+                  placeholder="HR Manager" style={{ width: '100%' }}
+                />
+              </div>
+            </div>
+
+            {/* Telefon + Email */}
+            <div className="grid-2" style={{ gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={labelStyle}>Telefon</label>
+                <input
+                  className="input" value={form.phone}
+                  onChange={e => f('phone', e.target.value)}
+                  placeholder="+49 170 1234567" style={{ width: '100%' }}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Email</label>
+                <input
+                  className="input" type="email" value={form.email}
+                  onChange={e => f('email', e.target.value)}
+                  placeholder="max@firma.de" style={{ width: '100%' }}
+                />
+              </div>
+            </div>
+
+            {/* Stadt */}
+            <div style={{ marginBottom: 12 }}>
+              <label style={labelStyle}>Stadt</label>
+              <input
+                className="input" value={form.city}
+                onChange={e => f('city', e.target.value)}
+                placeholder="M\u00FCnchen" style={{ width: '100%' }}
+              />
+            </div>
+
+            {/* LinkedIn + XING */}
+            <div className="grid-2" style={{ gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={labelStyle}>LinkedIn-URL</label>
+                <input
+                  className="input" value={form.linkedin_url}
+                  onChange={e => f('linkedin_url', e.target.value)}
+                  placeholder="https://linkedin.com/in/..." style={{ width: '100%' }}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>XING-URL</label>
+                <input
+                  className="input" value={form.xing_url}
+                  onChange={e => f('xing_url', e.target.value)}
+                  placeholder="https://xing.com/profile/..." style={{ width: '100%' }}
+                />
+              </div>
+            </div>
+
+            {/* Tags multi-select */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>Tags</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+                {TAG_OPTIONS.map(t => (
+                  <button
+                    key={t.key}
+                    type="button"
+                    className={`pill ${form.tags.includes(t.key) ? 'pill-gold' : 'pill-grey'}`}
+                    style={{ cursor: 'pointer', fontSize: 12 }}
+                    onClick={() => toggleFormTag(t.key)}
+                  >
+                    {t.icon} {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Beziehungsstaerke */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>Beziehungsst&auml;rke</label>
+              <StarRating
+                value={form.relationship_strength}
+                onChange={val => f('relationship_strength', val)}
+              />
+            </div>
+
+            {/* Wie kennengelernt */}
+            <div style={{ marginBottom: 12 }}>
+              <label style={labelStyle}>Wie kennengelernt</label>
+              <input
+                className="input" value={form.how_met}
+                onChange={e => f('how_met', e.target.value)}
+                placeholder="z.B. Messe, LinkedIn, Empfehlung\u2026"
+                style={{ width: '100%' }}
+              />
+            </div>
+
+            {/* Notizen */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={labelStyle}>Notizen</label>
+              <textarea
+                className="input" rows={3}
+                value={form.notes}
+                onChange={e => f('notes', e.target.value)}
+                placeholder="Pers\u00F6nliche Notizen zum Kontakt\u2026"
+                style={{ width: '100%', resize: 'vertical' }}
+              />
+            </div>
+
+            {/* Modal actions */}
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button className="btn btn-ghost" onClick={() => setModalOpen(false)}>
+                Abbrechen
+              </button>
+              <button className="btn btn-primary" onClick={saveContact} disabled={busy}>
+                {busy ? 'Speichern\u2026' : editId ? 'Aktualisieren' : 'Kontakt anlegen'}
+              </button>
             </div>
           </div>
         </div>

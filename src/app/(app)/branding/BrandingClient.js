@@ -1,947 +1,1055 @@
 'use client';
-import { useState, useEffect } from 'react';
+
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { awardPoints } from '@/lib/gamification';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import { awardPoints } from '@/lib/gamification';
 
-// ---------------------------------------------------------------------------
-// Post Templates
-// ---------------------------------------------------------------------------
-const POST_TEMPLATES = [
+/* ───────────────────────────── Platform Data ───────────────────────────── */
+
+const PLATFORMS = [
   {
-    id: 'erfolgs-story',
-    title: 'Erfolgs-Story',
-    subtitle: 'STAR-Format',
-    icon: '⭐',
-    color: 'var(--ki-red)',
-    text: 'Situation: [Beschreibe die Ausgangslage]\n\nTask: [Was war deine Aufgabe?]\n\nAction: [Was hast du konkret getan?]\n\nResult: [Was war das messbare Ergebnis?]\n\nKey Takeaway: [Was können andere daraus lernen?]',
+    id: 'linkedin',
+    name: 'LinkedIn',
+    color: '#0A66C2',
+    icon: '🔵',
+    url: 'https://linkedin.com',
+    checklist: [
+      'Profilbild (professionell, aktuell)',
+      'Banner-Bild mit Branding',
+      'Headline optimiert (nicht nur Jobtitel)',
+      'About-Section (min. 200 Wörter)',
+      'Berufserfahrung vollständig',
+      'Skills & Endorsements (min. 10)',
+      'Empfehlungen (min. 3)',
+      'SSI-Score > 50',
+      'Regelmäßig Posts/Artikel',
+      'Karriere-Institut Zertifikate verlinkt',
+    ],
+    tips: [
+      'Nutze Keywords aus Stellenanzeigen in deiner Headline',
+      'Poste 2-3x pro Woche für maximale Sichtbarkeit',
+      'Kommentiere bei Entscheidern deiner Branche',
+      'Aktiviere "Open to Work" für Recruiter',
+    ],
   },
   {
-    id: 'branchen-insight',
-    title: 'Branchen-Insight',
-    subtitle: 'Kontroverse These + Daten',
-    icon: '📈',
-    color: 'var(--ki-success)',
-    text: 'Kontroverse These: [Formuliere eine mutige Aussage zu deiner Branche]\n\nDaten & Fakten: [Belege deine These mit konkreten Zahlen oder Studien]\n\nWarum das wichtig ist: [Erkläre die Auswirkungen auf die Branche]\n\nMeine Einschätzung: [Deine persönliche Perspektive als Experte]\n\nFrage an mein Netzwerk: [Stelle eine offene Frage zur Diskussion]',
+    id: 'xing',
+    name: 'XING',
+    color: '#006567',
+    icon: '🟠',
+    url: 'https://xing.com',
+    checklist: [
+      'Profilbild professionell',
+      'Berufserfahrung vollständig',
+      'Qualifikationen eingetragen',
+      'Ich-suche / Ich-biete ausgefüllt',
+      'Portfolio verlinkt',
+      'Gehaltsvorstellung hinterlegt',
+      'Status: Offen für Angebote',
+      'Gruppen beigetreten (min. 3)',
+    ],
+    tips: [
+      'XING ist besonders stark im DACH-Raum',
+      'Viele Mittelständler nutzen primär XING',
+      'Die "Ich suche"-Sektion ist Gold wert für Recruiter',
+    ],
   },
   {
-    id: 'persoenlicher-meilenstein',
-    title: 'Persönlicher Meilenstein',
-    subtitle: 'Authentisch + Verletzlich',
-    icon: '🏆',
-    color: 'var(--ki-warning)',
-    text: 'Der Moment: [Beschreibe den Meilenstein, den du erreicht hast]\n\nDer Weg dahin: [Was hat es dich gekostet — Zeit, Energie, Rückschläge?]\n\nWas ich fast aufgegeben hätte: [Sei ehrlich über Zweifel und Herausforderungen]\n\nWas ich gelernt habe: [Die wichtigste Erkenntnis auf diesem Weg]\n\nAn alle, die gerade auf dem Weg sind: [Ermutigende Worte]',
+    id: 'stepstone',
+    name: 'StepStone',
+    color: '#00A88E',
+    icon: '🟢',
+    url: 'https://stepstone.de',
+    checklist: [
+      'Lebenslauf hochgeladen (aktuell)',
+      'Jobpräferenzen eingestellt',
+      'Gehaltsvorstellung definiert',
+      'Job-Alerts aktiviert',
+    ],
+    tips: [
+      'Aktualisiere deinen CV regelmäßig — Recruiter sehen "zuletzt aktiv"',
+      'Nutze den Gehaltsplaner für realistische Erwartungen',
+      'Bewirb dich auch auf "Fast-Matches"',
+    ],
   },
   {
-    id: 'how-to-guide',
-    title: 'How-To Guide',
-    subtitle: '3–5 Schritte',
-    icon: '💡',
-    color: 'var(--ki-blue, #2563eb)',
-    text: 'Problem: [Welches häufige Problem löst du?]\n\nSchritt 1: [Erste konkrete Aktion]\n\nSchritt 2: [Zweite konkrete Aktion]\n\nSchritt 3: [Dritte konkrete Aktion]\n\nSchritt 4 (optional): [Vierte konkrete Aktion]\n\nSchritt 5 (optional): [Fünfte konkrete Aktion]\n\nErgebnis: [Was erreicht man, wenn man diese Schritte befolgt?]',
+    id: 'indeed',
+    name: 'Indeed',
+    color: '#2164F3',
+    icon: '🔴',
+    url: 'https://indeed.de',
+    checklist: [
+      'Lebenslauf hochgeladen',
+      'Profil vollständig',
+      'Job-Alerts eingerichtet',
+    ],
+    tips: [
+      'Indeed hat die größte Job-Datenbank weltweit',
+      'Nutze die Gehaltsrecherche für Verhandlungen',
+      'Filtere nach "Arbeitgeber-Bewertung" für bessere Matches',
+    ],
   },
   {
-    id: 'empfehlung-buchreview',
-    title: 'Empfehlung / Buchreview',
-    subtitle: 'Was ich gelernt habe',
-    icon: '📚',
-    color: 'var(--ki-text-secondary)',
-    text: 'Das Buch/Tool/Ressource: [Name und kurze Beschreibung]\n\nWarum ich es empfehle: [Was hat mich überzeugt?]\n\nDie 3 wichtigsten Learnings:\n1. [Erstes Learning]\n2. [Zweites Learning]\n3. [Drittes Learning]\n\nFür wen ist es geeignet? [Zielgruppe beschreiben]\n\nMein Fazit in einem Satz: [Kernaussage]',
+    id: 'glassdoor',
+    name: 'Glassdoor',
+    color: '#0CAA41',
+    icon: '🟣',
+    url: 'https://glassdoor.de',
+    checklist: [
+      'Konto erstellt',
+      'Arbeitgeber bewertet (für vollen Zugang)',
+    ],
+    tips: [
+      'Lies Bewertungen VOR dem Bewerbungsgespräch',
+      'Gehalts-Infos sind Gold wert für Verhandlungen',
+      'Interview-Erfahrungen helfen bei der Vorbereitung',
+    ],
   },
   {
-    id: 'karriere-lektion',
-    title: 'Karriere-Lektion',
-    subtitle: 'Was ich anders machen würde',
-    icon: '🌱',
-    color: 'var(--ki-success)',
-    text: 'Wenn ich die Zeit zurückdrehen könnte: [Beschreibe die Situation von damals]\n\nWas ich damals getan habe: [Die Entscheidung, die du getroffen hast]\n\nWas ich heute anders machen würde: [Deine heutige Perspektive]\n\nWarum: [Was hast du seitdem gelernt?]\n\nMein Rat an mein jüngeres Ich: [Eine konkrete Empfehlung]',
+    id: 'kununu',
+    name: 'Kununu',
+    color: '#99C613',
+    icon: '⚫',
+    url: 'https://kununu.com',
+    checklist: [
+      'Konto erstellt',
+      'Arbeitgeber bewertet',
+    ],
+    tips: [
+      'Kununu ist das größte Arbeitgeber-Bewertungsportal im DACH-Raum',
+      'Nutze die anonyme Bewertungsfunktion',
+      'Firmenbewertungen sind ideal für Gesprächsvorbereitung',
+    ],
   },
 ];
 
-// ---------------------------------------------------------------------------
-// Checklist items
-// ---------------------------------------------------------------------------
-const CHECKLIST_ITEMS = [
-  { id: 'photo', label: 'Profilbild (professionell)' },
-  { id: 'banner', label: 'Banner-Bild' },
-  { id: 'headline', label: 'Headline optimiert' },
-  { id: 'about', label: 'About-Section (min. 200 Wörter)' },
-  { id: 'skills', label: '5+ Skills endorsed' },
-  { id: 'recommendations', label: '3+ Empfehlungen' },
-  { id: 'activity', label: 'Aktivitäts-Score > 50' },
+const UNIVERSAL_CHECKLIST = [
+  'Profilbild (professionell, aktuell)',
+  'Headline optimiert (nicht nur Jobtitel)',
+  'Zusammenfassung/About (min. 150 Wörter)',
+  'Berufserfahrung vollständig',
+  'Skills & Kenntnisse (min. 5)',
+  'Empfehlungen/Referenzen (min. 2)',
+  'Karriere-Institut Zertifikate verlinkt',
+  'Jobportal-Profil bei Wir:Personalberater',
 ];
 
-// ---------------------------------------------------------------------------
-// Client-side headline variations generator
-// ---------------------------------------------------------------------------
-function generateHeadlineVariations(currentPosition, skills, targetPosition) {
-  const skillStr = skills.filter(Boolean).join(' | ');
-  const s1 = skills[0] || 'Experte';
-  const s2 = skills[1] || 'Strategie';
-  const s3 = skills[2] || 'Leadership';
+/* ──────────────────────── Headline-Generator Helpers ───────────────────── */
 
-  return [
-    `${currentPosition} → ${targetPosition} | ${skillStr}`,
-    `${targetPosition} in Vorbereitung | ${s1} & ${s2} | Offen für neue Chancen`,
-    `${s1}-Experte mit Fokus auf ${s2} | Jetzt: ${currentPosition} | Ziel: ${targetPosition}`,
-    `Vom ${currentPosition} zum ${targetPosition} | ${skillStr} | Let's connect`,
-    `${s1} • ${s2} • ${s3} | ${currentPosition} | Auf dem Weg zu ${targetPosition}`,
-  ].filter((h) => h.trim().length > 10);
+function generateHeadlinesFallback(position, skills, target) {
+  const skillStr = skills.filter(Boolean).join(', ');
+  const base = [];
+
+  if (position && skillStr && target) {
+    base.push(
+      `${position} | ${skillStr} | Auf dem Weg zum ${target}`,
+      `${target} in spe — ${skillStr} | Aktuell ${position}`,
+      `${position} mit Fokus auf ${skillStr} → ${target}`,
+      `Von ${position} zu ${target} | Expertise: ${skillStr}`,
+      `${skillStr} Experte | ${position} | Nächstes Ziel: ${target}`,
+    );
+  } else if (position && skillStr) {
+    base.push(
+      `${position} | ${skillStr}`,
+      `${position} — Spezialisiert auf ${skillStr}`,
+      `${skillStr} | ${position} mit Leidenschaft`,
+      `Erfahrener ${position} | ${skillStr}`,
+      `${position} | Expertise in ${skillStr}`,
+    );
+  } else if (position) {
+    base.push(
+      `${position} — Offen für neue Herausforderungen`,
+      `Erfahrener ${position} mit breitem Skillset`,
+      `${position} | Karriere-Institut Akademie Absolvent`,
+      `${position} auf der Suche nach Impact`,
+      `${position} | Innovativ. Engagiert. Ergebnisorientiert.`,
+    );
+  } else {
+    base.push(
+      'Karriereorientierter Professional — Offen für neue Wege',
+      'Fachkraft mit Leidenschaft und Zielstrebigkeit',
+      'Bereit für den nächsten Karriereschritt',
+      'Professional | Karriere-Institut Akademie',
+      'Fachexperte — Offen für spannende Herausforderungen',
+    );
+  }
+
+  return base;
 }
 
-// ---------------------------------------------------------------------------
-// Sub-components
-// ---------------------------------------------------------------------------
-function ScoreRing({ score, size = 120 }) {
-  const r = (size - 12) / 2;
-  const c = 2 * Math.PI * r;
-  const offset = c - (score / 100) * c;
-  const color = score >= 70 ? 'var(--ki-success)' : score >= 40 ? 'var(--ki-warning)' : 'var(--ki-red)';
+/* ──────────────────────────── Progress Ring ─────────────────────────────── */
+
+function ProgressRing({ percent, size = 80, stroke = 6 }) {
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percent / 100) * circumference;
+  const ringColor =
+    percent === 100
+      ? 'var(--ki-success)'
+      : percent >= 50
+        ? 'var(--ki-warning)'
+        : 'var(--ki-red)';
+
   return (
-    <svg width={size} height={size} style={{ display: 'block', margin: '0 auto' }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--grey-5, #e5e5e5)" strokeWidth="8" />
+    <svg width={size} height={size} style={{ display: 'block', transform: 'rotate(-90deg)' }}>
       <circle
-        cx={size / 2} cy={size / 2} r={r}
-        fill="none" stroke={color} strokeWidth="8"
-        strokeDasharray={c} strokeDashoffset={offset}
-        strokeLinecap="round"
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        style={{ transition: 'stroke-dashoffset 1s ease' }}
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke="var(--ki-border)"
+        strokeWidth={stroke}
       />
-      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle"
-        style={{ fontSize: 28, fontWeight: 700, fill: color, fontFamily: 'inherit' }}>
-        {score}
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke={ringColor}
+        strokeWidth={stroke}
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+      />
+      <text
+        x="50%"
+        y="50%"
+        dominantBaseline="central"
+        textAnchor="middle"
+        fill="var(--ki-text)"
+        fontSize={size * 0.22}
+        fontWeight={700}
+        style={{ transform: 'rotate(90deg)', transformOrigin: 'center' }}
+      >
+        {percent}%
       </text>
     </svg>
   );
 }
 
-function ProfileRing({ percent, size = 140 }) {
-  const r = (size - 14) / 2;
-  const c = 2 * Math.PI * r;
-  const offset = c - (percent / 100) * c;
-  const color = percent >= 80 ? 'var(--ki-success)' : percent >= 50 ? 'var(--ki-warning)' : 'var(--ki-red)';
+/* ───────────────────────── Toast Notification ──────────────────────────── */
+
+function Toast({ message, onClose }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3500);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
   return (
-    <div style={{ textAlign: 'center' }}>
-      <svg width={size} height={size} style={{ display: 'block', margin: '0 auto' }}>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--grey-5, #e5e5e5)" strokeWidth="10" />
-        <circle
-          cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke={color} strokeWidth="10"
-          strokeDasharray={c} strokeDashoffset={offset}
-          strokeLinecap="round"
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-          style={{ transition: 'stroke-dashoffset 0.8s ease' }}
-        />
-        <text x="50%" y="44%" textAnchor="middle" dominantBaseline="middle"
-          style={{ fontSize: 26, fontWeight: 700, fill: color, fontFamily: 'inherit' }}>
-          {percent}%
-        </text>
-        <text x="50%" y="62%" textAnchor="middle" dominantBaseline="middle"
-          style={{ fontSize: 10, fill: 'var(--ki-text-secondary)', fontFamily: 'inherit' }}>
-          optimiert
-        </text>
-      </svg>
+    <div
+      style={{
+        position: 'fixed',
+        bottom: 24,
+        right: 24,
+        background: 'var(--ki-card)',
+        border: '1px solid var(--ki-border)',
+        borderRadius: 'var(--r-md)',
+        padding: '12px 20px',
+        boxShadow: 'var(--sh-lg)',
+        zIndex: 9999,
+        color: 'var(--ki-text)',
+        fontSize: 14,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        animation: 'fadeIn 0.3s ease',
+      }}
+    >
+      {message}
+      <button
+        onClick={onClose}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: 'var(--ki-text-tertiary)',
+          cursor: 'pointer',
+          fontSize: 16,
+          marginLeft: 8,
+          padding: 0,
+        }}
+      >
+        ×
+      </button>
     </div>
   );
 }
 
-function SsiChart({ scores }) {
-  if (scores.length === 0) {
-    return (
-      <div style={{ textAlign: 'center', padding: 24, color: 'var(--ki-text-secondary)', fontSize: 13 }}>
-        Noch keine SSI-Daten vorhanden. Trage deinen ersten Score ein.
-      </div>
-    );
-  }
+/* ══════════════════════════ MAIN COMPONENT ══════════════════════════════ */
 
-  const width = 500;
-  const height = 180;
-  const padL = 40; const padR = 16; const padT = 16; const padB = 32;
-  const chartW = width - padL - padR;
-  const chartH = height - padT - padB;
-
-  const values = scores.map((s) => s.score);
-  const minVal = Math.max(0, Math.min(...values) - 10);
-  const maxVal = Math.min(100, Math.max(...values) + 10);
-  const range = maxVal - minVal || 1;
-
-  const points = scores.map((s, i) => {
-    const x = padL + (scores.length === 1 ? chartW / 2 : (i / (scores.length - 1)) * chartW);
-    const y = padT + chartH - ((s.score - minVal) / range) * chartH;
-    return { x, y, score: s.score, date: s.recorded_at };
-  });
-
-  const polyline = points.map((p) => `${p.x},${p.y}`).join(' ');
-  const trend = values.length >= 2 ? values[values.length - 1] - values[0] : 0;
-
-  return (
-    <div>
-      <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: 'auto' }}>
-        {[0, 0.25, 0.5, 0.75, 1].map((frac) => {
-          const y = padT + chartH - frac * chartH;
-          const val = Math.round(minVal + frac * range);
-          return (
-            <g key={frac}>
-              <line x1={padL} y1={y} x2={width - padR} y2={y} stroke="var(--grey-5, #e5e5e5)" strokeWidth="0.5" />
-              <text x={padL - 8} y={y + 4} textAnchor="end" style={{ fontSize: 10, fill: 'var(--ki-text-secondary)' }}>{val}</text>
-            </g>
-          );
-        })}
-        <polyline points={polyline} fill="none" stroke="var(--ki-red)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-        <polygon
-          points={`${points[0].x},${padT + chartH} ${polyline} ${points[points.length - 1].x},${padT + chartH}`}
-          fill="var(--ki-red)" opacity="0.06"
-        />
-        {points.map((p, i) => (
-          <g key={i}>
-            <circle cx={p.x} cy={p.y} r="4" fill="white" stroke="var(--ki-red)" strokeWidth="2" />
-            <text x={p.x} y={p.y - 10} textAnchor="middle"
-              style={{ fontSize: 10, fontWeight: 600, fill: 'var(--ki-text)' }}>{p.score}</text>
-          </g>
-        ))}
-        {points.map((p, i) => {
-          const d = new Date(p.date);
-          const label = `${d.getDate()}.${d.getMonth() + 1}`;
-          return (
-            <text key={i} x={p.x} y={height - 6} textAnchor="middle"
-              style={{ fontSize: 9, fill: 'var(--ki-text-secondary)' }}>{label}</text>
-          );
-        })}
-      </svg>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 8 }}>
-        <span className={trend > 0 ? 'pill pill-green' : trend < 0 ? 'pill pill-red' : 'pill pill-grey'} style={{ fontSize: 11 }}>
-          Trend: {trend > 0 ? '+' : ''}{trend} Punkte
-        </span>
-        <span className="pill pill-grey" style={{ fontSize: 11 }}>
-          Aktuell: {values[values.length - 1]}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Main component
-// ---------------------------------------------------------------------------
 export default function BrandingClient({ userId, existing, profile }) {
   const supabase = createClient();
 
-  // ---- Existing LinkedIn analysis state ----
-  const [linkedinUrl, setLinkedinUrl] = useState(existing?.linkedin_url || '');
-  const [headline, setHeadline] = useState(existing?.current_headline || '');
-  const [visScore, setVisScore] = useState(existing?.visibility_score || null);
-  const [contentIdeas, setContentIdeas] = useState(existing?.content_suggestions || []);
-  const [analyzing, setAnalyzing] = useState(false);
-  const [feedback, setFeedback] = useState(existing?.ai_feedback || '');
-  const [existingSuggestions, setExistingSuggestions] = useState(existing?.suggested_headlines || []);
+  /* ── State ── */
+  const [expandedPlatform, setExpandedPlatform] = useState(null);
+  const [platformChecklists, setPlatformChecklists] = useState(() => {
+    const saved = existing?.platform_checklists;
+    if (saved && typeof saved === 'object') return saved;
+    const init = {};
+    PLATFORMS.forEach((p) => {
+      init[p.id] = [];
+    });
+    return init;
+  });
+  const [universalChecklist, setUniversalChecklist] = useState(
+    () => existing?.universal_checklist ?? [],
+  );
+  const [universalXpAwarded, setUniversalXpAwarded] = useState(
+    () => existing?.universal_xp_awarded ?? false,
+  );
 
-  // ---- Headline Generator state ----
-  const [genPosition, setGenPosition] = useState(profile?.position || '');
-  const [genSkills, setGenSkills] = useState(['', '', '']);
-  const [genTarget, setGenTarget] = useState(profile?.career_goal || '');
-  const [genSkillInput, setGenSkillInput] = useState('');
-  const [genSkillTags, setGenSkillTags] = useState([]);
-  const [genLoading, setGenLoading] = useState(false);
-  const [genHeadlines, setGenHeadlines] = useState([]);
+  // Headline generator
+  const [hlPosition, setHlPosition] = useState(profile?.position || '');
+  const [hlSkills, setHlSkills] = useState(['', '', '']);
+  const [hlTarget, setHlTarget] = useState(profile?.career_goal || '');
+  const [hlResults, setHlResults] = useState([]);
+  const [hlLoading, setHlLoading] = useState(false);
   const [copiedIdx, setCopiedIdx] = useState(null);
 
-  // ---- Profil-Checkliste state ----
-  const [checklist, setChecklist] = useState(() =>
-    CHECKLIST_ITEMS.reduce((acc, item) => ({ ...acc, [item.id]: false }), {})
-  );
-  const [checklistAwarded, setChecklistAwarded] = useState(false);
-
-  // ---- SSI state ----
-  const [ssiScore, setSsiScore] = useState('');
-  const [ssiScores, setSsiScores] = useState([]);
-  const [ssiSaving, setSsiSaving] = useState(false);
-
-  // ---- Template editor state ----
-  const [activeTemplate, setActiveTemplate] = useState(null);
-  const [editorText, setEditorText] = useState('');
-  const [optimizing, setOptimizing] = useState(false);
-  const [optimizeResult, setOptimizeResult] = useState(null);
-  const [postAwarded, setPostAwarded] = useState(false);
-
-  // ---- Toast ----
+  // Toast
   const [toast, setToast] = useState(null);
+  const showToast = useCallback((msg) => setToast(msg), []);
 
-  function showToast(msg, type = 'success') {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3200);
-  }
-
-  // Load SSI scores on mount
-  useEffect(() => {
-    const loadSsiScores = async () => {
-      const { data } = await supabase
-        .from('ssi_scores')
-        .select('*')
-        .eq('user_id', userId)
-        .order('recorded_at', { ascending: true })
-        .limit(12);
-      if (data) setSsiScores(data);
-    };
-    loadSsiScores();
-  }, [userId]);
-
-  // ---------------------------------------------------------------------------
-  // Existing analyze handler
-  // ---------------------------------------------------------------------------
-  const handleAnalyze = async () => {
-    setAnalyzing(true);
-    try {
-      const res = await fetch('/api/linkedin-analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          linkedinUrl,
-          currentHeadline: headline,
-          careerGoal: profile?.career_goal,
-          position: profile?.position,
-        }),
-      });
-      const data = await res.json();
-      setExistingSuggestions(data.suggested_headlines || []);
-      setVisScore(data.visibility_score || 50);
-      setContentIdeas(data.content_suggestions || []);
-      setFeedback(data.ai_feedback || '');
-      await supabase.from('linkedin_analysis').upsert(
+  /* ── Persistence ── */
+  const persist = useCallback(
+    async (pChecklists, uChecklist, xpFlag) => {
+      if (!userId) return;
+      await supabase.from('module_progress').upsert(
         {
           user_id: userId,
-          linkedin_url: linkedinUrl,
-          current_headline: headline,
-          suggested_headlines: data.suggested_headlines,
-          visibility_score: data.visibility_score,
-          content_suggestions: data.content_suggestions,
-          ai_feedback: data.ai_feedback,
-          analyzed_at: new Date().toISOString(),
+          module: 'branding',
+          platform_checklists: pChecklists,
+          universal_checklist: uChecklist,
+          universal_xp_awarded: xpFlag,
+          updated_at: new Date().toISOString(),
         },
-        { onConflict: 'user_id' }
+        { onConflict: 'user_id,module' },
       );
-    } catch (err) {
-      console.error(err);
-    }
-    setAnalyzing(false);
-  };
+    },
+    [userId, supabase],
+  );
 
-  // ---------------------------------------------------------------------------
-  // Headline Generator
-  // ---------------------------------------------------------------------------
-  const handleAddSkillTag = () => {
-    const trimmed = genSkillInput.trim();
-    if (!trimmed || genSkillTags.length >= 3) return;
-    setGenSkillTags((prev) => [...prev, trimmed]);
-    setGenSkillInput('');
-  };
+  /* ── Platform checklist toggle ── */
+  const togglePlatformItem = useCallback(
+    (platformId, item) => {
+      setPlatformChecklists((prev) => {
+        const items = prev[platformId] ?? [];
+        const next = items.includes(item)
+          ? items.filter((i) => i !== item)
+          : [...items, item];
+        const updated = { ...prev, [platformId]: next };
+        persist(updated, universalChecklist, universalXpAwarded);
+        return updated;
+      });
+    },
+    [persist, universalChecklist, universalXpAwarded],
+  );
 
-  const handleRemoveSkillTag = (idx) => {
-    setGenSkillTags((prev) => prev.filter((_, i) => i !== idx));
-  };
+  /* ── Universal checklist toggle ── */
+  const toggleUniversalItem = useCallback(
+    (item) => {
+      setUniversalChecklist((prev) => {
+        const next = prev.includes(item)
+          ? prev.filter((i) => i !== item)
+          : [...prev, item];
 
-  const handleGenerateHeadlines = async () => {
-    if (!genPosition.trim() || !genTarget.trim()) return;
-    setGenLoading(true);
-    setGenHeadlines([]);
+        const allDone = next.length === UNIVERSAL_CHECKLIST.length;
+        let xpFlag = universalXpAwarded;
 
-    // Try API first; fall back to client-side generation
+        if (allDone && !universalXpAwarded) {
+          xpFlag = true;
+          setUniversalXpAwarded(true);
+          awardPoints(supabase, userId, 'COMPLETE_LESSON').then(() => {
+            showToast('+50 XP — Universelle Profil-Checkliste abgeschlossen!');
+          });
+        }
+
+        persist(platformChecklists, next, xpFlag);
+        return next;
+      });
+    },
+    [persist, platformChecklists, universalXpAwarded, userId, showToast, supabase],
+  );
+
+  /* ── Platform progress ── */
+  const getPlatformPercent = useCallback(
+    (platformId) => {
+      const p = PLATFORMS.find((x) => x.id === platformId);
+      if (!p) return 0;
+      const checked = (platformChecklists[platformId] ?? []).length;
+      return Math.round((checked / p.checklist.length) * 100);
+    },
+    [platformChecklists],
+  );
+
+  /* ── Universal progress ── */
+  const universalPercent = useMemo(
+    () =>
+      Math.round(
+        (universalChecklist.length / UNIVERSAL_CHECKLIST.length) * 100,
+      ),
+    [universalChecklist],
+  );
+
+  /* ── Headline Generator ── */
+  const generateHeadlines = useCallback(async () => {
+    setHlLoading(true);
+    setHlResults([]);
+    setCopiedIdx(null);
+
+    const skills = hlSkills.filter(Boolean);
+
     try {
-      const res = await fetch('/api/linkedin-optimize', {
+      const res = await fetch('/api/ai/headlines', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: `Aktuelle Position: ${genPosition}\nSkills: ${genSkillTags.join(', ')}\nZiel-Position: ${genTarget}`,
-          template_type: 'headline',
+          position: hlPosition,
+          skills,
+          target: hlTarget,
         }),
       });
+
       if (res.ok) {
         const data = await res.json();
-        // If the API returns headline suggestions directly
-        if (data.headlines && Array.isArray(data.headlines)) {
-          setGenHeadlines(data.headlines.slice(0, 5));
-          setGenLoading(false);
+        if (data.headlines?.length) {
+          setHlResults(data.headlines.slice(0, 5));
+          setHlLoading(false);
           return;
         }
-        // Otherwise parse from optimized_text as newlines
-        if (data.optimized_text) {
-          const lines = data.optimized_text.split('\n').map((l) => l.trim()).filter(Boolean);
-          if (lines.length >= 2) {
-            setGenHeadlines(lines.slice(0, 5));
-            setGenLoading(false);
-            return;
-          }
-        }
       }
-    } catch (_) {
-      // fall through to client-side
+    } catch {
+      /* fallback below */
     }
 
-    // Client-side fallback
-    const variations = generateHeadlineVariations(genPosition, genSkillTags, genTarget);
-    setGenHeadlines(variations);
-    setGenLoading(false);
-  };
+    const fallback = generateHeadlinesFallback(hlPosition, skills, hlTarget);
+    setHlResults(fallback);
+    setHlLoading(false);
+  }, [hlPosition, hlSkills, hlTarget]);
 
-  const handleCopyHeadline = (text, idx) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedIdx(idx);
-      showToast('Headline kopiert!');
-      setTimeout(() => setCopiedIdx(null), 2000);
-    });
-  };
-
-  // ---------------------------------------------------------------------------
-  // Profil-Checkliste
-  // ---------------------------------------------------------------------------
-  const checklistPercent = Math.round(
-    (Object.values(checklist).filter(Boolean).length / CHECKLIST_ITEMS.length) * 100
+  const copyToClipboard = useCallback(
+    (text, idx) => {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopiedIdx(idx);
+        showToast('In die Zwischenablage kopiert!');
+        setTimeout(() => setCopiedIdx(null), 2000);
+      });
+    },
+    [showToast],
   );
 
-  const handleChecklistToggle = async (id) => {
-    const newChecklist = { ...checklist, [id]: !checklist[id] };
-    setChecklist(newChecklist);
+  const updateSkill = useCallback((index, value) => {
+    setHlSkills((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
+  }, []);
 
-    // Award +50 XP once when profile reaches 100%
-    const allDone = Object.values(newChecklist).every(Boolean);
-    if (allDone && !checklistAwarded) {
-      setChecklistAwarded(true);
-      await awardPoints(supabase, userId, 'COMPLETE_LESSON'); // 50 XP
-      showToast('+50 XP für optimiertes Profil!');
-    }
-  };
+  /* ═══════════════════════════ RENDER ══════════════════════════════════ */
 
-  // ---------------------------------------------------------------------------
-  // SSI save handler
-  // ---------------------------------------------------------------------------
-  const handleSaveSsi = async () => {
-    const score = parseInt(ssiScore, 10);
-    if (isNaN(score) || score < 1 || score > 100) return;
-    setSsiSaving(true);
-    try {
-      const { data, error } = await supabase
-        .from('ssi_scores')
-        .insert({ user_id: userId, score, recorded_at: new Date().toISOString() })
-        .select()
-        .single();
-      if (!error && data) {
-        setSsiScores((prev) => [...prev, data].slice(-12));
-        setSsiScore('');
-        showToast('SSI-Score gespeichert!');
-      }
-    } catch (err) {
-      console.error(err);
-    }
-    setSsiSaving(false);
-  };
-
-  // ---------------------------------------------------------------------------
-  // Template editor
-  // ---------------------------------------------------------------------------
-  const handleTemplateClick = (template) => {
-    setActiveTemplate(template);
-    setEditorText(template.text);
-    setOptimizeResult(null);
-    setPostAwarded(false);
-    // scroll to editor
-    setTimeout(() => {
-      document.getElementById('template-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 80);
-  };
-
-  const handleOptimize = async () => {
-    if (!editorText.trim()) return;
-    setOptimizing(true);
-    setOptimizeResult(null);
-    try {
-      const res = await fetch('/api/linkedin-optimize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: editorText, template_type: activeTemplate?.id || 'general' }),
-      });
-      const data = await res.json();
-      setOptimizeResult(data);
-
-      // Award +20 XP for creating a post (once per template session)
-      if (!postAwarded) {
-        setPostAwarded(true);
-        await awardPoints(supabase, userId, 'CONTACT_ADDED'); // 20 XP
-        showToast('+20 XP für erstellten Post!');
-      }
-    } catch (err) {
-      console.error(err);
-    }
-    setOptimizing(false);
-  };
-
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
   return (
-    <div className="page-container" style={{ maxWidth: 720, position: 'relative' }}>
+    <div className="page-container">
+      {/* ── Toast ── */}
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
-      {/* Toast */}
-      {toast && (
-        <div style={{
-          position: 'fixed', top: 20, right: 20, zIndex: 9999,
-          background: toast.type === 'success' ? 'var(--ki-success)' : 'var(--ki-red)',
-          color: '#fff', padding: '10px 20px', borderRadius: 'var(--r-md)',
-          fontSize: 14, fontWeight: 600, boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-          animation: 'fadeIn 0.2s ease',
-        }}>
-          {toast.msg}
-        </div>
-      )}
+      {/* ═══════════ 1. HEADER ═══════════ */}
+      <header className="animate-in" style={{ marginBottom: 32 }}>
+        <h1
+          className="page-title"
+          style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+        >
+          Jobportale &amp; Plattformen
+          <InfoTooltip moduleId="branding" />
+        </h1>
+        <p className="page-subtitle">
+          Deine Präsenz auf den wichtigsten Karriere-Plattformen optimieren
+        </p>
+      </header>
 
-      <h1 className="page-title">Personal Branding <InfoTooltip moduleId="branding" profile={profile} /></h1>
-      <p style={{ color: 'var(--ki-text-secondary)', marginBottom: 32, fontSize: 15 }}>
-        Optimiere deine LinkedIn-Präsenz — werde gefunden statt zu suchen.
-      </p>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* 1. Headline Generator                                               */}
-      {/* ------------------------------------------------------------------ */}
-      <div className="card animate-in" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>🤖 Headline-Generator</h3>
-        <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
-          Gib deine aktuelle Position, bis zu 3 Skills und dein Ziel ein — KI generiert 5 Vorschläge.
+      {/* ═══════════ 2. WIR:PERSONALBERATER JOBPORTAL ═══════════ */}
+      <section
+        className="card animate-in"
+        style={{
+          borderLeft: '3px solid var(--ki-red)',
+          marginBottom: 32,
+          padding: 28,
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 20,
+            fontWeight: 700,
+            marginBottom: 8,
+            color: 'var(--ki-text)',
+          }}
+        >
+          🏢 Wir:Personalberater Jobportal
+        </h2>
+        <p
+          style={{
+            color: 'var(--ki-text-secondary)',
+            marginBottom: 20,
+            lineHeight: 1.6,
+          }}
+        >
+          Das exklusive Jobportal des Karriere-Instituts. Hier findest du
+          kuratierte Stellenangebote von unseren Partner-unternehmen.
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <input
-            className="input"
-            placeholder="Aktuelle Position (z.B. Projektmanager, Senior Developer)"
-            value={genPosition}
-            onChange={(e) => setGenPosition(e.target.value)}
-          />
-
-          {/* Skill Tags */}
-          <div>
-            <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-              <input
-                className="input"
-                placeholder={`Skill hinzufügen (${genSkillTags.length}/3)`}
-                value={genSkillInput}
-                onChange={(e) => setGenSkillInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddSkillTag()}
-                disabled={genSkillTags.length >= 3}
-                style={{ flex: 1 }}
-              />
-              <button
-                className="btn btn-secondary"
-                onClick={handleAddSkillTag}
-                disabled={!genSkillInput.trim() || genSkillTags.length >= 3}
-              >
-                + Tag
-              </button>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+            marginBottom: 24,
+          }}
+        >
+          {[
+            'Kuratierte Stellen',
+            'Direkter Kontakt zu Entscheidern',
+            'Karriere-Institut Mitglieder bevorzugt',
+          ].map((item) => (
+            <div
+              key={item}
+              style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+            >
+              <span style={{ color: 'var(--ki-success)', fontSize: 18 }}>
+                ✓
+              </span>
+              <span style={{ color: 'var(--ki-text)' }}>{item}</span>
             </div>
-            {genSkillTags.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {genSkillTags.map((tag, i) => (
-                  <span key={i} className="pill pill-grey" style={{ fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    {tag}
-                    <span onClick={() => handleRemoveSkillTag(i)} style={{ opacity: 0.6, fontWeight: 700, lineHeight: 1 }}>×</span>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <input
-            className="input"
-            placeholder="Ziel-Position (z.B. Head of Product, VP Engineering)"
-            value={genTarget}
-            onChange={(e) => setGenTarget(e.target.value)}
-          />
-
-          <button
-            className="btn btn-primary"
-            onClick={handleGenerateHeadlines}
-            disabled={genLoading || !genPosition.trim() || !genTarget.trim()}
-            style={{ width: '100%' }}
-          >
-            {genLoading ? 'Generiere Vorschläge...' : '🤖 Generieren'}
-          </button>
+          ))}
         </div>
 
-        {/* Headline Suggestions */}
-        {genHeadlines.length > 0 && (
-          <div style={{ marginTop: 20 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text-secondary)', marginBottom: 10 }}>
-              5 Headline-Vorschläge:
-            </div>
-            {genHeadlines.map((h, i) => (
+        <a
+          href="https://jobportal.wirpersonalberater.de/#/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn btn-primary"
+          style={{
+            fontSize: 16,
+            padding: '12px 28px',
+            display: 'inline-block',
+            textDecoration: 'none',
+          }}
+        >
+          Zum Jobportal →
+        </a>
+        <p
+          style={{
+            marginTop: 8,
+            fontSize: 12,
+            color: 'var(--ki-text-tertiary)',
+          }}
+        >
+          jobportal.wirpersonalberater.de
+        </p>
+      </section>
+
+      {/* ═══════════ 3. PROFIL-OPTIMIERUNG — 6 Platform Cards ═══════════ */}
+      <section className="animate-in" style={{ marginBottom: 40 }}>
+        <h2
+          style={{
+            fontSize: 18,
+            fontWeight: 700,
+            marginBottom: 16,
+            color: 'var(--ki-text)',
+          }}
+        >
+          Profil-Optimierung
+        </h2>
+
+        <div className="grid-3">
+          {PLATFORMS.map((platform) => {
+            const isOpen = expandedPlatform === platform.id;
+            const checked = platformChecklists[platform.id] ?? [];
+            const percent = getPlatformPercent(platform.id);
+
+            return (
               <div
-                key={i}
+                key={platform.id}
+                className="card"
                 style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-                  padding: '12px 14px', marginBottom: 8, borderRadius: 'var(--r-md)',
-                  background: i === 0 ? 'rgba(204,20,38,0.05)' : 'var(--ki-bg-alt)',
-                  border: i === 0 ? '1px solid rgba(204,20,38,0.2)' : '1px solid var(--ki-border)',
+                  borderTop: `3px solid ${platform.color}`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0,
+                  overflow: 'hidden',
+                  transition: 'all 0.3s ease',
                 }}
               >
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  {i === 0 && <span className="pill pill-red" style={{ fontSize: 10, flexShrink: 0 }}>TOP</span>}
-                  <span style={{ fontSize: 14, fontWeight: i === 0 ? 600 : 400, lineHeight: 1.4 }}>{h}</span>
+                {/* Card Header */}
+                <div style={{ padding: 20, paddingBottom: isOpen ? 12 : 20 }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: 8,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                      }}
+                    >
+                      <span style={{ fontSize: 20 }}>{platform.icon}</span>
+                      <h3
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 700,
+                          color: 'var(--ki-text)',
+                          margin: 0,
+                        }}
+                      >
+                        {platform.name}
+                      </h3>
+                    </div>
+                    <span
+                      className={`pill ${
+                        percent === 100
+                          ? 'pill-green'
+                          : percent > 0
+                            ? 'pill-grey'
+                            : 'pill-red'
+                      }`}
+                    >
+                      {percent}%
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <button
+                      className="btn btn-ghost"
+                      style={{ fontSize: 13, padding: '4px 10px' }}
+                      onClick={() =>
+                        setExpandedPlatform(isOpen ? null : platform.id)
+                      }
+                    >
+                      {isOpen ? 'Schließen' : 'Checkliste öffnen'}
+                    </button>
+                    <a
+                      href={platform.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-ghost"
+                      style={{
+                        fontSize: 13,
+                        padding: '4px 10px',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      Profil öffnen →
+                    </a>
+                  </div>
+                </div>
+
+                {/* Expandable Content */}
+                {isOpen && (
+                  <div
+                    style={{
+                      borderTop: '1px solid var(--ki-border)',
+                      padding: 20,
+                      background: 'var(--ki-bg-alt)',
+                      animation: 'fadeIn 0.25s ease',
+                    }}
+                  >
+                    {/* Checklist */}
+                    <h4
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: 'var(--ki-text-secondary)',
+                        marginBottom: 10,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                      }}
+                    >
+                      Checkliste
+                    </h4>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 6,
+                        marginBottom: 20,
+                      }}
+                    >
+                      {platform.checklist.map((item) => {
+                        const isChecked = checked.includes(item);
+                        return (
+                          <label
+                            key={item}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: 8,
+                              cursor: 'pointer',
+                              fontSize: 14,
+                              color: isChecked
+                                ? 'var(--ki-text-tertiary)'
+                                : 'var(--ki-text)',
+                              textDecoration: isChecked
+                                ? 'line-through'
+                                : 'none',
+                              transition: 'color 0.2s ease',
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() =>
+                                togglePlatformItem(platform.id, item)
+                              }
+                              style={{
+                                marginTop: 2,
+                                accentColor: platform.color,
+                                cursor: 'pointer',
+                              }}
+                            />
+                            {item}
+                          </label>
+                        );
+                      })}
+                    </div>
+
+                    {/* Tips */}
+                    <h4
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: 'var(--ki-text-secondary)',
+                        marginBottom: 10,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                      }}
+                    >
+                      Tipps
+                    </h4>
+                    <ul
+                      style={{
+                        margin: 0,
+                        paddingLeft: 18,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 6,
+                      }}
+                    >
+                      {platform.tips.map((tip) => (
+                        <li
+                          key={tip}
+                          style={{
+                            fontSize: 13,
+                            color: 'var(--ki-text-secondary)',
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ═══════════ 4. LINKEDIN HEADLINE-GENERATOR ═══════════ */}
+      <section
+        className="card animate-in"
+        style={{ marginBottom: 32, padding: 28 }}
+      >
+        <h2
+          style={{
+            fontSize: 18,
+            fontWeight: 700,
+            marginBottom: 4,
+            color: 'var(--ki-text)',
+          }}
+        >
+          LinkedIn Headline-Generator
+        </h2>
+        <p
+          style={{
+            color: 'var(--ki-text-secondary)',
+            marginBottom: 20,
+            fontSize: 14,
+          }}
+        >
+          Erstelle eine optimierte Headline für dein LinkedIn-Profil.
+        </p>
+
+        <div className="grid-2" style={{ marginBottom: 16 }}>
+          <div>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--ki-text-secondary)',
+                marginBottom: 6,
+              }}
+            >
+              Aktuelle Position
+            </label>
+            <input
+              className="input"
+              type="text"
+              placeholder="z.B. Marketing Manager"
+              value={hlPosition}
+              onChange={(e) => setHlPosition(e.target.value)}
+              style={{ width: '100%' }}
+            />
+          </div>
+          <div>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--ki-text-secondary)',
+                marginBottom: 6,
+              }}
+            >
+              Ziel-Position
+            </label>
+            <input
+              className="input"
+              type="text"
+              placeholder="z.B. Head of Marketing"
+              value={hlTarget}
+              onChange={(e) => setHlTarget(e.target.value)}
+              style={{ width: '100%' }}
+            />
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--ki-text-secondary)',
+              marginBottom: 6,
+            }}
+          >
+            Top 3 Skills
+          </label>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {hlSkills.map((skill, idx) => (
+              <input
+                key={idx}
+                className="input"
+                type="text"
+                placeholder={`Skill ${idx + 1}`}
+                value={skill}
+                onChange={(e) => updateSkill(idx, e.target.value)}
+                style={{ flex: '1 1 150px', minWidth: 120 }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <button
+          className="btn btn-primary"
+          onClick={generateHeadlines}
+          disabled={hlLoading}
+          style={{ marginBottom: 20 }}
+        >
+          {hlLoading ? 'Generiere...' : 'Headlines generieren'}
+        </button>
+
+        {hlResults.length > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+            }}
+          >
+            {hlResults.map((headline, idx) => (
+              <div
+                key={idx}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  padding: '12px 16px',
+                  background:
+                    idx === 0
+                      ? 'rgba(204,20,38,0.05)'
+                      : 'var(--ki-bg-alt)',
+                  borderRadius: 'var(--r-md)',
+                  border:
+                    idx === 0
+                      ? '1px solid rgba(204,20,38,0.2)'
+                      : '1px solid var(--ki-border)',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    flex: 1,
+                  }}
+                >
+                  {idx === 0 && (
+                    <span
+                      className="pill pill-red"
+                      style={{ fontSize: 10, flexShrink: 0 }}
+                    >
+                      TOP
+                    </span>
+                  )}
+                  <span
+                    style={{
+                      fontSize: 14,
+                      color: 'var(--ki-text)',
+                      lineHeight: 1.5,
+                      fontWeight: idx === 0 ? 600 : 400,
+                    }}
+                  >
+                    {headline}
+                  </span>
                 </div>
                 <button
-                  className="btn btn-ghost"
-                  onClick={() => handleCopyHeadline(h, i)}
-                  style={{ fontSize: 12, flexShrink: 0, color: copiedIdx === i ? 'var(--ki-success)' : undefined }}
+                  className="btn btn-secondary"
+                  style={{
+                    fontSize: 12,
+                    padding: '4px 12px',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                  onClick={() => copyToClipboard(headline, idx)}
                 >
-                  {copiedIdx === i ? '✓ Kopiert' : 'Kopieren'}
+                  {copiedIdx === idx ? '✓ Kopiert' : 'Kopieren'}
                 </button>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* 2. Profil-Checkliste                                                */}
-      {/* ------------------------------------------------------------------ */}
-      <div className="card animate-in" style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 24 }}>
-          <div style={{ flex: 1 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Profil-Checkliste</h3>
-            <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
-              Hake ab, was du bereits optimiert hast. 100% = +50 XP.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {CHECKLIST_ITEMS.map((item) => (
-                <label
-                  key={item.id}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
-                    padding: '10px 14px', borderRadius: 'var(--r-md)',
-                    background: checklist[item.id] ? 'rgba(34,197,94,0.07)' : 'var(--ki-bg-alt)',
-                    border: checklist[item.id] ? '1px solid rgba(34,197,94,0.25)' : '1px solid var(--ki-border)',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onClick={() => handleChecklistToggle(item.id)}
-                >
-                  <div style={{
-                    width: 20, height: 20, borderRadius: 5, flexShrink: 0,
-                    border: checklist[item.id] ? '2px solid var(--ki-success)' : '2px solid var(--ki-border)',
-                    background: checklist[item.id] ? 'var(--ki-success)' : 'transparent',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    transition: 'all 0.15s ease',
-                  }}>
-                    {checklist[item.id] && (
-                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                        <polyline points="2,6 5,9 10,3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </div>
-                  <span style={{
-                    fontSize: 14,
-                    color: checklist[item.id] ? 'var(--ki-success)' : 'var(--ki-text)',
-                    textDecoration: checklist[item.id] ? 'line-through' : 'none',
-                    fontWeight: checklist[item.id] ? 400 : 500,
-                    transition: 'color 0.2s ease',
-                  }}>
-                    {item.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Progress Ring */}
-          <div style={{ flexShrink: 0, paddingTop: 8 }}>
-            <ProfileRing percent={checklistPercent} size={140} />
-            <div style={{ textAlign: 'center', marginTop: 6, fontSize: 12, color: 'var(--ki-text-secondary)' }}>
-              {Object.values(checklist).filter(Boolean).length}/{CHECKLIST_ITEMS.length} erledigt
-            </div>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div style={{ marginTop: 16 }}>
-          <div className="progress-bar" style={{ background: 'var(--ki-bg-alt)', borderRadius: 99, overflow: 'hidden', height: 6 }}>
-            <div style={{
-              height: '100%', width: `${checklistPercent}%`,
-              background: checklistPercent === 100 ? 'var(--ki-success)' : checklistPercent >= 50 ? 'var(--ki-warning)' : 'var(--ki-red)',
-              borderRadius: 99, transition: 'width 0.5s ease',
-            }} />
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginTop: 6, textAlign: 'right' }}>
-            {checklistPercent === 100
-              ? '🎉 Profil vollständig optimiert! +50 XP erhalten.'
-              : checklistPercent >= 50
-              ? 'Gut — weiter optimieren!'
-              : 'Noch viel Potenzial — hake weitere Punkte ab.'}
-          </div>
-        </div>
-      </div>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* 3. LinkedIn Profil-Analyse (existing)                              */}
-      {/* ------------------------------------------------------------------ */}
-      <div className="card animate-in" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Profil-Analyse (KI)</h3>
-        <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
-          KI analysiert dein Profil und gibt dir einen Sichtbarkeits-Score + Feedback.
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <input
-            className="input"
-            placeholder="LinkedIn-URL (z.B. linkedin.com/in/dein-name)"
-            value={linkedinUrl}
-            onChange={(e) => setLinkedinUrl(e.target.value)}
-          />
-          <input
-            className="input"
-            placeholder="Aktuelle Headline (z.B. 'Projektmanager bei Firma X')"
-            value={headline}
-            onChange={(e) => setHeadline(e.target.value)}
-          />
-          <button
-            className="btn btn-primary"
-            onClick={handleAnalyze}
-            disabled={analyzing || !headline}
-            style={{ width: '100%' }}
-          >
-            {analyzing ? 'KI analysiert...' : 'Profil analysieren & optimieren'}
-          </button>
-        </div>
-      </div>
-
-      {/* Visibility Score + Feedback */}
-      {visScore !== null && (
-        <div className="grid-2" style={{ marginBottom: 24 }}>
-          <div className="card animate-in" style={{ textAlign: 'center', padding: 24 }}>
-            <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Sichtbarkeits-Score
-            </div>
-            <ScoreRing score={visScore} />
-            <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 8 }}>
-              {visScore >= 70 ? 'Stark — du wirst gefunden!' : visScore >= 40 ? 'Ausbaufähig — Potenzial vorhanden' : 'Unsichtbar — dringend optimieren'}
-            </div>
-          </div>
-          <div className="card animate-in">
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text-secondary)', marginBottom: 12 }}>KI-Feedback</div>
-            <p style={{ fontSize: 14, lineHeight: 1.6 }}>{feedback}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Headline Suggestions from analysis */}
-      {existingSuggestions.length > 0 && (
-        <div className="card animate-in" style={{ marginBottom: 24 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Headline-Vorschläge (Analyse)</h3>
-          <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 12 }}>
-            Aktuell: <span style={{ textDecoration: 'line-through' }}>{headline}</span>
-          </div>
-          {existingSuggestions.map((s, i) => (
-            <div key={i} style={{
-              padding: 12, borderRadius: 'var(--r-md)', marginBottom: 8,
-              background: i === 0 ? 'rgba(204,20,38,0.04)' : 'var(--ki-bg-alt)',
-              border: i === 0 ? '1px solid rgba(204,20,38,0.15)' : '1px solid transparent',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {i === 0 && <span className="pill pill-red" style={{ fontSize: 10 }}>TOP</span>}
-                <span style={{ fontSize: 15, fontWeight: i === 0 ? 600 : 400 }}>{s}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Content Ideas */}
-      {contentIdeas.length > 0 && (
-        <div className="card animate-in" style={{ marginBottom: 24 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Content-Ideen für diese Woche</h3>
-          <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 12 }}>
-            Poste regelmäßig, um deine Expertise sichtbar zu machen.
-          </p>
-          {contentIdeas.map((idea, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderBottom: '1px solid var(--ki-border)' }}>
-              <span style={{ color: 'var(--ki-red)', fontWeight: 700, fontSize: 14, minWidth: 20 }}>{i + 1}</span>
-              <span style={{ fontSize: 14 }}>{idea}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ------------------------------------------------------------------ */}
-      {/* 4. Post-Templates                                                   */}
-      {/* ------------------------------------------------------------------ */}
-      <div className="card animate-in" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Post-Templates</h3>
-        <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
-          Wähle ein Template und erstelle deinen nächsten LinkedIn-Post. +20 XP pro KI-Optimierung.
-        </p>
-        <div className="grid-3" style={{ gap: 12 }}>
-          {POST_TEMPLATES.map((t) => (
-            <div
-              key={t.id}
-              className="card"
-              onClick={() => handleTemplateClick(t)}
+      {/* ═══════════ 5. UNIVERSELLE PROFIL-CHECKLISTE ═══════════ */}
+      <section className="card animate-in" style={{ padding: 28 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 20,
+            flexWrap: 'wrap',
+            gap: 16,
+          }}
+        >
+          <div>
+            <h2
               style={{
-                cursor: 'pointer', padding: 16, textAlign: 'center',
-                border: activeTemplate?.id === t.id ? `2px solid ${t.color}` : '1px solid var(--ki-border)',
-                transition: 'border-color 0.2s, transform 0.15s',
+                fontSize: 18,
+                fontWeight: 700,
+                marginBottom: 4,
+                color: 'var(--ki-text)',
               }}
             >
-              <div style={{ fontSize: 28, marginBottom: 8 }}>{t.icon}</div>
-              <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{t.title}</div>
-              <div style={{ fontSize: 11, color: 'var(--ki-text-secondary)' }}>{t.subtitle}</div>
-            </div>
-          ))}
+              Universelle Profil-Checkliste
+            </h2>
+            <p
+              style={{
+                color: 'var(--ki-text-secondary)',
+                fontSize: 14,
+                margin: 0,
+              }}
+            >
+              Diese Punkte gelten für <strong>alle</strong> Plattformen.
+              {!universalXpAwarded && (
+                <span style={{ color: 'var(--ki-warning)', marginLeft: 6 }}>
+                  +50 XP bei 100%
+                </span>
+              )}
+              {universalXpAwarded && (
+                <span style={{ color: 'var(--ki-success)', marginLeft: 6 }}>
+                  ✓ +50 XP erhalten
+                </span>
+              )}
+            </p>
+          </div>
+          <ProgressRing percent={universalPercent} />
         </div>
-      </div>
 
-      {/* Template Editor */}
-      {activeTemplate && (
-        <div id="template-editor" className="card animate-in" style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700 }}>
-              {activeTemplate.icon} {activeTemplate.title}
-            </h3>
-            <button
-              className="btn btn-ghost"
-              onClick={() => { setActiveTemplate(null); setOptimizeResult(null); }}
-              style={{ fontSize: 13 }}
-            >
-              Schließen
-            </button>
-          </div>
-          <textarea
-            className="input"
-            value={editorText}
-            onChange={(e) => setEditorText(e.target.value)}
-            rows={12}
-            style={{ width: '100%', resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}
-          />
-          <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-            <button
-              className="btn btn-primary"
-              onClick={handleOptimize}
-              disabled={optimizing || !editorText.trim()}
-            >
-              {optimizing ? 'KI optimiert...' : '🤖 KI verbessern'}
-            </button>
-            <button
-              className="btn btn-secondary"
-              onClick={() => {
-                navigator.clipboard.writeText(optimizeResult?.optimized_text || editorText);
-                showToast('Post kopiert!');
-              }}
-            >
-              Kopieren
-            </button>
-          </div>
-
-          {optimizeResult && (
-            <div style={{ marginTop: 20 }}>
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text-secondary)', marginBottom: 6 }}>Optimierter Text</div>
-                <div className="card" style={{ padding: 16, background: 'var(--ki-bg-alt)', whiteSpace: 'pre-wrap', fontSize: 14, lineHeight: 1.7 }}>
-                  {optimizeResult.optimized_text}
-                </div>
-              </div>
-
-              {optimizeResult.hook_suggestion && (
-                <div style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text-secondary)', marginBottom: 6 }}>Hook-Vorschlag (erste Zeile)</div>
-                  <div className="card" style={{ padding: 12, background: 'rgba(204,20,38,0.04)', border: '1px solid rgba(204,20,38,0.15)', fontSize: 14, fontWeight: 500 }}>
-                    {optimizeResult.hook_suggestion}
-                  </div>
-                </div>
-              )}
-
-              {optimizeResult.hashtags?.length > 0 && (
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text-secondary)', marginBottom: 6 }}>Empfohlene Hashtags</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {optimizeResult.hashtags.map((tag, i) => (
-                      <span key={i} className="pill pill-grey" style={{ fontSize: 12 }}>{tag}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <button
-                className="btn btn-secondary"
-                style={{ marginTop: 12 }}
-                onClick={() => setEditorText(optimizeResult.optimized_text)}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}
+        >
+          {UNIVERSAL_CHECKLIST.map((item) => {
+            const isChecked = universalChecklist.includes(item);
+            return (
+              <label
+                key={item}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 14px',
+                  borderRadius: 'var(--r-md)',
+                  background: isChecked
+                    ? 'var(--ki-bg-alt)'
+                    : 'transparent',
+                  border: '1px solid var(--ki-border)',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s ease',
+                  color: isChecked
+                    ? 'var(--ki-text-tertiary)'
+                    : 'var(--ki-text)',
+                  textDecoration: isChecked ? 'line-through' : 'none',
+                }}
               >
-                Optimierten Text übernehmen
-              </button>
-            </div>
-          )}
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={() => toggleUniversalItem(item)}
+                  style={{
+                    accentColor: 'var(--ki-red)',
+                    cursor: 'pointer',
+                    width: 16,
+                    height: 16,
+                  }}
+                />
+                <span style={{ fontSize: 14 }}>{item}</span>
+              </label>
+            );
+          })}
         </div>
-      )}
 
-      {/* ------------------------------------------------------------------ */}
-      {/* 5. SSI Score Tracker                                                */}
-      {/* ------------------------------------------------------------------ */}
-      <div className="card animate-in" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>SSI Score Tracker</h3>
-        <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
-          Tracke deinen LinkedIn Social Selling Index (1–100) über die letzten 12 Wochen.{' '}
-          <a
-            href="https://www.linkedin.com/sales/ssi"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: 'var(--ki-red)', textDecoration: 'underline' }}
+        {universalPercent === 100 && (
+          <div
+            style={{
+              marginTop: 20,
+              padding: '14px 18px',
+              borderRadius: 'var(--r-md)',
+              background: 'var(--ki-bg-alt)',
+              border: '1px solid var(--ki-success)',
+              textAlign: 'center',
+              color: 'var(--ki-success)',
+              fontWeight: 600,
+              fontSize: 14,
+            }}
           >
-            Meinen SSI-Score herausfinden →
-          </a>
-        </p>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-          <input
-            className="input"
-            type="number"
-            min="1" max="100"
-            placeholder="SSI Score (1–100)"
-            value={ssiScore}
-            onChange={(e) => setSsiScore(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSaveSsi()}
-            style={{ flex: 1 }}
-          />
-          <button
-            className="btn btn-primary"
-            onClick={handleSaveSsi}
-            disabled={ssiSaving || !ssiScore}
-          >
-            {ssiSaving ? 'Speichern...' : 'Eintragen'}
-          </button>
-        </div>
-        <SsiChart scores={ssiScores} />
-      </div>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* 6. Video Placeholder                                                */}
-      {/* ------------------------------------------------------------------ */}
-      <div className="card animate-in" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>🎬 LinkedIn-Profil in 30 Minuten optimieren</h3>
-        <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
-          Schritt-für-Schritt Anleitung von unserem Karriere-Coach.
-        </p>
-        <div style={{
-          background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-lg)',
-          aspectRatio: '16/9', display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', gap: 12,
-          border: '2px dashed var(--ki-border)',
-        }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: '50%',
-            background: 'var(--ki-red)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer',
-          }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
-              <polygon points="5,3 19,12 5,21" />
-            </svg>
+            Alle Punkte abgeschlossen — dein Profil ist optimal aufgestellt!
           </div>
-          <div style={{ fontSize: 14, color: 'var(--ki-text-secondary)', fontWeight: 500 }}>
-            Video kommt bald
-          </div>
-          <span className="pill pill-grey" style={{ fontSize: 11 }}>ca. 30 Minuten</span>
-        </div>
-      </div>
-
+        )}
+      </section>
     </div>
   );
 }

@@ -1,25 +1,22 @@
 'use client';
+
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { marketValueProgress } from '@/lib/career-logic';
-import { awardPoints } from '@/lib/gamification';
 import InfoTooltip from '@/components/ui/InfoTooltip';
-import EmptyState from '@/components/ui/EmptyState';
 
-// CountUp animation hook
+/* ───────────────────────── useCountUp ───────────────────────── */
 function useCountUp(target, duration = 1500) {
   const [value, setValue] = useState(0);
   const ref = useRef(null);
   useEffect(() => {
     if (ref.current) cancelAnimationFrame(ref.current);
     const start = performance.now();
-    const from = 0;
     const animate = (now) => {
       const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
-      setValue(Math.round(from + (target - from) * eased));
-      if (progress < 1) ref.current = requestAnimationFrame(animate);
+      const p = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setValue(Math.round(target * eased));
+      if (p < 1) ref.current = requestAnimationFrame(animate);
     };
     ref.current = requestAnimationFrame(animate);
     return () => { if (ref.current) cancelAnimationFrame(ref.current); };
@@ -27,359 +24,473 @@ function useCountUp(target, duration = 1500) {
   return value;
 }
 
-// Simple SVG Area Chart
-function AreaChart({ data, width = 600, height = 200 }) {
-  if (!data || data.length < 2) return <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ki-text-tertiary)', fontSize: 14 }}>Noch keine Verlaufsdaten</div>;
-  const values = data.map(d => d.total_value || d.base_value || 0);
-  const min = Math.min(...values) * 0.95;
-  const max = Math.max(...values) * 1.05;
-  const range = max - min || 1;
-  const px = 40, py = 20;
-  const cw = width - px * 2, ch = height - py * 2;
-  const points = values.map((v, i) => ({
-    x: px + (i / (values.length - 1)) * cw,
-    y: py + ch - ((v - min) / range) * ch,
-  }));
-  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
-  const areaPath = `${linePath} L${points[points.length - 1].x},${height - py} L${points[0].x},${height - py} Z`;
+/* ───────────────────── Score-Berechnung ─────────────────────── */
+function calculateMarktwertScore(progress, courses) {
+  let score = 0;
+
+  // Karriere-Analyse abgeschlossen: check if any lesson_progress exists
+  const hasAnalysis = (progress || []).length > 0;
+  if (hasAnalysis) score += 20;
+
+  // E-Learning Zertifikate (je 10%, max 6)
+  const completedCourses = (courses || []).filter(c => {
+    const totalLessons = (c.modules || []).reduce((s, m) => s + (m.lessons?.length || 0), 0);
+    if (totalLessons === 0) return false;
+    const completedLessons = (progress || []).filter(p =>
+      (c.modules || []).some(m => (m.lessons || []).some(l => l.id === p.lesson_id))
+    ).length;
+    return completedLessons >= totalLessons;
+  });
+
+  const completedCount = Math.min(completedCourses.length, 6);
+  score += completedCount * 10;
+
+  // Bonus: Alle 6 E-Learnings komplett
+  if (completedCount >= 6) score += 10;
+
+  return Math.min(score, 100);
+}
+
+/* ──────────────── Zertifikats-Definitionen ──────────────────── */
+const CERTIFICATES = [
+  { key: 'kommunikation',   label: 'Kommunikation',           type: 'elearning' },
+  { key: 'networking',      label: 'Networking',               type: 'elearning' },
+  { key: 'karriereanalyse', label: 'Karriere-Analyse',         type: 'analyse'   },
+  { key: 'prioritaeten',    label: 'Prioritätenmanagement',    type: 'elearning' },
+  { key: 'speedreading',    label: 'Speedreading',             type: 'elearning' },
+  { key: 'worklife',        label: 'Work-Life-Balance',        type: 'elearning' },
+  { key: 'typgerecht',      label: 'Typgerechtes Lernen',      type: 'elearning' },
+  { key: 'strukturgramm',   label: 'Strukturgramm®',           type: 'premium'   },
+  { key: 'insights',        label: 'INSIGHTS MDI® EQ',         type: 'premium'   },
+];
+
+/* ────────────── Score-Breakdown Definitionen ────────────────── */
+const SCORE_BREAKDOWN = [
+  { label: 'Karriere-Analyse abgeschlossen', value: '+20%',       key: 'analyse'       },
+  { label: 'Pro E-Learning Zertifikat',      value: '+10%',       key: 'elearning'     },
+  { label: 'Strukturgramm®',                 value: '+15%',       key: 'strukturgramm' },
+  { label: 'INSIGHTS MDI® EQ',              value: '+15%',       key: 'insights'      },
+  { label: 'Alle 6 E-Learnings komplett',    value: '+10% Bonus', key: 'bonus'         },
+  { label: 'Maximaler Score',               value: '100%',       key: 'max'           },
+];
+
+/* ───────────────────── SVG Progress Ring ────────────────────── */
+function ScoreRing({ score, size = 200, stroke = 10 }) {
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (score / 100) * circumference;
+
+  const color = score >= 60
+    ? 'var(--ki-success)'
+    : score >= 30
+      ? 'var(--ki-warning)'
+      : 'var(--ki-red)';
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%' }}>
-      <defs>
-        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--ki-red)" stopOpacity="0.15" />
-          <stop offset="100%" stopColor="var(--ki-red)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      {/* Grid lines */}
-      {[0, 0.25, 0.5, 0.75, 1].map(pct => {
-        const y = py + ch * (1 - pct);
-        const val = min + range * pct;
-        return (
-          <g key={pct}>
-            <line x1={px} y1={y} x2={width - px} y2={y} stroke="var(--grey-5)" strokeWidth="0.5" />
-            <text x={px - 8} y={y + 4} textAnchor="end" style={{ fontSize: 10, fill: 'var(--ki-text-tertiary)', fontFamily: 'Instrument Sans' }}>
-              €{Math.round(val / 1000)}k
-            </text>
-          </g>
-        );
-      })}
-      <path d={areaPath} fill="url(#areaGrad)" />
-      <path d={linePath} fill="none" stroke="var(--ki-red)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      {points.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="3" fill="var(--ki-red)" opacity={i === points.length - 1 ? 1 : 0} />
-      ))}
-      {/* Date labels */}
-      {data.filter((_, i) => i === 0 || i === data.length - 1 || i === Math.floor(data.length / 2)).map((d, i) => {
-        const idx = i === 0 ? 0 : i === 1 ? Math.floor(data.length / 2) : data.length - 1;
-        return (
-          <text key={idx} x={points[idx]?.x} y={height - 4} textAnchor="middle"
-            style={{ fontSize: 10, fill: 'var(--ki-text-tertiary)', fontFamily: 'Instrument Sans' }}>
-            {new Date(data[idx]?.date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short' })}
-          </text>
-        );
-      })}
+    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke="var(--ki-border)"
+        strokeWidth={stroke}
+      />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke={color}
+        strokeWidth={stroke}
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.22, 1, 0.36, 1)' }}
+      />
     </svg>
   );
 }
 
-// Industry comparison data
-const INDUSTRY_BENCHMARKS = {
-  it:          { label: 'IT/Tech',      avg: 72000, top: 110000 },
-  finance:     { label: 'Finance',      avg: 68000, top: 100000 },
-  consulting:  { label: 'Consulting',   avg: 65000, top: 95000  },
-  marketing:   { label: 'Marketing',    avg: 52000, top: 80000  },
-  industry:    { label: 'Industrie',    avg: 58000, top: 85000  },
-  healthcare:  { label: 'Healthcare',   avg: 55000, top: 82000  },
-  legal:       { label: 'Recht',        avg: 62000, top: 90000  },
-  other:       { label: 'Sonstiges',    avg: 54000, top: 78000  },
-};
-
+/* ════════════════════════ HAUPTKOMPONENTE ════════════════════ */
 export default function MarktwertClient({ profile, log, progress, courses, userId }) {
-  const supabase = createClient();
-  const baseSalary = profile?.current_salary || 50000;
-  const targetSalary = profile?.target_salary || 120000;
-  const skillBonus = (progress || []).reduce((s, p) => s + (p.lessons?.market_value_impact || 0), 0);
-  const currentValue = baseSalary + skillBonus;
-  const gap = targetSalary - currentValue;
-  const pct = marketValueProgress(currentValue, baseSalary, targetSalary);
-  const animatedValue = useCountUp(currentValue, 2000);
-  const [editSalary, setEditSalary] = useState(false);
-  const [salaryForm, setSalaryForm] = useState({ current: baseSalary, target: targetSalary });
-  const [appCount, setAppCount] = useState(0);
+  const score = calculateMarktwertScore(progress, courses);
+  const animatedScore = useCountUp(score, 1800);
 
-  const totalPotential = (courses || []).reduce((s, c) => s + (c.market_value_impact || 0), 0);
-  const remainingPotential = totalPotential - skillBonus;
-
-  // Total lessons across all courses for masterclass progress
-  const totalLessons = (courses || []).reduce((s, c) =>
-    s + (c.modules || []).reduce((ms, m) => ms + (m.lessons?.length || 0), 0), 0);
-  const completedLessons = (progress || []).length;
-  const masterclassPct = totalLessons > 0 ? Math.min(100, Math.round((completedLessons / totalLessons) * 100)) : 0;
-
-  // Analyse done = at least one market_value_log entry exists
-  const analyseDone = (log || []).length > 0;
-
-  // Industry comparison
-  const industryKey = profile?.industry || 'other';
-  const benchmark = INDUSTRY_BENCHMARKS[industryKey] || INDUSTRY_BENCHMARKS.other;
-  const comparisonMax = Math.max(currentValue, benchmark.avg, benchmark.top) * 1.05;
-
-  // Award +75 XP on first marktwert page visit
-  useEffect(() => {
-    const key = `marktwert_visited_${userId}`;
-    if (typeof window !== 'undefined' && !localStorage.getItem(key)) {
-      localStorage.setItem(key, '1');
-      awardPoints(supabase, userId, 'VALUE_ASSESSMENT');
+  /* ── Welche Zertifikate hat der User? ── */
+  const completedCourseKeys = new Set();
+  (courses || []).forEach(c => {
+    const totalLessons = (c.modules || []).reduce((s, m) => s + (m.lessons?.length || 0), 0);
+    if (totalLessons === 0) return;
+    const completedLessons = (progress || []).filter(p =>
+      (c.modules || []).some(m => (m.lessons || []).some(l => l.id === p.lesson_id))
+    ).length;
+    if (completedLessons >= totalLessons && c.slug) {
+      completedCourseKeys.add(c.slug);
     }
-  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
+  });
 
-  // Fetch application count client-side
-  useEffect(() => {
-    if (!userId) return;
-    supabase.from('applications').select('id', { count: 'exact', head: true }).eq('user_id', userId)
-      .then(({ count }) => setAppCount(count || 0));
-  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const hasAnalysis = (progress || []).length > 0;
+  const completedELearningCount = CERTIFICATES
+    .filter(cert => cert.type === 'elearning' && completedCourseKeys.has(cert.key))
+    .length;
+  const allSixComplete = completedELearningCount >= 6;
 
-  // Save salary settings
-  const saveSalary = async () => {
-    await supabase.from('profiles').update({
-      current_salary: salaryForm.current, target_salary: salaryForm.target,
-    }).eq('id', userId);
-    setEditSalary(false);
-    window.location.reload();
-  };
+  function isCertCompleted(cert) {
+    if (cert.type === 'analyse') return hasAnalysis;
+    if (cert.type === 'elearning') return completedCourseKeys.has(cert.key);
+    if (cert.key === 'strukturgramm') return !!profile?.strukturgramm_done;
+    if (cert.key === 'insights') return !!profile?.insights_done;
+    return false;
+  }
 
+  function isBreakdownAchieved(item) {
+    switch (item.key) {
+      case 'analyse':       return hasAnalysis;
+      case 'elearning':     return completedELearningCount > 0;
+      case 'strukturgramm': return !!profile?.strukturgramm_done;
+      case 'insights':      return !!profile?.insights_done;
+      case 'bonus':         return allSixComplete;
+      case 'max':           return score >= 100;
+      default:              return false;
+    }
+  }
+
+  const scoreColor = score >= 60
+    ? 'var(--ki-success)'
+    : score >= 30
+      ? 'var(--ki-warning)'
+      : 'var(--ki-red)';
+
+  /* ────────────────────── RENDER ─────────────────────────── */
   return (
     <div className="page-container">
-      <h1 className="page-title">Dein Marktwert</h1><InfoTooltip moduleId="marktwert" profile={profile} />
-      <p className="page-subtitle" style={{ marginBottom: 32 }}>Jede Lektion steigert deinen Wert</p>
 
-      {/* Hero Value */}
-      <div className="card animate-in" style={{ textAlign: 'center', padding: 40, marginBottom: 24 }}>
-        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
-          Aktueller Marktwert
-        </div>
-        <div style={{ fontSize: 56, fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--ki-text)' }}>
-          €{animatedValue.toLocaleString('de-DE')}
-        </div>
-        <div style={{ marginTop: 8 }}>
-          {gap > 0 ? (
-            <span className="pill pill-red">Noch €{Math.round(gap).toLocaleString('de-DE')} bis €{targetSalary.toLocaleString('de-DE')}</span>
-          ) : (
-            <span className="pill pill-green">Ziel erreicht!</span>
-          )}
-        </div>
-      </div>
+      {/* ═══ 1. HEADER ═══ */}
+      <header className="animate-in" style={{ marginBottom: '2rem' }}>
+        <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+          Dein Marktwert
+          <InfoTooltip moduleId="marktwert" />
+        </h1>
+        <p className="page-subtitle">Entscheider erkennen deine Qualifikation</p>
+      </header>
 
-      <div className="grid-2" style={{ marginBottom: 24 }}>
-        {/* Gap Bar */}
-        <div className="card animate-in">
-          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Gehaltslücke</h3>
-          <div style={{ position: 'relative', height: 32, background: 'var(--grey-6)', borderRadius: 'var(--r-pill)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg, var(--ki-red), var(--ki-success))`, borderRadius: 'var(--r-pill)', transition: 'width 1s var(--ease-apple)' }} />
-            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', fontSize: 13, fontWeight: 700, color: pct > 50 ? 'white' : 'var(--ki-text)' }}>
-              {pct}%
-            </div>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--ki-text-secondary)', marginTop: 8 }}>
-            <span>€{baseSalary.toLocaleString('de-DE')}</span>
-            <span>€{targetSalary.toLocaleString('de-DE')}</span>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="card animate-in">
-          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Statistik</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ki-success)' }}>+€{skillBonus.toLocaleString('de-DE')}</div>
-              <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>Skill-Bonus verdient</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ki-text-secondary)' }}>€{remainingPotential.toLocaleString('de-DE')}</div>
-              <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>Potenzial offen</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 22, fontWeight: 700 }}>{(progress || []).length}</div>
-              <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>Lektionen abgeschlossen</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ki-red)' }}>{profile?.xp || 0}</div>
-              <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>KI-Points</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Chart */}
-      <div className="card animate-in" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Marktwert-Verlauf</h3>
-        <AreaChart data={log} />
-      </div>
-
-      {/* ── Challenges: Marktwert steigern ── */}
-      <div className="card animate-in" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Marktwert steigern</h3>
-        <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 20 }}>Deine Challenges der nächsten 7 Tage</p>
-
-        {/* Challenge 1 – Masterclass abschließen */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 18 }}>🎓</span>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>Masterclass abschließen</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="pill pill-grey" style={{ fontSize: 11 }}>7 Tage</span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: masterclassPct >= 100 ? 'var(--ki-success)' : 'var(--ki-text-secondary)' }}>
-                {masterclassPct}%
-              </span>
-            </div>
-          </div>
-          <div style={{ height: 8, background: 'var(--grey-6)', borderRadius: 'var(--r-pill)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${masterclassPct}%`, background: masterclassPct >= 100 ? 'var(--ki-success)' : 'var(--ki-red)', borderRadius: 'var(--r-pill)', transition: 'width 1.2s var(--ease-apple)' }} />
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 4 }}>
-            {completedLessons} von {totalLessons} Lektionen abgeschlossen
+      {/* ═══ 2. HERO SCORE CARD ═══ */}
+      <section
+        className="card animate-in"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: '3rem 2rem',
+          marginBottom: '2rem',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ position: 'relative', width: 200, height: 200, marginBottom: '1.5rem' }}>
+          <ScoreRing score={score} />
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <span style={{
+              fontSize: '3rem',
+              fontWeight: 800,
+              lineHeight: 1,
+              color: scoreColor,
+            }}>
+              {animatedScore}%
+            </span>
+            <span style={{
+              fontSize: '.85rem',
+              color: 'var(--ki-text-secondary)',
+              marginTop: '.25rem',
+            }}>
+              Marktwert
+            </span>
           </div>
         </div>
 
-        {/* Challenge 2 – Analyse durchführen */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 18 }}>📊</span>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>Marktwert-Analyse durchführen</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="pill pill-grey" style={{ fontSize: 11 }}>7 Tage</span>
-              {analyseDone
-                ? <span className="pill pill-green" style={{ fontSize: 11 }}>Erledigt</span>
-                : <span className="pill pill-grey" style={{ fontSize: 11 }}>Offen</span>}
-            </div>
-          </div>
-          <div style={{ height: 8, background: 'var(--grey-6)', borderRadius: 'var(--r-pill)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: analyseDone ? '100%' : '0%', background: 'var(--ki-success)', borderRadius: 'var(--r-pill)', transition: 'width 1.2s var(--ease-apple)' }} />
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 4 }}>
-            {analyseDone ? 'Verlaufsdaten vorhanden – gut gemacht!' : 'Führe deine erste Marktwert-Analyse durch'}
-          </div>
+        <p style={{
+          fontSize: '1.1rem',
+          color: 'var(--ki-text)',
+          fontWeight: 600,
+          maxWidth: 420,
+        }}>
+          Du hebst dich von <span style={{ color: scoreColor }}>{animatedScore}%</span> der Bewerber ab
+        </p>
+        <p style={{
+          fontSize: '.875rem',
+          color: 'var(--ki-text-tertiary)',
+          marginTop: '.5rem',
+          maxWidth: 480,
+        }}>
+          Basierend auf deinen abgeschlossenen Zertifikaten des Karriere-Instituts
+        </p>
+      </section>
+
+      {/* ═══ 3. DEINE ZERTIFIKATE ═══ */}
+      <section className="animate-in" style={{ marginBottom: '2rem' }}>
+        <h2 style={{
+          fontSize: '1.25rem',
+          fontWeight: 700,
+          color: 'var(--ki-text)',
+          marginBottom: '1rem',
+        }}>
+          Deine Zertifikate
+        </h2>
+
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          {CERTIFICATES.map((cert, i) => {
+            const completed = isCertCompleted(cert);
+            const isLast = i === CERTIFICATES.length - 1;
+
+            let actionHref = '/masterclass';
+            let actionLabel = 'Kurs starten →';
+            if (cert.type === 'premium') {
+              actionHref = '/masterclass';
+              actionLabel = 'Buchen →';
+            } else if (cert.type === 'analyse') {
+              actionHref = '/karriereanalyse';
+              actionLabel = 'Analyse starten →';
+            }
+
+            return (
+              <div
+                key={cert.key}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '1rem 1.25rem',
+                  borderBottom: isLast ? 'none' : '1px solid var(--ki-border)',
+                  gap: '1rem',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', flex: 1, minWidth: 0 }}>
+                  <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>
+                    {completed ? '✅' : '🔒'}
+                  </span>
+                  <span style={{
+                    fontWeight: 600,
+                    color: completed ? 'var(--ki-text)' : 'var(--ki-text-tertiary)',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}>
+                    {cert.label}
+                  </span>
+                </div>
+
+                {completed ? (
+                  <span className="pill pill-green" style={{ flexShrink: 0 }}>
+                    Erworben
+                  </span>
+                ) : (
+                  <a
+                    href={actionHref}
+                    className="btn btn-ghost"
+                    style={{
+                      fontSize: '.8rem',
+                      padding: '.35rem .75rem',
+                      flexShrink: 0,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {actionLabel}
+                  </a>
+                )}
+              </div>
+            );
+          })}
         </div>
+      </section>
 
-        {/* Challenge 3 – 3 Bewerbungen senden */}
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 18 }}>✉️</span>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>3 Bewerbungen senden</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="pill pill-grey" style={{ fontSize: 11 }}>7 Tage</span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: appCount >= 3 ? 'var(--ki-success)' : 'var(--ki-text-secondary)' }}>
-                {Math.min(appCount, 3)}/3
-              </span>
-            </div>
-          </div>
-          <div style={{ height: 8, background: 'var(--grey-6)', borderRadius: 'var(--r-pill)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${Math.min(100, Math.round((appCount / 3) * 100))}%`, background: appCount >= 3 ? 'var(--ki-success)' : 'var(--ki-red)', borderRadius: 'var(--r-pill)', transition: 'width 1.2s var(--ease-apple)' }} />
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 4 }}>
-            {appCount >= 3 ? 'Challenge abgeschlossen!' : `Noch ${Math.max(0, 3 - appCount)} Bewerbung${3 - appCount === 1 ? '' : 'en'} ausstehend`}
-          </div>
+      {/* ═══ 4. WARUM ZERTIFIKATE WICHTIG SIND ═══ */}
+      <section className="animate-in" style={{ marginBottom: '2rem' }}>
+        <div className="card" style={{
+          background: 'var(--ki-bg-alt)',
+          padding: '2rem',
+        }}>
+          <h2 style={{
+            fontSize: '1.15rem',
+            fontWeight: 700,
+            color: 'var(--ki-text)',
+            marginBottom: '.75rem',
+          }}>
+            Warum Zertifikate wichtig sind
+          </h2>
+          <p style={{
+            color: 'var(--ki-text-secondary)',
+            fontSize: '.95rem',
+            lineHeight: 1.6,
+            marginBottom: '1.25rem',
+          }}>
+            Personalentscheider suchen nach Kandidaten die in ihre Weiterentwicklung investieren.
+          </p>
+
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '.65rem' }}>
+            {[
+              'Eigeninitiative & Lernbereitschaft',
+              'Nachgewiesene Kompetenz im Bereich',
+              'Professionelle Weiterbildung',
+              'Über 11.000 Mitglieder vertrauen dem Institut',
+            ].map((text) => (
+              <li
+                key={text}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '.6rem',
+                  fontSize: '.9rem',
+                  color: 'var(--ki-text)',
+                }}
+              >
+                <span style={{ color: 'var(--ki-success)', fontWeight: 700, flexShrink: 0 }}>✓</span>
+                <span>{text}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      </section>
 
-      {/* ── Video Platzhalter ── */}
-      <div className="card" style={{ aspectRatio: '16/9', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
-        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(204,20,38,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>▶</div>
-        <div style={{ color: 'white', fontSize: 16, fontWeight: 600 }}>Was bestimmt deinen Marktwert?</div>
-        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>Verfügbar ab April 2026</div>
-      </div>
+      {/* ═══ 5. WIE DEIN SCORE BERECHNET WIRD ═══ */}
+      <section className="animate-in" style={{ marginBottom: '2rem' }}>
+        <h2 style={{
+          fontSize: '1.25rem',
+          fontWeight: 700,
+          color: 'var(--ki-text)',
+          marginBottom: '1rem',
+        }}>
+          Wie dein Score berechnet wird
+        </h2>
 
-      {/* ── Vergleich: Dein Marktwert vs. Branche ── */}
-      <div className="card animate-in" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Vergleich</h3>
-        <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 20 }}>
-          Dein Marktwert vs. Durchschnitt deiner Branche ({benchmark.label})
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          {SCORE_BREAKDOWN.map((item, i) => {
+            const achieved = isBreakdownAchieved(item);
+            const isMax = item.key === 'max';
+            const isLast = i === SCORE_BREAKDOWN.length - 1;
+
+            return (
+              <div
+                key={item.key}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '1rem 1.25rem',
+                  borderBottom: isLast ? 'none' : '1px solid var(--ki-border)',
+                  background: isMax ? 'var(--ki-bg-alt)' : 'transparent',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '.65rem' }}>
+                  {!isMax && (
+                    <span style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: 'var(--r-md)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '.75rem',
+                      fontWeight: 700,
+                      background: achieved ? 'var(--ki-success)' : 'var(--grey-5)',
+                      color: achieved ? '#fff' : 'var(--ki-text-tertiary)',
+                      flexShrink: 0,
+                    }}>
+                      {achieved ? '✓' : '–'}
+                    </span>
+                  )}
+                  <span style={{
+                    fontWeight: isMax ? 700 : 500,
+                    color: 'var(--ki-text)',
+                    fontSize: isMax ? '.95rem' : '.9rem',
+                  }}>
+                    {item.label}
+                  </span>
+                  {item.key === 'elearning' && completedELearningCount > 0 && (
+                    <span className="pill pill-green" style={{ fontSize: '.7rem' }}>
+                      {completedELearningCount}/6
+                    </span>
+                  )}
+                </div>
+
+                <span style={{
+                  fontWeight: 700,
+                  fontSize: '.9rem',
+                  color: isMax
+                    ? 'var(--ki-text)'
+                    : achieved
+                      ? 'var(--ki-success)'
+                      : 'var(--ki-text-tertiary)',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {item.value}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ═══ 6. DEIN ZERTIFIKATS-PORTFOLIO ═══ */}
+      <section className="card animate-in" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+        padding: '2.5rem 2rem',
+        marginBottom: '2rem',
+      }}>
+        <h2 style={{
+          fontSize: '1.15rem',
+          fontWeight: 700,
+          color: 'var(--ki-text)',
+          marginBottom: '.5rem',
+        }}>
+          Dein Zertifikats-Portfolio
+        </h2>
+        <p style={{
+          color: 'var(--ki-text-secondary)',
+          fontSize: '.875rem',
+          marginBottom: '1.5rem',
+          maxWidth: 400,
+        }}>
+          Lade deine gesammelten Zertifikate als PDF herunter oder teile deinen Fortschritt auf LinkedIn.
         </p>
 
-        {/* My value bar */}
-        {[
-          { label: 'Dein Marktwert', value: currentValue, color: 'var(--ki-red)', bold: true },
-          { label: 'Branchendurchschnitt', value: benchmark.avg, color: 'var(--ki-text-secondary)', bold: false },
-          { label: 'Top 25% Branche', value: benchmark.top, color: 'var(--ki-success)', bold: false },
-        ].map(({ label, value, color, bold }) => (
-          <div key={label} style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-              <span style={{ fontSize: 13, fontWeight: bold ? 700 : 500, color: bold ? 'var(--ki-text)' : 'var(--ki-text-secondary)' }}>{label}</span>
-              <span style={{ fontSize: 13, fontWeight: 700, color }}>{value >= 1000 ? `€${(value / 1000).toFixed(0)}k` : `€${value}`}</span>
-            </div>
-            <div style={{ height: 10, background: 'var(--grey-6)', borderRadius: 'var(--r-pill)', overflow: 'hidden' }}>
-              <div style={{
-                height: '100%',
-                width: `${Math.round((value / comparisonMax) * 100)}%`,
-                background: color,
-                borderRadius: 'var(--r-pill)',
-                transition: 'width 1.2s var(--ease-apple)',
-                opacity: bold ? 1 : 0.65,
-              }} />
-            </div>
-          </div>
-        ))}
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <button
+            className="btn btn-primary"
+            onClick={() => alert('PDF-Download wird bald verfügbar sein.')}
+            style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            PDF herunterladen
+          </button>
 
-        {currentValue > benchmark.avg ? (
-          <div className="pill pill-green" style={{ display: 'inline-flex', marginTop: 4 }}>
-            Du liegst {Math.round(((currentValue - benchmark.avg) / benchmark.avg) * 100)}% über dem Branchendurchschnitt
-          </div>
-        ) : (
-          <div className="pill pill-red" style={{ display: 'inline-flex', marginTop: 4 }}>
-            Noch €{(benchmark.avg - currentValue).toLocaleString('de-DE')} unter dem Branchendurchschnitt
-          </div>
-        )}
-      </div>
-
-      {/* Completed Lessons with Impact */}
-      {progress && progress.length > 0 && (
-        <div className="card animate-in" style={{ marginBottom: 24 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Abgeschlossene Lektionen</h3>
-          {progress.sort((a, b) => (b.lessons?.market_value_impact || 0) - (a.lessons?.market_value_impact || 0)).slice(0, 10).map((p, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--ki-border)', gap: 8 }}>
-              <span style={{ color: 'var(--ki-success)' }}>✓</span>
-              <span style={{ flex: 1, fontSize: 14 }}>{p.lessons?.title || 'Lektion'}</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-success)' }}>+€{(p.lessons?.market_value_impact || 0).toLocaleString('de-DE')}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Salary Settings */}
-      <div className="card animate-in">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700 }}>Gehalt-Einstellungen</h3>
-          <button className="btn btn-ghost" onClick={() => setEditSalary(!editSalary)} style={{ fontSize: 13 }}>
-            {editSalary ? 'Abbrechen' : '✏️ Bearbeiten'}
+          <button
+            className="btn btn-secondary"
+            onClick={() => alert('LinkedIn-Teilen wird bald verfügbar sein.')}
+            style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+              <polyline points="16 6 12 2 8 6" />
+              <line x1="12" y1="2" x2="12" y2="15" />
+            </svg>
+            Auf LinkedIn teilen
           </button>
         </div>
-        {editSalary ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--ki-text-secondary)', marginBottom: 4, display: 'block' }}>Aktuelles Gehalt (€/Jahr)</label>
-              <input className="input" type="number" value={salaryForm.current} onChange={e => setSalaryForm(p => ({ ...p, current: +e.target.value }))} />
-            </div>
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--ki-text-secondary)', marginBottom: 4, display: 'block' }}>Zielgehalt (€/Jahr)</label>
-              <input className="input" type="number" value={salaryForm.target} onChange={e => setSalaryForm(p => ({ ...p, target: +e.target.value }))} />
-            </div>
-            <button className="btn btn-primary" onClick={saveSalary}>Speichern</button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', gap: 24 }}>
-            <div><span style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>Aktuell: </span><span style={{ fontWeight: 600 }}>€{baseSalary.toLocaleString('de-DE')}</span></div>
-            <div><span style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>Ziel: </span><span style={{ fontWeight: 600 }}>€{targetSalary.toLocaleString('de-DE')}</span></div>
-          </div>
-        )}
-      </div>
+      </section>
     </div>
   );
 }
