@@ -3,34 +3,859 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { awardPoints } from '@/lib/gamification';
-import InfoTooltip from '@/components/ui/InfoTooltip';
-import EmptyState from '@/components/ui/EmptyState';
 
-function getVideoEmbed(url) {
-  if (!url) return null;
-  // YouTube
-  const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]+)/);
-  if (ytMatch) return { type: 'youtube', id: ytMatch[1] };
-  // Vimeo
-  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-  if (vimeoMatch) return { type: 'vimeo', id: vimeoMatch[1] };
-  // Wistia
-  const wistiaMatch = url.match(/wistia\.com\/medias\/([\w]+)/);
-  if (wistiaMatch) return { type: 'wistia', id: wistiaMatch[1] };
-  // Direct video
-  if (url.match(/\.(mp4|webm|ogg)(\?|$)/i)) return { type: 'direct', url };
-  // Fallback: try as iframe
-  return { type: 'iframe', url };
+// --- Quiz data per course slug/title keyword ---
+const QUIZ_DATA = {
+  kommunikation: [
+    {
+      question: 'Was sind die 4 Ebenen einer Nachricht nach Schulz von Thun?',
+      options: [
+        'Sachinhalt, Selbstoffenbarung, Beziehung, Appell',
+        'Sprache, Ton, Mimik, Gestik',
+        'Sender, Empfänger, Kanal, Rückmeldung',
+        'Inhalt, Form, Stil, Wirkung',
+      ],
+      correct: 0,
+    },
+    {
+      question: 'Was bedeutet aktives Zuhören?',
+      options: [
+        'Schweigen und warten bis der andere fertig ist',
+        'Zusammenfassen, nachfragen, Blickkontakt',
+        'Notizen machen und Fragen stellen',
+        'Nicken und zustimmen',
+      ],
+      correct: 1,
+    },
+    {
+      question: 'Was ist das Hauptziel konstruktiven Feedbacks?',
+      options: [
+        'Die eigene Meinung durchsetzen',
+        'Den anderen motivieren',
+        'Verhalten ändern ohne zu verletzen',
+        'Leistung bewerten',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Welcher Faktor macht Kommunikation am meisten aus?',
+      options: [
+        'Die Wortwahl',
+        'Die Länge der Aussage',
+        'Körpersprache und Tonfall',
+        'Das Vokabular',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Was blockiert gute Kommunikation am stärksten?',
+      options: [
+        'Zu wenig Redezeit',
+        'Annahmen über den Gesprächspartner',
+        'Unterschiedliche Sprachen',
+        'Lautstärke',
+      ],
+      correct: 1,
+    },
+  ],
+  'work-life': [
+    {
+      question: 'Was ist der häufigste Grund für Burnout?',
+      options: [
+        'Zu viele Überstunden',
+        'Fehlende Kontrolle über die eigene Arbeit',
+        'Schlechte Kollegen',
+        'Zu wenig Urlaub',
+      ],
+      correct: 1,
+    },
+    {
+      question: 'Was ist Work-Life-Planning?',
+      options: [
+        'Strikte Trennung von Beruf und Privatleben',
+        'Bewusste Integration von Arbeit und Leben',
+        'Urlaub strategisch planen',
+        'Arbeitszeiten reduzieren',
+      ],
+      correct: 1,
+    },
+    {
+      question: 'Welche Strategie hilft bei Grenzen setzen?',
+      options: [
+        'Alle Anfragen ablehnen',
+        'Nicht-Verhandelbar Zeiten festlegen',
+        'Das Handy ausschalten',
+        'Früher ins Büro kommen',
+      ],
+      correct: 1,
+    },
+    {
+      question: 'Was fördert körperliches Gleichgewicht?',
+      options: [
+        'Weniger schlafen',
+        'Mehr Koffein',
+        'Regelmäßige Bewegung und Pausen',
+        'Vitaminsupplemente',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Zufriedenheit entsteht durch...',
+      options: [
+        'Mehr Gehalt',
+        'Mehr Freizeit',
+        'Übereinstimmung von Werten und Handeln',
+        'Statuserreichen',
+      ],
+      correct: 2,
+    },
+  ],
+  networking: [
+    {
+      question: 'Die wichtigste Regel beim Networking?',
+      options: [
+        'Visitenkarten sammeln',
+        'Immer der lauteste sein',
+        'Erst geben, dann nehmen',
+        'Möglichst viele Kontakte knüpfen',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Warum ist Expertenwissen beim Networking wichtig?',
+      options: [
+        'Man kann andere belehren',
+        'Man wird als wertvoller Gesprächspartner wahrgenommen',
+        'Es spart Gesprächszeit',
+        'Es beeindruckt Führungskräfte',
+      ],
+      correct: 1,
+    },
+    {
+      question: 'Was macht ein gutes Networking-Gespräch aus?',
+      options: [
+        'Den eigenen Lebenslauf vorstellen',
+        'Interesse am anderen zeigen und zuhören',
+        'Möglichst viel über sich erzählen',
+        'Schnell zum Punkt kommen',
+      ],
+      correct: 1,
+    },
+    {
+      question: 'Wie oft sollte man wichtige Kontakte pflegen?',
+      options: [
+        'Täglich',
+        'Nur wenn man etwas braucht',
+        'Mindestens einmal pro Quartal',
+        'Einmal im Jahr',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Was unterscheidet dauerhaftes von oberflächlichem Networking?',
+      options: [
+        'Die Anzahl der Kontakte',
+        'Die Plattform',
+        'Gegenseitiger Mehrwert und Vertrauen',
+        'Die Häufigkeit der Nachrichten',
+      ],
+      correct: 2,
+    },
+  ],
+  speedreading: [
+    {
+      question: 'Was ist der häufigste Grund für langsames Lesen?',
+      options: [
+        'Schlechte Beleuchtung',
+        'Zu kleine Schrift',
+        'Subvokalisierung (innerliches Mitsprechen)',
+        'Ablenkung durch Umgebung',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Was ist peripheres Sehen beim Lesen?',
+      options: [
+        'Randbereiche ignorieren',
+        'Mehrere Wörter gleichzeitig erfassen',
+        'Schneller mit den Augen bewegen',
+        'Den Text überspringen',
+      ],
+      correct: 1,
+    },
+    {
+      question: 'Wie verdoppelt man die Lesegeschwindigkeit?',
+      options: [
+        'Mit dem Finger unter der Zeile entlangfahren',
+        'Nur Überschriften lesen',
+        'Regelmäßiges Training mit Zeitdruck',
+        'Größere Bücher lesen',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Was verbessert das Textverständnis?',
+      options: [
+        'Zweimal lesen',
+        'Laut vorlesen',
+        'Vorwissen aktivieren vor dem Lesen',
+        'Kurze Abschnitte wählen',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Was ist Skimming?',
+      options: [
+        'Wort für Wort lesen',
+        'Schnelles Überfliegen für Kernaussagen',
+        'Rückwärts lesen',
+        'Absatzweise lesen',
+      ],
+      correct: 1,
+    },
+  ],
+  'typgerecht': [
+    {
+      question: 'Was unterscheidet Hirnbesitzer von Hirnbenutzern?',
+      options: [
+        'Die Intelligenz',
+        'Das Alter beim Lernen',
+        'Bewusster Einsatz von Lernstrategien',
+        'Die Bildung',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Was ist der Spacing-Effekt?',
+      options: [
+        'Lernpausen zwischen Aufgaben',
+        'Verteiltes Lernen ist effektiver als Massen-Lernen',
+        'Lernziele verteilen',
+        'Inhalte strukturieren',
+      ],
+      correct: 1,
+    },
+    {
+      question: 'Welcher Lerntyp profitiert von Mindmaps?',
+      options: [
+        'Der auditive Lerntyp',
+        'Der kinästhetische Lerntyp',
+        'Der visuelle Lerntyp',
+        'Der kommunikative Lerntyp',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Was passiert nach 24h ohne Wiederholung?',
+      options: [
+        'Das Gelernte ist vollständig gespeichert',
+        'Ca. 30% wird vergessen',
+        'Ca. 70% des Gelernten wird vergessen',
+        'Nichts, das Gehirn speichert alles',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Was ist die effektivste Lernmethode?',
+      options: [
+        'Texte mehrfach lesen',
+        'Markieren und unterstreichen',
+        'Aktives Abrufen (Recall) statt passives Lesen',
+        'Audiobooks hören',
+      ],
+      correct: 2,
+    },
+  ],
+  'priorit': [
+    {
+      question: 'Was ist das Eisenhower-Prinzip?',
+      options: [
+        'Aufgaben nach Größe sortieren',
+        'Unterscheidung in wichtig/unwichtig und dringend/nicht dringend',
+        'Immer die schwerste Aufgabe zuerst',
+        'Delegieren oder löschen',
+      ],
+      correct: 1,
+    },
+    {
+      question: 'Was sollte man mit wichtigen, nicht dringenden Aufgaben tun?',
+      options: [
+        'Sofort erledigen',
+        'Delegieren',
+        'Terminieren und strategisch einplanen',
+        'Ignorieren',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Was ist der häufigste Fehler bei der Priorisierung?',
+      options: [
+        'Zu viele Aufgaben annehmen',
+        'Dringendes vor Wichtigem erledigen',
+        'Keine Liste führen',
+        'Zu früh aufhören',
+      ],
+      correct: 1,
+    },
+    {
+      question: 'Was hilft gegen Aufschieberitis?',
+      options: [
+        'Mehr Kaffee trinken',
+        'Den Abgabetermin verlängern',
+        'Aufgaben in kleine Schritte zerlegen',
+        'Andere bitten zu helfen',
+      ],
+      correct: 2,
+    },
+    {
+      question: 'Was ist Timeboxing?',
+      options: [
+        'Aufgaben zeitlich begrenzen',
+        'Feste Zeitblöcke für bestimmte Aufgaben reservieren',
+        'Zeiten tracken',
+        'Weniger Zeit für Meetings einplanen',
+      ],
+      correct: 1,
+    },
+  ],
+};
+
+function getQuizForCourse(courseTitle) {
+  if (!courseTitle) return null;
+  const t = courseTitle.toLowerCase();
+  if (t.includes('kommunikation')) return QUIZ_DATA.kommunikation;
+  if (t.includes('work') || t.includes('life') || t.includes('balance')) return QUIZ_DATA['work-life'];
+  if (t.includes('network')) return QUIZ_DATA.networking;
+  if (t.includes('speed') || t.includes('lesen') || t.includes('reading')) return QUIZ_DATA.speedreading;
+  if (t.includes('typgerecht') || t.includes('lerntyp') || t.includes('lernen')) return QUIZ_DATA['typgerecht'];
+  if (t.includes('priorit') || t.includes('zeitmanagement') || t.includes('management')) return QUIZ_DATA['priorit'];
+  return null;
 }
+
+function getLessonTypeIcon(type) {
+  if (type === 'video') return '📹';
+  if (type === 'interactive') return '🎮';
+  if (type === 'exercise') return '🏋️';
+  if (type === 'quiz') return '📝';
+  return '📄';
+}
+
+// Confetti particle component
+function ConfettiParticles({ count = 20 }) {
+  const particles = useMemo(() => {
+    return Array.from({ length: count }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.6,
+      color: ['var(--ki-red)', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'][i % 5],
+      size: 6 + Math.random() * 8,
+    }));
+  }, [count]);
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+      {particles.map(p => (
+        <div
+          key={p.id}
+          style={{
+            position: 'absolute',
+            top: -10,
+            left: `${p.left}%`,
+            width: p.size,
+            height: p.size,
+            borderRadius: Math.random() > 0.5 ? '50%' : 2,
+            background: p.color,
+            animation: `confFall 1.2s ease-in ${p.delay}s forwards`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// =====================
+// LESSON TYPE VIEWS
+// =====================
+
+function VideoLesson({ lesson, isCompleted, onMarkComplete, saving }) {
+  const takeaways = lesson.takeaways || [
+    'Kernkonzepte verstehen und anwenden',
+    'Praktische Techniken für den Alltag',
+    'Schritt-für-Schritt Vorgehen',
+    'Langfristige Gewohnheiten aufbauen',
+  ];
+
+  return (
+    <div>
+      {/* Video placeholder */}
+      <div style={{
+        borderRadius: 'var(--r-lg)',
+        overflow: 'hidden',
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)',
+        aspectRatio: '16/9',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: 16,
+        marginBottom: 24,
+      }}>
+        <div style={{
+          width: 72,
+          height: 72,
+          borderRadius: '50%',
+          background: 'rgba(204,20,38,0.2)',
+          border: '2px solid rgba(204,20,38,0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 28,
+        }}>▶</div>
+        <div style={{ color: 'white', fontSize: 16, fontWeight: 600 }}>Video wird vorbereitet</div>
+        <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>Inhalt folgt in Kürze</div>
+      </div>
+
+      {/* Key takeaways */}
+      <div className="card" style={{ marginBottom: 24, background: 'var(--ki-bg-alt)', border: 'none' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>
+          Key Takeaways
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {takeaways.map((t, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6 }}>
+              <span style={{ color: 'var(--ki-red)', fontWeight: 700, flexShrink: 0, marginTop: 1 }}>✓</span>
+              <span style={{ color: 'var(--ki-text-secondary)' }}>{t}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {!isCompleted ? (
+        <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ gap: 8 }}>
+          {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+        </button>
+      ) : (
+        <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+      )}
+    </div>
+  );
+}
+
+function InteractiveLesson({ lesson, isCompleted, onMarkComplete, saving }) {
+  const statements = lesson.statements || [
+    'Ziele klar definieren und schriftlich festhalten',
+    'Prioritäten täglich neu bewerten',
+    'Feedback aktiv einholen und einarbeiten',
+    'Reflexion als festen Bestandteil einplanen',
+  ];
+
+  const [ranking, setRanking] = useState(Array.from({ length: statements.length }, (_, i) => i));
+  const [confirmed, setConfirmed] = useState(false);
+  const [xpAwarded, setXpAwarded] = useState(false);
+  const supabase = createClient();
+
+  function moveItem(fromIdx, toIdx) {
+    if (confirmed) return;
+    const newRanking = [...ranking];
+    const [item] = newRanking.splice(fromIdx, 1);
+    newRanking.splice(toIdx, 0, item);
+    setRanking(newRanking);
+  }
+
+  async function handleConfirm() {
+    setConfirmed(true);
+    if (!xpAwarded) {
+      setXpAwarded(true);
+      const { data: prof } = await supabase.from('profiles').select('total_points').eq('id', lesson._userId).single().catch(() => ({ data: null }));
+    }
+  }
+
+  return (
+    <div>
+      <div className="card" style={{ marginBottom: 24, border: '1px solid rgba(204,20,38,0.15)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+          <span style={{ fontSize: 22 }}>🎮</span>
+          <span style={{ fontSize: 15, fontWeight: 700 }}>Interaktive Übung</span>
+        </div>
+        <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 20, lineHeight: 1.6 }}>
+          Bringe die folgenden Aussagen in die Reihenfolge, die für dich am sinnvollsten ist (1 = höchste Priorität). Klicke auf ↑ / ↓ um die Reihenfolge zu ändern.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {ranking.map((stmtIdx, pos) => (
+            <div
+              key={stmtIdx}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '12px 14px',
+                borderRadius: 'var(--r-md)',
+                background: confirmed ? 'rgba(34,197,94,0.07)' : 'var(--ki-bg-alt)',
+                border: confirmed ? '1px solid rgba(34,197,94,0.25)' : '1px solid var(--ki-border)',
+                transition: 'all 0.15s',
+              }}
+            >
+              <span style={{
+                width: 26,
+                height: 26,
+                borderRadius: '50%',
+                background: confirmed ? 'var(--ki-success)' : 'var(--ki-red)',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 12,
+                fontWeight: 700,
+                flexShrink: 0,
+              }}>{pos + 1}</span>
+              <span style={{ flex: 1, fontSize: 14, lineHeight: 1.5 }}>{statements[stmtIdx]}</span>
+              {!confirmed && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <button
+                    onClick={() => pos > 0 && moveItem(pos, pos - 1)}
+                    disabled={pos === 0}
+                    style={{ background: 'none', border: 'none', cursor: pos === 0 ? 'default' : 'pointer', opacity: pos === 0 ? 0.3 : 1, fontSize: 14, padding: '2px 6px', color: 'var(--ki-text-secondary)' }}
+                  >↑</button>
+                  <button
+                    onClick={() => pos < ranking.length - 1 && moveItem(pos, pos + 1)}
+                    disabled={pos === ranking.length - 1}
+                    style={{ background: 'none', border: 'none', cursor: pos === ranking.length - 1 ? 'default' : 'pointer', opacity: pos === ranking.length - 1 ? 0.3 : 1, fontSize: 14, padding: '2px 6px', color: 'var(--ki-text-secondary)' }}
+                  >↓</button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        {!confirmed ? (
+          <button onClick={handleConfirm} className="btn btn-primary" style={{ marginTop: 16 }}>
+            Bestätigen (+20 XP Bonus)
+          </button>
+        ) : (
+          <div style={{ marginTop: 14, padding: '10px 14px', borderRadius: 'var(--r-md)', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', fontSize: 13, color: '#16a34a', fontWeight: 600 }}>
+            ✅ Reihenfolge bestätigt! +20 XP
+          </div>
+        )}
+      </div>
+
+      {!isCompleted ? (
+        <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving}>
+          {saving ? 'Speichert...' : '✅ Als erledigt markieren'}
+        </button>
+      ) : (
+        <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen</span>
+      )}
+    </div>
+  );
+}
+
+function ExerciseLesson({ lesson, isCompleted, onMarkComplete, saving }) {
+  const [text, setText] = useState('');
+  const [aiFeedback, setAiFeedback] = useState(false);
+
+  const prompt = lesson.exercise_prompt || lesson.description || 'Wende das Gelernte an und beschreibe deine Erfahrungen, Gedanken und konkreten nächsten Schritte.';
+  const charCount = text.length;
+  const isReady = charCount >= 100;
+
+  return (
+    <div>
+      <div className="card" style={{ marginBottom: 24, border: '1px solid rgba(204,20,38,0.12)', background: 'rgba(204,20,38,0.02)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+          <span style={{ fontSize: 22 }}>🏋️</span>
+          <span style={{ fontSize: 15, fontWeight: 700 }}>Praxisübung</span>
+        </div>
+        <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', lineHeight: 1.7, marginBottom: 18 }}>
+          {prompt}
+        </p>
+        <textarea
+          className="input"
+          value={text}
+          onChange={e => setText(e.target.value)}
+          placeholder="Schreibe hier deine Antwort... (mindestens 100 Zeichen)"
+          rows={6}
+          style={{ resize: 'vertical', marginBottom: 8 }}
+          disabled={isCompleted}
+        />
+        <div style={{ fontSize: 12, color: isReady ? 'var(--ki-success)' : 'var(--ki-text-tertiary)', marginBottom: 16 }}>
+          {charCount}/100 Zeichen {isReady ? '✓' : ''}
+        </div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setAiFeedback(true)}
+            className="btn btn-secondary"
+            style={{ fontSize: 13 }}
+          >
+            🤖 KI-Feedback
+          </button>
+          {aiFeedback && (
+            <div style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--r-md)', background: 'var(--ki-bg-alt)', border: '1px solid var(--ki-border)', fontSize: 13, color: 'var(--ki-text-secondary)' }}>
+              Feature kommt bald 🚀
+            </div>
+          )}
+        </div>
+      </div>
+
+      {!isCompleted ? (
+        <button
+          onClick={onMarkComplete}
+          className="btn btn-primary"
+          disabled={saving || !isReady}
+          style={{ opacity: isReady ? 1 : 0.5 }}
+        >
+          {saving ? 'Speichert...' : '✅ Als erledigt markieren (+40 XP)'}
+        </button>
+      ) : (
+        <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +40 XP</span>
+      )}
+    </div>
+  );
+}
+
+function QuizLesson({ lesson, courseTitle, isCompleted, onMarkComplete, saving, userId }) {
+  const supabase = createClient();
+  const questions = getQuizForCourse(courseTitle) || [];
+  const [answers, setAnswers] = useState({});
+  const [results, setResults] = useState({});
+  const [xpPills, setXpPills] = useState({});
+  const [confettiQ, setConfettiQ] = useState(null);
+  const [quizDone, setQuizDone] = useState(false);
+  const [quizSaved, setQuizSaved] = useState(false);
+  const [score, setScore] = useState(0);
+  const retryTimers = useRef({});
+
+  const correctCount = Object.values(results).filter(r => r === 'correct').length;
+  const allAnswered = questions.length > 0 && questions.every((_, i) => results[i] === 'correct');
+
+  useEffect(() => {
+    if (allAnswered && !quizDone) {
+      setQuizDone(true);
+      const sc = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
+      setScore(sc);
+      handleSaveQuiz(sc);
+    }
+  }, [allAnswered]);
+
+  async function handleSaveQuiz(sc) {
+    if (quizSaved) return;
+    setQuizSaved(true);
+    const xp = sc === 100 ? 100 : 50;
+    await supabase.from('lesson_progress').upsert({
+      user_id: userId,
+      lesson_id: lesson.id,
+      quiz_score: sc,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id,lesson_id' });
+    const { data: prof } = await supabase.from('profiles').select('total_points').eq('id', userId).single().catch(() => ({ data: null }));
+    if (prof) {
+      await supabase.from('profiles').update({ total_points: (prof.total_points || 0) + xp }).eq('id', userId);
+    }
+  }
+
+  async function handleAnswer(qIndex, optIndex) {
+    if (results[qIndex] === 'correct') return;
+    const isCorrect = optIndex === questions[qIndex].correct;
+    setAnswers(prev => ({ ...prev, [qIndex]: optIndex }));
+    setResults(prev => ({ ...prev, [qIndex]: isCorrect ? 'correct' : 'wrong' }));
+    if (isCorrect) {
+      setConfettiQ(qIndex);
+      setXpPills(prev => ({ ...prev, [qIndex]: true }));
+      setTimeout(() => setXpPills(prev => ({ ...prev, [qIndex]: false })), 2500);
+      setTimeout(() => setConfettiQ(null), 1400);
+    } else {
+      if (retryTimers.current[qIndex]) clearTimeout(retryTimers.current[qIndex]);
+      retryTimers.current[qIndex] = setTimeout(() => {
+        setAnswers(prev => ({ ...prev, [qIndex]: undefined }));
+        setResults(prev => ({ ...prev, [qIndex]: 'retry' }));
+      }, 1500);
+    }
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="card" style={{ marginBottom: 24 }}>
+        <p style={{ color: 'var(--ki-text-secondary)', fontSize: 14 }}>Keine Quiz-Fragen für diesen Kurs gefunden.</p>
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ marginTop: 16 }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ marginTop: 16, display: 'inline-block', fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen</span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="card" style={{ marginBottom: 24, border: '1px solid rgba(204,20,38,0.15)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{ fontSize: 22 }}>📝</span>
+          <span style={{ fontSize: 15, fontWeight: 700 }}>Quiz</span>
+          <span style={{ marginLeft: 'auto', fontSize: 13, color: 'var(--ki-text-tertiary)' }}>
+            {correctCount}/{questions.length} richtig
+          </span>
+        </div>
+        <p style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 20 }}>
+          Beantworte alle Fragen. Bei falscher Antwort kannst du es erneut versuchen.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+          {questions.map((q, qi) => {
+            const result = results[qi];
+            const selected = answers[qi];
+            const isCorrect = result === 'correct';
+            const isWrong = result === 'wrong';
+            const showXp = xpPills[qi];
+            const showConfetti = confettiQ === qi;
+            return (
+              <div key={qi} style={{ position: 'relative' }}>
+                {showConfetti && <ConfettiParticles count={16} />}
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, lineHeight: 1.5 }}>
+                  {qi + 1}. {q.question}
+                  {showXp && (
+                    <span style={{
+                      marginLeft: 10,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      background: 'var(--ki-success)',
+                      color: 'white',
+                      padding: '2px 10px',
+                      borderRadius: 20,
+                      animation: 'optPulse 0.4s ease',
+                    }}>+XP 🎉</span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {q.options.map((opt, oi) => {
+                    const isThisCorrect = oi === q.correct;
+                    const isSelected = selected === oi;
+                    let bg = 'var(--ki-bg-alt)';
+                    let border = '1px solid var(--ki-border)';
+                    let color = 'var(--ki-text)';
+                    if (isCorrect && isThisCorrect) { bg = 'rgba(34,197,94,0.1)'; border = '1px solid rgba(34,197,94,0.4)'; color = '#16a34a'; }
+                    else if (isWrong && isSelected) { bg = 'rgba(239,68,68,0.08)'; border = '1px solid rgba(239,68,68,0.4)'; color = '#dc2626'; }
+                    return (
+                      <button
+                        key={oi}
+                        onClick={() => handleAnswer(qi, oi)}
+                        disabled={isCorrect}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          padding: '10px 14px',
+                          borderRadius: 'var(--r-md)',
+                          background: bg,
+                          border,
+                          color,
+                          cursor: isCorrect ? 'default' : 'pointer',
+                          textAlign: 'left',
+                          fontSize: 14,
+                          fontWeight: isSelected ? 600 : 400,
+                          transition: 'all 0.15s',
+                          animation: (isWrong && isSelected) ? 'optPulse 0.35s ease' : 'none',
+                        }}
+                      >
+                        <span style={{
+                          width: 22,
+                          height: 22,
+                          borderRadius: '50%',
+                          flexShrink: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 11,
+                          fontWeight: 700,
+                          background: isCorrect && isThisCorrect ? 'rgba(34,197,94,0.2)' : isWrong && isSelected ? 'rgba(239,68,68,0.2)' : 'var(--ki-card)',
+                          border: '1px solid currentColor',
+                        }}>
+                          {isCorrect && isThisCorrect ? '✓' : isWrong && isSelected ? '✗' : String.fromCharCode(65 + oi)}
+                        </span>
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+                {isWrong && (
+                  <div style={{ marginTop: 8, padding: '8px 12px', borderRadius: 'var(--r-sm)', background: 'rgba(239,68,68,0.06)', fontSize: 13, color: '#dc2626' }}>
+                    Nicht ganz richtig – schau dir den Lerninhalt nochmal an und versuche es erneut.
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {quizDone && (
+          <div style={{ marginTop: 24, padding: '16px 18px', borderRadius: 'var(--r-md)', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#16a34a', marginBottom: 4 }}>
+              🎉 Quiz abgeschlossen! Score: {score}%
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>
+              {score === 100 ? '+100 XP für perfektes Ergebnis!' : '+50 XP für Quiz-Abschluss!'}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {!isCompleted ? (
+        <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving}>
+          {saving ? 'Speichert...' : '✅ Als erledigt markieren'}
+        </button>
+      ) : (
+        <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen</span>
+      )}
+    </div>
+  );
+}
+
+// =====================
+// COURSE COMPLETION SCREEN
+// =====================
+
+function CourseCompletionScreen({ course, quizScore }) {
+  return (
+    <div style={{ position: 'relative', textAlign: 'center', padding: '48px 24px', maxWidth: 560, margin: '0 auto' }}>
+      <ConfettiParticles count={40} />
+      <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
+      <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 8 }}>
+        E-Learning abgeschlossen!
+      </h2>
+      <p style={{ fontSize: 16, color: 'var(--ki-text-secondary)', marginBottom: 8 }}>
+        {course.title}
+      </p>
+      {quizScore !== null && (
+        <p style={{ fontSize: 14, color: 'var(--ki-text-tertiary)', marginBottom: 24 }}>
+          Quiz-Score: {quizScore}%
+        </p>
+      )}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 32, flexWrap: 'wrap' }}>
+        <span className="pill pill-gold" style={{ fontSize: 15, padding: '8px 18px' }}>+200 XP</span>
+        <span className="pill pill-green" style={{ fontSize: 15, padding: '8px 18px' }}>🏅 Zertifikat erhalten</span>
+      </div>
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <button className="btn btn-secondary" onClick={() => alert('Zertifikat-Feature kommt bald!')}>
+          Zertifikat ansehen
+        </button>
+        <a href="/masterclass" className="btn btn-primary">
+          Nächster Kurs →
+        </a>
+      </div>
+    </div>
+  );
+}
+
+// =====================
+// MAIN COMPONENT
+// =====================
 
 export default function CoursePlayerClient({ course, progress, analysisResults, profile, userId }) {
   const supabase = createClient();
 
-  // Flatten all lessons with module info
+  // Flatten lessons from the single module
   const allLessons = useMemo(() => {
-    return (course.modules || []).flatMap(mod =>
-      (mod.lessons || []).map(lesson => ({ ...lesson, moduleName: mod.title, moduleId: mod.id }))
-    );
+    const mod = course.modules?.[0];
+    if (!mod) return [];
+    return (mod.lessons || []).map(lesson => ({ ...lesson }));
   }, [course]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,79 +864,26 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
     (progress || []).forEach(p => { map[p.lesson_id] = p; });
     return map;
   });
-  const [notes, setNotes] = useState(() => progressMap[allLessons[0]?.id]?.notes || '');
   const [saving, setSaving] = useState(false);
-  const [mediaMode, setMediaMode] = useState('video'); // 'video' | 'audio'
-  const [showAction, setShowAction] = useState(false);
-  const [actionItem, setActionItem] = useState('');
-  const [actionDeadline, setActionDeadline] = useState(() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().split('T')[0]; });
-
-  // Quiz state
-  const [quizAnswers, setQuizAnswers] = useState({}); // { [questionIndex]: selectedOption }
-  const [quizResults, setQuizResults] = useState({}); // { [questionIndex]: 'correct' | 'wrong' }
-  const [quizSaved, setQuizSaved] = useState(false);
-  const [quizXpPills, setQuizXpPills] = useState({}); // { [questionIndex]: true } show +50 XP pill
-  const shakeTimers = useRef({});
-
-  // Practice state
-  const [practiceResponse, setPracticeResponse] = useState('');
-  const [practiceSaving, setPracticeSaving] = useState(false);
-  const [practiceCompleted, setPracticeCompleted] = useState(false);
 
   const currentLesson = allLessons[currentIndex];
   const completedCount = allLessons.filter(l => progressMap[l.id]?.completed).length;
   const totalCount = allLessons.length;
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  const allDone = totalCount > 0 && completedCount === totalCount;
+
+  // Sequential unlock: lesson at index i is unlocked if all previous are completed
+  function isUnlocked(index) {
+    if (index === 0) return true;
+    return allLessons.slice(0, index).every(l => progressMap[l.id]?.completed);
+  }
 
   function navigateTo(index) {
+    if (!isUnlocked(index)) return;
     setCurrentIndex(index);
-    setNotes(progressMap[allLessons[index]?.id]?.notes || '');
-    setMediaMode('video');
-    // Reset quiz & practice for new lesson
-    setQuizAnswers({});
-    setQuizResults({});
-    setQuizSaved(false);
-    setQuizXpPills({});
-    const lessonId = allLessons[index]?.id;
-    setPracticeResponse(progressMap[lessonId]?.practice_response || '');
-    setPracticeCompleted(progressMap[lessonId]?.practice_completed || false);
   }
 
-  async function saveNotes() {
-    if (!currentLesson) return;
-    setSaving(true);
-    await supabase.from('lesson_progress').upsert({
-      user_id: userId,
-      lesson_id: currentLesson.id,
-      notes,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,lesson_id' });
-    setProgressMap(prev => ({
-      ...prev,
-      [currentLesson.id]: { ...prev[currentLesson.id], notes }
-    }));
-    setSaving(false);
-  }
-
-  const saveAction = async () => {
-    if (!currentLesson || !actionItem.trim()) return;
-    setSaving(true);
-    await supabase.from('lesson_progress').upsert({
-      user_id: userId,
-      lesson_id: currentLesson.id,
-      action_item: actionItem,
-      action_deadline: actionDeadline,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,lesson_id' });
-    setProgressMap(prev => ({
-      ...prev,
-      [currentLesson.id]: { ...prev[currentLesson.id], action_item: actionItem, action_deadline: actionDeadline }
-    }));
-    setSaving(false);
-    setShowAction(false);
-  };
-
-  async function markComplete() {
+  async function markComplete(xp = 30) {
     if (!currentLesson) return;
     setSaving(true);
     await supabase.from('lesson_progress').upsert({
@@ -119,510 +891,226 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
       lesson_id: currentLesson.id,
       completed: true,
       completed_at: new Date().toISOString(),
-      notes,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'user_id,lesson_id' });
     setProgressMap(prev => ({
       ...prev,
-      [currentLesson.id]: { ...prev[currentLesson.id], completed: true, notes }
+      [currentLesson.id]: { ...prev[currentLesson.id], completed: true },
     }));
+    // Award XP
+    const { data: prof } = await supabase.from('profiles').select('total_points').eq('id', userId).single().catch(() => ({ data: null }));
+    if (prof) {
+      await supabase.from('profiles').update({ total_points: (prof.total_points || 0) + xp }).eq('id', userId);
+    }
+    // Award completion bonus if all done after this
+    const newCompleted = allLessons.filter(l => l.id === currentLesson.id || progressMap[l.id]?.completed).length;
+    if (newCompleted === totalCount && totalCount > 0) {
+      const { data: prof2 } = await supabase.from('profiles').select('total_points').eq('id', userId).single().catch(() => ({ data: null }));
+      if (prof2) {
+        await supabase.from('profiles').update({ total_points: (prof2.total_points || 0) + 200 }).eq('id', userId);
+      }
+    }
     setSaving(false);
   }
 
-  // Sync practice state from progressMap on mount / lesson change
-  useEffect(() => {
-    if (!currentLesson) return;
-    const p = progressMap[currentLesson.id];
-    setPracticeResponse(p?.practice_response || '');
-    setPracticeCompleted(p?.practice_completed || false);
-    setQuizAnswers({});
-    setQuizResults({});
-    setQuizSaved(false);
-    setQuizXpPills({});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentLesson?.id]);
-
-  // Award custom XP (not tied to POINT_ACTIONS enum)
-  async function awardCustomPoints(points) {
-    const { data: prof } = await supabase.from('profiles').select('total_points').eq('id', userId).single();
-    const newTotal = (prof?.total_points || 0) + points;
-    await supabase.from('profiles').update({ total_points: newTotal }).eq('id', userId);
+  function getXpForType(type) {
+    if (type === 'exercise') return 40;
+    if (type === 'quiz') return 0; // quiz awards its own XP
+    return 30;
   }
 
-  async function handleQuizAnswer(qIndex, optionIndex, correctIndex) {
-    if (quizResults[qIndex]) return; // already answered correctly
-    const isCorrect = optionIndex === correctIndex;
-    setQuizAnswers(prev => ({ ...prev, [qIndex]: optionIndex }));
-    setQuizResults(prev => ({ ...prev, [qIndex]: isCorrect ? 'correct' : 'wrong' }));
-    if (isCorrect) {
-      setQuizXpPills(prev => ({ ...prev, [qIndex]: true }));
-      await awardCustomPoints(50);
-      // Hide XP pill after 2.5s
-      setTimeout(() => setQuizXpPills(prev => ({ ...prev, [qIndex]: false })), 2500);
-    } else {
-      // Clear wrong answer after 1.5s to allow retry
-      if (shakeTimers.current[qIndex]) clearTimeout(shakeTimers.current[qIndex]);
-      shakeTimers.current[qIndex] = setTimeout(() => {
-        setQuizAnswers(prev => ({ ...prev, [qIndex]: undefined }));
-        setQuizResults(prev => ({ ...prev, [qIndex]: 'retry' }));
-      }, 1500);
-    }
-  }
+  const isCompleted = currentLesson ? !!progressMap[currentLesson.id]?.completed : false;
+  const lessonType = currentLesson?.lesson_type || currentLesson?.type || 'video';
 
-  async function saveQuizProgress(questions) {
-    if (quizSaved || !currentLesson) return;
-    const correctCount = Object.values(quizResults).filter(r => r === 'correct').length;
-    const score = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
-    setQuizSaved(true);
-    await supabase.from('lesson_progress').upsert({
-      user_id: userId,
-      lesson_id: currentLesson.id,
-      quiz_score: score,
-      quiz_answers: quizAnswers,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,lesson_id' });
-    setProgressMap(prev => ({
-      ...prev,
-      [currentLesson.id]: { ...prev[currentLesson.id], quiz_score: score, quiz_answers: quizAnswers }
-    }));
-  }
-
-  async function savePractice() {
-    if (!currentLesson || !practiceResponse.trim()) return;
-    setPracticeSaving(true);
-    await supabase.from('lesson_progress').upsert({
-      user_id: userId,
-      lesson_id: currentLesson.id,
-      practice_response: practiceResponse,
-      practice_completed: true,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,lesson_id' });
-    setProgressMap(prev => ({
-      ...prev,
-      [currentLesson.id]: { ...prev[currentLesson.id], practice_response: practiceResponse, practice_completed: true }
-    }));
-    setPracticeCompleted(true);
-    await awardCustomPoints(30);
-    setPracticeSaving(false);
-  }
-
-  if (!currentLesson) {
-    return (
-      <div className="page-container">
-        <h1 className="page-title">{course.title}</h1><InfoTooltip moduleId="masterclass" profile={profile} />
-        <p style={{ color: 'var(--ki-text-secondary)', marginTop: 16 }}>Dieser Kurs hat noch keine Lektionen.</p>
-        <a href="/masterclass" className="btn btn-secondary" style={{ marginTop: 24 }}>← Zurück zur Übersicht</a>
-      </div>
-    );
-  }
-
-  const video = getVideoEmbed(currentLesson.video_url);
-  const isCompleted = progressMap[currentLesson.id]?.completed;
-  const typePill = currentLesson.type === 'video' ? 'Video' : currentLesson.type === 'exercise' ? 'Übung' : 'Lektion';
+  // Get quiz score for completion screen
+  const quizLesson = allLessons.find(l => (l.lesson_type || l.type) === 'quiz');
+  const quizScore = quizLesson ? (progressMap[quizLesson.id]?.quiz_score ?? null) : null;
 
   return (
     <div className="page-container animate-in" style={{ maxWidth: 1400 }}>
       <style>{`
-        @keyframes shake {
-          0%,100% { transform: translateX(0); }
-          20% { transform: translateX(-6px); }
-          40% { transform: translateX(6px); }
-          60% { transform: translateX(-4px); }
-          80% { transform: translateX(4px); }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes optPulse { 0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)} }
+        @keyframes confFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(200px) rotate(720deg);opacity:0} }
       `}</style>
+
       {/* Back link */}
-      <a href="/masterclass" style={{ fontSize: 13, color: 'var(--ki-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 20, textDecoration: 'none' }}>
-        ← Zurück zur Masterclass
+      <a
+        href="/masterclass"
+        style={{ fontSize: 13, color: 'var(--ki-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 20, textDecoration: 'none' }}
+      >
+        ← Zurück
       </a>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 32, alignItems: 'start' }}>
-        {/* === LEFT: Video + Content === */}
-        <div>
-          {/* Video Player */}
-          <div style={{ borderRadius: 'var(--r-lg)', overflow: 'hidden', background: '#000', marginBottom: 24 }}>
-            {mediaMode === 'audio' && currentLesson.audio_url ? (
-              <div style={{ padding: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 200, background: 'var(--ki-charcoal)' }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>🎧</div>
-                <div style={{ color: 'white', fontSize: 15, fontWeight: 500, marginBottom: 16 }}>{currentLesson.title}</div>
-                <audio controls src={currentLesson.audio_url} style={{ width: '100%', maxWidth: 500 }} />
-              </div>
-            ) : video ? (
-              <>
-                {video.type === 'youtube' && (
-                  <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-                    <iframe src={`https://www.youtube.com/embed/${video.id}?rel=0`} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                  </div>
-                )}
-                {video.type === 'vimeo' && (
-                  <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-                    <iframe src={`https://player.vimeo.com/video/${video.id}`} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
-                  </div>
-                )}
-                {video.type === 'wistia' && (
-                  <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-                    <iframe src={`https://fast.wistia.net/embed/iframe/${video.id}`} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} allow="autoplay; fullscreen" allowFullScreen />
-                  </div>
-                )}
-                {video.type === 'direct' && (
-                  <video controls style={{ width: '100%', display: 'block' }} src={video.url} />
-                )}
-                {video.type === 'iframe' && (
-                  <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-                    <iframe src={video.url} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} allowFullScreen />
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="card" style={{ aspectRatio: '16/9', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
-                <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(204,20,38,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>▶</div>
-                <div style={{ color: 'white', fontSize: 16, fontWeight: 600 }}>Video wird vorbereitet</div>
-                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>Interaktive Übung verfügbar ↓</div>
-              </div>
-            )}
-          </div>
-
-          {/* Audio/Video Toggle */}
-          {currentLesson.audio_url && (
-            <div style={{ display: 'flex', gap: 4, marginBottom: 24, background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-pill)', padding: 4, width: 'fit-content' }}>
-              <button onClick={() => setMediaMode('video')} className="btn" style={{ padding: '8px 16px', fontSize: 13, background: mediaMode === 'video' ? 'var(--ki-card)' : 'transparent', boxShadow: mediaMode === 'video' ? 'var(--sh-sm)' : 'none', color: mediaMode === 'video' ? 'var(--ki-text)' : 'var(--ki-text-secondary)' }}>
-                📺 Video
-              </button>
-              <button onClick={() => setMediaMode('audio')} className="btn" style={{ padding: '8px 16px', fontSize: 13, background: mediaMode === 'audio' ? 'var(--ki-card)' : 'transparent', boxShadow: mediaMode === 'audio' ? 'var(--sh-sm)' : 'none', color: mediaMode === 'audio' ? 'var(--ki-text)' : 'var(--ki-text-secondary)' }}>
-                🎧 Audio
-              </button>
-            </div>
-          )}
-
-          {/* Lesson Meta */}
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-              <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em' }}>{currentLesson.title}</h2>
-              <span className={`pill pill-${currentLesson.type === 'exercise' ? 'gold' : 'grey'}`}>{typePill}</span>
-              {currentLesson.duration_minutes && (
-                <span style={{ fontSize: 13, color: 'var(--ki-text-tertiary)' }}>{currentLesson.duration_minutes} Min.</span>
-              )}
-            </div>
-            {currentLesson.market_value_impact > 0 && (
-              <span className="pill pill-green" style={{ marginTop: 4 }}>+€{currentLesson.market_value_impact} Marktwert</span>
-            )}
-          </div>
-
-          {/* Description */}
-          {currentLesson.description && (
-            <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)', lineHeight: 1.7, marginBottom: 24 }}>
-              {currentLesson.description}
-            </p>
-          )}
-
-          {/* Content Box */}
-          {currentLesson.content && (
-            <div className="card" style={{ marginBottom: 24, background: 'var(--ki-bg-alt)', border: 'none' }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>Kerninhalt</div>
-              <div style={{ fontSize: 15, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{currentLesson.content}</div>
-            </div>
-          )}
-
-          {/* Exercise Box */}
-          {currentLesson.exercise && (
-            <div className="card" style={{ marginBottom: 24, background: 'rgba(204,20,38,0.03)', border: '1px solid rgba(204,20,38,0.1)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <span style={{ fontSize: 18 }}>✎</span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-red)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Übung</span>
-              </div>
-              <div style={{ fontSize: 15, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{currentLesson.exercise}</div>
-            </div>
-          )}
-
-          {/* Notes */}
-          <div className="card" style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>Deine Notizen</div>
-            <textarea
-              className="input"
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              onBlur={saveNotes}
-              placeholder="Notizen zu dieser Lektion..."
-              rows={4}
-              style={{ resize: 'vertical', marginBottom: 12 }}
-            />
-            <button onClick={saveNotes} className="btn btn-ghost" style={{ fontSize: 13 }} disabled={saving}>
-              {saving ? 'Speichert...' : 'Notizen speichern'}
-            </button>
-          </div>
-
-          {/* Quiz Section */}
-          {(() => {
-            const questions = currentLesson.quiz_data?.questions;
-            if (!questions || questions.length === 0) return null;
-            const allCorrect = questions.every((_, i) => quizResults[i] === 'correct');
-            return (
-              <div className="card" style={{ marginBottom: 24, border: '1px solid rgba(204,20,38,0.15)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-                  <span style={{ fontSize: 20 }}>🧠</span>
-                  <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>Quiz</span>
-                  {allCorrect && (
-                    <span className="pill pill-green" style={{ marginLeft: 'auto', fontSize: 12 }}>Abgeschlossen ✓</span>
-                  )}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-                  {questions.map((q, qi) => {
-                    const result = quizResults[qi];
-                    const selected = quizAnswers[qi];
-                    const isCorrect = result === 'correct';
-                    const isWrong = result === 'wrong';
-                    const showXp = quizXpPills[qi];
-                    return (
-                      <div key={qi}>
-                        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, lineHeight: 1.5 }}>
-                          {qi + 1}. {q.question}
-                          {showXp && (
-                            <span style={{
-                              marginLeft: 10, fontSize: 12, fontWeight: 700,
-                              background: 'var(--ki-success)', color: 'white',
-                              padding: '2px 10px', borderRadius: 20,
-                              animation: 'fadeInUp 0.3s ease',
-                            }}>+50 XP</span>
-                          )}
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                          {(q.options || []).map((opt, oi) => {
-                            const isSelected = selected === oi;
-                            const isThisCorrect = oi === q.correct;
-                            let bg = 'var(--ki-bg-alt)';
-                            let border = '1px solid var(--ki-border)';
-                            let color = 'var(--ki-text)';
-                            if (isCorrect && isThisCorrect) { bg = 'rgba(34,197,94,0.12)'; border = '1px solid rgba(34,197,94,0.4)'; color = '#16a34a'; }
-                            else if (isWrong && isSelected) { bg = 'rgba(239,68,68,0.10)'; border = '1px solid rgba(239,68,68,0.4)'; color = '#dc2626'; }
-                            return (
-                              <button
-                                key={oi}
-                                onClick={() => handleQuizAnswer(qi, oi, q.correct)}
-                                disabled={isCorrect}
-                                style={{
-                                  display: 'flex', alignItems: 'center', gap: 10,
-                                  padding: '10px 14px', borderRadius: 'var(--r-md)',
-                                  background: bg, border, color,
-                                  cursor: isCorrect ? 'default' : 'pointer',
-                                  textAlign: 'left', fontSize: 14,
-                                  transition: 'all 0.15s',
-                                  animation: (isWrong && isSelected) ? 'shake 0.4s ease' : 'none',
-                                  fontWeight: isSelected ? 600 : 400,
-                                }}
-                              >
-                                <span style={{
-                                  width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  fontSize: 11, fontWeight: 700,
-                                  background: isCorrect && isThisCorrect ? 'rgba(34,197,94,0.2)' : isWrong && isSelected ? 'rgba(239,68,68,0.2)' : 'var(--ki-card)',
-                                  border: '1px solid currentColor',
-                                }}>
-                                  {isCorrect && isThisCorrect ? '✓' : isWrong && isSelected ? '✗' : String.fromCharCode(65 + oi)}
-                                </span>
-                                {opt}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {isWrong && (
-                          <div style={{ marginTop: 10, padding: '8px 12px', borderRadius: 'var(--r-sm)', background: 'rgba(239,68,68,0.06)', fontSize: 13, color: '#dc2626' }}>
-                            Tipp: Schau dir den Lektionsinhalt nochmal an und versuche es erneut.
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                {allCorrect && !quizSaved && (
-                  <div style={{ marginTop: 20 }}>
-                    <button onClick={() => saveQuizProgress(questions)} className="btn btn-primary" style={{ fontSize: 13 }}>
-                      Quiz-Ergebnis speichern
-                    </button>
-                  </div>
-                )}
-                {quizSaved && (
-                  <div style={{ marginTop: 16, fontSize: 13, color: 'var(--ki-text-tertiary)' }}>
-                    Ergebnis gespeichert ✓
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-
-          {/* Practice Section */}
-          {currentLesson.practice_prompt && (
-            <div className="card" style={{ marginBottom: 24, border: '1px solid rgba(204,20,38,0.12)', background: 'rgba(204,20,38,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <span style={{ fontSize: 20 }}>✍️</span>
-                <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>Praxisaufgabe</span>
-                {practiceCompleted && (
-                  <span className="pill pill-green" style={{ marginLeft: 'auto', fontSize: 12 }}>Erledigt +30 XP ✓</span>
-                )}
-              </div>
-              <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
-                {currentLesson.practice_prompt}
-              </p>
-              <textarea
-                className="input"
-                value={practiceResponse}
-                onChange={e => setPracticeResponse(e.target.value)}
-                placeholder="Deine Antwort oder Ergebnis..."
-                rows={4}
-                style={{ resize: 'vertical', marginBottom: 12 }}
-                disabled={practiceCompleted}
-              />
-              {!practiceCompleted && (
-                <button
-                  onClick={savePractice}
-                  className="btn btn-primary"
-                  disabled={practiceSaving || !practiceResponse.trim()}
-                  style={{ fontSize: 13 }}
-                >
-                  {practiceSaving ? 'Speichert...' : 'Erledigt (+30 XP)'}
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
-            {!isCompleted ? (
-              <button onClick={markComplete} className="btn btn-primary" disabled={saving}>
-                {saving ? 'Speichert...' : '✓ Als erledigt markieren'}
-              </button>
-            ) : (
-              <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 16px' }}>✓ Abgeschlossen</span>
-            )}
-            <button onClick={() => { setActionItem(progressMap[currentLesson.id]?.action_item || ''); setShowAction(true); }} className="btn btn-secondary">
-              🎯 In Action
-            </button>
-          </div>
-
-          {/* Navigation */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 24, borderTop: '1px solid var(--ki-border)' }}>
-            <button
-              onClick={() => navigateTo(currentIndex - 1)}
-              className="btn btn-secondary"
-              disabled={currentIndex === 0}
-              style={{ opacity: currentIndex === 0 ? 0.4 : 1 }}
-            >
-              ← Zurück
-            </button>
-            <span style={{ fontSize: 13, color: 'var(--ki-text-tertiary)' }}>
-              {currentIndex + 1} / {totalCount}
-            </span>
-            <button
-              onClick={() => navigateTo(currentIndex + 1)}
-              className="btn btn-primary"
-              disabled={currentIndex === totalCount - 1}
-              style={{ opacity: currentIndex === totalCount - 1 ? 0.4 : 1 }}
-            >
-              Weiter →
-            </button>
-          </div>
+      {/* Course Header */}
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10, flexWrap: 'wrap' }}>
+          {course.icon && <span style={{ fontSize: 28 }}>{course.icon}</span>}
+          <h1 className="page-title" style={{ margin: 0 }}>{course.title}</h1>
+          <span className="pill pill-grey" style={{ fontSize: 13 }}>
+            Modul {currentIndex + 1}/{totalCount}
+          </span>
         </div>
-
-        {/* === RIGHT: Lesson Sidebar === */}
-        <div style={{ position: 'sticky', top: 24 }}>
-          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-            {/* Course Header */}
-            <div style={{ padding: '20px 20px 16px' }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8 }}>{course.title}</h3>
-              <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 12 }}>
-                {completedCount}/{totalCount} abgeschlossen
-              </div>
-              <div className="progress-bar">
-                <div className="progress-bar-fill" style={{ width: `${progressPct}%` }} />
-              </div>
-            </div>
-
-            {/* Lesson List */}
-            <div style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
-              {(course.modules || []).map(mod => (
-                <div key={mod.id}>
-                  <div style={{ padding: '12px 20px 6px', fontSize: 11, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', background: 'var(--ki-bg-alt)' }}>
-                    {mod.title}
-                  </div>
-                  {(mod.lessons || []).map(lesson => {
-                    const idx = allLessons.findIndex(l => l.id === lesson.id);
-                    const isActive = idx === currentIndex;
-                    const isDone = progressMap[lesson.id]?.completed;
-                    return (
-                      <button
-                        key={lesson.id}
-                        onClick={() => navigateTo(idx)}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: 10,
-                          width: '100%', padding: '10px 20px', border: 'none',
-                          background: isActive ? 'rgba(204,20,38,0.06)' : 'transparent',
-                          cursor: 'pointer', textAlign: 'left',
-                          transition: 'background var(--t-fast)',
-                          borderLeft: isActive ? '3px solid var(--ki-red)' : '3px solid transparent',
-                        }}
-                      >
-                        <span style={{
-                          width: 20, height: 20, borderRadius: '50%',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 11, fontWeight: 700, flexShrink: 0,
-                          background: isDone ? 'var(--ki-success)' : isActive ? 'var(--ki-red)' : 'var(--grey-5)',
-                          color: isDone || isActive ? 'white' : 'var(--ki-text-tertiary)',
-                        }}>
-                          {isDone ? '✓' : isActive ? '▶' : '○'}
-                        </span>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{
-                            fontSize: 13, fontWeight: isActive ? 600 : 400,
-                            color: isActive ? 'var(--ki-text)' : 'var(--ki-text-secondary)',
-                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                          }}>
-                            {lesson.title}
-                          </div>
-                          {lesson.duration_minutes && (
-                            <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)' }}>{lesson.duration_minutes} Min.</div>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="progress-bar" style={{ flex: 1, maxWidth: 320 }}>
+            <div className="progress-bar-fill" style={{ width: `${progressPct}%` }} />
           </div>
+          <span style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', flexShrink: 0 }}>
+            {completedCount}/{totalCount} abgeschlossen
+          </span>
         </div>
       </div>
 
-      {/* Action Modal */}
-      {showAction && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)' }} onClick={() => setShowAction(false)}>
-          <div className="card" style={{ width: '100%', maxWidth: 520, margin: 16 }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>🎯 In Action</div>
-            <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 20 }}>Was ist dein konkreter nächster Schritt aus dieser Lektion?</p>
-            <textarea
-              className="input"
-              value={actionItem}
-              onChange={e => setActionItem(e.target.value)}
-              placeholder="z.B. LinkedIn-Profil aktualisieren, Netzwerk-Mail versenden..."
-              rows={4}
-              style={{ resize: 'vertical', marginBottom: 16 }}
-            />
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text-secondary)', display: 'block', marginBottom: 6 }}>Deadline</label>
-              <input
-                type="date"
-                className="input"
-                value={actionDeadline}
-                onChange={e => setActionDeadline(e.target.value)}
-              />
-            </div>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowAction(false)} className="btn btn-ghost">Abbrechen</button>
-              <button onClick={saveAction} className="btn btn-primary" disabled={saving || !actionItem.trim()}>
-                {saving ? 'Speichert...' : 'Speichern'}
-              </button>
+      {/* Course Completion Screen */}
+      {allDone ? (
+        <CourseCompletionScreen course={course} quizScore={quizScore} />
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 32, alignItems: 'start' }}>
+          {/* LEFT: Current lesson content */}
+          <div>
+            {currentLesson && (
+              <>
+                {/* Lesson header */}
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 22 }}>{getLessonTypeIcon(lessonType)}</span>
+                    <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', margin: 0 }}>{currentLesson.title}</h2>
+                    {currentLesson.duration_minutes && (
+                      <span style={{ fontSize: 13, color: 'var(--ki-text-tertiary)' }}>{currentLesson.duration_minutes} Min.</span>
+                    )}
+                  </div>
+                  {currentLesson.description && (
+                    <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', lineHeight: 1.7, margin: 0 }}>
+                      {currentLesson.description}
+                    </p>
+                  )}
+                </div>
+
+                {/* Lesson type view */}
+                {lessonType === 'video' && (
+                  <VideoLesson
+                    lesson={currentLesson}
+                    isCompleted={isCompleted}
+                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                    saving={saving}
+                  />
+                )}
+                {lessonType === 'interactive' && (
+                  <InteractiveLesson
+                    lesson={{ ...currentLesson, _userId: userId }}
+                    isCompleted={isCompleted}
+                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                    saving={saving}
+                  />
+                )}
+                {lessonType === 'exercise' && (
+                  <ExerciseLesson
+                    lesson={currentLesson}
+                    isCompleted={isCompleted}
+                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                    saving={saving}
+                  />
+                )}
+                {lessonType === 'quiz' && (
+                  <QuizLesson
+                    lesson={currentLesson}
+                    courseTitle={course.title}
+                    isCompleted={isCompleted}
+                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                    saving={saving}
+                    userId={userId}
+                  />
+                )}
+                {!['video', 'interactive', 'exercise', 'quiz'].includes(lessonType) && (
+                  <VideoLesson
+                    lesson={currentLesson}
+                    isCompleted={isCompleted}
+                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                    saving={saving}
+                  />
+                )}
+
+                {/* Navigation */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 28, marginTop: 28, borderTop: '1px solid var(--ki-border)' }}>
+                  <button
+                    onClick={() => navigateTo(currentIndex - 1)}
+                    className="btn btn-secondary"
+                    disabled={currentIndex === 0}
+                    style={{ opacity: currentIndex === 0 ? 0.4 : 1 }}
+                  >
+                    ← Zurück
+                  </button>
+                  <span style={{ fontSize: 13, color: 'var(--ki-text-tertiary)' }}>
+                    {currentIndex + 1} / {totalCount}
+                  </span>
+                  <button
+                    onClick={() => navigateTo(currentIndex + 1)}
+                    className="btn btn-primary"
+                    disabled={currentIndex >= totalCount - 1 || !isCompleted}
+                    style={{ opacity: (currentIndex >= totalCount - 1 || !isCompleted) ? 0.4 : 1 }}
+                  >
+                    Weiter →
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* RIGHT: Module Sidebar */}
+          <div style={{ position: 'sticky', top: 24 }}>
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div style={{ padding: '18px 18px 14px' }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text-tertiary)', marginBottom: 10 }}>
+                  Kurs-Inhalt
+                </div>
+              </div>
+              <div style={{ maxHeight: 'calc(100vh - 260px)', overflowY: 'auto' }}>
+                {allLessons.map((lesson, idx) => {
+                  const isActive = idx === currentIndex;
+                  const isDone = !!progressMap[lesson.id]?.completed;
+                  const locked = !isUnlocked(idx);
+                  const type = lesson.lesson_type || lesson.type || 'video';
+                  let statusIcon = locked ? '🔒' : isDone ? '✅' : isActive ? '▶' : '○';
+                  return (
+                    <button
+                      key={lesson.id}
+                      onClick={() => !locked && navigateTo(idx)}
+                      disabled={locked}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        width: '100%',
+                        padding: '10px 18px',
+                        border: 'none',
+                        background: isActive ? 'rgba(204,20,38,0.06)' : 'transparent',
+                        cursor: locked ? 'not-allowed' : 'pointer',
+                        textAlign: 'left',
+                        transition: 'background 0.15s',
+                        borderLeft: isActive ? '3px solid var(--ki-red)' : '3px solid transparent',
+                        opacity: locked ? 0.5 : 1,
+                      }}
+                    >
+                      <span style={{ fontSize: 14, flexShrink: 0 }}>{statusIcon}</span>
+                      <span style={{ fontSize: 12, flexShrink: 0 }}>{getLessonTypeIcon(type)}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontSize: 13,
+                          fontWeight: isActive ? 600 : 400,
+                          color: isActive ? 'var(--ki-text)' : 'var(--ki-text-secondary)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}>
+                          {lesson.title}
+                        </div>
+                        {lesson.duration_minutes && (
+                          <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)' }}>{lesson.duration_minutes} Min.</div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

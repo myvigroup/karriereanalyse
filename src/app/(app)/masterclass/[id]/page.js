@@ -15,7 +15,7 @@ export default async function CoursePlayerPage({ params }) {
 
   if (!course) redirect('/masterclass');
 
-  // Sort modules and lessons by sort_order
+  // Sort modules and lessons
   if (course.modules) {
     course.modules.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
     course.modules.forEach(m => {
@@ -25,17 +25,12 @@ export default async function CoursePlayerPage({ params }) {
 
   const { data: progress } = await supabase
     .from('lesson_progress')
-    .select('lesson_id, completed, notes')
-    .eq('user_id', user.id);
-
-  const { data: analysisResults } = await supabase
-    .from('analysis_results')
-    .select('field_id, score, competency_fields(title, slug)')
+    .select('lesson_id, completed, quiz_score, practice_completed')
     .eq('user_id', user.id);
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('current_salary, target_salary')
+    .select('total_points')
     .eq('id', user.id)
     .single();
 
@@ -43,7 +38,6 @@ export default async function CoursePlayerPage({ params }) {
     <CoursePlayerClient
       course={course}
       progress={progress || []}
-      analysisResults={analysisResults || []}
       profile={profile}
       userId={user.id}
     />
