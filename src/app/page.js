@@ -21,16 +21,21 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section style={{ textAlign: 'center', padding: '80px 24px 60px', maxWidth: 800, margin: '0 auto' }}>
-        <div className="pill pill-red" style={{ marginBottom: 16 }}>Dein Karriere-Betriebssystem</div>
+        <div className="pill pill-red" style={{ marginBottom: 16 }}>Die Blaupause f\u00FCr deine berufliche Zukunft</div>
         <h1 style={{ fontSize: 52, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 16, color: 'var(--ki-text)' }}>
-          Karriere ist kein Zufall.<br />Karriere ist ein System.
+          Erhalte jetzt dein<br />Karriere-Blutbild.
         </h1>
         <p style={{ fontSize: 18, color: 'var(--ki-text-secondary)', maxWidth: 560, margin: '0 auto 32px', lineHeight: 1.6 }}>
-          KI-gest\u00FCtzte Analyse, pers\u00F6nliches Coaching und strategische Tools \u2014 alles in einer Plattform.
+          KI-gest\u00FCtzte Analyse, pers\u00F6nliches Coaching und strategische Tools \u2014 alles in einer Plattform f\u00FCr deinen beruflichen Erfolg.
         </p>
-        <a href="/auth/login" className="btn btn-primary" style={{ fontSize: 16, padding: '14px 32px' }}>
-          Kostenlos starten \u2192
-        </a>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <a href="/auth/register" className="btn btn-primary" style={{ fontSize: 16, padding: '14px 32px' }}>
+            Kostenlos starten {'\u2192'}
+          </a>
+          <a href="/angebote" className="btn btn-secondary" style={{ fontSize: 16, padding: '14px 32px' }}>
+            Angebote ansehen
+          </a>
+        </div>
       </section>
 
       {/* Features */}
@@ -79,17 +84,17 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer style={{ borderTop: '1px solid var(--ki-border)', padding: '32px 24px', textAlign: 'center' }}>
-        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', color: 'var(--ki-red)', textTransform: 'uppercase', marginBottom: 12 }}>Karriere-Institut</div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 24, fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', color: 'var(--ki-red)', textTransform: 'uppercase', marginBottom: 8 }}>Das Karriere-Institut</div>
+        <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginBottom: 12 }}>+49 511 5468 4547 | info@daskarriereinstitut.de</div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16, flexWrap: 'wrap' }}>
           <a href="/auth/login" style={{ color: 'var(--ki-text-secondary)' }}>Login</a>
-          <span>\u00B7</span>
-          <span>Datenschutz</span>
-          <span>\u00B7</span>
-          <span>Impressum</span>
-          <span>\u00B7</span>
-          <span>Kontakt</span>
+          <a href="/angebote" style={{ color: 'var(--ki-text-secondary)' }}>Angebote</a>
+          <a href="/impressum" style={{ color: 'var(--ki-text-secondary)' }}>Impressum</a>
+          <a href="/datenschutz" style={{ color: 'var(--ki-text-secondary)' }}>Datenschutz</a>
+          <a href="/widerruf" style={{ color: 'var(--ki-text-secondary)' }}>Widerruf</a>
+          <a href="/agb" style={{ color: 'var(--ki-text-secondary)' }}>AGB</a>
         </div>
-        <p style={{ fontSize: 12, color: 'var(--ki-text-tertiary)' }}>\u00A9 {new Date().getFullYear()} Karriere-Institut. Alle Rechte vorbehalten.</p>
+        <p style={{ fontSize: 12, color: 'var(--ki-text-tertiary)' }}>{'\u00A9'} 2026 - Das Karriere-Institut. Alle Rechte vorbehalten.</p>
       </footer>
     </div>
   );

@@ -1,44 +1,51 @@
-# Phase 3 FINAL — Build Status
+# Phase 3+4 Build Status
 
-## Block 1: Fundament
-- [x] Step 1: SQL Migration 007_phase3_complete.sql
-- [x] Step 2: EmptyState Component
-- [x] Step 3: LoadingSkeleton + ErrorFallback
-- [x] Step 4: Executive-Mode Helper
+## Phase 3 — KOMPLETT (alle 30 Steps erledigt)
 
-## Block 2: Onboarding & UX
-- [x] Step 5: Onboarding-Wizard (DSGVO-Checkbox, dsgvo_consent_at)
-- [x] Step 6: Gamification-Engine (COACH_SESSION added)
-- [x] Step 7: InfoTooltips (15 Module, Executive-Mode)
-- [x] Step 8: Guided App-Tour (8 Steps, Auto-Resume, data-tour Attributes)
+## Phase 4 — IN PROGRESS
 
-## Block 3: Module (alle existieren aus vorheriger Session)
-- [x] Step 9: B1 Karriereanalyse (Szenario, Video, +200 XP, InfoTooltip)
-- [x] Step 10: B2 Masterclass (Quiz, Practice, Video, InfoTooltip)
-- [x] Step 11: B3 Gehaltsdatenbank (Simulator, "Was wäre wenn", InfoTooltip)
-- [x] Step 12: B4 Marktwert (Challenges, Branchenvergleich, InfoTooltip)
-- [x] Step 13: B5 Bewerbungen (KI-Generator, Reminder, InfoTooltip)
-- [x] Step 14: B6 KI-Coach (Stimmung, Quick-Prompts, InfoTooltip)
-- [x] Step 15: B7 Entscheidungs-Kompass (4 Phasen, InfoTooltip)
-- [x] Step 16: B8 Netzwerk (CRM, Stakeholder-Map, InfoTooltip)
-- [x] Step 17: B9 LinkedIn (Headline-Gen, SSI, InfoTooltip)
-- [x] Step 18: B10 Exit-Strategie (Runway, Burnout, InfoTooltip)
-- [x] Step 19: B11 Dokumenten-Safe (DragDrop, Filter, InfoTooltip)
-- [x] Step 20: B12 Gehalts-Tagebuch (FAB, Heatmap, InfoTooltip)
-- [x] Step 21: B13 Karrierepfad (Skill-Tree, Levels, InfoTooltip)
-- [x] Dashboard + Profil: InfoTooltip + Tour-Reset + DSGVO-Buttons
+### Block 1: Setup
+- [x] Step 1: SQL Migration 008_phase4_monetization.sql
+- [x] Step 2: npm install stripe @stripe/stripe-js resend
+- [x] Step 3: .env.local mit Stripe/Resend/Calendly Platzhaltern
 
-## Block 4: Infrastruktur
-- [x] Step 22: Mobile Responsive + MobileNav (aus vorheriger Session)
-- [x] Step 23: Notification Engine (aus vorheriger Session)
-- [x] Step 24: Landing Page (aus vorheriger Session)
-- [x] Step 25: DSGVO (CookieBanner, Datenschutz, Impressum, Data-Export API, Konto-Löschung)
-- [x] Step 26: Rate Limiting (coach-chat, generate-application, zeugnis-decode)
-- [x] Step 27: Coach-Dashboard (KPIs, Klienten-Liste, Notizen)
-- [x] Step 28: Global Search (Ctrl+K, Kurse/Kontakte/Bewerbungen)
-- [x] Step 29: Analytics + Admin Dashboard (aus vorheriger Session)
-- [x] Step 30: Accessibility (focus-visible, outline styles)
+### Block 2: Stripe (Kern-Monetarisierung)
+- [x] Step 4: A1 Stripe Config (dynamische Preise aus env)
+- [x] Step 5: A2 Angebote-Seite (5 Produkte, Interval-Toggle)
+- [x] Step 6: A3 Checkout Flow (Trial, Invoice, MwSt)
+- [x] Step 7: A4 Webhook Handler (Signatur-Verifiziert, Idempotent)
+- [x] Step 8: A5 Success Pages (pro Produkt, Calendly für Coaching)
+- [x] Step 9: A6 Paywall + Access Control + UpgradePrompt
+- [x] Step 10: A7 Billing im Profil (Abo, Portal, Trial-Banner)
+- [x] Bonus: Widerrufs-Seite + AGB-Seite + Billing-Portal API
 
-## Block 5: API + Git
-- [x] Step 31: API Routes (generate-application, linkedin-optimize, zeugnis-decode, daily-impulse, data-export, merge-documents)
-- [ ] Step 32: Git Commit + Push
+### Block 3: Community
+- [x] Step 11: Sidebar Navigation (Community-Link)
+- [x] Step 12: Achievement-Wall (Feed, Likes, Filter, Paywall)
+- [x] Step 13: Peer-Matching (Score-basiert, Anfragen, Accept)
+- [x] Step 14: Erfolgs-Stories (Vorher/Nachher, Moderation, Likes)
+
+### Block 4: Email
+- [x] Step 15: Email Service (Resend, Mock-Fallback)
+- [x] Step 16: 12 Email-Templates (HTML, branded, CTA-Buttons)
+- [x] Step 17: Cron-Jobs (täglich + wöchentlich, Duplikat-Schutz)
+- [x] Step 18: Unsubscribe (1-Klick, DSGVO-konform, vercel.json)
+
+### Block 5: Multi-Tenant
+- [x] Step 19: Org-Admin Dashboard (KPIs, Mitglieder, Seat-Counter)
+- [x] Step 20: Invite Flow (Email-Einladung, Seat-Limit, Auto-Add)
+
+### Block 6: Dark Mode + PWA
+- [x] Step 21: Dark Mode (CSS Variables, ThemeToggle in Sidebar)
+- [x] Step 22: PWA (Manifest, Service Worker, Meta Tags, Install Prompt, SVG Icons)
+
+### Block 7: Advanced
+- [x] Step 23: Streak-Freeze (Freeze-Tokens, 7d-Streak = +1 Freeze, max 3)
+- [x] Step 24: Smart Recommendations (Priorität-basiert, Top-3 auf Dashboard)
+- [x] Step 25: Coaching Marketplace (Coach-Cards, Calendly, Reviews)
+- [x] Step 26: Changelog (Timeline, "Neu" Badge, Auto-Mark-Seen)
+- [x] Step 27: Admin Content Management (Quiz-Editor, Praxis-Aufgaben)
+- [x] Step 28: Rechtliche Seiten (Landing Page Branding, Footer-Links)
+
+### Block 8: Git
+- [ ] Steps 29-30: Build + Commit

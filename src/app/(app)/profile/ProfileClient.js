@@ -191,6 +191,50 @@ export default function ProfileClient({ profile: initialProfile, userBadges, all
         </div>
       </div>
 
+      {/* Abo & Billing */}
+      <div className="card" style={{ marginTop: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Mein Abo & Rechnungen</h3>
+        <div style={{ display: 'flex', gap: 24, marginBottom: 16, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Aktueller Plan</div>
+            <div style={{ fontSize: 18, fontWeight: 700 }}>{profile?.subscription_plan || 'FREE'}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Status</div>
+            <span className={`pill ${profile?.subscription_status === 'active' || profile?.subscription_status === 'trialing' ? 'pill-green' : profile?.subscription_status === 'past_due' ? 'pill-gold' : 'pill-grey'}`}>
+              {profile?.subscription_status === 'active' ? 'Aktiv' : profile?.subscription_status === 'trialing' ? 'Testphase' : profile?.subscription_status === 'past_due' ? '\u00DCberf\u00E4llig' : profile?.subscription_status === 'canceled' ? 'Gek\u00FCndigt' : 'Inaktiv'}
+            </span>
+          </div>
+          {profile?.subscription_ends_at && (
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>L\u00E4uft bis</div>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{new Date(profile.subscription_ends_at).toLocaleDateString('de-DE')}</div>
+            </div>
+          )}
+        </div>
+
+        {profile?.subscription_status === 'trialing' && (
+          <div style={{ padding: '10px 16px', background: 'rgba(212,160,23,0.08)', borderRadius: 'var(--r-md)', marginBottom: 12, fontSize: 13, color: 'var(--ki-warning)' }}>
+            {'\u26A0\uFE0F'} Deine Testphase endet am {profile?.subscription_ends_at ? new Date(profile.subscription_ends_at).toLocaleDateString('de-DE') : 'bald'}.
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {profile?.stripe_customer_id && (
+            <button className="btn btn-secondary" style={{ fontSize: 13 }} onClick={async () => {
+              const res = await fetch('/api/billing-portal', { method: 'POST' });
+              const data = await res.json();
+              if (data.url) window.location.href = data.url;
+            }}>
+              Abo verwalten / Rechnungen
+            </button>
+          )}
+          {(!profile?.subscription_plan || profile?.subscription_plan === 'FREE') && (
+            <a href="/angebote" className="btn btn-primary" style={{ fontSize: 13 }}>Upgrade</a>
+          )}
+        </div>
+      </div>
+
       {/* Einstellungen */}
       <div className="card" style={{ marginTop: 24 }}>
         <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Einstellungen</h3>

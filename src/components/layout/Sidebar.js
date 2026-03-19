@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { AUDIO_INTROS, AUDIO_TTS_FALLBACKS } from '@/lib/audio-config';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: '◻' },
@@ -18,8 +19,11 @@ const NAV_ITEMS = [
   { label: 'Netzwerk', path: '/network', icon: '🤝' },
   { label: 'LinkedIn & Branding', path: '/branding', icon: '🔗' },
   { label: 'Exit-Strategie', path: '/strategy/exit', icon: '🚪' },
-  { label: 'Karrierepfad', path: '/career', icon: '↗' },
-  { label: 'Profil', path: '/profile', icon: '○' },
+  { label: 'Karrierepfad', path: '/career', icon: '\u2197' },
+  { label: 'Community', path: '/community/achievements', icon: '\u{1F465}' },
+  { label: 'Marketplace', path: '/marketplace', icon: '\u{1F3AF}' },
+  { label: 'Changelog', path: '/changelog', icon: '\u{1F4CB}' },
+  { label: 'Profil', path: '/profile', icon: '\u25CB' },
 ];
 
 const ADMIN_ITEMS = [
@@ -27,6 +31,7 @@ const ADMIN_ITEMS = [
   { label: 'Nutzerverwaltung', path: '/admin/users', icon: '\u229E' },
   { label: 'Kursverwaltung', path: '/admin/courses', icon: '\u22A1' },
   { label: 'Analytics', path: '/admin/analytics', icon: '\u{1F4C8}' },
+  { label: 'Content', path: '/admin/content', icon: '📝' },
   { label: 'Meine Klienten', path: '/coach-dashboard', icon: '📋' },
 ];
 
@@ -253,6 +258,9 @@ export default function Sidebar({ profile }) {
           </>
         )}
       </nav>
+
+      {/* Theme Toggle */}
+      <ThemeToggle />
 
       {/* Logout */}
       <button onClick={handleLogout} style={{

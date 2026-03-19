@@ -74,7 +74,7 @@ export async function awardPoints(supabase, userId, action) {
 export async function checkStreak(supabase, userId) {
   const { data: profile } = await supabase
     .from('profiles')
-    .select('streak_count, last_streak_date, total_points')
+    .select('streak_count, last_streak_date, total_points, streak_freezes')
     .eq('id', userId)
     .single();
 
@@ -82,20 +82,31 @@ export async function checkStreak(supabase, userId) {
 
   const today = new Date().toISOString().split('T')[0];
   if (profile.last_streak_date === today) {
-    return { streak: profile.streak_count, alreadyCounted: true };
+    return { streak: profile.streak_count, alreadyCounted: true, freezes: profile.streak_freezes || 0 };
   }
 
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
   let newStreak;
+  let freezeUsed = false;
+  let newFreezes = profile.streak_freezes || 0;
+
   if (profile.last_streak_date === yesterday) {
     newStreak = (profile.streak_count || 0) + 1;
+  } else if (newFreezes > 0 && profile.streak_count > 0) {
+    // Streak-Freeze: skip one day without losing streak
+    newStreak = (profile.streak_count || 0) + 1;
+    newFreezes -= 1;
+    freezeUsed = true;
   } else {
     newStreak = 1;
   }
 
   let bonusPoints = POINT_ACTIONS.DAILY_LOGIN;
   if (newStreak === 3) bonusPoints += POINT_ACTIONS.STREAK_3;
-  if (newStreak === 7) bonusPoints += POINT_ACTIONS.STREAK_7;
+  if (newStreak === 7) {
+    bonusPoints += POINT_ACTIONS.STREAK_7;
+    newFreezes = Math.min(newFreezes + 1, 3); // Earn a freeze token at 7-day streak
+  }
   if (newStreak === 30) bonusPoints += POINT_ACTIONS.STREAK_30;
 
   const newTotal = (profile.total_points || 0) + bonusPoints;
@@ -106,8 +117,9 @@ export async function checkStreak(supabase, userId) {
       streak_count: newStreak,
       last_streak_date: today,
       total_points: newTotal,
+      streak_freezes: newFreezes,
     })
     .eq('id', userId);
 
-  return { streak: newStreak, bonus: bonusPoints, totalXP: newTotal };
+  return { streak: newStreak, bonus: bonusPoints, totalXP: newTotal, freezeUsed, freezes: newFreezes };
 }
