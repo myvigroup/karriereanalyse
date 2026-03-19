@@ -38,40 +38,82 @@ const ANALYSE_TOOLS = [
 // ─── Hardcoded Seminare ───────────────────────────────────────────────────────
 const SEMINARE = [
   {
-    id: 'kommunikation',
-    icon: '💬',
-    title: 'Kommunikation Intensiv-Seminar',
-    features: ['Klare & wirkungsvolle Gesprächsführung', 'Konflikte professionell lösen', 'Überzeugende Körpersprache'],
+    id: 'sem-achtsamkeit', icon: '\u{1F9D8}',
+    title: 'Achtsamkeit',
+    subtitle: 'Gelassenheit ist trainierbar',
+    description: 'Nur selten nimmt man sich neben dem Beruf und reiz\u00FCberfluteten Alltag Zeit f\u00FCr sich und die eigenen Bed\u00FCrfnisse.',
   },
   {
-    id: 'work-life',
-    icon: '⚖️',
-    title: 'Work-Life-Balance Intensiv-Seminar',
-    features: ['Energie & Ressourcen managen', 'Grenzen setzen ohne Schuldgefühle', 'Nachhaltige Erholung verstehen'],
+    id: 'sem-homeoffice', icon: '\u{1F3E0}',
+    title: 'Arbeiten aus dem Home Office',
+    subtitle: 'Effizient arbeiten, flexibel leben',
+    description: 'Strategien und Impulse, um auch von zu Hause aus ausgeglichen und effektiv deiner Arbeit nachzugehen.',
   },
   {
-    id: 'networking',
-    icon: '🤝',
-    title: 'Networking Intensiv-Seminar',
-    features: ['Kontakte authentisch aufbauen', 'LinkedIn strategisch nutzen', 'Follow-up & Beziehungspflege'],
+    id: 'sem-knigge', icon: '\u{1F454}',
+    title: 'Business Knigge',
+    subtitle: 'Der erste Eindruck z\u00E4hlt, der zweite bleibt',
+    description: 'Die richtigen Formen und Kommunikationsf\u00E4higkeiten im Berufs- und Gesch\u00E4ftsumfeld.',
   },
   {
-    id: 'speedreading',
-    icon: '📖',
-    title: 'Speedreading Intensiv-Seminar',
-    features: ['Lesegeschwindigkeit verdoppeln', 'Texte gezielt selektieren', 'Wissen langfristig behalten'],
+    id: 'sem-kommunikation', icon: '\u{1F4AC}',
+    title: 'Kommunikation',
+    subtitle: 'Verst\u00E4ndigung als Schl\u00FCssel zum Erfolg',
+    description: 'Effektive Kommunikation mit Kollegen und Gesch\u00E4ftspartnern.',
   },
   {
-    id: 'typgerechtes-lernen',
-    icon: '🧠',
-    title: 'Typgerechtes Lernen Intensiv-Seminar',
-    features: ['Lerntyp erkennen & nutzen', 'Lernmethoden passend anpassen', 'Motivation dauerhaft sichern'],
+    id: 'sem-konflikt', icon: '\u{1F91C}',
+    title: 'Konfliktmanagement',
+    subtitle: 'Aus Krisen Chancen machen',
+    description: 'Strategien und Techniken zur erfolgreichen Konfliktbew\u00E4ltigung.',
   },
   {
-    id: 'prioritaetenmanagement',
-    icon: '🎯',
-    title: 'Prioritätenmanagement Intensiv-Seminar',
-    features: ['Wichtiges von Dringendem trennen', 'Fokus trotz Unterbrechungen halten', 'Produktivitätssysteme einführen'],
+    id: 'sem-motivation', icon: '\u{1F525}',
+    title: 'Selbstmotivation',
+    subtitle: 'Dein Warum, dein Motor',
+    description: 'Wie du dich effektiv motivierst, langfristig und diszipliniert an eigenen Zielen arbeitest.',
+  },
+  {
+    id: 'sem-networking', icon: '\u{1F91D}',
+    title: 'Networking',
+    subtitle: 'Kontakte kn\u00FCpfen, Vertrauen aufbauen',
+    description: 'F\u00E4higkeiten im Aufbau und der Pflege von beruflichen Beziehungen verbessern.',
+  },
+  {
+    id: 'sem-leadership', icon: '\u{1F451}',
+    title: 'Personal Leadership',
+    subtitle: 'Authentisch f\u00FChren, wirksam bleiben',
+    description: 'Wie du aus W\u00FCnschen echte Ziele machst und diese erreichen kannst.',
+  },
+  {
+    id: 'sem-prioritaeten', icon: '\u{1F3AF}',
+    title: 'Priorit\u00E4tenmanagement',
+    subtitle: 'Nicht alles gleichzeitig, sondern das Richtige zuerst',
+    description: 'Bewusster Umgang mit unserer Zeit als Schl\u00FCssel zum beruflichen Erfolg.',
+  },
+  {
+    id: 'sem-rhetorik', icon: '\u{1F3A4}',
+    title: 'Rhetorik, Dialektik, Kinesik',
+    subtitle: '\u00DCberzeugen mit Worten und Wirkung',
+    description: 'Wirkungsvoll, passend und adressatengerecht kommunizieren in jeder Situation.',
+  },
+  {
+    id: 'sem-speedreading', icon: '\u{1F4D6}',
+    title: 'Speedreading',
+    subtitle: 'Geschwindigkeit trifft Verst\u00E4ndnis',
+    description: 'Grundlagen des \u00FCberdurchschnittlich schnellen Lesens mit hohem Textverst\u00E4ndnis.',
+  },
+  {
+    id: 'sem-typgerecht', icon: '\u{1F9E0}',
+    title: 'Typgerechtes Lernen',
+    subtitle: 'Finde deinen Weg zum Wissen',
+    description: 'Warum lernen, denken und vergessen wir unterschiedlich? Was motiviert uns zum Lernen?',
+  },
+  {
+    id: 'sem-worklife', icon: '\u2696\uFE0F',
+    title: 'Work-Life-Balance',
+    subtitle: 'Gesundheit trifft Leistung',
+    description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.',
   },
 ];
 
@@ -460,27 +502,30 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                     <span style={{ fontSize: 32 }}>{seminar.icon}</span>
-                    <span style={{ fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em', lineHeight: 1.3 }}>
-                      {seminar.title}
-                    </span>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em', lineHeight: 1.3 }}>{seminar.title}</div>
+                      <div style={{ fontSize: 13, color: 'var(--ki-red)', fontWeight: 500 }}>{seminar.subtitle}</div>
+                    </div>
                   </div>
                   <span className="pill pill-green" style={{ fontSize: 11, flexShrink: 0 }}>Live</span>
                 </div>
 
+                {/* Description */}
+                <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.5 }}>{seminar.description}</p>
+
                 {/* Meta */}
-                <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>
-                  📅 Samstags &nbsp;|&nbsp; ⏰ 09:30 – 12:00 &nbsp;|&nbsp; Ab 99€
+                <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span>{'\u{1F4C5}'} Samstags</span>
+                  <span>|</span>
+                  <span>{'\u23F0'} 09:30 \u2013 12:00</span>
+                  <span>|</span>
+                  <span style={{ fontWeight: 600, color: 'var(--ki-text)' }}>Ab 99\u20AC</span>
                 </div>
 
-                {/* Features */}
-                <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {seminar.features.map((f, fi) => (
-                    <li key={fi} style={{ fontSize: 13, color: 'var(--ki-text-secondary)', display: 'flex', gap: 8 }}>
-                      <span style={{ color: 'var(--ki-success)', flexShrink: 0 }}>✓</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
+                {/* Includes */}
+                <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)' }}>
+                  Inkl. Arbeitsmaterialien + Teilnahme-Zertifikat
+                </div>
 
                 {/* CTA */}
                 <a
