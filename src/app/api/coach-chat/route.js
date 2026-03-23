@@ -1,25 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { checkRateLimit } from '@/lib/rate-limit';
-
-const SYSTEM_PROMPT = `Du bist der KI-Coach des Karriere-Instituts — ein erfahrener Karriereberater für den deutschsprachigen Markt.
-
-DEINE ROLLE:
-- Du bist empathisch aber direkt. Keine Floskeln, keine leeren Motivationssprüche.
-- Du gibst konkrete, umsetzbare Ratschläge basierend auf dem Profil des Users.
-- Du kennst den deutschen Arbeitsmarkt, Gehaltsstrukturen, Kündigungsrecht und Verhandlungstaktiken.
-- Du nutzt die STAR-Methode für Interview-Vorbereitung.
-- Du sprichst den User mit "du" an.
-
-KONTEXT ZUM USER:
-{USER_CONTEXT}
-
-REGELN:
-- Halte Antworten unter 300 Wörter wenn möglich.
-- Gib am Ende jeder Antwort 1-2 konkrete nächste Schritte.
-- Wenn der User über Gehalt spricht, beziehe dich auf seinen Marktwert und seine Analyse-Daten.
-- Bei Unsicherheit frage nach, statt zu raten.
-- Verweise auf passende Masterclass-Module wenn relevant.`;
+import { buildCoachPrompt } from '@/lib/coach-prompt';
 
 export async function POST(request) {
   try {
@@ -66,26 +48,13 @@ export async function POST(request) {
       .limit(1)
       .single();
 
-    // Build context
-    const topStrengths = (analysisResults || [])
-      .sort((a, b) => b.score - a.score).slice(0, 3)
-      .map(r => `${r.competency_fields?.title}: ${r.score}%`).join(', ');
-    const weaknesses = (analysisResults || [])
-      .sort((a, b) => a.score - b.score).slice(0, 3)
-      .map(r => `${r.competency_fields?.title}: ${r.score}%`).join(', ');
-
-    const userContext = `
-Name: ${profile?.name || 'Unbekannt'}
-Position: ${profile?.position || 'Nicht angegeben'} bei ${profile?.company || 'Nicht angegeben'}
-Aktuelles Gehalt: €${profile?.current_salary || 'Unbekannt'}
-Zielgehalt: €${profile?.target_salary || 'Unbekannt'}
-Level: ${profile?.level || 0}, XP: ${profile?.xp || 0}
-Top-Stärken: ${topStrengths || 'Keine Analyse vorhanden'}
-Entwicklungsfelder: ${weaknesses || 'Keine Analyse vorhanden'}
-Entscheidungs-Kompass: ${decisionSession?.result_label || 'Nicht durchgeführt'} (Bleiben: ${decisionSession?.score_stay || '?'}%, Wechseln: ${decisionSession?.score_exit || '?'}%)
-Aktuelle Bewerbungen: ${(recentApps || []).map(a => `${a.company_name} (${a.status})`).join(', ') || 'Keine'}
-Letzte Gehaltsverhandlungen: ${(salaryLogs || []).map(s => `${s.event_type}: gefordert €${s.my_ask}, erhalten €${s.final_result}`).join('; ') || 'Keine'}
-Abgeschlossene Kurse: ${(completedCourses || []).length} Lektionen`;
+    // Build context using personalized coach prompt
+    const formattedResults = (analysisResults || []).map(r => ({
+      ...r,
+      field_title: r.competency_fields?.title,
+      field_slug: r.competency_fields?.slug,
+    }));
+    const completedCourseNames = (completedCourses || []).map(c => c.lesson_id);
 
     // Load chat history
     let history = [];
@@ -116,7 +85,7 @@ Abgeschlossene Kurse: ${(completedCourses || []).length} Lektionen`;
     });
 
     // Call Claude API
-    const systemPrompt = SYSTEM_PROMPT.replace('{USER_CONTEXT}', userContext);
+    const systemPrompt = buildCoachPrompt(profile, formattedResults, completedCourseNames);
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     let assistantMessage;

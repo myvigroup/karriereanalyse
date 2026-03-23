@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { AUDIO_INTROS, AUDIO_TTS_FALLBACKS } from '@/lib/audio-config';
+import { getPersonalization } from '@/lib/personalization';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: '◻' },
@@ -13,7 +14,6 @@ const NAV_ITEMS = [
   { label: 'Gehaltsdatenbank', path: '/gehalt', icon: '📊' },
   { label: 'Marktwert', path: '/marktwert', icon: '💰' },
   { label: 'Bewerbungen', path: '/applications', icon: '✉' },
-  { label: 'Dokumenten-Safe', path: '/pre-coaching', icon: '◈' },
   { label: 'Netzwerk', path: '/network', icon: '🤝' },
   { label: 'Jobportale & Plattformen', path: '/branding', icon: '🔗' },
   { label: 'Exit-Strategie', path: '/strategy/exit', icon: '🚪' },
@@ -31,11 +31,14 @@ const ADMIN_ITEMS = [
   { label: 'Meine Klienten', path: '/coach-dashboard', icon: '📋' },
 ];
 
-export default function Sidebar({ profile }) {
+export default function Sidebar({ profile, analysisResults }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
   const isAdmin = profile?.role === 'admin' || profile?.role === 'coach';
+
+  const { visibleModules, recommendations } = getPersonalization(analysisResults, profile?.phase);
+  const recommendedCourseIds = recommendations.map(r => r.courseId);
 
   const [notifications, setNotifications] = useState([]);
   const [showNotifs, setShowNotifs] = useState(false);
@@ -218,16 +221,27 @@ export default function Sidebar({ profile }) {
 
       {/* Navigation */}
       <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {NAV_ITEMS.map(item => {
+        {NAV_ITEMS.filter(item => {
+          if (!visibleModules) return true;
+          const pathKey = item.path.replace(/^\//, '');
+          return visibleModules.some(m => pathKey === m || pathKey.startsWith(m + '/'));
+        }).map(item => {
           const tourAttr = item.path === '/dashboard' ? { 'data-tour-dashboard': '' }
             : item.path === '/coach' ? { 'data-tour-coach': '' }
             : item.path === '/analyse' ? { 'data-tour-analyse': '' }
             : item.path === '/profile' ? { 'data-tour-profile': '' }
             : {};
+          const isRecommended = recommendations.some(r => item.path.includes(r.title?.toLowerCase?.() || '___'));
           return (
           <a key={item.path} href={item.path} style={linkStyle(item.path)} {...tourAttr}>
             <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>{item.icon}</span>
             <span style={{ flex: 1 }}>{item.label}</span>
+            {isRecommended && (
+              <span style={{
+                fontSize: 10, fontWeight: 600, color: 'var(--ki-red)', background: 'rgba(204,20,38,0.08)',
+                padding: '2px 6px', borderRadius: 'var(--r-sm)', lineHeight: 1.4,
+              }}>Empfohlen</span>
+            )}
             {AUDIO_INTROS[item.path] && (
               <span
                 onClick={(e) => playIntro(item.path, e)}

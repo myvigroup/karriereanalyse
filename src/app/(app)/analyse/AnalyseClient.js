@@ -654,7 +654,7 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
     }, 500);
   }, [currentField, answers, questionIndex, fieldScores, fieldIndex, supabase, userId]);
 
-  const nextField = useCallback(() => {
+  const nextField = useCallback(async () => {
     setShowFieldResult(false);
     if (fieldIndex >= 12) {
       // All done!
@@ -665,6 +665,12 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
         awardPoints(supabase, userId, 'FIRST_ANALYSIS');
         setXpAwarded(true);
       }
+      // Grant 30-day premium trial
+      await supabase.from('profiles').update({
+        subscription_plan: 'PREMIUM_TRIAL',
+        subscription_status: 'active',
+        subscription_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      }).eq('id', userId);
     } else {
       const nextIdx = fieldIndex + 1;
       const nextCat = KOMPETENZFELDER[nextIdx]?.category;

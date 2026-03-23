@@ -25,7 +25,7 @@ const TAG_MAP = Object.fromEntries(TAG_OPTIONS.map(t => [t.key, t]));
 const EMPTY_FORM = {
   first_name: '', last_name: '', company: '', role: '', phone: '',
   email: '', city: '', linkedin_url: '', xing_url: '',
-  tags: [], relationship_strength: 0, how_met: '', notes: '',
+  tags: [], relationship_strength: 0, how_met: '', what_can_i_give: '', notes: '',
 };
 
 const labelStyle = {
@@ -49,6 +49,14 @@ function getContactStatus(daysSince) {
   if (daysSince < 14)    return 'fresh';
   if (daysSince <= 30)   return 'warm';
   return 'cold';
+}
+
+function getContactFreshness(lastContactDate) {
+  if (!lastContactDate) return { color: '#6B7280', label: 'Neu', icon: '\u26AA' };
+  const days = Math.floor((Date.now() - new Date(lastContactDate)) / (1000 * 60 * 60 * 24));
+  if (days <= 14) return { color: '#10B981', label: 'Aktiv', icon: '\uD83D\uDFE2' };
+  if (days <= 60) return { color: '#F59E0B', label: 'Touchpoint fällig', icon: '\uD83D\uDFE1' };
+  return { color: '#EF4444', label: 'Schläft ein!', icon: '\uD83D\uDD34' };
 }
 
 function statusBorder(status) {
@@ -163,6 +171,9 @@ export default function NetworkClient({ contacts: initial, userId }) {
   const [noteText, setNoteText]           = useState('');
   const [expandedNotes, setExpandedNotes] = useState({});
   const [busy, setBusy]                   = useState(false);
+  const [messageModal, setMessageModal]   = useState(null);
+  const [messageText, setMessageText]     = useState('');
+  const [messageCopied, setMessageCopied] = useState(false);
 
   /* ---- derived ---- */
   const now = Date.now();
@@ -207,7 +218,19 @@ export default function NetworkClient({ contacts: initial, userId }) {
     const tagCounts = {};
     contacts.forEach(c => (c.tags || []).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; }));
     const score = calcNetworkScore(contacts);
-    return { total, active, inactive, tagCounts, score };
+
+    // Ampel-System stats
+    let ampelGreen = 0, ampelYellow = 0, ampelRed = 0, ampelNew = 0;
+    contacts.forEach(c => {
+      const d = c.last_contact_date || c.last_contacted_at;
+      const freshness = getContactFreshness(d);
+      if (freshness.label === 'Aktiv') ampelGreen++;
+      else if (freshness.label === 'Touchpoint fällig') ampelYellow++;
+      else if (freshness.label === 'Schläft ein!') ampelRed++;
+      else ampelNew++;
+    });
+
+    return { total, active, inactive, tagCounts, score, ampelGreen, ampelYellow, ampelRed, ampelNew };
   }, [contacts, enriched]);
 
   /* ---- helpers ---- */
@@ -238,6 +261,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
       tags: c.tags || [],
       relationship_strength: c.relationship_strength || 0,
       how_met: c.how_met || '',
+      what_can_i_give: c.what_can_i_give || '',
       notes: c.notes || '',
     });
     setModalOpen(true);
@@ -264,6 +288,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
       tags: form.tags,
       relationship_strength: form.relationship_strength,
       how_met: form.how_met.trim() || null,
+      what_can_i_give: form.what_can_i_give.trim() || null,
       notes: form.notes.trim() || null,
       updated_at: new Date().toISOString(),
     };
@@ -402,6 +427,42 @@ export default function NetworkClient({ contacts: initial, userId }) {
       </div>
 
       {/* ============================================================ */}
+      {/*  2b. Ampel-System Summary Bar                                  */}
+      {/* ============================================================ */}
+      {contacts.length > 0 && (
+        <div
+          className="card animate-in"
+          style={{
+            marginBottom: 24, padding: '14px 20px',
+            display: 'flex', flexWrap: 'wrap', gap: '8px 20px',
+            alignItems: 'center', fontSize: 14,
+          }}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>{'\uD83D\uDFE2'}</span>
+            <strong>{stats.ampelGreen}</strong>
+            <span style={{ color: 'var(--ki-text-secondary)' }}>aktive Kontakte</span>
+          </span>
+          <span style={{ color: 'var(--ki-text-tertiary)' }}>|</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>{'\uD83D\uDFE1'}</span>
+            <strong>{stats.ampelYellow}</strong>
+            <span style={{ color: 'var(--ki-text-secondary)' }}>brauchen Touchpoint</span>
+          </span>
+          <span style={{ color: 'var(--ki-text-tertiary)' }}>|</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>{'\uD83D\uDD34'}</span>
+            <strong>{stats.ampelRed}</strong>
+            <span style={{ color: 'var(--ki-text-secondary)' }}>schlafen ein</span>
+          </span>
+          <span style={{ color: 'var(--ki-text-tertiary)' }}>|</span>
+          <span style={{ fontWeight: 600 }}>
+            Total: {stats.total}
+          </span>
+        </div>
+      )}
+
+      {/* ============================================================ */}
       {/*  3. Search + Sort Bar                                         */}
       {/* ============================================================ */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 20 }}>
@@ -470,6 +531,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
         {filtered.map((c, idx) => {
           const border = statusBorder(c.status);
           const notesOpen = expandedNotes[c.id];
+          const freshness = getContactFreshness(c.last_contact_date || c.last_contacted_at);
 
           return (
             <div
@@ -492,10 +554,19 @@ export default function NetworkClient({ contacts: initial, userId }) {
                 {/* Info block */}
                 <div style={{ flex: 1, minWidth: 200 }}>
 
-                  {/* Name + stars + status pill */}
+                  {/* Name + stars + Ampel badge + status pill */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <strong style={{ fontSize: 16 }}>{c.name}</strong>
                     <StarRating value={c.relationship_strength} onChange={val => updateStars(c.id, val)} />
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: '2px 8px',
+                      borderRadius: 'var(--r-pill)',
+                      background: `${freshness.color}18`,
+                      color: freshness.color,
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                    }}>
+                      {freshness.icon} {freshness.label}
+                    </span>
                     {c.status === 'warm' && (
                       <span className="pill pill-gold" style={{ fontSize: 11 }}>Bald melden!</span>
                     )}
@@ -555,6 +626,16 @@ export default function NetworkClient({ contacts: initial, userId }) {
                     </p>
                   )}
 
+                  {/* What can I give */}
+                  {c.what_can_i_give && (
+                    <p style={{
+                      fontSize: 12, color: 'var(--ki-text-tertiary)',
+                      marginTop: 4, fontStyle: 'italic',
+                    }}>
+                      Was kann ich geben: {c.what_can_i_give}
+                    </p>
+                  )}
+
                   {/* Notes (expandable) */}
                   {c.notes && (
                     <div style={{ marginTop: 8 }}>
@@ -594,6 +675,20 @@ export default function NetworkClient({ contacts: initial, userId }) {
                   >
                     &#x1F4DE; Kontaktiert
                   </button>
+                  {c.email && (
+                    <button
+                      className="btn btn-secondary"
+                      style={{ fontSize: 13, padding: '6px 12px' }}
+                      onClick={() => {
+                        const firstName = (c.name || '').split(' ')[0] || 'du';
+                        setMessageText(`Hi ${firstName}, ich hoffe dir geht es gut! `);
+                        setMessageModal(c.id);
+                        setMessageCopied(false);
+                      }}
+                    >
+                      &#x2709;&#xFE0F; Nachricht
+                    </button>
+                  )}
                   <button
                     className="btn btn-secondary"
                     style={{ fontSize: 13, padding: '6px 12px' }}
@@ -885,6 +980,18 @@ export default function NetworkClient({ contacts: initial, userId }) {
               />
             </div>
 
+            {/* Was kann ICH dieser Person geben? */}
+            <div style={{ marginBottom: 12 }}>
+              <label style={labelStyle}>Was kann ICH dieser Person geben?</label>
+              <textarea
+                className="input" rows={2}
+                value={form.what_can_i_give}
+                onChange={e => f('what_can_i_give', e.target.value)}
+                placeholder="z.B. Kontakte vermitteln, Fachwissen teilen, Feedback geben\u2026"
+                style={{ width: '100%', resize: 'vertical' }}
+              />
+            </div>
+
             {/* Notizen */}
             <div style={{ marginBottom: 20 }}>
               <label style={labelStyle}>Notizen</label>
@@ -904,6 +1011,54 @@ export default function NetworkClient({ contacts: initial, userId }) {
               </button>
               <button className="btn btn-primary" onClick={saveContact} disabled={busy}>
                 {busy ? 'Speichern\u2026' : editId ? 'Aktualisieren' : 'Kontakt anlegen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/*  Quick Message Modal                                           */}
+      {/* ============================================================ */}
+      {messageModal && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000, padding: 16,
+          }}
+          onClick={() => setMessageModal(null)}
+        >
+          <div
+            className="card"
+            style={{ maxWidth: 480, width: '100%', padding: 24 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ marginBottom: 4 }}>Nachricht schreiben</h3>
+            <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
+              Bearbeite die Nachricht und kopiere sie in die Zwischenablage.
+            </p>
+            <textarea
+              className="input"
+              rows={5}
+              value={messageText}
+              onChange={e => setMessageText(e.target.value)}
+              style={{ width: '100%', resize: 'vertical', marginBottom: 16, fontSize: 14, lineHeight: 1.6 }}
+              autoFocus
+            />
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button className="btn btn-ghost" onClick={() => setMessageModal(null)}>
+                Abbrechen
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  navigator.clipboard.writeText(messageText);
+                  setMessageCopied(true);
+                  setTimeout(() => setMessageCopied(false), 2000);
+                }}
+              >
+                {messageCopied ? '\u2705 Kopiert!' : 'In Zwischenablage kopieren'}
               </button>
             </div>
           </div>
