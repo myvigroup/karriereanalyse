@@ -5,6 +5,7 @@ import MobileNav from '@/components/layout/MobileNav';
 import AppTour from '@/components/ui/AppTour';
 import GlobalSearch from '@/components/ui/GlobalSearch';
 import InstallPrompt from '@/components/ui/InstallPrompt';
+import SOSButton from '@/components/elearning/SOSButton';
 
 export default async function AppLayout({ children }) {
   const supabase = createClient();
@@ -29,6 +30,7 @@ export default async function AppLayout({ children }) {
       <AppTour profile={profile} userId={user.id} />
       <GlobalSearch />
       <InstallPrompt />
+      <SOSButton userId={user.id} />
     </div>
   );
 }

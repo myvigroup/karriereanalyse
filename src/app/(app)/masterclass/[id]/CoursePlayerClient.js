@@ -4,6 +4,23 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { awardPoints } from '@/lib/gamification';
 
+// Prioritätenmanagement widgets
+import SelbstdiagnoseWidget from '@/components/elearning/SelbstdiagnoseWidget';
+import BossFightWidget from '@/components/elearning/BossFightWidget';
+import DragDropSortierung from '@/components/elearning/DragDropSortierung';
+import SzenarioPlayer from '@/components/elearning/SzenarioPlayer';
+import ChronotypTest from '@/components/elearning/ChronotypTest';
+import BrainDumpTimer from '@/components/elearning/BrainDumpTimer';
+import NeinSkripteWidget from '@/components/elearning/NeinSkripteWidget';
+import JournalEntry from '@/components/elearning/JournalEntry';
+import AbschlussTestWidget from '@/components/elearning/AbschlussTestWidget';
+import {
+  BOSS_FIGHTS, EISENHOWER_SORTIERUNG, NEIN_SKRIPTE,
+  SZENARIEN, JOURNAL_FRAGEN, MODUL_QUIZ, ABSCHLUSSTEST,
+} from '@/lib/elearning/prioritaeten-content';
+
+const PRIO_COURSE_ID = 'c1000000-0000-0000-0000-000000000006';
+
 // --- Quiz data per course slug/title keyword ---
 const QUIZ_DATA = {
   kommunikation: [
@@ -337,7 +354,262 @@ function getLessonTypeIcon(type) {
   if (type === 'interactive') return '🎮';
   if (type === 'exercise') return '🏋️';
   if (type === 'quiz') return '📝';
+  if (type === 'scenario') return '🎭';
+  if (type === 'bossfight') return '⚔️';
   return '📄';
+}
+
+// =====================
+// PRIORITÄTENMANAGEMENT WIDGET ROUTER
+// =====================
+function PrioLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, saving, userId, courseTitle }) {
+  const title = (lesson.title || '').toLowerCase();
+  const modOrder = lesson._moduleSortOrder ?? -1;
+
+  // Helper: get module-specific quiz questions
+  function getModulQuiz() {
+    const key = `modul_${modOrder}`;
+    return MODUL_QUIZ?.[key] || null;
+  }
+
+  // Modul 0: Selbstdiagnose
+  if (modOrder === 0 && lessonType === 'interactive') {
+    return isCompleted ? (
+      <CompletedBadge text="Selbstdiagnose abgeschlossen" />
+    ) : (
+      <SelbstdiagnoseWidget onComplete={onMarkComplete} />
+    );
+  }
+
+  // Boss-Fight: Cypher (Modul 1)
+  if (title.includes('boss-fight') && title.includes('cypher')) {
+    return isCompleted ? (
+      <CompletedBadge text="Boss-Fight: Cypher besiegt! +150 XP" />
+    ) : (
+      <BossFightWidget config={BOSS_FIGHTS.cypher} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Boss-Fight: Dr. Dringend (Modul 7)
+  if (title.includes('boss-fight') && title.includes('dringend')) {
+    return isCompleted ? (
+      <CompletedBadge text="Boss-Fight: Dr. Dringend besiegt! +200 XP" />
+    ) : (
+      <BossFightWidget config={BOSS_FIGHTS.dr_dringend} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Drag & Drop Eisenhower (Modul 2)
+  if (title.includes('drag') && title.includes('drop')) {
+    return isCompleted ? (
+      <CompletedBadge text="Eisenhower-Sortierung abgeschlossen" />
+    ) : (
+      <DragDropSortierung config={EISENHOWER_SORTIERUNG} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Szenario: Posteingang (Modul 1)
+  if (title.includes('posteingang')) {
+    return isCompleted ? (
+      <CompletedBadge text="Szenario abgeschlossen" />
+    ) : (
+      <SzenarioPlayer config={SZENARIEN.posteingang} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Szenario: Tag der Entscheidung (Modul 6)
+  if (title.includes('tag der entscheidung')) {
+    return isCompleted ? (
+      <CompletedBadge text="Szenario abgeschlossen" />
+    ) : (
+      <SzenarioPlayer config={SZENARIEN.entscheidung} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Chronotyp-Test (Modul 3)
+  if (title.includes('chronotyp')) {
+    return isCompleted ? (
+      <CompletedBadge text="Chronotyp-Test abgeschlossen" />
+    ) : (
+      <ChronotypTest onComplete={onMarkComplete} />
+    );
+  }
+
+  // Tagesplan Generator (Modul 3)
+  if (title.includes('tagesplan')) {
+    return isCompleted ? (
+      <CompletedBadge text="Tagesplan erstellt" />
+    ) : (
+      <ChronotypTest onComplete={onMarkComplete} />
+    );
+  }
+
+  // Brain-Dump (Modul 4)
+  if (title.includes('brain-dump') || title.includes('brain dump')) {
+    return isCompleted ? (
+      <CompletedBadge text="Brain-Dump abgeschlossen" />
+    ) : (
+      <BrainDumpTimer onComplete={onMarkComplete} />
+    );
+  }
+
+  // Nein-Skripte (Modul 7)
+  if (title.includes('skripte')) {
+    return isCompleted ? (
+      <CompletedBadge text="Nein-Skripte gelernt" />
+    ) : (
+      <NeinSkripteWidget skripte={NEIN_SKRIPTE} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Abschlusstest (Modul 8)
+  if (title.includes('abschlusstest')) {
+    return isCompleted ? (
+      <CompletedBadge text="Abschlusstest bestanden! +500 XP" />
+    ) : (
+      <AbschlussTestWidget onComplete={onMarkComplete} userId={userId} />
+    );
+  }
+
+  // 30-Tage Transfer-Challenge (Modul 8)
+  if (title.includes('30-tage') || title.includes('transfer')) {
+    return isCompleted ? (
+      <CompletedBadge text="30-Tage Challenge gestartet" />
+    ) : (
+      <div className="card" style={{ padding: 32, textAlign: 'center' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🚀</div>
+        <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>30-Tage Transfer-Challenge</h3>
+        <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24, lineHeight: 1.7 }}>
+          Ab heute wendest du jeden Tag eine Technik aus dem Kurs an. Du bekommst täglich einen Impuls.
+          Dein Ziel: 30 Tage am Stück Prioritäten bewusst setzen.
+        </p>
+        <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving}>
+          {saving ? 'Startet...' : 'Challenge starten!'}
+        </button>
+      </div>
+    );
+  }
+
+  // Module-specific quizzes (Reflexion & Quiz)
+  if (lessonType === 'quiz') {
+    const modulQuiz = getModulQuiz();
+    if (modulQuiz) {
+      return (
+        <QuizLesson
+          lesson={lesson}
+          courseTitle={courseTitle}
+          isCompleted={isCompleted}
+          onMarkComplete={onMarkComplete}
+          saving={saving}
+          userId={userId}
+          overrideQuestions={modulQuiz}
+        />
+      );
+    }
+    return (
+      <QuizLesson
+        lesson={lesson}
+        courseTitle={courseTitle}
+        isCompleted={isCompleted}
+        onMarkComplete={onMarkComplete}
+        saving={saving}
+        userId={userId}
+      />
+    );
+  }
+
+  // Scenario type fallback
+  if (lessonType === 'scenario') {
+    return isCompleted ? (
+      <CompletedBadge text="Szenario abgeschlossen" />
+    ) : (
+      <VideoLesson
+        lesson={lesson}
+        isCompleted={isCompleted}
+        onMarkComplete={onMarkComplete}
+        saving={saving}
+      />
+    );
+  }
+
+  // Exercise lessons with journal
+  if (lessonType === 'exercise') {
+    const journalQ = JOURNAL_FRAGEN?.[modOrder] || null;
+    if (journalQ) {
+      return isCompleted ? (
+        <CompletedBadge text="Übung abgeschlossen +40 XP" />
+      ) : (
+        <div>
+          <ExerciseLesson
+            lesson={lesson}
+            isCompleted={isCompleted}
+            onMarkComplete={onMarkComplete}
+            saving={saving}
+          />
+          <div style={{ marginTop: 24 }}>
+            <JournalEntry frage={journalQ} modulIndex={modOrder} userId={userId} onComplete={() => {}} />
+          </div>
+        </div>
+      );
+    }
+    return (
+      <ExerciseLesson
+        lesson={lesson}
+        isCompleted={isCompleted}
+        onMarkComplete={onMarkComplete}
+        saving={saving}
+      />
+    );
+  }
+
+  // Video lessons with story overlay for story lessons
+  if (lessonType === 'video') {
+    return (
+      <VideoLesson
+        lesson={lesson}
+        isCompleted={isCompleted}
+        onMarkComplete={onMarkComplete}
+        saving={saving}
+      />
+    );
+  }
+
+  // Interactive fallback
+  if (lessonType === 'interactive') {
+    return (
+      <InteractiveLesson
+        lesson={{ ...lesson, _userId: userId }}
+        isCompleted={isCompleted}
+        onMarkComplete={onMarkComplete}
+        saving={saving}
+      />
+    );
+  }
+
+  // Default fallback
+  return (
+    <VideoLesson
+      lesson={lesson}
+      isCompleted={isCompleted}
+      onMarkComplete={onMarkComplete}
+      saving={saving}
+    />
+  );
+}
+
+// Completed badge for already-done prio lessons
+function CompletedBadge({ text }) {
+  return (
+    <div className="card" style={{
+      padding: '24px 32px',
+      textAlign: 'center',
+      background: 'rgba(34,197,94,0.05)',
+      border: '1px solid rgba(34,197,94,0.2)',
+    }}>
+      <span style={{ fontSize: 32, display: 'block', marginBottom: 8 }}>✅</span>
+      <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>{text}</span>
+    </div>
+  );
 }
 
 // Confetti particle component
@@ -610,9 +882,9 @@ function ExerciseLesson({ lesson, isCompleted, onMarkComplete, saving }) {
   );
 }
 
-function QuizLesson({ lesson, courseTitle, isCompleted, onMarkComplete, saving, userId }) {
+function QuizLesson({ lesson, courseTitle, isCompleted, onMarkComplete, saving, userId, overrideQuestions }) {
   const supabase = createClient();
-  const questions = getQuizForCourse(courseTitle) || [];
+  const questions = overrideQuestions || getQuizForCourse(courseTitle) || [];
   const [answers, setAnswers] = useState({});
   const [results, setResults] = useState({});
   const [xpPills, setXpPills] = useState({});
@@ -851,11 +1123,19 @@ function CourseCompletionScreen({ course, quizScore }) {
 export default function CoursePlayerClient({ course, progress, analysisResults, profile, userId }) {
   const supabase = createClient();
 
-  // Flatten lessons from the single module
+  const isPrioCourse = course.id === PRIO_COURSE_ID;
+
+  // Flatten lessons from ALL modules (sorted by module sort_order, then lesson sort_order)
   const allLessons = useMemo(() => {
-    const mod = course.modules?.[0];
-    if (!mod) return [];
-    return (mod.lessons || []).map(lesson => ({ ...lesson }));
+    const modules = (course.modules || []).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    const lessons = [];
+    for (const mod of modules) {
+      const sorted = (mod.lessons || []).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      for (const lesson of sorted) {
+        lessons.push({ ...lesson, _moduleTitle: mod.title, _moduleSortOrder: mod.sort_order ?? 0 });
+      }
+    }
+    return lessons;
   }, [course]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -986,47 +1266,61 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                 </div>
 
                 {/* Lesson type view */}
-                {lessonType === 'video' && (
-                  <VideoLesson
+                {isPrioCourse ? (
+                  <PrioLessonRouter
                     lesson={currentLesson}
-                    isCompleted={isCompleted}
-                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
-                    saving={saving}
-                  />
-                )}
-                {lessonType === 'interactive' && (
-                  <InteractiveLesson
-                    lesson={{ ...currentLesson, _userId: userId }}
-                    isCompleted={isCompleted}
-                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
-                    saving={saving}
-                  />
-                )}
-                {lessonType === 'exercise' && (
-                  <ExerciseLesson
-                    lesson={currentLesson}
-                    isCompleted={isCompleted}
-                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
-                    saving={saving}
-                  />
-                )}
-                {lessonType === 'quiz' && (
-                  <QuizLesson
-                    lesson={currentLesson}
-                    courseTitle={course.title}
+                    lessonType={lessonType}
                     isCompleted={isCompleted}
                     onMarkComplete={() => markComplete(getXpForType(lessonType))}
                     saving={saving}
                     userId={userId}
+                    courseTitle={course.title}
                   />
-                )}
-                {!['video', 'interactive', 'exercise', 'quiz'].includes(lessonType) && (
-                  <VideoLesson
-                    lesson={currentLesson}
-                    isCompleted={isCompleted}
-                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
-                    saving={saving}
-                  />
+                ) : (
+                  <>
+                    {lessonType === 'video' && (
+                      <VideoLesson
+                        lesson={currentLesson}
+                        isCompleted={isCompleted}
+                        onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                        saving={saving}
+                      />
+                    )}
+                    {lessonType === 'interactive' && (
+                      <InteractiveLesson
+                        lesson={{ ...currentLesson, _userId: userId }}
+                        isCompleted={isCompleted}
+                        onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                        saving={saving}
+                      />
+                    )}
+                    {lessonType === 'exercise' && (
+                      <ExerciseLesson
+                        lesson={currentLesson}
+                        isCompleted={isCompleted}
+                        onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                        saving={saving}
+                      />
+                    )}
+                    {lessonType === 'quiz' && (
+                      <QuizLesson
+                        lesson={currentLesson}
+                        courseTitle={course.title}
+                        isCompleted={isCompleted}
+                        onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                        saving={saving}
+                        userId={userId}
+                      />
+                    )}
+                    {!['video', 'interactive', 'exercise', 'quiz'].includes(lessonType) && (
+                      <VideoLesson
+                        lesson={currentLesson}
+                        isCompleted={isCompleted}
+                        onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                        saving={saving}
+                      />
+                    )}
+                  </>
                 )}
 
                 {/* Navigation */}
@@ -1070,44 +1364,61 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                   const locked = !isUnlocked(idx);
                   const type = lesson.lesson_type || lesson.type || 'video';
                   let statusIcon = locked ? '🔒' : isDone ? '✅' : isActive ? '▶' : '○';
+                  // Show module header for multi-module courses
+                  const showModuleHeader = isPrioCourse && (idx === 0 || lesson._moduleSortOrder !== allLessons[idx - 1]?._moduleSortOrder);
                   return (
-                    <button
-                      key={lesson.id}
-                      onClick={() => !locked && navigateTo(idx)}
-                      disabled={locked}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        width: '100%',
-                        padding: '10px 18px',
-                        border: 'none',
-                        background: isActive ? 'rgba(204,20,38,0.06)' : 'transparent',
-                        cursor: locked ? 'not-allowed' : 'pointer',
-                        textAlign: 'left',
-                        transition: 'background 0.15s',
-                        borderLeft: isActive ? '3px solid var(--ki-red)' : '3px solid transparent',
-                        opacity: locked ? 0.5 : 1,
-                      }}
-                    >
-                      <span style={{ fontSize: 14, flexShrink: 0 }}>{statusIcon}</span>
-                      <span style={{ fontSize: 12, flexShrink: 0 }}>{getLessonTypeIcon(type)}</span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
+                    <div key={lesson.id}>
+                      {showModuleHeader && (
                         <div style={{
-                          fontSize: 13,
-                          fontWeight: isActive ? 600 : 400,
-                          color: isActive ? 'var(--ki-text)' : 'var(--ki-text-secondary)',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
+                          padding: '10px 18px 4px',
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: 'var(--ki-red)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          borderTop: idx > 0 ? '1px solid var(--ki-border)' : 'none',
+                          marginTop: idx > 0 ? 4 : 0,
                         }}>
-                          {lesson.title}
+                          {lesson._moduleTitle}
                         </div>
-                        {lesson.duration_minutes && (
-                          <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)' }}>{lesson.duration_minutes} Min.</div>
-                        )}
-                      </div>
-                    </button>
+                      )}
+                      <button
+                        onClick={() => !locked && navigateTo(idx)}
+                        disabled={locked}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          width: '100%',
+                          padding: '10px 18px',
+                          border: 'none',
+                          background: isActive ? 'rgba(204,20,38,0.06)' : 'transparent',
+                          cursor: locked ? 'not-allowed' : 'pointer',
+                          textAlign: 'left',
+                          transition: 'background 0.15s',
+                          borderLeft: isActive ? '3px solid var(--ki-red)' : '3px solid transparent',
+                          opacity: locked ? 0.5 : 1,
+                        }}
+                      >
+                        <span style={{ fontSize: 14, flexShrink: 0 }}>{statusIcon}</span>
+                        <span style={{ fontSize: 12, flexShrink: 0 }}>{getLessonTypeIcon(type)}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            fontSize: 13,
+                            fontWeight: isActive ? 600 : 400,
+                            color: isActive ? 'var(--ki-text)' : 'var(--ki-text-secondary)',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}>
+                            {lesson.title}
+                          </div>
+                          {lesson.duration_minutes && (
+                            <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)' }}>{lesson.duration_minutes} Min.</div>
+                          )}
+                        </div>
+                      </button>
+                    </div>
                   );
                 })}
               </div>
