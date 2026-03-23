@@ -5,12 +5,12 @@ const PRODUCTS = [
   {
     key: 'ANALYSE_STUDENT',
     name: 'Karriere-Analyse',
-    audience: 'F\u00FCr Studierende',
-    description: 'Lege den Grundstein f\u00FCr deine Karriere. Erhalte dein Karriere-Blutbild.',
-    features: ['65 Fragen Assessment', '50+ Seiten Report', 'Radar-Chart', 'Handlungsempfehlungen'],
-    fallbackPrice: '24,99\u20AC',
-    badge: null,
-    cta: 'Analyse starten',
+    audience: 'Für alle',
+    description: 'Lege den Grundstein für deine Karriere. Erhalte dein Karriere-Blutbild.',
+    features: ['65 Fragen Assessment', '50+ Seiten Report', 'Radar-Chart', 'Handlungsempfehlungen', '1 Monat Premium gratis'],
+    fallbackPrice: 'KOSTENLOS',
+    badge: '🎁 Gratis',
+    cta: 'Kostenlose Analyse starten',
     type: 'one_time',
   },
   {

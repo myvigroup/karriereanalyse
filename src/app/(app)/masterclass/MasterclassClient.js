@@ -12,6 +12,7 @@ const ANALYSE_TOOLS = [
     subtitle: 'Erkenne deine Biostruktur',
     pricing: 'Online-Test + Coaching | Preis auf Anfrage',
     badge: '⭐ Premium',
+    link: 'https://www.daskarriereinstitut.de/de/e/structogram-82?uId=2',
     features: [
       'Persönlichkeitsstruktur wissenschaftlich analysieren',
       'Stärken & blinde Flecken erkennen',
@@ -26,6 +27,7 @@ const ANALYSE_TOOLS = [
     subtitle: 'Emotionale Intelligenz verstehen',
     pricing: 'Test + Auswertung | 499€ pro Person',
     badge: '⭐ Premium',
+    link: 'https://www.daskarriereinstitut.de/de/e/insights-mdi-trimetrix-eq-analyse-und-auswertungsgespr%C3%A4ch-94?uId=2',
     features: [
       'EQ-Profil mit internationalem Standard',
       'Verhaltens- & Motivationsanalyse',
@@ -457,8 +459,8 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
 
                 {/* CTA */}
                 <div style={{ flexShrink: 0, alignSelf: 'center' }}>
-                  <a href="/angebote" className="btn btn-primary" style={{ fontSize: 13, padding: '10px 22px' }}>
-                    Buchen →
+                  <a href={tool.link || '/angebote'} target={tool.link ? '_blank' : undefined} rel={tool.link ? 'noopener noreferrer' : undefined} className="btn btn-primary" style={{ fontSize: 13, padding: '10px 22px' }}>
+                    Mehr erfahren →
                   </a>
                 </div>
               </div>

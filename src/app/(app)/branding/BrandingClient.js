@@ -9,6 +9,25 @@ import { awardPoints } from '@/lib/gamification';
 
 const PLATFORMS = [
   {
+    id: 'wir-personalberater',
+    name: 'Wir:Personalberater Jobportal',
+    color: '#CC1426',
+    icon: '⭐',
+    url: 'https://jobportal.wirpersonalberater.de/#/',
+    highlight: true,
+    checklist: [
+      'Account erstellen',
+      'Profil vollständig ausfüllen',
+      'Lebenslauf hochladen',
+      'Jobpräferenzen einstellen',
+    ],
+    tips: [
+      'Exklusive Stellen aus unserem Netzwerk',
+      'Direkte Verbindung zu Personalberatern',
+      'Viele Positionen werden hier exklusiv ausgeschrieben',
+    ],
+  },
+  {
     id: 'linkedin',
     name: 'LinkedIn',
     color: '#0A66C2',
