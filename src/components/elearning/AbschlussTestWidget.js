@@ -7,7 +7,7 @@ import { ABSCHLUSSTEST } from '@/lib/elearning/prioritaeten-content';
 const PASS_THRESHOLD = 7;
 const XP_REWARD = 500;
 
-export default function AbschlussTestWidget({ onComplete, userId }) {
+export default function AbschlussTestWidget({ onComplete, userId, overrideQuestions }) {
   const [phase, setPhase] = useState('intro'); // intro | quiz | result
   const [currentQ, setCurrentQ] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -17,7 +17,7 @@ export default function AbschlussTestWidget({ onComplete, userId }) {
   const [certNumber, setCertNumber] = useState('');
   const [xpAwarded, setXpAwarded] = useState(false);
 
-  const questions = ABSCHLUSSTEST || [];
+  const questions = overrideQuestions || ABSCHLUSSTEST || [];
   const totalQuestions = questions.length;
 
   const generateCertNumber = () => {

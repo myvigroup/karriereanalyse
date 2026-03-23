@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { awardPoints } from '@/lib/gamification';
 
-// Prioritätenmanagement widgets
+// Shared widgets (reusable across courses)
 import SelbstdiagnoseWidget from '@/components/elearning/SelbstdiagnoseWidget';
 import BossFightWidget from '@/components/elearning/BossFightWidget';
 import DragDropSortierung from '@/components/elearning/DragDropSortierung';
@@ -14,12 +14,33 @@ import BrainDumpTimer from '@/components/elearning/BrainDumpTimer';
 import NeinSkripteWidget from '@/components/elearning/NeinSkripteWidget';
 import JournalEntry from '@/components/elearning/JournalEntry';
 import AbschlussTestWidget from '@/components/elearning/AbschlussTestWidget';
+
+// Kommunikation-specific widgets
+import VierOhrenDragDrop from '@/components/elearning/VierOhrenDragDrop';
+import ZuhoerStufenWidget from '@/components/elearning/ZuhoerStufenWidget';
+import FeedbackTemplates from '@/components/elearning/FeedbackTemplates';
+import EmailTemplates from '@/components/elearning/EmailTemplates';
+import ElevatorPitchBuilder from '@/components/elearning/ElevatorPitchBuilder';
+import StimmTrainingWidget from '@/components/elearning/StimmTrainingWidget';
+import DigitaleKommWidget from '@/components/elearning/DigitaleKommWidget';
+
+// Prioritätenmanagement content
 import {
   BOSS_FIGHTS, EISENHOWER_SORTIERUNG, NEIN_SKRIPTE,
   SZENARIEN, JOURNAL_FRAGEN, MODUL_QUIZ, ABSCHLUSSTEST,
 } from '@/lib/elearning/prioritaeten-content';
 
+// Kommunikation content
+import {
+  SELBSTDIAGNOSE_KOMM, BOSS_FIGHTS_KOMM, VIER_OHREN_UEBUNG,
+  FEEDBACK_TEMPLATES as FEEDBACK_TEMPLATES_DATA, EMAIL_TEMPLATES as EMAIL_TEMPLATES_DATA,
+  SZENARIO_KONFLIKTE, NOTFALL_SKRIPTE_KOMM, STRESS_KOMMUNIKATION,
+  SMALLTALK_TOOLKIT, ABSCHLUSSTEST_KOMM, MODUL_QUIZ_KOMM,
+  JOURNAL_FRAGEN_KOMM, KOERPERSPRACHE_LESEN,
+} from '@/lib/elearning/kommunikation-content';
+
 const PRIO_COURSE_ID = 'c1000000-0000-0000-0000-000000000006';
+const KOMM_COURSE_ID = 'c1000000-0000-0000-0000-000000000001';
 
 // --- Quiz data per course slug/title keyword ---
 const QUIZ_DATA = {
@@ -597,6 +618,225 @@ function PrioLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, sav
   );
 }
 
+// =====================
+// KOMMUNIKATION WIDGET ROUTER
+// =====================
+function KommLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, saving, userId, courseTitle }) {
+  const title = (lesson.title || '').toLowerCase();
+  const modOrder = lesson._moduleSortOrder ?? -1;
+
+  function getModulQuiz() {
+    const key = `modul_${modOrder}`;
+    return MODUL_QUIZ_KOMM?.[key] || null;
+  }
+
+  // Modul 0: Selbstdiagnose
+  if (modOrder === 0 && lessonType === 'interactive') {
+    return isCompleted ? <CompletedBadge text="Kommunikations-Diagnose abgeschlossen" /> : (
+      <SelbstdiagnoseWidget onComplete={onMarkComplete} diagnoseData={SELBSTDIAGNOSE_KOMM} />
+    );
+  }
+
+  // 4-Ohren Drag & Drop (Modul 1)
+  if (title.includes('4-ohren') || title.includes('vier-ohren') || (title.includes('drag') && title.includes('drop') && title.includes('ohren'))) {
+    return isCompleted ? <CompletedBadge text="4-Ohren Übung abgeschlossen" /> : (
+      <VierOhrenDragDrop config={VIER_OHREN_UEBUNG} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Zuhör-Stufen (Modul 2)
+  if (title.includes('stufen') && title.includes('zuh')) {
+    return isCompleted ? <CompletedBadge text="Zuhör-Stufen abgeschlossen" /> : (
+      <ZuhoerStufenWidget onComplete={onMarkComplete} />
+    );
+  }
+
+  // Körpersprache lesen (Modul 3)
+  if (title.includes('signale') && title.includes('lesen')) {
+    return isCompleted ? <CompletedBadge text="Körpersprache-Lesen abgeschlossen" /> : (
+      <SzenarioPlayer config={{
+        titel: 'Körpersprache lesen: 8 Signale',
+        beschreibung: KOERPERSPRACHE_LESEN?.warnung || 'Achte auf Cluster, nicht Einzelsignale.',
+        events: (KOERPERSPRACHE_LESEN?.signale || []).slice(0, 5).map(s => ({
+          text: `Du siehst: ${s.signal} — ${s.bedeutung_oft}`,
+          optionen: [
+            { text: s.tipp, impact: 10, feedback: 'Richtig erkannt!' },
+            { text: 'Signal ignorieren', impact: 0, feedback: s.tipp },
+            { text: 'Direkt ansprechen', impact: 3, feedback: 'Manchmal ok, aber subtiler ist besser.' },
+          ]
+        })),
+      }} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Stimm-Training (Modul 4)
+  if (title.includes('betonungs') || title.includes('stimmkiller') || (modOrder === 4 && lessonType === 'interactive')) {
+    return isCompleted ? <CompletedBadge text="Stimm-Training abgeschlossen" /> : (
+      <StimmTrainingWidget onComplete={onMarkComplete} />
+    );
+  }
+
+  // Spiegel-Test (Modul 4 exercise)
+  if (title.includes('spiegel-test')) {
+    return isCompleted ? <CompletedBadge text="Spiegel-Test abgeschlossen +40 XP" /> : (
+      <ExerciseLesson lesson={{...lesson, exercise_prompt: 'Nimm dich 60 Sekunden per Handy auf wie du deinen Elevator Pitch sprichst. Höre es dir an und beantworte: Sprichst du zu schnell? Endest du mit steigender Stimme? Machst du Pausen? Ist deine Stimme monoton?'}} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />
+    );
+  }
+
+  // Feedback-Templates (Modul 5)
+  if (title.includes('feedback-template') || title.includes('5 feedback')) {
+    return isCompleted ? <CompletedBadge text="Feedback-Templates gelernt" /> : (
+      <FeedbackTemplates templates={FEEDBACK_TEMPLATES_DATA} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Boss-Fights
+  if (title.includes('boss-fight') && title.includes('feedback')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Feedback-Tornado besiegt! +200 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_KOMM.feedback_tornado} onComplete={onMarkComplete} />
+    );
+  }
+  if (title.includes('boss-fight') && title.includes('konflikt')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Konflikt-Vulkan besiegt! +250 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_KOMM.konflikt_vulkan} onComplete={onMarkComplete} />
+    );
+  }
+  if (title.includes('boss-fight') && title.includes('stumm')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Der Stumme Raum besiegt! +300 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_KOMM.stummer_raum} onComplete={onMarkComplete} />
+    );
+  }
+  if (title.includes('boss-fight') && title.includes('eskalation')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Eskalations-Sturm besiegt! +250 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_KOMM.eskalations_sturm} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Notfall-Sätze / Stress (Modul 6)
+  if (title.includes('notfall') && title.includes('stress')) {
+    return isCompleted ? <CompletedBadge text="Notfall-Sätze gelernt" /> : (
+      <NeinSkripteWidget skripte={(STRESS_KOMMUNIKATION?.notfall_saetze || []).map((s, i) => ({
+        situation: `Stresssituation ${i + 1}`,
+        skript: s,
+      }))} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Elevator Pitch Builder (Modul 7)
+  if (title.includes('elevator') || title.includes('pitch builder')) {
+    return isCompleted ? <CompletedBadge text="Elevator Pitch erstellt" /> : (
+      <ElevatorPitchBuilder onComplete={onMarkComplete} />
+    );
+  }
+
+  // E-Mail Templates (Modul 8)
+  if (title.includes('e-mail template') || title.includes('email template') || title.includes('5 e-mail')) {
+    return isCompleted ? <CompletedBadge text="E-Mail-Templates gelernt" /> : (
+      <EmailTemplates templates={EMAIL_TEMPLATES_DATA} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Szenarien
+  if (title.includes('slack-krieg') || title.includes('slack krieg')) {
+    return isCompleted ? <CompletedBadge text="Szenario abgeschlossen" /> : (
+      <SzenarioPlayer config={SZENARIO_KONFLIKTE?.email_missverstaendnis} onComplete={onMarkComplete} />
+    );
+  }
+  if (title.includes('stille') && title.includes('bewerbung')) {
+    return isCompleted ? <CompletedBadge text="Szenario abgeschlossen" /> : (
+      <SzenarioPlayer config={SZENARIO_KONFLIKTE?.gehalts_gespraech} onComplete={onMarkComplete} />
+    );
+  }
+  if (title.includes('international') && title.includes('meeting')) {
+    return isCompleted ? <CompletedBadge text="Szenario abgeschlossen" /> : (
+      <SzenarioPlayer config={SZENARIO_KONFLIKTE?.gehalts_gespraech} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Digitale Kommunikation Kanal-Quiz (Modul 9)
+  if (title.includes('wann chat') || title.includes('wann mail')) {
+    return isCompleted ? <CompletedBadge text="Kanal-Quiz abgeschlossen" /> : (
+      <DigitaleKommWidget onComplete={onMarkComplete} />
+    );
+  }
+
+  // Gesprächs-Opener / Smalltalk (Modul 10)
+  if (title.includes('opener') || title.includes('copy & paste')) {
+    return isCompleted ? <CompletedBadge text="Gesprächs-Opener gelernt" /> : (
+      <NeinSkripteWidget skripte={(SMALLTALK_TOOLKIT?.opener || []).map(o => ({
+        situation: o.situation,
+        skript: (o.saetze || []).join('\n\nODER:\n\n'),
+      }))} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Abschlusstest (Modul 11)
+  if (title.includes('abschlusstest')) {
+    return isCompleted ? <CompletedBadge text="Abschlusstest bestanden! +500 XP" /> : (
+      <AbschlussTestWidget onComplete={onMarkComplete} userId={userId} overrideQuestions={ABSCHLUSSTEST_KOMM} />
+    );
+  }
+
+  // 30-Tage Challenge
+  if (title.includes('30-tage') || title.includes('challenge starten')) {
+    return isCompleted ? <CompletedBadge text="30-Tage Challenge gestartet" /> : (
+      <div className="card" style={{ padding: 32, textAlign: 'center' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>💬</div>
+        <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>30-Tage Kommunikations-Challenge</h3>
+        <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24, lineHeight: 1.7 }}>
+          Ab heute übst du jeden Tag eine Kommunikationstechnik. Woche 1: Zuhören. Woche 2: Feedback. Woche 3: Überzeugen. Woche 4: Meisterschaft.
+        </p>
+        <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving}>
+          {saving ? 'Startet...' : 'Challenge starten!'}
+        </button>
+      </div>
+    );
+  }
+
+  // Module-specific quizzes
+  if (lessonType === 'quiz') {
+    const modulQuiz = getModulQuiz();
+    if (modulQuiz) {
+      return <QuizLesson lesson={lesson} courseTitle={courseTitle} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} userId={userId} overrideQuestions={modulQuiz} />;
+    }
+    return <QuizLesson lesson={lesson} courseTitle={courseTitle} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} userId={userId} />;
+  }
+
+  // Scenario fallback
+  if (lessonType === 'scenario') {
+    return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  // Exercise with journal
+  if (lessonType === 'exercise') {
+    const journalQ = JOURNAL_FRAGEN_KOMM?.[modOrder] || null;
+    if (journalQ) {
+      return isCompleted ? <CompletedBadge text="Übung abgeschlossen +40 XP" /> : (
+        <div>
+          <ExerciseLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />
+          <div style={{ marginTop: 24 }}>
+            <JournalEntry frage={journalQ} modulIndex={modOrder} userId={userId} onComplete={() => {}} />
+          </div>
+        </div>
+      );
+    }
+    return <ExerciseLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  // Video
+  if (lessonType === 'video') {
+    return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  // Interactive fallback
+  if (lessonType === 'interactive') {
+    return <InteractiveLesson lesson={{ ...lesson, _userId: userId }} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  // Default
+  return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+}
+
 // Completed badge for already-done prio lessons
 function CompletedBadge({ text }) {
   return (
@@ -1124,6 +1364,8 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
   const supabase = createClient();
 
   const isPrioCourse = course.id === PRIO_COURSE_ID;
+  const isKommCourse = course.id === KOMM_COURSE_ID;
+  const isEnhancedCourse = isPrioCourse || isKommCourse;
 
   // Flatten lessons from ALL modules (sorted by module sort_order, then lesson sort_order)
   const allLessons = useMemo(() => {
@@ -1266,7 +1508,17 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                 </div>
 
                 {/* Lesson type view */}
-                {isPrioCourse ? (
+                {isKommCourse ? (
+                  <KommLessonRouter
+                    lesson={currentLesson}
+                    lessonType={lessonType}
+                    isCompleted={isCompleted}
+                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                    saving={saving}
+                    userId={userId}
+                    courseTitle={course.title}
+                  />
+                ) : isPrioCourse ? (
                   <PrioLessonRouter
                     lesson={currentLesson}
                     lessonType={lessonType}
@@ -1365,7 +1617,7 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                   const type = lesson.lesson_type || lesson.type || 'video';
                   let statusIcon = locked ? '🔒' : isDone ? '✅' : isActive ? '▶' : '○';
                   // Show module header for multi-module courses
-                  const showModuleHeader = isPrioCourse && (idx === 0 || lesson._moduleSortOrder !== allLessons[idx - 1]?._moduleSortOrder);
+                  const showModuleHeader = isEnhancedCourse && (idx === 0 || lesson._moduleSortOrder !== allLessons[idx - 1]?._moduleSortOrder);
                   return (
                     <div key={lesson.id}>
                       {showModuleHeader && (

@@ -37,14 +37,15 @@ const DIMENSION_LABELS = {
 
 const SLIDER_LABELS = ['Stimme gar nicht zu', '', 'Neutral', '', 'Stimme voll zu'];
 
-export default function SelbstdiagnoseWidget({ onComplete }) {
+export default function SelbstdiagnoseWidget({ onComplete, diagnoseData }) {
   const [phase, setPhase] = useState(null);
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState({});
   const [showResult, setShowResult] = useState(false);
   const [slideDir, setSlideDir] = useState('in');
 
-  const questions = SELBSTDIAGNOSE?.fragen || SELBSTDIAGNOSE?.questions || [];
+  const diagData = diagnoseData || SELBSTDIAGNOSE;
+  const questions = diagData?.fragen || diagData?.questions || [];
   const totalQ = questions.length || 10;
 
   const handlePhaseSelect = useCallback((p) => {
