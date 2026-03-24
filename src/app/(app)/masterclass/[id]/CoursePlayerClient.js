@@ -1569,6 +1569,38 @@ function SpeedLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, sa
   return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
 }
 
+// Kompetenz-Boost: Zeigt Motivations-Kontext bei schwachen Bereichen
+function CompetencyBoostBanner({ competency, lessonTitle }) {
+  if (!competency || competency.level === 'stark' || competency.level === 'ausbaufaehig') return null;
+  const tips = {
+    kritisch: [
+      'Nimm dir extra Zeit für diese Lektion — jeder Schritt zählt doppelt.',
+      'Tipp: Mach dir Notizen. Bei einem Score unter 35% ist aktives Mitschreiben 3x effektiver.',
+      'Du startest bei {score}% — nach diesem Modul wirst du den Unterschied spüren.',
+      'Dein Gehirn baut gerade neue Verbindungen auf. Das fühlt sich anstrengend an — aber genau das ist Wachstum.',
+    ],
+    schwach: [
+      'Fokus-Tipp: Lies jede Übung aufmerksam — hier liegt dein größter Hebel.',
+      'Dein Score von {score}% zeigt Potenzial. Dieser Kurs bringt dich auf 60%+.',
+      'Wende das Gelernte innerhalb von 24 Stunden an — das verdoppelt den Effekt.',
+    ],
+  };
+  const pool = tips[competency.level] || tips.schwach;
+  const tip = pool[Math.floor(Math.random() * pool.length)].replace('{score}', competency.score);
+  return (
+    <div style={{
+      padding: '10px 14px', borderRadius: 'var(--r-md)', marginBottom: 16,
+      background: competency.level === 'kritisch' ? 'rgba(239,68,68,0.04)' : 'rgba(245,158,11,0.04)',
+      border: `1px solid ${competency.level === 'kritisch' ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)'}`,
+      fontSize: 12, color: 'var(--ki-text-secondary)', lineHeight: 1.6,
+      display: 'flex', alignItems: 'flex-start', gap: 8,
+    }}>
+      <span style={{ fontSize: 16, flexShrink: 0 }}>{competency.level === 'kritisch' ? '🧠' : '💡'}</span>
+      <span>{tip}</span>
+    </div>
+  );
+}
+
 // Skipped lesson card (module hidden for user's phase)
 function SkippedLessonCard({ reason, alternativeText }) {
   return (
@@ -2141,15 +2173,14 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
   }, [userId]);
 
   // --- Analyse-Score für diesen Kurs (Kompetenz-Personalisierung) ---
+  // 4 Stufen: kritisch (<35), schwach (35-49), ausbaufähig (50-69), stark (70+)
   const courseCompetency = useMemo(() => {
     if (!analysisResults || !course?.competency_link) return null;
     const match = analysisResults.find(r => r.field_slug === course.competency_link);
     if (!match) return null;
     const score = Math.round(match.score);
-    const isWeak = score < 50;
-    const isMedium = score >= 50 && score < 70;
-    const isStrong = score >= 70;
-    return { score, isWeak, isMedium, isStrong, title: match.field_title, icon: match.field_icon };
+    const level = score < 35 ? 'kritisch' : score < 50 ? 'schwach' : score < 70 ? 'ausbaufaehig' : 'stark';
+    return { score, level, title: match.field_title, icon: match.field_icon };
   }, [analysisResults, course?.competency_link]);
 
   // Flatten lessons from ALL modules (sorted by module sort_order, then lesson sort_order)
@@ -2227,9 +2258,11 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
   }
 
   function getXpForType(type) {
-    if (type === 'exercise') return 40;
+    // Schwache Bereiche bekommen XP-Boost als Anreiz
+    const boost = courseCompetency?.level === 'kritisch' ? 2 : courseCompetency?.level === 'schwach' ? 1.5 : 1;
+    if (type === 'exercise') return Math.round(40 * boost);
     if (type === 'quiz') return 0; // quiz awards its own XP
-    return 30;
+    return Math.round(30 * boost);
   }
 
   const isCompleted = currentLesson ? !!progressMap[currentLesson.id]?.completed : false;
@@ -2273,32 +2306,27 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
         </div>
 
         {/* Kompetenz-Score Banner (aus Karriere-Analyse) */}
-        {courseCompetency && (
-          <div style={{
-            marginTop: 12, padding: '12px 16px', borderRadius: 'var(--r-md)',
-            background: courseCompetency.isWeak ? 'rgba(239,68,68,0.06)' : courseCompetency.isMedium ? 'rgba(245,158,11,0.06)' : 'rgba(34,197,94,0.06)',
-            border: `1px solid ${courseCompetency.isWeak ? 'rgba(239,68,68,0.2)' : courseCompetency.isMedium ? 'rgba(245,158,11,0.2)' : 'rgba(34,197,94,0.2)'}`,
-            display: 'flex', alignItems: 'center', gap: 12,
-          }}>
-            <div style={{
-              width: 42, height: 42, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 18, fontWeight: 800,
-              background: courseCompetency.isWeak ? 'rgba(239,68,68,0.1)' : courseCompetency.isMedium ? 'rgba(245,158,11,0.1)' : 'rgba(34,197,94,0.1)',
-              color: courseCompetency.isWeak ? '#dc2626' : courseCompetency.isMedium ? '#d97706' : '#16a34a',
-            }}>
-              {courseCompetency.score}%
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: courseCompetency.isWeak ? '#dc2626' : courseCompetency.isMedium ? '#d97706' : '#16a34a' }}>
-                {courseCompetency.isWeak ? '⚡ Prioritäts-Bereich — Hier wirst du am meisten wachsen' : courseCompetency.isMedium ? '📈 Ausbaufähig — Gutes Fundament, Potenzial nach oben' : '💪 Stärke — Verfeinere dein Können'}
+        {courseCompetency && (() => {
+          const cfg = {
+            kritisch: { bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.25)', color: '#dc2626', label: '🚨 Kritischer Bereich — Hier liegt dein größtes Wachstumspotenzial', sub: 'Dieser Kurs wird dir Schritt für Schritt die Grundlagen aufbauen. Jede Lektion zählt.' },
+            schwach: { bg: 'rgba(245,158,11,0.06)', border: 'rgba(245,158,11,0.2)', color: '#d97706', label: '⚡ Entwicklungsbereich — Hier wirst du am meisten wachsen', sub: 'Du hast eine Basis — dieser Kurs macht sie solide.' },
+            ausbaufaehig: { bg: 'rgba(59,130,246,0.05)', border: 'rgba(59,130,246,0.15)', color: '#2563eb', label: '📈 Ausbaufähig — Gutes Fundament, Potenzial nach oben', sub: 'Fokussiere dich auf die fortgeschrittenen Module.' },
+            stark: { bg: 'rgba(34,197,94,0.05)', border: 'rgba(34,197,94,0.15)', color: '#16a34a', label: '💪 Stärke — Verfeinere und meistere dein Können', sub: 'Du bist schon gut. Die Boss-Fights und Abschlussübungen sind dein Fokus.' },
+          }[courseCompetency.level];
+          return (
+            <div style={{ marginTop: 12, padding: '12px 16px', borderRadius: 'var(--r-md)', background: cfg.bg, border: `1px solid ${cfg.border}`, display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 800, background: `${cfg.color}15`, color: cfg.color, flexShrink: 0 }}>
+                {courseCompetency.score}%
               </div>
-              <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 2 }}>
-                Dein Analyse-Score in {courseCompetency.title}: {courseCompetency.score}%
-                {courseCompetency.isWeak && ' — Dieser Kurs ist DEIN Game-Changer.'}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: cfg.color }}>{cfg.label}</div>
+                <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 2 }}>
+                  {courseCompetency.title}: {courseCompetency.score}% — {cfg.sub}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* Course Completion Screen */}
@@ -2325,6 +2353,9 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                     </p>
                   )}
                 </div>
+
+                {/* Kompetenz-Boost bei schwachen Bereichen */}
+                <CompetencyBoostBanner competency={courseCompetency} lessonTitle={currentLesson.title} />
 
                 {/* Lesson type view */}
                 {isBalanceCourse ? (
