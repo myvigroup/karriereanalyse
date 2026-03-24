@@ -30,9 +30,22 @@ export default async function CoursePlayerPage({ params }) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('total_points')
+    .select('total_points, phase')
     .eq('id', user.id)
     .single();
+
+  // Analyse-Ergebnisse laden (Kompetenz-Scores)
+  const { data: analysisResults } = await supabase
+    .from('analysis_results')
+    .select('score, competency_fields(slug, title, icon)')
+    .eq('user_id', user.id);
+
+  const formattedResults = (analysisResults || []).map(r => ({
+    score: r.score,
+    field_slug: r.competency_fields?.slug,
+    field_title: r.competency_fields?.title,
+    field_icon: r.competency_fields?.icon,
+  }));
 
   return (
     <CoursePlayerClient
@@ -40,6 +53,7 @@ export default async function CoursePlayerPage({ params }) {
       progress={progress || []}
       profile={profile}
       userId={user.id}
+      analysisResults={formattedResults}
     />
   );
 }

@@ -2140,6 +2140,18 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
     loadPhase();
   }, [userId]);
 
+  // --- Analyse-Score für diesen Kurs (Kompetenz-Personalisierung) ---
+  const courseCompetency = useMemo(() => {
+    if (!analysisResults || !course?.competency_link) return null;
+    const match = analysisResults.find(r => r.field_slug === course.competency_link);
+    if (!match) return null;
+    const score = Math.round(match.score);
+    const isWeak = score < 50;
+    const isMedium = score >= 50 && score < 70;
+    const isStrong = score >= 70;
+    return { score, isWeak, isMedium, isStrong, title: match.field_title, icon: match.field_icon };
+  }, [analysisResults, course?.competency_link]);
+
   // Flatten lessons from ALL modules (sorted by module sort_order, then lesson sort_order)
   const allLessons = useMemo(() => {
     const modules = (course.modules || []).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
@@ -2259,6 +2271,34 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
             {completedCount}/{totalCount} abgeschlossen
           </span>
         </div>
+
+        {/* Kompetenz-Score Banner (aus Karriere-Analyse) */}
+        {courseCompetency && (
+          <div style={{
+            marginTop: 12, padding: '12px 16px', borderRadius: 'var(--r-md)',
+            background: courseCompetency.isWeak ? 'rgba(239,68,68,0.06)' : courseCompetency.isMedium ? 'rgba(245,158,11,0.06)' : 'rgba(34,197,94,0.06)',
+            border: `1px solid ${courseCompetency.isWeak ? 'rgba(239,68,68,0.2)' : courseCompetency.isMedium ? 'rgba(245,158,11,0.2)' : 'rgba(34,197,94,0.2)'}`,
+            display: 'flex', alignItems: 'center', gap: 12,
+          }}>
+            <div style={{
+              width: 42, height: 42, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 18, fontWeight: 800,
+              background: courseCompetency.isWeak ? 'rgba(239,68,68,0.1)' : courseCompetency.isMedium ? 'rgba(245,158,11,0.1)' : 'rgba(34,197,94,0.1)',
+              color: courseCompetency.isWeak ? '#dc2626' : courseCompetency.isMedium ? '#d97706' : '#16a34a',
+            }}>
+              {courseCompetency.score}%
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: courseCompetency.isWeak ? '#dc2626' : courseCompetency.isMedium ? '#d97706' : '#16a34a' }}>
+                {courseCompetency.isWeak ? '⚡ Prioritäts-Bereich — Hier wirst du am meisten wachsen' : courseCompetency.isMedium ? '📈 Ausbaufähig — Gutes Fundament, Potenzial nach oben' : '💪 Stärke — Verfeinere dein Können'}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 2 }}>
+                Dein Analyse-Score in {courseCompetency.title}: {courseCompetency.score}%
+                {courseCompetency.isWeak && ' — Dieser Kurs ist DEIN Game-Changer.'}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Course Completion Screen */}
