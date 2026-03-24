@@ -44,7 +44,7 @@ export async function getDashboardData(userId) {
   return {
     xp: profile?.total_points || 0,
     marktwert: profile?.marktwert_xp || 0,
-    phase: profile?.phase || 'einsteiger',
+    phase: profile?.phase || 'berufseinsteiger',
     wpm: profile?.wpm_current || 0,
     wpmStart: profile?.wpm_start || 0,
     name: profile?.full_name || '',

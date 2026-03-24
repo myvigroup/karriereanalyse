@@ -2129,7 +2129,7 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
   const isEnhancedCourse = isPrioCourse || isKommCourse || isSpeedCourse || isLernenCourse || isBalanceCourse || isNetzCourse;
 
   // --- User Phase (Zielgruppen-Personalisierung) ---
-  const [userPhase, setUserPhase] = useState(profile?.phase || 'einsteiger');
+  const [userPhase, setUserPhase] = useState(profile?.phase || 'berufseinsteiger');
 
   useEffect(() => {
     async function loadPhase() {

@@ -8,29 +8,29 @@
 // 0. ZIELGRUPPEN-CONFIG — Adaptive Pfade
 // ---------------------------------------------------------------------------
 export const ZIELGRUPPEN_CONFIG = {
-  student: {
-    label: '🎓 Berufseinsteiger',
+  studierende: {
+    label: '🎓 Studierende',
     fokus: 'Grundlagen aufbauen, Prüfungen bestehen, erstes Fachwissen effizient speichern',
     freigeschaltet: ['alle_basis_module', 'mentor_mirror', 'pruefungs_panik_boss'],
     ausgeblendet: ['executive_abstractor', 'unlearn_assistant', 'team_lernen'],
   },
-  professional: {
+  berufseinsteiger: {
+    label: '🚀 Berufseinsteiger',
+    fokus: 'Effizient lernen, Onboarding meistern, Skills aufbauen',
+    freigeschaltet: ['alle_basis_module', 'onboarding_90_tage'],
+    ausgeblendet: ['executive_abstractor', 'team_lernen'],
+  },
+  berufserfahren: {
     label: '💼 Berufserfahren',
     fokus: 'Effizienz steigern, Altes verlernen, neue Skills in Rekordzeit',
-    freigeschaltet: ['alle_basis_module', 'unlearn_assistant', 'energie_budgetierung', 'ai_copilot'],
+    freigeschaltet: ['alle_basis_module', 'unlearn_assistant', 'energie_budgetierung'],
     ausgeblendet: ['mentor_mirror', 'pruefungs_panik_boss'],
   },
   fuehrungskraft: {
     label: '👑 Führungskraft',
-    fokus: 'Team-Lernkultur, Executive Learning, Entscheidungsqualität',
+    fokus: 'Team-Lernkultur, Executive Learning, Synthese, Entscheidungsqualität',
     freigeschaltet: ['alle_module', 'executive_abstractor', 'team_lernen', 'synthese_training'],
-    ausgeblendet: ['pruefungs_panik_boss'],
-  },
-  investor: {
-    label: '💰 Investor',
-    fokus: 'Synthese, Mustererkennung, schnelle Bewertung von Informationen',
-    freigeschaltet: ['executive_abstractor', 'synthese_training', 'ai_copilot', 'energie_budgetierung'],
-    ausgeblendet: ['pruefungs_panik_boss', 'mentor_mirror', 'team_lernen'],
+    ausgeblendet: ['pruefungs_panik_boss', 'mentor_mirror'],
   },
 };
 

@@ -1,17 +1,22 @@
 // ============================================================================
 // Zentrale Zielgruppen-Config für ALLE 6 E-Learnings
-// EINE Datei steuert die Personalisierung: hide/highlight pro Phase
+// 4 Phasen: Studierende, Berufseinsteiger, Berufserfahren, Führungskraft
 // ============================================================================
 
 export const PHASEN = {
-  student:        { label: '🎓 Student/in', kurzform: 'Student' },
-  einsteiger:     { label: '🚀 Berufseinsteiger', kurzform: 'Einsteiger' },
-  professional:   { label: '💼 Berufserfahren', kurzform: 'Profi' },
-  fuehrungskraft: { label: '👑 Führungskraft', kurzform: 'FK' },
-  investor:       { label: '💰 Investor/Unternehmer', kurzform: 'Investor' },
+  studierende:      { label: '🎓 Studierende', kurzform: 'Studi', desc: 'Studium, Praktika, Orientierung' },
+  berufseinsteiger: { label: '🚀 Berufseinsteiger', kurzform: 'Einsteiger', desc: '0-3 Jahre Berufserfahrung' },
+  berufserfahren:   { label: '💼 Berufserfahren', kurzform: 'Profi', desc: '3-10 Jahre, Spezialisierung' },
+  fuehrungskraft:   { label: '👑 Führungskraft', kurzform: 'FK', desc: 'Personalverantwortung, Strategie, C-Level' },
 };
 
-// Kurs-IDs
+export const KARRIERE_PHASEN_AUSWAHL = [
+  { id: 'studierende', label: '🎓 Studierende', desc: 'Studium, Praktika, Berufseinstieg vorbereiten' },
+  { id: 'berufseinsteiger', label: '🚀 Berufseinsteiger (0-3 Jahre)', desc: 'Erste Festanstellung, Orientierung, Skills aufbauen' },
+  { id: 'berufserfahren', label: '💼 Berufserfahren (3-10 Jahre)', desc: 'Expertise vertiefen, Karriere beschleunigen, Gehalt optimieren' },
+  { id: 'fuehrungskraft', label: '👑 Führungskraft / Executive', desc: 'Team leiten, strategisch denken, C-Level Netzwerk' },
+];
+
 const KURS_IDS = {
   kommunikation: 'c1000000-0000-0000-0000-000000000001',
   balance:       'c1000000-0000-0000-0000-000000000002',
@@ -25,55 +30,48 @@ export const KURS_ID_TO_SLUG = Object.fromEntries(
   Object.entries(KURS_IDS).map(([slug, id]) => [id, slug])
 );
 
-// ═══ PERSONALISIERUNG PRO KURS ═══
 export const KURS_CONFIG = {
 
   prioritaeten: {
-    student:        { label: 'Fokus: Studium & erste Stelle organisieren', hide: ['delegation_advanced', 'strategische_planung'], highlight: ['eisenhower', 'timeboxing', 'prokrastination'] },
-    einsteiger:     { label: 'Fokus: Aufgaben priorisieren, Nein sagen lernen', hide: ['strategische_planung'], highlight: ['eisenhower', 'nein_sagen', 'batching'] },
-    professional:   { label: 'Fokus: Projekte steuern, delegieren, Energie managen', hide: [], highlight: ['delegation', 'nein_sagen', 'batching', 'energie'] },
-    fuehrungskraft: { label: 'Fokus: Strategische Prioritäten, Team-Kapazität', hide: ['prokrastination'], highlight: ['delegation', 'strategische_planung', 'energie'] },
-    investor:       { label: 'Fokus: Deal-Flow, Portfolio-Management', hide: ['prokrastination', 'timeboxing'], highlight: ['eisenhower', 'delegation', 'batching'] },
+    studierende:      { label: 'Fokus: Studium organisieren, Prüfungen priorisieren', hide: ['delegation_advanced', 'strategische_planung'], highlight: ['eisenhower', 'timeboxing', 'prokrastination'] },
+    berufseinsteiger: { label: 'Fokus: Aufgaben priorisieren, Nein sagen lernen', hide: ['strategische_planung'], highlight: ['eisenhower', 'nein_sagen', 'batching', 'timeboxing'] },
+    berufserfahren:   { label: 'Fokus: Projekte steuern, delegieren, Energie managen', hide: [], highlight: ['delegation', 'nein_sagen', 'batching', 'energie'] },
+    fuehrungskraft:   { label: 'Fokus: Strategische Prioritäten, Team-Kapazität, Deal-Flow', hide: ['prokrastination'], highlight: ['delegation', 'strategische_planung', 'energie', 'batching'] },
   },
 
   kommunikation: {
-    student:        { label: 'Fokus: Bewerbungsgespräche, Präsentationen', hide: ['krisenkommunikation', 'c_level'], highlight: ['elevator_pitch', 'feedback', 'smalltalk', 'email'] },
-    einsteiger:     { label: 'Fokus: Meetings, Feedback, erste Konflikte', hide: ['krisenkommunikation'], highlight: ['feedback', 'email', 'smalltalk', 'deeskalation'] },
-    professional:   { label: 'Fokus: Verhandlung, Konflikte, Stakeholder', hide: [], highlight: ['verhandlung', 'konflikt', 'storytelling', 'deeskalation'] },
-    fuehrungskraft: { label: 'Fokus: Team führen, Krisen, Board-Präsentationen', hide: ['bewerbung', 'smalltalk'], highlight: ['krisenkommunikation', 'storytelling', 'koerpersprache'] },
-    investor:       { label: 'Fokus: Pitch-Bewertung, Verhandlung', hide: ['bewerbung', 'smalltalk', 'email'], highlight: ['verhandlung', 'storytelling', 'koerpersprache'] },
+    studierende:      { label: 'Fokus: Bewerbungsgespräche, Präsentationen, erste Meetings', hide: ['krisenkommunikation', 'c_level'], highlight: ['elevator_pitch', 'feedback', 'smalltalk', 'email'] },
+    berufseinsteiger: { label: 'Fokus: Meetings meistern, Feedback geben, Konflikte lösen', hide: ['krisenkommunikation'], highlight: ['feedback', 'email', 'smalltalk', 'deeskalation'] },
+    berufserfahren:   { label: 'Fokus: Verhandlung, Konflikte, Stakeholder-Management', hide: [], highlight: ['verhandlung', 'konflikt', 'storytelling', 'deeskalation'] },
+    fuehrungskraft:   { label: 'Fokus: Team führen, Krisenkommunikation, Board-Präsentationen', hide: ['bewerbung'], highlight: ['krisenkommunikation', 'storytelling', 'koerpersprache', 'verhandlung'] },
   },
 
   networking: {
-    student:        { label: 'Fokus: Erstes Netzwerk, Mentor finden, LinkedIn starten', hide: ['c_level', 'b2b', 'branchen'], highlight: ['mentor', 'linkedin', 'opener', 'follow_up'] },
-    einsteiger:     { label: 'Fokus: Netzwerk aufbauen, Events meistern', hide: ['c_level', 'b2b'], highlight: ['linkedin', 'follow_up', 'wert_geschenke', 'crm'] },
-    professional:   { label: 'Fokus: Netzwerk vertiefen, Hubs finden, Sichtbarkeit', hide: [], highlight: ['crm', 'hub_finder', 'dark_social', 'wert_geschenke'] },
-    fuehrungskraft: { label: 'Fokus: C-Level Networking, strategische Allianzen', hide: ['linkedin_basics', 'opener'], highlight: ['c_level', 'gatekeeper', 'strategisch', 'cross_generational'] },
-    investor:       { label: 'Fokus: Deal-Flow Netzwerk, Co-Investoren', hide: ['linkedin_basics', 'opener', 'introvertierte'], highlight: ['hub_finder', 'b2b', 'dark_social', 'strategisch'] },
+    studierende:      { label: 'Fokus: Erstes Netzwerk aufbauen, Mentor finden, LinkedIn starten', hide: ['c_level', 'b2b', 'branchen'], highlight: ['mentor', 'linkedin', 'opener', 'follow_up'] },
+    berufseinsteiger: { label: 'Fokus: Netzwerk erweitern, Events meistern, Follow-Up System', hide: ['c_level', 'b2b'], highlight: ['linkedin', 'follow_up', 'wert_geschenke', 'crm'] },
+    berufserfahren:   { label: 'Fokus: Netzwerk vertiefen, Hubs finden, Sichtbarkeit aufbauen', hide: [], highlight: ['crm', 'hub_finder', 'dark_social', 'wert_geschenke'] },
+    fuehrungskraft:   { label: 'Fokus: C-Level Networking, strategische Allianzen, Deal-Flow', hide: ['linkedin_basics', 'opener'], highlight: ['c_level', 'gatekeeper', 'strategisch', 'hub_finder', 'b2b'] },
   },
 
   speedreading: {
-    student:        { label: 'Fokus: Lehrbücher, Skripte, Prüfungsvorbereitung', hide: ['executive'], highlight: ['wpm', 'chunk', 'sq3r', 'textverstaendnis'] },
-    einsteiger:     { label: 'Fokus: Fachliteratur & E-Mails effizient verarbeiten', hide: ['executive'], highlight: ['wpm', 'chunk', 'skimming', 'email'] },
-    professional:   { label: 'Fokus: 200 E-Mails/Tag, Reports, Fachartikel', hide: [], highlight: ['email', 'skimming', 'relevanz', 'differenzierung'] },
-    fuehrungskraft: { label: 'Fokus: Executive Summaries, Board-Papers', hide: [], highlight: ['executive', 'skimming', 'relevanz', 'differenzierung'] },
-    investor:       { label: 'Fokus: Pitch-Decks, Due Diligence, Marktanalysen', hide: [], highlight: ['executive', 'relevanz', 'informationsflut'] },
+    studierende:      { label: 'Fokus: Lehrbücher, Skripte, Prüfungsvorbereitung', hide: ['executive'], highlight: ['wpm', 'chunk', 'sq3r', 'textverstaendnis'] },
+    berufseinsteiger: { label: 'Fokus: Fachliteratur & E-Mails effizient verarbeiten', hide: ['executive'], highlight: ['wpm', 'chunk', 'skimming', 'email'] },
+    berufserfahren:   { label: 'Fokus: 200 E-Mails/Tag, Reports, Fachartikel meistern', hide: [], highlight: ['email', 'skimming', 'relevanz', 'differenzierung'] },
+    fuehrungskraft:   { label: 'Fokus: Executive Summaries, Board-Papers, Pitch-Decks', hide: [], highlight: ['executive', 'skimming', 'relevanz', 'informationsflut'] },
   },
 
   lernen: {
-    student:        { label: 'Fokus: Lerntyp entdecken, Prüfungen meistern', hide: ['executive_abstractor', 'unlearn', 'team_lernen'], highlight: ['lerntyp', 'vergessenskurve', 'pruefung', 'lerngruppen'] },
-    einsteiger:     { label: 'Fokus: Effizient lernen im Berufsalltag', hide: ['executive_abstractor', 'team_lernen'], highlight: ['feynman', 'pomodoro', 'spaced_repetition', 'flow'] },
-    professional:   { label: 'Fokus: Verlernen, Micro-Learning, Skill-Stacking', hide: ['pruefung', 'mentor_mirror'], highlight: ['unlearn', 'micro_learning', 'skill_stacking', 'lern_roi'] },
-    fuehrungskraft: { label: 'Fokus: Team-Lernkultur, Executive Learning', hide: ['pruefung', 'mentor_mirror'], highlight: ['team_lernen', 'executive_abstractor', 'wissenstransfer'] },
-    investor:       { label: 'Fokus: Schnelle Synthese, Mustererkennung', hide: ['pruefung', 'mentor_mirror', 'team_lernen', 'lerngruppen'], highlight: ['executive_abstractor', 'synthese', 'entscheidungs_journal'] },
+    studierende:      { label: 'Fokus: Lerntyp entdecken, Prüfungen meistern, Grundlagen', hide: ['executive_abstractor', 'unlearn', 'team_lernen'], highlight: ['lerntyp', 'vergessenskurve', 'pruefung', 'lerngruppen'] },
+    berufseinsteiger: { label: 'Fokus: Effizient lernen im Berufsalltag, Onboarding meistern', hide: ['executive_abstractor', 'team_lernen'], highlight: ['feynman', 'pomodoro', 'spaced_repetition', 'flow'] },
+    berufserfahren:   { label: 'Fokus: Verlernen, Micro-Learning, Skill-Stacking', hide: ['pruefung', 'mentor_mirror'], highlight: ['unlearn', 'micro_learning', 'skill_stacking', 'lern_roi'] },
+    fuehrungskraft:   { label: 'Fokus: Team-Lernkultur, Executive Learning, Synthese', hide: ['pruefung', 'mentor_mirror'], highlight: ['team_lernen', 'executive_abstractor', 'synthese', 'wissenstransfer'] },
   },
 
   balance: {
-    student:        { label: 'Fokus: Social Media Kontrolle, Schlaf, Studium-Freizeit', hide: ['fuehrungskraefte', 'eltern'], highlight: ['digital_detox', 'schlaf', 'lebensrad', 'grenzen'] },
-    einsteiger:     { label: 'Fokus: Feierabend lernen, Grenzen setzen', hide: ['fuehrungskraefte'], highlight: ['shutdown_ritual', 'grenzen', 'burnout', 'digital_detox'] },
-    professional:   { label: 'Fokus: Burnout-Prävention, Energie managen', hide: [], highlight: ['burnout', 'shutdown_ritual', 'energie', 'grenzen'] },
-    fuehrungskraft: { label: 'Fokus: Balance vorleben, Team schützen', hide: [], highlight: ['fuehrungskraefte', 'burnout', 'grenzen', 'work_life_integration'] },
-    investor:       { label: 'Fokus: High-Performance ohne Ausbrennung', hide: ['eltern', 'digital_detox'], highlight: ['energie', 'shutdown_ritual', 'burnout', 'work_life_integration'] },
+    studierende:      { label: 'Fokus: Social Media Kontrolle, Schlaf-Rhythmus, Studium-Freizeit', hide: ['fuehrungskraefte', 'eltern'], highlight: ['digital_detox', 'schlaf', 'lebensrad', 'revenge_bedtime'] },
+    berufseinsteiger: { label: 'Fokus: Feierabend lernen, erste Grenzen setzen, Burnout verhindern', hide: ['fuehrungskraefte'], highlight: ['shutdown_ritual', 'grenzen', 'burnout', 'revenge_bedtime'] },
+    berufserfahren:   { label: 'Fokus: Burnout-Prävention, Energie managen, Beziehungen retten', hide: [], highlight: ['burnout', 'energie', 'shutdown_ritual', 'beziehungs_konto'] },
+    fuehrungskraft:   { label: 'Fokus: Balance vorleben, Team schützen, nachhaltige High-Performance', hide: [], highlight: ['fuehrungskraefte', 'burnout', 'identity_shift', 'energie', 'executive_recovery'] },
   },
 };
 
@@ -82,7 +80,7 @@ export const KURS_CONFIG = {
 export function getKursConfig(courseId, userPhase) {
   const slug = KURS_ID_TO_SLUG[courseId];
   if (!slug || !KURS_CONFIG[slug]) return null;
-  return KURS_CONFIG[slug][userPhase] || KURS_CONFIG[slug].einsteiger;
+  return KURS_CONFIG[slug][userPhase] || KURS_CONFIG[slug].berufseinsteiger;
 }
 
 export function isLessonVisible(courseId, lessonTitle, userPhase) {

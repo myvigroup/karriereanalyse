@@ -20,7 +20,7 @@ const PHASE_MODULES = {
 };
 
 export function getPersonalization(analysisResults, userPhase) {
-  const phase = userPhase || 'einsteiger';
+  const phase = userPhase || 'berufseinsteiger';
   const visibleModules = PHASE_MODULES[phase] || null;
 
   if (!analysisResults || analysisResults.length === 0) {

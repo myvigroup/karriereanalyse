@@ -930,11 +930,10 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
   // PHASE 3: KARRIERE-PHASE AUSWAHL
   if (phase === 3) {
     const KARRIERE_PHASEN_AUSWAHL = [
-      { id: 'student', label: '🎓 Student/in', desc: 'Studium, Praktika, Berufseinstieg' },
-      { id: 'einsteiger', label: '🚀 Berufseinsteiger (0-3 Jahre)', desc: 'Erste Festanstellung, Orientierung' },
-      { id: 'professional', label: '💼 Berufserfahren (3-10 Jahre)', desc: 'Expertise vertiefen, Karriere beschleunigen' },
-      { id: 'fuehrungskraft', label: '👑 Führungskraft', desc: 'Team leiten, strategisch denken' },
-      { id: 'investor', label: '💰 Investor / Unternehmer', desc: 'Portfolio, Deals, Skalierung' },
+      { id: 'studierende', label: '🎓 Studierende', desc: 'Studium, Praktika, Berufseinstieg vorbereiten' },
+      { id: 'berufseinsteiger', label: '🚀 Berufseinsteiger (0-3 Jahre)', desc: 'Erste Festanstellung, Orientierung, Skills aufbauen' },
+      { id: 'berufserfahren', label: '💼 Berufserfahren (3-10 Jahre)', desc: 'Expertise vertiefen, Karriere beschleunigen, Gehalt optimieren' },
+      { id: 'fuehrungskraft', label: '👑 Führungskraft / Executive', desc: 'Team leiten, strategisch denken, C-Level Netzwerk' },
     ];
 
     async function selectPhase(phaseId) {
