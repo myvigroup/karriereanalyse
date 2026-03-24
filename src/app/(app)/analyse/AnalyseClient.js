@@ -927,8 +927,66 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
     );
   }
 
-  // PHASE 3: RESULTS
+  // PHASE 3: KARRIERE-PHASE AUSWAHL
   if (phase === 3) {
+    const KARRIERE_PHASEN_AUSWAHL = [
+      { id: 'student', label: '🎓 Student/in', desc: 'Studium, Praktika, Berufseinstieg' },
+      { id: 'einsteiger', label: '🚀 Berufseinsteiger (0-3 Jahre)', desc: 'Erste Festanstellung, Orientierung' },
+      { id: 'professional', label: '💼 Berufserfahren (3-10 Jahre)', desc: 'Expertise vertiefen, Karriere beschleunigen' },
+      { id: 'fuehrungskraft', label: '👑 Führungskraft', desc: 'Team leiten, strategisch denken' },
+      { id: 'investor', label: '💰 Investor / Unternehmer', desc: 'Portfolio, Deals, Skalierung' },
+    ];
+
+    async function selectPhase(phaseId) {
+      await supabase.from('profiles').update({
+        phase: phaseId,
+        onboarding_completed: true,
+      }).eq('id', userId);
+      setPhase(4);
+    }
+
+    return (
+      <div className="page-container" style={{ maxWidth: 560 }}>
+        <ConfettiOverlay />
+        <AnimStyles />
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <div style={{ fontSize: 48, marginBottom: 8 }}>🎯</div>
+          <h1 className="page-title" style={{ marginBottom: 6 }}>In welcher Karrierephase bist du?</h1>
+          <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', lineHeight: 1.7 }}>
+            Wir personalisieren alle E-Learnings für deine Phase. Du kannst das jederzeit im Profil ändern.
+          </p>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {KARRIERE_PHASEN_AUSWAHL.map(p => (
+            <button
+              key={p.id}
+              onClick={() => selectPhase(p.id)}
+              className="card"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 14,
+                padding: '16px 20px', cursor: 'pointer', textAlign: 'left',
+                border: '1px solid var(--ki-border)', transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--ki-red)'; e.currentTarget.style.background = 'rgba(204,20,38,0.02)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--ki-border)'; e.currentTarget.style.background = ''; }}
+            >
+              <span style={{ fontSize: 28 }}>{p.label.split(' ')[0]}</span>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 600 }}>{p.label.slice(p.label.indexOf(' ') + 1)}</div>
+                <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)' }}>{p.desc}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setPhase(4)} style={{ marginTop: 16, fontSize: 12, color: 'var(--ki-text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
+          Überspringen (Standard: Berufseinsteiger)
+        </button>
+      </div>
+    );
+  }
+
+  // PHASE 4: RESULTS
+  if (phase === 4 || phase === 3.5) {
     const top3 = sortedScores.slice(0, 3);
     const bottom3 = sortedScores.slice(-3).reverse();
 

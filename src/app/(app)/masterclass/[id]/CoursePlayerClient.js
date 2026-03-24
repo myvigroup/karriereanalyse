@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { awardPoints } from '@/lib/gamification';
+import { isLessonVisible, isLessonHighlighted, getPhaseLabel, PHASEN } from '@/lib/elearning/zielgruppen-config';
 
 // Shared widgets (reusable across courses)
 import SelbstdiagnoseWidget from '@/components/elearning/SelbstdiagnoseWidget';
@@ -39,8 +40,86 @@ import {
   JOURNAL_FRAGEN_KOMM, KOERPERSPRACHE_LESEN,
 } from '@/lib/elearning/kommunikation-content';
 
+// Speedreading-specific widgets
+import WPMTestWidget from '@/components/elearning/WPMTestWidget';
+import SehspannenTrainer from '@/components/elearning/SehspannenTrainer';
+import ChunkReadingTrainer from '@/components/elearning/ChunkReadingTrainer';
+import PacerSimulator from '@/components/elearning/PacerSimulator';
+import ErgonomieCheckWidget from '@/components/elearning/ErgonomieCheckWidget';
+import DifferenzierungsMatrix from '@/components/elearning/DifferenzierungsMatrix';
+import AtemTimerWidget from '@/components/elearning/AtemTimerWidget';
+import RelevanzFilterBuilder from '@/components/elearning/RelevanzFilterBuilder';
+import ShareableProgressCard from '@/components/elearning/ShareableProgressCard';
+
+// Speedreading content
+import {
+  SELBSTDIAGNOSE_SPEED, BOSS_FIGHTS_SPEED, AUGENGESUNDHEIT,
+  DIFFERENZIERUNG, RELEVANZ_FILTER, PRE_READ_FOKUS,
+  WPM_TEXTE, SEHSPANNEN_CONFIG, CHUNK_READING_CONFIG,
+  MODUL_QUIZ_SPEED, JOURNAL_FRAGEN_SPEED, FORTSCHRITT,
+} from '@/lib/elearning/speedreading-content';
+
+// Typgerechtes Lernen widgets
+import LerntypTest from '@/components/elearning/LerntypTest';
+import VergessenskurveWidget from '@/components/elearning/VergessenskurveWidget';
+import FeynmanUebung from '@/components/elearning/FeynmanUebung';
+import FlowFormelBuilder from '@/components/elearning/FlowFormelBuilder';
+import StateManagementWidget from '@/components/elearning/StateManagementWidget';
+import FehlerAutopsieWidget from '@/components/elearning/FehlerAutopsieWidget';
+import TransferPlannerWidget from '@/components/elearning/TransferPlannerWidget';
+import MentorMirrorWidget from '@/components/elearning/MentorMirrorWidget';
+import UnlearnAssistantWidget from '@/components/elearning/UnlearnAssistantWidget';
+import ExecutiveAbstractorWidget from '@/components/elearning/ExecutiveAbstractorWidget';
+import SyntheseTrainerWidget from '@/components/elearning/SyntheseTrainerWidget';
+import LernROICalculator from '@/components/elearning/LernROICalculator';
+
+// Typgerechtes Lernen content
+import {
+  SELBSTDIAGNOSE_LERNEN, LERNTYP_TEST, BOSS_FIGHTS_LERNEN,
+  EMOTIONEN_LERNEN, FEHLER_KULTUR, TRANSFER,
+  EINSTEIGER_EXTRAS, PROFESSIONAL_EXTRAS, INVESTOR_EXTRAS,
+  MODUL_QUIZ_LERNEN, JOURNAL_FRAGEN_LERNEN, ABSCHLUSSTEST_LERNEN,
+} from '@/lib/elearning/lernen-content';
+
+// Balance widgets
+import LebensradWidget from '@/components/elearning/LebensradWidget';
+import BurnoutStufenWidget from '@/components/elearning/BurnoutStufenWidget';
+import StressAmpelWidget from '@/components/elearning/StressAmpelWidget';
+import ShutdownRitualBuilder from '@/components/elearning/ShutdownRitualBuilder';
+import EnergieProtokollWidget from '@/components/elearning/EnergieProtokollWidget';
+import MicroRecoveryWidget from '@/components/elearning/MicroRecoveryWidget';
+import BeziehungsKontoWidget from '@/components/elearning/BeziehungsKontoWidget';
+
+// Balance content
+import {
+  SELBSTDIAGNOSE_BALANCE, BOSS_FIGHTS_BALANCE, MICRO_RECOVERY,
+  BURNOUT_STUFEN, SHUTDOWN_RITUAL, ENERGIE_PROTOKOLL, GRENZ_SKRIPTE,
+  MODUL_QUIZ_BALANCE, JOURNAL_FRAGEN_BALANCE, ABSCHLUSSTEST_BALANCE,
+} from '@/lib/elearning/balance-content';
+
+// Networking widgets
+import NetzwerkMapBuilder from '@/components/elearning/NetzwerkMapBuilder';
+import CRMBuilder from '@/components/elearning/CRMBuilder';
+import FollowUpTemplates from '@/components/elearning/FollowUpTemplates';
+import WertGeschenkeWidget from '@/components/elearning/WertGeschenkeWidget';
+import LinkedInTemplates from '@/components/elearning/LinkedInTemplates';
+import OpenerGenerator from '@/components/elearning/OpenerGenerator';
+import MentorAnfrageBuilder from '@/components/elearning/MentorAnfrageBuilder';
+import GeisterCounterWidget from '@/components/elearning/GeisterCounterWidget';
+
+// Networking content
+import {
+  SELBSTDIAGNOSE_NETZ, BOSS_FIGHTS_NETZ, WERT_GESCHENKE,
+  FOLLOW_UP_TEMPLATES, OPENER, MENTOR_TEMPLATES, CRM_CONFIG,
+  MODUL_QUIZ_NETZ, JOURNAL_FRAGEN_NETZ, ABSCHLUSSTEST_NETZ,
+} from '@/lib/elearning/networking-content';
+
 const PRIO_COURSE_ID = 'c1000000-0000-0000-0000-000000000006';
 const KOMM_COURSE_ID = 'c1000000-0000-0000-0000-000000000001';
+const SPEED_COURSE_ID = 'c1000000-0000-0000-0000-000000000004';
+const LERNEN_COURSE_ID = 'c1000000-0000-0000-0000-000000000005';
+const BALANCE_COURSE_ID = 'c1000000-0000-0000-0000-000000000002';
+const NETZ_COURSE_ID = 'c1000000-0000-0000-0000-000000000003';
 
 // --- Quiz data per course slug/title keyword ---
 const QUIZ_DATA = {
@@ -837,6 +916,684 @@ function KommLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, sav
   return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
 }
 
+// =====================
+// BALANCE WIDGET ROUTER
+// =====================
+function BalanceLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, saving, userId, courseTitle, userPhase }) {
+  const title = (lesson.title || '').toLowerCase();
+  const modOrder = lesson._moduleSortOrder ?? -1;
+
+  function getModulQuiz() {
+    const key = `modul_${modOrder}`;
+    return MODUL_QUIZ_BALANCE?.[key] || null;
+  }
+
+  // Modul 0: Selbstdiagnose
+  if (modOrder === 0 && lessonType === 'interactive') {
+    return isCompleted ? <CompletedBadge text="Balance-Diagnose abgeschlossen" /> : (
+      <SelbstdiagnoseWidget onComplete={onMarkComplete} diagnoseData={SELBSTDIAGNOSE_BALANCE} />
+    );
+  }
+
+  // Modul 2: Lebensrad
+  if (title.includes('lebensrad') || title.includes('4 bereiche bewerten')) {
+    return isCompleted ? <CompletedBadge text="Lebensrad abgeschlossen" /> : (
+      <LebensradWidget onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 3: Stress-Ampel
+  if (title.includes('stress-ampel') || title.includes('stress-profil')) {
+    return isCompleted ? <CompletedBadge text="Stress-Profil erstellt" /> : (
+      <StressAmpelWidget onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 4: Shutdown-Ritual
+  if (title.includes('shutdown-ritual') || title.includes('shutdown ritual')) {
+    return isCompleted ? <CompletedBadge text="Shutdown-Ritual erstellt" /> : (
+      <ShutdownRitualBuilder config={SHUTDOWN_RITUAL} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 4: Boss-Fight Always-On
+  if (title.includes('boss-fight') && title.includes('always-on')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Always-On Dämon besiegt! +200 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_BALANCE.always_on} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 4: Grenz-Skripte
+  if (title.includes('grenz-skripte') || title.includes('5 grenz')) {
+    return isCompleted ? <CompletedBadge text="Grenz-Skripte gelernt" /> : (
+      <NeinSkripteWidget skripte={(GRENZ_SKRIPTE || []).map(s => ({ situation: s.ziel, skript: s.skript || s.beispiel || s.erklaerung || '' }))} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 5: Energie-Protokoll
+  if (title.includes('energie-protokoll') || title.includes('energie protokoll')) {
+    return isCompleted ? <CompletedBadge text="Energie-Protokoll erstellt" /> : (
+      <EnergieProtokollWidget onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 6: Micro-Recovery
+  if (title.includes('micro-recovery') || title.includes('10 micro')) {
+    return isCompleted ? <CompletedBadge text="Micro-Recovery abgeschlossen" /> : (
+      <MicroRecoveryWidget config={MICRO_RECOVERY} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 8: Boss-Fight Mitternachts-Scrolleur
+  if (title.includes('boss-fight') && title.includes('mitternachts')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Mitternachts-Scrolleur besiegt! +200 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_BALANCE.mitternachts_scrolleur} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 9: Beziehungs-Konto
+  if (title.includes('beziehungs-konto') || title.includes('einzahlungen')) {
+    return isCompleted ? <CompletedBadge text="Beziehungs-Konto verstanden" /> : (
+      <BeziehungsKontoWidget onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 10: Burnout-Stufen
+  if (title.includes('selbsttest') && modOrder === 10) {
+    return isCompleted ? <CompletedBadge text="Burnout-Check abgeschlossen" /> : (
+      <BurnoutStufenWidget config={BURNOUT_STUFEN} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 12: Abschlusstest
+  if (title.includes('abschlusstest')) {
+    return isCompleted ? <CompletedBadge text="Abschlusstest bestanden! +500 XP" /> : (
+      <AbschlussTestWidget onComplete={onMarkComplete} userId={userId} overrideQuestions={ABSCHLUSSTEST_BALANCE} />
+    );
+  }
+
+  // 30-Tage Challenge
+  if (title.includes('30-tage') || title.includes('challenge')) {
+    return isCompleted ? <CompletedBadge text="30-Tage Balance-Challenge gestartet!" /> : (
+      <div className="card" style={{ padding: 32, textAlign: 'center' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>⚖️</div>
+        <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>30-Tage Balance-Challenge</h3>
+        <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24, lineHeight: 1.7 }}>
+          Ab heute übst du jeden Tag eine Balance-Technik. Woche 1: Grenzen. Woche 2: Energie. Woche 3: Beziehungen. Woche 4: Integration.
+        </p>
+        <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving}>
+          {saving ? 'Startet...' : 'Challenge starten!'}
+        </button>
+      </div>
+    );
+  }
+
+  // Module-specific quizzes
+  if (lessonType === 'quiz') {
+    const modulQuiz = getModulQuiz();
+    if (modulQuiz) return <QuizLesson lesson={lesson} courseTitle={courseTitle} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} userId={userId} overrideQuestions={modulQuiz} />;
+    return <QuizLesson lesson={lesson} courseTitle={courseTitle} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} userId={userId} />;
+  }
+
+  if (lessonType === 'exercise') {
+    const journalQ = JOURNAL_FRAGEN_BALANCE?.[modOrder] || null;
+    if (journalQ) return isCompleted ? <CompletedBadge text="Übung abgeschlossen +40 XP" /> : (
+      <div><ExerciseLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} /><div style={{ marginTop: 24 }}><JournalEntry frage={journalQ} modulIndex={modOrder} userId={userId} onComplete={() => {}} /></div></div>
+    );
+    return <ExerciseLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  if (lessonType === 'scenario') return isCompleted ? <CompletedBadge text="Szenario abgeschlossen" /> : <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  if (lessonType === 'video') return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  if (lessonType === 'interactive') return <InteractiveLesson lesson={{ ...lesson, _userId: userId }} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+}
+
+// =====================
+// NETWORKING WIDGET ROUTER
+// =====================
+function NetworkingLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, saving, userId, courseTitle, userPhase }) {
+  const title = (lesson.title || '').toLowerCase();
+  const modOrder = lesson._moduleSortOrder ?? -1;
+
+  function getModulQuiz() {
+    const key = `modul_${modOrder}`;
+    return MODUL_QUIZ_NETZ?.[key] || null;
+  }
+
+  // Modul 0: Selbstdiagnose
+  if (modOrder === 0 && lessonType === 'interactive') {
+    return isCompleted ? <CompletedBadge text="Networking-Diagnose abgeschlossen" /> : (
+      <SelbstdiagnoseWidget onComplete={onMarkComplete} diagnoseData={SELBSTDIAGNOSE_NETZ} />
+    );
+  }
+
+  // Modul 2: Netzwerk-Map
+  if (title.includes('netzwerk-map') || title.includes('netzwerk map')) {
+    return isCompleted ? <CompletedBadge text="Netzwerk-Map erstellt" /> : (
+      <NetzwerkMapBuilder onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 3: Wert-Geschenke
+  if (title.includes('wert-geschenke') || title.includes('12 wert')) {
+    return isCompleted ? <CompletedBadge text="Wert-Geschenke gelernt" /> : (
+      <WertGeschenkeWidget config={WERT_GESCHENKE} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Boss-Fights
+  if (title.includes('boss-fight') && title.includes('vampir')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Netzwerk-Vampir besiegt! +200 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_NETZ.netzwerk_vampir} onComplete={onMarkComplete} />
+    );
+  }
+  if (title.includes('boss-fight') && (title.includes('hölle') || title.includes('hoelle'))) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Networking-Hölle besiegt! +200 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_NETZ.networking_hoelle} onComplete={onMarkComplete} />
+    );
+  }
+  if (title.includes('boss-fight') && title.includes('marathon')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Networking-Marathon besiegt! +200 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_NETZ.networking_marathon} onComplete={onMarkComplete} />
+    );
+  }
+  if (title.includes('boss-fight') && title.includes('gatekeeper')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Gatekeeper besiegt! +250 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_NETZ.gatekeeper} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 4: Opener
+  if (title.includes('opener') || title.includes('gesprächs-opener')) {
+    return isCompleted ? <CompletedBadge text="Opener gelernt" /> : (
+      <OpenerGenerator config={OPENER} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 5: LinkedIn Templates
+  if (title.includes('vernetzungsanfragen') || title.includes('8 templates')) {
+    return isCompleted ? <CompletedBadge text="LinkedIn-Templates gelernt" /> : (
+      <LinkedInTemplates onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 6: Follow-Up Templates
+  if (title.includes('follow-up template') || title.includes('7 follow')) {
+    return isCompleted ? <CompletedBadge text="Follow-Up Templates gelernt" /> : (
+      <FollowUpTemplates templates={FOLLOW_UP_TEMPLATES} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 8: CRM
+  if (title.includes('ampel') || title.includes('crm') || title.includes('deep context')) {
+    return isCompleted ? <CompletedBadge text="CRM eingerichtet" /> : (
+      <CRMBuilder config={CRM_CONFIG} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 9: Mentor-Anfrage
+  if (title.includes('mentor') && title.includes('template')) {
+    return isCompleted ? <CompletedBadge text="Mentor-Anfrage erstellt" /> : (
+      <MentorAnfrageBuilder config={MENTOR_TEMPLATES} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 10: Hub-Finder
+  if (title.includes('hub-finder') || title.includes('multiplikatoren')) {
+    return isCompleted ? <CompletedBadge text="Hubs identifiziert" /> : (
+      <InteractiveLesson lesson={{ ...lesson, _userId: userId }} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />
+    );
+  }
+
+  // Modul 17: Geister-Counter
+  if (title.includes('geister')) {
+    return isCompleted ? <CompletedBadge text="Absage-Resilienz aufgebaut" /> : (
+      <GeisterCounterWidget config={GEISTER_COUNTER} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Abschlusstest
+  if (title.includes('abschlusstest')) {
+    return isCompleted ? <CompletedBadge text="Abschlusstest bestanden! +500 XP" /> : (
+      <AbschlussTestWidget onComplete={onMarkComplete} userId={userId} overrideQuestions={ABSCHLUSSTEST_NETZ} />
+    );
+  }
+
+  // 30-Tage Challenge
+  if (title.includes('30-tage') || title.includes('challenge')) {
+    return isCompleted ? <CompletedBadge text="30-Tage Networking-Challenge gestartet!" /> : (
+      <div className="card" style={{ padding: 32, textAlign: 'center' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🤝</div>
+        <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>30-Tage Networking-Challenge</h3>
+        <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24, lineHeight: 1.7 }}>
+          Woche 1: Inventur. Woche 2: Kontakte aktivieren. Woche 3: Events. Woche 4: System aufbauen.
+        </p>
+        <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving}>
+          {saving ? 'Startet...' : 'Challenge starten!'}
+        </button>
+      </div>
+    );
+  }
+
+  // Quizzes
+  if (lessonType === 'quiz') {
+    const modulQuiz = getModulQuiz();
+    if (modulQuiz) return <QuizLesson lesson={lesson} courseTitle={courseTitle} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} userId={userId} overrideQuestions={modulQuiz} />;
+    return <QuizLesson lesson={lesson} courseTitle={courseTitle} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} userId={userId} />;
+  }
+
+  if (lessonType === 'exercise') {
+    const journalQ = JOURNAL_FRAGEN_NETZ?.[modOrder] || null;
+    if (journalQ) return isCompleted ? <CompletedBadge text="Übung abgeschlossen +40 XP" /> : (
+      <div><ExerciseLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} /><div style={{ marginTop: 24 }}><JournalEntry frage={journalQ} modulIndex={modOrder} userId={userId} onComplete={() => {}} /></div></div>
+    );
+    return <ExerciseLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  if (lessonType === 'scenario') return isCompleted ? <CompletedBadge text="Szenario abgeschlossen" /> : <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  if (lessonType === 'video') return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  if (lessonType === 'interactive') return <InteractiveLesson lesson={{ ...lesson, _userId: userId }} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+}
+
+// =====================
+// TYPGERECHTES LERNEN WIDGET ROUTER
+// =====================
+function LernenLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, saving, userId, courseTitle }) {
+  const title = (lesson.title || '').toLowerCase();
+  const modOrder = lesson._moduleSortOrder ?? -1;
+
+  function getModulQuiz() {
+    const key = `modul_${modOrder}`;
+    return MODUL_QUIZ_LERNEN?.[key] || null;
+  }
+
+  // Modul 0: Selbstdiagnose
+  if (modOrder === 0 && lessonType === 'interactive') {
+    return isCompleted ? <CompletedBadge text="Lern-Diagnose abgeschlossen" /> : (
+      <SelbstdiagnoseWidget onComplete={onMarkComplete} diagnoseData={SELBSTDIAGNOSE_LERNEN} />
+    );
+  }
+
+  // Modul 1: Mythen entlarvt (interactive)
+  if (title.includes('mythen')) {
+    return isCompleted ? <CompletedBadge text="Mythen entlarvt" /> : (
+      <InteractiveLesson lesson={{ ...lesson, _userId: userId, statements: ['Multitasking funktioniert beim Lernen', 'Wir nutzen nur 10% unseres Gehirns', 'Es gibt feste Lerntypen', 'Markieren ist eine effektive Lernmethode'] }} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />
+    );
+  }
+
+  // Modul 2: Lerntyp-Test (VARK)
+  if (title.includes('lerntyp-test') || title.includes('vark')) {
+    return isCompleted ? <CompletedBadge text="Lerntyp-Test abgeschlossen" /> : (
+      <LerntypTest config={LERNTYP_TEST} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 2: Lerntyp-Report
+  if (title.includes('lerntyp-report')) {
+    return isCompleted ? <CompletedBadge text="Lerntyp-Report erstellt" /> : (
+      <MentorMirrorWidget config={EINSTEIGER_EXTRAS.mentor_mirror} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 3: Boss-Fight Langeweile-Drache
+  if (title.includes('boss-fight') && title.includes('langeweile')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Langeweile-Drache besiegt! +200 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_LERNEN.langeweile_drache} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 3: State-Management
+  if (title.includes('state-management') || title.includes('60 sekunden lernbereit')) {
+    return isCompleted ? <CompletedBadge text="State-Management abgeschlossen" /> : (
+      <StateManagementWidget onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 4: Boss-Fight Vergessens-Tsunami
+  if (title.includes('boss-fight') && title.includes('vergessen')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Vergessens-Tsunami besiegt! +200 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_LERNEN.vergessens_tsunami} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 4: Vergessenskurve (video but with widget)
+  if (title.includes('ebbinghaus') || title.includes('vergessenskurve')) {
+    return isCompleted ? <CompletedBadge text="Vergessenskurve verstanden" /> : (
+      <VergessenskurveWidget onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 5: Mind-Mapping (interactive)
+  if (title.includes('mind-mapping') || title.includes('sketchnotes')) {
+    return isCompleted ? <CompletedBadge text="Mind-Mapping abgeschlossen" /> : (
+      <InteractiveLesson lesson={{ ...lesson, _userId: userId, statements: ['Zentrale Idee in die Mitte', 'Hauptäste = Hauptthemen', 'Unteräste = Details', 'Farben und Symbole nutzen'] }} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />
+    );
+  }
+
+  // Modul 5: Feynman-Methode
+  if (title.includes('feynman')) {
+    return isCompleted ? <CompletedBadge text="Feynman-Methode angewendet +40 XP" /> : (
+      <FeynmanUebung onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 6: Active Recall (interactive)
+  if (title.includes('active recall')) {
+    return isCompleted ? <CompletedBadge text="Active Recall verstanden" /> : (
+      <InteractiveLesson lesson={{ ...lesson, _userId: userId, statements: ['Aus dem Gedächtnis abrufen statt nochmal lesen', 'Sich selbst testen ist 3x effektiver', 'Fehler beim Abrufen stärken das Gedächtnis', 'Karteikarten nutzen den Recall-Effekt'] }} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />
+    );
+  }
+
+  // Modul 6: Boss-Fight Prüfungs-Panik
+  if (title.includes('boss-fight') && (title.includes('prüfung') || title.includes('panik'))) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Prüfungs-Panik besiegt! +200 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_LERNEN.pruefungs_panik} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 7: Flow-Formel
+  if (title.includes('flow-formel') || title.includes('flow formel') || (modOrder === 7 && lessonType === 'exercise')) {
+    return isCompleted ? <CompletedBadge text="Flow-Formel erstellt +40 XP" /> : (
+      <FlowFormelBuilder onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 9: Musik beim Lernen
+  if (title.includes('musik')) {
+    return isCompleted ? <CompletedBadge text="Musik-Analyse abgeschlossen" /> : (
+      <InteractiveLesson lesson={{ ...lesson, _userId: userId, statements: ['Instrumentale Musik kann Fokus verbessern', 'Lyrics stören die Sprachverarbeitung', 'Lo-Fi Beats haben konstantes Tempo = gut', 'Stille ist manchmal besser als Musik'] }} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />
+    );
+  }
+
+  // Modul 10: Fehler-Autopsie
+  if (title.includes('fehler-autopsie') || title.includes('fehler autopsie')) {
+    return isCompleted ? <CompletedBadge text="Fehler-Autopsie abgeschlossen +40 XP" /> : (
+      <FehlerAutopsieWidget onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 10: Boss-Fight Perfektionismus
+  if (title.includes('boss-fight') && title.includes('perfektionismus')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Perfektionismus-Parasit besiegt! +200 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_LERNEN.perfektionismus_parasit} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 11: Transfer-Planner (WENN-DANN)
+  if (title.includes('wenn-dann') || title.includes('24-stunden') || (modOrder === 11 && lessonType === 'exercise')) {
+    return isCompleted ? <CompletedBadge text="Transfer-Plan erstellt +40 XP" /> : (
+      <TransferPlannerWidget beispiele={TRANSFER.wenn_dann.beispiele} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 13: Abschlusstest
+  if (title.includes('abschlusstest')) {
+    return isCompleted ? <CompletedBadge text="Abschlusstest bestanden! +500 XP" /> : (
+      <AbschlussTestWidget onComplete={onMarkComplete} userId={userId} overrideQuestions={ABSCHLUSSTEST_LERNEN} />
+    );
+  }
+
+  // Modul 13: 30-Tage Challenge
+  if (title.includes('30-tage') || title.includes('challenge')) {
+    return isCompleted ? <CompletedBadge text="30-Tage Lern-Challenge gestartet!" /> : (
+      <div className="card" style={{ padding: 32, textAlign: 'center' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🧠</div>
+        <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>30-Tage Lern-Challenge</h3>
+        <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24, lineHeight: 1.7 }}>
+          Ab heute lernst du jeden Tag 20 Minuten mit einer Technik aus diesem Kurs. Woche 1: Feynman. Woche 2: Active Recall. Woche 3: Transfer. Woche 4: Meisterschaft.
+        </p>
+        <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving}>
+          {saving ? 'Startet...' : 'Challenge starten!'}
+        </button>
+      </div>
+    );
+  }
+
+  // Module-specific quizzes
+  if (lessonType === 'quiz') {
+    const modulQuiz = getModulQuiz();
+    if (modulQuiz) {
+      return <QuizLesson lesson={lesson} courseTitle={courseTitle} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} userId={userId} overrideQuestions={modulQuiz} />;
+    }
+    return <QuizLesson lesson={lesson} courseTitle={courseTitle} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} userId={userId} />;
+  }
+
+  // Exercise with journal
+  if (lessonType === 'exercise') {
+    const journalQ = JOURNAL_FRAGEN_LERNEN?.[modOrder] || null;
+    if (journalQ) {
+      return isCompleted ? <CompletedBadge text="Übung abgeschlossen +40 XP" /> : (
+        <div>
+          <ExerciseLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />
+          <div style={{ marginTop: 24 }}>
+            <JournalEntry frage={journalQ} modulIndex={modOrder} userId={userId} onComplete={() => {}} />
+          </div>
+        </div>
+      );
+    }
+    return <ExerciseLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  // Video
+  if (lessonType === 'video') {
+    return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  // Interactive fallback
+  if (lessonType === 'interactive') {
+    return <InteractiveLesson lesson={{ ...lesson, _userId: userId }} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  // Default
+  return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+}
+
+// =====================
+// SPEEDREADING WIDGET ROUTER
+// =====================
+function SpeedLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, saving, userId, courseTitle }) {
+  const title = (lesson.title || '').toLowerCase();
+  const modOrder = lesson._moduleSortOrder ?? -1;
+
+  function getModulQuiz() {
+    const key = `modul_${modOrder}`;
+    return MODUL_QUIZ_SPEED?.[key] || null;
+  }
+
+  // Modul 0: Selbstdiagnose
+  if (modOrder === 0 && lessonType === 'interactive') {
+    return isCompleted ? <CompletedBadge text="Lese-Diagnose abgeschlossen" /> : (
+      <SelbstdiagnoseWidget onComplete={onMarkComplete} diagnoseData={SELBSTDIAGNOSE_SPEED} />
+    );
+  }
+
+  // Modul 2: Atem-Übung (Fokus-Aktivierung)
+  if (title.includes('atem') || title.includes('fokus-aktivierung')) {
+    return isCompleted ? <CompletedBadge text="Fokus aktiviert!" /> : (
+      <AtemTimerWidget config={PRE_READ_FOKUS} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 2: WPM-Test (erster Test)
+  if (title.includes('wpm-test') || (title.includes('wpm') && title.includes('test')) || title.includes('erster wpm')) {
+    return isCompleted ? <CompletedBadge text="WPM-Test abgeschlossen" /> : (
+      <WPMTestWidget texte={WPM_TEXTE} ghostWPM={0} onComplete={onMarkComplete} userId={userId} />
+    );
+  }
+
+  // Modul 2: Textverständnis messen
+  if (title.includes('textverständnis messen') || title.includes('textverstaendnis messen')) {
+    return isCompleted ? <CompletedBadge text="Textverständnis gemessen" /> : (
+      <WPMTestWidget texte={WPM_TEXTE.slice(1)} ghostWPM={0} onComplete={onMarkComplete} userId={userId} />
+    );
+  }
+
+  // Modul 3: Ergonomie-Check
+  if (title.includes('ergonomie')) {
+    return isCompleted ? <CompletedBadge text="Ergonomie-Check abgeschlossen" /> : (
+      <ErgonomieCheckWidget config={AUGENGESUNDHEIT.ergonomie_check} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 4: Pacer-Simulator
+  if (title.includes('pacer')) {
+    return isCompleted ? <CompletedBadge text="Pacer-Training abgeschlossen" /> : (
+      <PacerSimulator onComplete={onMarkComplete} />
+    );
+  }
+
+  // Boss-Fight: Subvokalisierungs-Dämon (Modul 4)
+  if (title.includes('boss-fight') && title.includes('subvokalisierung')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Subvokalisierungs-Dämon besiegt! +150 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_SPEED.subvokalisierung} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 5: Sehspannen-Trainer
+  if (title.includes('sehspannen') || title.includes('4 level')) {
+    return isCompleted ? <CompletedBadge text="Sehspannen-Training abgeschlossen" /> : (
+      <SehspannenTrainer config={SEHSPANNEN_CONFIG} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 6: Chunk-Reading Trainer
+  if (title.includes('chunk-reading') || title.includes('chunk reading')) {
+    return isCompleted ? <CompletedBadge text="Chunk-Reading Training abgeschlossen" /> : (
+      <ChunkReadingTrainer config={CHUNK_READING_CONFIG} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Boss-Fight: Report-Berg (Modul 7)
+  if (title.includes('boss-fight') && title.includes('report')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Report-Berg besiegt! +200 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_SPEED.report_berg} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 8: Differenzierungs-Matrix (Drag & Drop)
+  if (title.includes('lese-modus') || title.includes('differenzierung') || (title.includes('drag') && title.includes('drop') && modOrder === 8)) {
+    return isCompleted ? <CompletedBadge text="Differenzierungs-Matrix abgeschlossen" /> : (
+      <DifferenzierungsMatrix config={DIFFERENZIERUNG.uebung} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Boss-Fight: Informationsflut (Modul 9)
+  if (title.includes('boss-fight') && title.includes('informationsflut')) {
+    return isCompleted ? <CompletedBadge text="Boss-Fight: Informationsflut besiegt! +250 XP" /> : (
+      <BossFightWidget config={BOSS_FIGHTS_SPEED.informationsflut} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 9: Relevanz-Filter / Lese-Diät
+  if (title.includes('lese-diät') || title.includes('lese-diaet') || title.includes('persönliche lese')) {
+    return isCompleted ? <CompletedBadge text="Lese-Diät erstellt +40 XP" /> : (
+      <RelevanzFilterBuilder config={RELEVANZ_FILTER} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 12: WPM Re-Test (Ghost Mode)
+  if (title.includes('re-test') || title.includes('ghost')) {
+    return isCompleted ? <CompletedBadge text="WPM Re-Test abgeschlossen" /> : (
+      <WPMTestWidget texte={WPM_TEXTE} ghostWPM={250} onComplete={onMarkComplete} userId={userId} />
+    );
+  }
+
+  // Modul 12: Shareable Progress Card
+  if (title.includes('shareable') || title.includes('progress card')) {
+    return isCompleted ? <CompletedBadge text="Progress Card erstellt!" /> : (
+      <ShareableProgressCard startWPM={250} currentWPM={0} verstaendnis={0} tage={0} onComplete={onMarkComplete} />
+    );
+  }
+
+  // Modul 12: Abschlusstest
+  if (title.includes('abschlusstest')) {
+    return isCompleted ? <CompletedBadge text="Abschlusstest bestanden! +500 XP" /> : (
+      <AbschlussTestWidget onComplete={onMarkComplete} userId={userId} />
+    );
+  }
+
+  // Modul 14: 30-Tage Challenge
+  if (title.includes('30-tage') || title.includes('challenge')) {
+    return isCompleted ? <CompletedBadge text="30-Tage Challenge gestartet!" /> : (
+      <div className="card" style={{ padding: 32, textAlign: 'center' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>📖</div>
+        <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>30-Tage Speedreading Challenge</h3>
+        <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24, lineHeight: 1.7 }}>
+          Ab heute übst du jeden Tag eine Speedreading-Technik. Woche 1: Beobachtung. Woche 2: Technik. Woche 3: Anwendung. Woche 4: Meisterschaft.
+        </p>
+        <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving}>
+          {saving ? 'Startet...' : 'Challenge starten!'}
+        </button>
+      </div>
+    );
+  }
+
+  // Module-specific quizzes
+  if (lessonType === 'quiz') {
+    const modulQuiz = getModulQuiz();
+    if (modulQuiz) {
+      return <QuizLesson lesson={lesson} courseTitle={courseTitle} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} userId={userId} overrideQuestions={modulQuiz} />;
+    }
+    return <QuizLesson lesson={lesson} courseTitle={courseTitle} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} userId={userId} />;
+  }
+
+  // Exercise with journal
+  if (lessonType === 'exercise') {
+    const journalQ = JOURNAL_FRAGEN_SPEED?.[modOrder] || null;
+    if (journalQ) {
+      return isCompleted ? <CompletedBadge text="Übung abgeschlossen +40 XP" /> : (
+        <div>
+          <ExerciseLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />
+          <div style={{ marginTop: 24 }}>
+            <JournalEntry frage={journalQ} modulIndex={modOrder} userId={userId} onComplete={() => {}} />
+          </div>
+        </div>
+      );
+    }
+    return <ExerciseLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  // Video
+  if (lessonType === 'video') {
+    return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  // Interactive fallback
+  if (lessonType === 'interactive') {
+    return <InteractiveLesson lesson={{ ...lesson, _userId: userId }} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  // Default
+  return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+}
+
+// Skipped lesson card (module hidden for user's phase)
+function SkippedLessonCard({ reason, alternativeText }) {
+  return (
+    <div style={{
+      padding: 32, textAlign: 'center', background: 'var(--ki-bg-alt)',
+      borderRadius: 16, border: '2px dashed var(--ki-border)',
+      maxWidth: 480, margin: '40px auto',
+    }}>
+      <div style={{ fontSize: 40, marginBottom: 12 }}>🚀</div>
+      <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Abkürzung genommen!</h3>
+      <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', lineHeight: 1.7, marginBottom: 16 }}>
+        {reason || 'Dieses Modul wurde für deine Karrierephase übersprungen.'}
+      </p>
+      {alternativeText && (
+        <p style={{ fontSize: 13, color: '#2563EB', fontWeight: 600 }}>
+          Empfohlener Fokus: {alternativeText}
+        </p>
+      )}
+      <p style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginTop: 12 }}>
+        Du kannst es trotzdem ansehen — klicke einfach auf "Als erledigt markieren".
+      </p>
+    </div>
+  );
+}
+
 // Completed badge for already-done prio lessons
 function CompletedBadge({ text }) {
   return (
@@ -1365,7 +2122,23 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
 
   const isPrioCourse = course.id === PRIO_COURSE_ID;
   const isKommCourse = course.id === KOMM_COURSE_ID;
-  const isEnhancedCourse = isPrioCourse || isKommCourse;
+  const isSpeedCourse = course.id === SPEED_COURSE_ID;
+  const isLernenCourse = course.id === LERNEN_COURSE_ID;
+  const isBalanceCourse = course.id === BALANCE_COURSE_ID;
+  const isNetzCourse = course.id === NETZ_COURSE_ID;
+  const isEnhancedCourse = isPrioCourse || isKommCourse || isSpeedCourse || isLernenCourse || isBalanceCourse || isNetzCourse;
+
+  // --- User Phase (Zielgruppen-Personalisierung) ---
+  const [userPhase, setUserPhase] = useState(profile?.phase || 'einsteiger');
+
+  useEffect(() => {
+    async function loadPhase() {
+      if (!userId) return;
+      const { data } = await supabase.from('profiles').select('phase').eq('id', userId).single().catch(() => ({ data: null }));
+      if (data?.phase) setUserPhase(data.phase);
+    }
+    loadPhase();
+  }, [userId]);
 
   // Flatten lessons from ALL modules (sorted by module sort_order, then lesson sort_order)
   const allLessons = useMemo(() => {
@@ -1380,6 +2153,12 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
     return lessons;
   }, [course]);
 
+  // Filter lessons by user phase (hide irrelevant modules)
+  const filteredLessons = useMemo(() => {
+    if (!course?.id) return allLessons;
+    return allLessons.filter(lesson => isLessonVisible(course.id, lesson.title, userPhase));
+  }, [allLessons, course?.id, userPhase]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progressMap, setProgressMap] = useState(() => {
     const map = {};
@@ -1388,16 +2167,16 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
   });
   const [saving, setSaving] = useState(false);
 
-  const currentLesson = allLessons[currentIndex];
-  const completedCount = allLessons.filter(l => progressMap[l.id]?.completed).length;
-  const totalCount = allLessons.length;
+  const currentLesson = filteredLessons[currentIndex];
+  const completedCount = filteredLessons.filter(l => progressMap[l.id]?.completed).length;
+  const totalCount = filteredLessons.length;
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   const allDone = totalCount > 0 && completedCount === totalCount;
 
   // Sequential unlock: lesson at index i is unlocked if all previous are completed
   function isUnlocked(index) {
     if (index === 0) return true;
-    return allLessons.slice(0, index).every(l => progressMap[l.id]?.completed);
+    return filteredLessons.slice(0, index).every(l => progressMap[l.id]?.completed);
   }
 
   function navigateTo(index) {
@@ -1425,7 +2204,7 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
       await supabase.from('profiles').update({ total_points: (prof.total_points || 0) + xp }).eq('id', userId);
     }
     // Award completion bonus if all done after this
-    const newCompleted = allLessons.filter(l => l.id === currentLesson.id || progressMap[l.id]?.completed).length;
+    const newCompleted = filteredLessons.filter(l => l.id === currentLesson.id || progressMap[l.id]?.completed).length;
     if (newCompleted === totalCount && totalCount > 0) {
       const { data: prof2 } = await supabase.from('profiles').select('total_points').eq('id', userId).single().catch(() => ({ data: null }));
       if (prof2) {
@@ -1445,7 +2224,7 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
   const lessonType = currentLesson?.lesson_type || currentLesson?.type || 'video';
 
   // Get quiz score for completion screen
-  const quizLesson = allLessons.find(l => (l.lesson_type || l.type) === 'quiz');
+  const quizLesson = filteredLessons.find(l => (l.lesson_type || l.type) === 'quiz');
   const quizScore = quizLesson ? (progressMap[quizLesson.id]?.quiz_score ?? null) : null;
 
   return (
@@ -1508,7 +2287,51 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                 </div>
 
                 {/* Lesson type view */}
-                {isKommCourse ? (
+                {isBalanceCourse ? (
+                  <BalanceLessonRouter
+                    lesson={currentLesson}
+                    lessonType={lessonType}
+                    isCompleted={isCompleted}
+                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                    saving={saving}
+                    userId={userId}
+                    courseTitle={course.title}
+                    userPhase={userPhase}
+                  />
+                ) : isNetzCourse ? (
+                  <NetworkingLessonRouter
+                    lesson={currentLesson}
+                    lessonType={lessonType}
+                    isCompleted={isCompleted}
+                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                    saving={saving}
+                    userId={userId}
+                    courseTitle={course.title}
+                    userPhase={userPhase}
+                  />
+                ) : isLernenCourse ? (
+                  <LernenLessonRouter
+                    lesson={currentLesson}
+                    lessonType={lessonType}
+                    isCompleted={isCompleted}
+                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                    saving={saving}
+                    userId={userId}
+                    courseTitle={course.title}
+                    userPhase={userPhase}
+                  />
+                ) : isSpeedCourse ? (
+                  <SpeedLessonRouter
+                    lesson={currentLesson}
+                    lessonType={lessonType}
+                    isCompleted={isCompleted}
+                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                    saving={saving}
+                    userId={userId}
+                    courseTitle={course.title}
+                    userPhase={userPhase}
+                  />
+                ) : isKommCourse ? (
                   <KommLessonRouter
                     lesson={currentLesson}
                     lessonType={lessonType}
@@ -1517,6 +2340,7 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                     saving={saving}
                     userId={userId}
                     courseTitle={course.title}
+                    userPhase={userPhase}
                   />
                 ) : isPrioCourse ? (
                   <PrioLessonRouter
@@ -1527,6 +2351,7 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                     saving={saving}
                     userId={userId}
                     courseTitle={course.title}
+                    userPhase={userPhase}
                   />
                 ) : (
                   <>
@@ -1608,16 +2433,31 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text-tertiary)', marginBottom: 10 }}>
                   Kurs-Inhalt
                 </div>
+                {/* Phase Banner */}
+                {(() => {
+                  const pLabel = course?.id ? getPhaseLabel(course.id, userPhase) : null;
+                  return pLabel ? (
+                    <div style={{
+                      padding: '8px 12px', background: 'rgba(37,99,235,0.05)',
+                      borderRadius: 8, border: '1px solid rgba(37,99,235,0.1)',
+                      marginBottom: 8, fontSize: 11, color: 'var(--ki-text-secondary)',
+                      display: 'flex', alignItems: 'center', gap: 4,
+                    }}>
+                      <span>🎯</span> {pLabel}
+                    </div>
+                  ) : null;
+                })()}
               </div>
               <div style={{ maxHeight: 'calc(100vh - 260px)', overflowY: 'auto' }}>
-                {allLessons.map((lesson, idx) => {
+                {filteredLessons.map((lesson, idx) => {
                   const isActive = idx === currentIndex;
                   const isDone = !!progressMap[lesson.id]?.completed;
                   const locked = !isUnlocked(idx);
                   const type = lesson.lesson_type || lesson.type || 'video';
+                  const highlighted = isLessonHighlighted(course.id, lesson.title, userPhase);
                   let statusIcon = locked ? '🔒' : isDone ? '✅' : isActive ? '▶' : '○';
                   // Show module header for multi-module courses
-                  const showModuleHeader = isEnhancedCourse && (idx === 0 || lesson._moduleSortOrder !== allLessons[idx - 1]?._moduleSortOrder);
+                  const showModuleHeader = isEnhancedCourse && (idx === 0 || lesson._moduleSortOrder !== filteredLessons[idx - 1]?._moduleSortOrder);
                   return (
                     <div key={lesson.id}>
                       {showModuleHeader && (
@@ -1664,6 +2504,13 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                             textOverflow: 'ellipsis',
                           }}>
                             {lesson.title}
+                            {highlighted && (
+                              <span style={{
+                                fontSize: 9, fontWeight: 700, color: '#CC1426',
+                                background: 'rgba(204,20,38,0.08)', padding: '1px 5px',
+                                borderRadius: 99, marginLeft: 4, whiteSpace: 'nowrap',
+                              }}>⭐</span>
+                            )}
                           </div>
                           {lesson.duration_minutes && (
                             <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)' }}>{lesson.duration_minutes} Min.</div>

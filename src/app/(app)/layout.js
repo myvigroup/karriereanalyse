@@ -7,6 +7,7 @@ import AppTour from '@/components/ui/AppTour';
 import GlobalSearch from '@/components/ui/GlobalSearch';
 import InstallPrompt from '@/components/ui/InstallPrompt';
 import SOSButton from '@/components/elearning/SOSButton';
+import NightModeShield from '@/components/ui/NightModeShield';
 
 export default async function AppLayout({ children }) {
   const supabase = createClient();
@@ -57,6 +58,7 @@ export default async function AppLayout({ children }) {
       <GlobalSearch />
       <InstallPrompt />
       <SOSButton userId={user.id} />
+      <NightModeShield />
     </div>
   );
 }
