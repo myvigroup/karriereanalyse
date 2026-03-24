@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { getLevel, getLevelProgress } from '@/lib/career-logic';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import { KARRIERE_PHASEN_AUSWAHL } from '@/lib/elearning/zielgruppen-config';
 
 export default function ProfileClient({ profile: initialProfile, userBadges, allBadges, analysisSession, lessonsCompleted, certificates, userId }) {
   const supabase = createClient();
@@ -18,6 +19,17 @@ export default function ProfileClient({ profile: initialProfile, userBadges, all
     target_salary: profile?.target_salary || '',
     career_goal: profile?.career_goal || '',
   });
+
+  const [currentPhase, setCurrentPhase] = useState(profile?.phase || 'berufseinsteiger');
+  const [phaseSaving, setPhaseSaving] = useState(false);
+
+  async function changePhase(newPhase) {
+    setPhaseSaving(true);
+    await supabase.from('profiles').update({ phase: newPhase }).eq('id', userId);
+    setCurrentPhase(newPhase);
+    setProfile(prev => ({ ...prev, phase: newPhase }));
+    setPhaseSaving(false);
+  }
 
   const earnedBadgeIds = new Set((userBadges || []).map(ub => ub.badge_id));
   const level = getLevel(profile?.xp || 0);
@@ -135,6 +147,48 @@ export default function ProfileClient({ profile: initialProfile, userBadges, all
         <div className="card animate-in delay-4" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Zertifikate</div>
           <div style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.04em' }}>{certificates.length}</div>
+        </div>
+      </div>
+
+      {/* Karrierephase */}
+      <div className="card" style={{ marginBottom: 32 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700 }}>Deine Karrierephase</div>
+            <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 2 }}>
+              Alle E-Learnings passen sich an deine Phase an
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8 }}>
+          {KARRIERE_PHASEN_AUSWAHL.map(p => {
+            const isActive = currentPhase === p.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => !isActive && changePhase(p.id)}
+                disabled={phaseSaving}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '12px 14px', borderRadius: 'var(--r-md)',
+                  background: isActive ? 'rgba(204,20,38,0.05)' : 'var(--ki-bg-alt)',
+                  border: isActive ? '2px solid var(--ki-red)' : '1px solid var(--ki-border)',
+                  cursor: isActive ? 'default' : 'pointer',
+                  textAlign: 'left', transition: 'all 0.15s',
+                  opacity: phaseSaving ? 0.6 : 1,
+                }}
+              >
+                <span style={{ fontSize: 22 }}>{p.label.split(' ')[0]}</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: isActive ? 700 : 500, color: isActive ? 'var(--ki-red)' : 'var(--ki-text)' }}>
+                    {p.label.slice(p.label.indexOf(' ') + 1)}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)' }}>{p.desc}</div>
+                </div>
+                {isActive && <span style={{ marginLeft: 'auto', fontSize: 14, color: 'var(--ki-red)' }}>✓</span>}
+              </button>
+            );
+          })}
         </div>
       </div>
 
