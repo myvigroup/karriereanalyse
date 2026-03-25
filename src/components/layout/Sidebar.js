@@ -6,39 +6,47 @@ import { AUDIO_INTROS, AUDIO_TTS_FALLBACKS } from '@/lib/audio-config';
 import { getPersonalization } from '@/lib/personalization';
 import { getLevel, getLevelProgress } from '@/lib/gamification';
 
-// ── Gruppierte Navigation (MYVI-Style) ──
+// ══════════════════════════════════════════════════
+// SIDEBAR NAVIGATION — MYVI-Mapping
+// ══════════════════════════════════════════════════
+// MYVI Akademie          → Karriere-Institut OS
+// Dashboard              → Dashboard
+// Online-Kurse           → Masterclass (E-Learnings)
+// Präsenz & Prüfungen    → Premium (Seminare, Strukturgramm, INSIGHTS)
+// Badges & XP            → Badges & XP
+// Karrierepfad           → Karrierepfad
+// Starthilfe-Status      → Karriere-Analyse (Startpunkt)
+// Meine Ziele            → Mein Fortschritt (13 Kompetenzfelder)
+// Activity Guide         → KI-Coach
+// Rangliste              → Rangliste
+// Profil                 → Profil
+// ══════════════════════════════════════════════════
+
 const NAV_GROUPS = [
   {
-    label: null, // Kein Header für Hauptgruppe
+    label: null,
     items: [
-      { label: 'Dashboard', path: '/dashboard', icon: '◻' },
-      { label: 'Karriere-Analyse', path: '/analyse', icon: '◎' },
-      { label: 'Masterclass', path: '/masterclass', icon: '▶' },
-      { label: 'KI-Coach', path: '/coach', icon: '🤖' },
+      { label: 'Dashboard',         path: '/dashboard',    icon: '◻' },
+      { label: 'Masterclass',       path: '/masterclass',  icon: '▶' },
+      { label: 'Premium',           path: '/marketplace',  icon: '⭐' },
+      { label: 'Badges & XP',       path: '/community/achievements', icon: '🏅' },
+      { label: 'Karrierepfad',      path: '/career',       icon: '↗' },
+      { label: 'Karriere-Analyse',  path: '/analyse',      icon: '◎' },
+      { label: 'Mein Fortschritt',  path: '/marktwert',    icon: '📊' },
+      { label: 'KI-Coach',          path: '/coach',        icon: '🤖' },
+      { label: 'Rangliste',         path: '/community/peers', icon: '🏆' },
     ],
   },
   {
     label: 'Karriere-Tools',
     items: [
-      { label: 'Karrierepfad', path: '/career', icon: '↗' },
-      { label: 'Marktwert', path: '/marktwert', icon: '💰' },
-      { label: 'Gehaltsdatenbank', path: '/gehalt', icon: '📊' },
-      { label: 'Bewerbungen', path: '/applications', icon: '✉' },
-      { label: 'Kompass', path: '/strategy/decision', icon: '🧭' },
-    ],
-  },
-  {
-    label: 'Netzwerk & Community',
-    items: [
-      { label: 'Netzwerk', path: '/network', icon: '🤝' },
-      { label: 'Community', path: '/community', icon: '👥' },
-      { label: 'Jobportale', path: '/branding', icon: '🔗' },
-    ],
-  },
-  {
-    label: 'Premium',
-    items: [
-      { label: 'Exit-Strategie', path: '/strategy/exit', icon: '🚪' },
+      { label: 'Gehaltsdatenbank',  path: '/gehalt',             icon: '💰' },
+      { label: 'Bewerbungen',       path: '/applications',       icon: '✉' },
+      { label: 'Netzwerk',          path: '/network',            icon: '🤝' },
+      { label: 'Jobportale',        path: '/branding',           icon: '🔗' },
+      { label: 'Kompass',           path: '/strategy/decision',  icon: '🧭' },
+      { label: 'Exit-Strategie',    path: '/strategy/exit',      icon: '🚪' },
+      { label: 'Community',         path: '/community',          icon: '👥' },
     ],
   },
 ];
@@ -47,12 +55,12 @@ const NAV_GROUPS = [
 const NAV_ITEMS = NAV_GROUPS.flatMap(g => g.items);
 
 const ADMIN_ITEMS = [
-  { label: 'Coaching-Cockpit', path: '/admin/coaching', icon: '\u2295' },
-  { label: 'Nutzerverwaltung', path: '/admin/users', icon: '\u229E' },
-  { label: 'Kursverwaltung', path: '/admin/courses', icon: '\u22A1' },
-  { label: 'Analytics', path: '/admin/analytics', icon: '\u{1F4C8}' },
-  { label: 'Content', path: '/admin/content', icon: '📝' },
-  { label: 'Meine Klienten', path: '/coach-dashboard', icon: '📋' },
+  { label: 'Userverwaltung',    path: '/admin/users',     icon: '👤' },
+  { label: 'Kursverwaltung',    path: '/admin/courses',   icon: '📚' },
+  { label: 'Seminarverwaltung', path: '/admin/content',   icon: '🎓' },
+  { label: 'Badges',            path: '/admin/coaching',  icon: '🏅' },
+  { label: 'Analytics',         path: '/admin/analytics', icon: '📈' },
+  { label: 'FK Dashboard',      path: '/coach-dashboard', icon: '📋' },
 ];
 
 export default function Sidebar({ profile, analysisResults }) {
