@@ -1,36 +1,42 @@
 'use client';
 import { useRouter } from 'next/navigation';
 
+// Soft-CTA Banner statt Hard-Block
+// User kann die App IMMER nutzen — die Analyse ist eine EMPFEHLUNG, kein Zwang
 export default function AnalyseGate({ hasAnalysis, children }) {
   const router = useRouter();
 
-  if (!hasAnalysis) {
-    return (
-      <div style={{ padding: 48, textAlign: 'center', maxWidth: 500, margin: '80px auto' }}>
-        <div style={{ fontSize: 64, marginBottom: 16 }}>🎯</div>
-        <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, letterSpacing: '-0.02em' }}>
-          Deine Karriere-Analyse wartet
-        </h2>
-        <p style={{ color: 'var(--ki-text-secondary)', marginBottom: 24, lineHeight: 1.7, fontSize: 15 }}>
-          Bevor du die App nutzen kannst, erstellen wir dein persönliches
-          Kompetenz-Profil. Kostenlos. 5 Minuten. Danach passt sich die
-          gesamte App an DICH an.
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+  return (
+    <>
+      {!hasAnalysis && (
+        <div style={{
+          padding: '12px 24px',
+          background: 'linear-gradient(135deg, rgba(204,20,38,0.06) 0%, rgba(204,20,38,0.02) 100%)',
+          borderBottom: '1px solid rgba(204,20,38,0.12)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+          flexWrap: 'wrap',
+        }}>
+          <span style={{ fontSize: 20 }}>🎯</span>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ki-text)' }}>
+              Karriere-Analyse noch nicht abgeschlossen
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>
+              5 Minuten — danach passt sich die gesamte App an dich an.
+            </div>
+          </div>
           <button
             onClick={() => router.push('/analyse')}
             className="btn btn-primary"
-            style={{ padding: '14px 32px', fontSize: 16 }}
+            style={{ padding: '8px 20px', fontSize: 13, flexShrink: 0 }}
           >
-            Jetzt Analyse starten →
+            Analyse starten →
           </button>
-          <span style={{ fontSize: 13, color: 'var(--ki-text-tertiary)' }}>
-            Inklusive 1 Monat Premium gratis
-          </span>
         </div>
-      </div>
-    );
-  }
-
-  return children;
+      )}
+      {children}
+    </>
+  );
 }

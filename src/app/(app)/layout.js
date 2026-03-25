@@ -22,16 +22,21 @@ export default async function AppLayout({ children }) {
 
   if (profile && profile.onboarding_complete === false) redirect('/onboarding');
 
-  // Check if user has completed analysis
-  const { data: analysisSession } = await supabase
-    .from('analysis_sessions')
-    .select('id')
-    .eq('user_id', user.id)
-    .not('completed_at', 'is', null)
-    .limit(1)
-    .maybeSingle();
-
-  const hasCompletedAnalysis = !!analysisSession;
+  // Check if user has completed analysis (robust: bei Fehler → nicht blockieren)
+  let hasCompletedAnalysis = true; // Default: nicht blockieren
+  try {
+    const { data: analysisSession } = await supabase
+      .from('analysis_sessions')
+      .select('id')
+      .eq('user_id', user.id)
+      .not('completed_at', 'is', null)
+      .limit(1)
+      .maybeSingle();
+    hasCompletedAnalysis = !!analysisSession;
+  } catch {
+    // Bei DB-Fehler: User nicht aussperren
+    hasCompletedAnalysis = true;
+  }
 
   // Fetch analysis results for personalization
   const { data: analysisResults } = await supabase
