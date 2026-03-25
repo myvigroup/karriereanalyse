@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import { berechnePersonalisierung } from '@/lib/personalization';
 
 // ─── Hardcoded Analyse-Tools ──────────────────────────────────────────────────
 const ANALYSE_TOOLS = [
@@ -174,7 +175,22 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
     [progress]
   );
 
-  // Enrich E-Learning courses with progress + PRIO flag
+  // Personalisierung berechnen
+  const personalisierung = useMemo(
+    () => berechnePersonalisierung(analysisResults, profile?.phase),
+    [analysisResults, profile?.phase]
+  );
+
+  // Relevanz-Map: kursId → {relevanz, istSchwaeche, empfehlung, rang}
+  const relevanzMap = useMemo(() => {
+    const map = {};
+    (personalisierung.empfohleneKurse || []).forEach((k, i) => {
+      map[k.kursId] = { relevanz: k.relevanz, istSchwaeche: k.istSchwaeche, empfehlung: k.empfehlung, rang: i };
+    });
+    return map;
+  }, [personalisierung]);
+
+  // Enrich E-Learning courses with progress + Relevanz-Sortierung
   const eLearnings = useMemo(() => {
     return (courses || [])
       .filter((c) => !c.category || c.category === 'E-Learning' || c.category === 'e-learning')
@@ -186,15 +202,18 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
         );
         const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
-        // PRIO: find analysis result linked to this course's competency
-        const result = (analysisResults || []).find(
-          (r) => r.field_id === c.competency_link || r.field_id === c.competency_field_id
-        );
-        const isPrio = result && result.score < 50;
+        const rel = relevanzMap[c.id];
+        const isPrio = rel?.istSchwaeche || false;
+        const isTopEmpfehlung = rel?.rang === 0 && analysisResults?.length > 0;
 
-        return { ...c, total, done, pct, isPrio };
+        return { ...c, total, done, pct, isPrio, isTopEmpfehlung, relevanz: rel?.relevanz ?? 0, empfehlung: rel?.empfehlung || '' };
+      })
+      // Sortiere nach Relevanz (höchste zuerst), falls Analyse vorhanden
+      .sort((a, b) => {
+        if (!analysisResults || analysisResults.length === 0) return 0;
+        return b.relevanz - a.relevanz;
       });
-  }, [courses, completedSet, analysisResults]);
+  }, [courses, completedSet, analysisResults, relevanzMap]);
 
   // Find in-progress course for "Weiterlernen" banner
   const inProgressCourse = useMemo(
@@ -365,15 +384,22 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                     flexDirection: 'column',
                   }}
                 >
-                  {/* PRIO Badge */}
-                  {course.isPrio && (
+                  {/* Relevanz-Badge */}
+                  {course.isTopEmpfehlung ? (
                     <span
                       className="pill pill-red"
                       style={{ position: 'absolute', top: 12, right: 12, fontSize: 11, fontWeight: 700 }}
                     >
-                      ⚡ PRIO
+                      #1 Empfehlung
                     </span>
-                  )}
+                  ) : course.isPrio ? (
+                    <span
+                      className="pill pill-gold"
+                      style={{ position: 'absolute', top: 12, right: 12, fontSize: 11, fontWeight: 700 }}
+                    >
+                      Potenzial
+                    </span>
+                  ) : null}
 
                   {/* Icon */}
                   <div style={{ fontSize: 40, marginBottom: 12 }}>{course.icon || '📘'}</div>
@@ -396,9 +422,17 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                     </div>
                   )}
 
+                  {/* Empfehlung (personalisiert) */}
+                  {course.empfehlung && analysisResults?.length > 0 && (
+                    <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginBottom: 8, lineHeight: 1.4 }}>
+                      {course.empfehlung}
+                    </div>
+                  )}
+
                   {/* Module count */}
                   <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginBottom: 12 }}>
                     {(course.modules || []).length} Module &bull; {course.total} Lektionen
+                    {course.isPrio && ' • 2x XP'}
                   </div>
 
                   {/* Progress bar */}

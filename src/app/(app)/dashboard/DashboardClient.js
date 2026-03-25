@@ -1,6 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import { getPersonalization, FIELD_TO_COURSE, berechnePersonalisierung } from '@/lib/personalization';
 
 const QUOTES = [
   "Erfolg ist kein Zufall — er ist die Summe deiner täglichen Entscheidungen.",
@@ -196,6 +197,128 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
       <div style={{ marginBottom: 24, padding: '12px 20px', background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-md)', fontSize: 14, color: 'var(--ki-text-secondary)', fontStyle: 'italic', borderLeft: '3px solid var(--ki-red)' }}>
         „{dailyQuote}"
       </div>
+
+      {/* === PERSONALIZED WELCOME (Fun-First) === */}
+      {hasAnalysis && analysisResults.length > 0 && (() => {
+        const pers = berechnePersonalisierung(analysisResults, profile?.phase);
+        const topEmpf = pers.topEmpfehlung;
+        const topStrong = pers.staerken[0];
+
+        // Find the course for the top recommendation
+        const topRecCourse = topEmpf
+          ? (courses || []).find(c => c.id === topEmpf.kursId)
+          : null;
+
+        return (
+          <div className="animate-in" style={{ marginBottom: 28 }}>
+            {/* Stärken zuerst! (Fun-First) */}
+            {topStrong && (
+              <div className="card" style={{
+                padding: '16px 20px', marginBottom: 12,
+                borderLeft: '4px solid var(--ki-success)',
+                background: 'linear-gradient(135deg, rgba(16,185,129,0.04) 0%, transparent 100%)',
+              }}>
+                <div style={{ fontSize: 15, fontWeight: 700 }}>
+                  {topStrong.label}: {Math.round(topStrong.score)}% — das ist stark!
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 2 }}>
+                  Du hast hier echtes Talent. Jetzt holen wir deine anderen Felder auf das gleiche Level.
+                </div>
+              </div>
+            )}
+
+            {/* Top Empfehlung */}
+            {topEmpf && (
+              <div className="card" style={{
+                padding: '20px 24px',
+                borderLeft: `4px solid ${topEmpf.farbe || 'var(--ki-red)'}`,
+                marginBottom: 12,
+                background: 'linear-gradient(135deg, var(--ki-bg-alt) 0%, transparent 100%)',
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: topEmpf.farbe || 'var(--ki-red)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+                  Deine #1 Empfehlung
+                </div>
+                <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>
+                  {topEmpf.icon} {topEmpf.title}
+                </div>
+                <div style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 12 }}>
+                  {topEmpf.empfehlung}
+                </div>
+                {topEmpf.istSchwaeche && (
+                  <div style={{ fontSize: 12, color: 'var(--ki-warning)', fontWeight: 600, marginBottom: 12 }}>
+                    2x XP-Boost aktiv — du trainierst dein Wachstumsfeld!
+                  </div>
+                )}
+                <a
+                  href={topRecCourse ? `/masterclass/${topRecCourse.id}` : '/masterclass'}
+                  className="btn btn-primary"
+                  style={{ fontSize: 14, display: 'inline-block' }}
+                >
+                  Jetzt starten →
+                </a>
+              </div>
+            )}
+
+            {/* Quick Stats Row */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+              gap: 12,
+            }}>
+              <div className="card" style={{ padding: '14px 16px', textAlign: 'center' }}>
+                <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', fontWeight: 500, marginBottom: 4 }}>Karriere-Score</div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ki-red)' }}>{pers.gesamtScore}%</div>
+              </div>
+              {pers.staerken.length > 0 && (
+                <div className="card" style={{ padding: '14px 16px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', fontWeight: 500, marginBottom: 4 }}>Top-Stärke</div>
+                  <div style={{ fontSize: 15, fontWeight: 700 }}>{pers.staerken[0].label}</div>
+                  <div style={{ fontSize: 13, color: 'var(--ki-success)', fontWeight: 600 }}>{Math.round(pers.staerken[0].score)}%</div>
+                </div>
+              )}
+              {pers.schwaechen.length > 0 && (
+                <div className="card" style={{ padding: '14px 16px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', fontWeight: 500, marginBottom: 4 }}>Größtes Potenzial</div>
+                  <div style={{ fontSize: 15, fontWeight: 700 }}>{pers.schwaechen[0].label}</div>
+                  <div style={{ fontSize: 13, color: 'var(--ki-warning)', fontWeight: 600 }}>{Math.round(pers.schwaechen[0].score)}%</div>
+                </div>
+              )}
+              {pers.marktwertPotenzial > 0 && (
+                <div className="card" style={{ padding: '14px 16px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', fontWeight: 500, marginBottom: 4 }}>Marktwert-Potenzial</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ki-warning)' }}>+{pers.marktwertPotenzial}%</div>
+                </div>
+              )}
+            </div>
+
+            {/* Empfohlene Kurse (nach Relevanz) */}
+            {pers.empfohleneKurse.length > 1 && (
+              <div style={{ display: 'grid', gap: 8, marginTop: 12 }}>
+                {pers.empfohleneKurse.slice(1, 4).map((kurs) => (
+                  <a key={kurs.kursId} href={`/masterclass/${kurs.kursId}`}
+                     className="card" style={{
+                       padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12,
+                       borderLeft: `3px solid ${kurs.farbe}`, textDecoration: 'none', color: 'inherit',
+                     }}>
+                    <span style={{ fontSize: 20 }}>{kurs.icon}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>{kurs.title}</div>
+                      <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>{kurs.empfehlung}</div>
+                    </div>
+                    <div style={{
+                      fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 99,
+                      background: kurs.istSchwaeche ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)',
+                      color: kurs.istSchwaeche ? '#F59E0B' : '#10B981',
+                    }}>
+                      {kurs.istSchwaeche ? 'Potenzial' : 'Solide'}
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* === FOCUS MODE === */}
       {focusMode ? (
