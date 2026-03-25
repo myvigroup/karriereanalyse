@@ -514,12 +514,21 @@ export const PROFESSIONAL_EXTRAS = {
 };
 
 // ---------------------------------------------------------------------------
-// 11. INVESTOR EXTRAS
+// 11. FÜHRUNGSKRAFT EXTRAS (inkl. ehemaliger Investor-Content)
 // ---------------------------------------------------------------------------
-export const INVESTOR_EXTRAS = {
+export const FUEHRUNGSKRAFT_EXTRAS = {
+  // Wissenstransfer (aus Professional-Bereich, relevant für FK)
+  wissenstransfer: {
+    titel: 'Wissenstransfer: Lehren = 90% Retention',
+    methoden: [
+      { name: 'Brown Bag Sessions', erklaerung: '30 Min Mittagspause: 1 Person erklärt 1 Konzept. Pizza optional, Wissen obligatorisch.', format: '15 Min Vortrag + 15 Min Q&A' },
+      { name: '1-Pager System', erklaerung: 'Jedes Tool, jeden Prozess, jedes Konzept auf 1 Seite zusammenfassen. So dass ein Neuling es in 5 Min versteht.', format: 'Titel, Problem, Lösung, 3 Schritte, 1 Beispiel' },
+    ],
+  },
+  // Executive Abstractor (ehemals Investor)
   executive_abstractor: {
     titel: '100 Seiten in 10 Minuten: Die 5-Punkte Extraktion',
-    erklaerung: 'Investoren haben keine Zeit für langes Lesen. Diese Methode extrahiert das Wesentliche.',
+    erklaerung: 'Führungskräfte haben keine Zeit für langes Lesen. Diese Methode extrahiert das Wesentliche.',
     schritte: [
       { minute: '1-2', aktion: 'Inhaltsverzeichnis + letzte Seite lesen', warum: 'Struktur + Fazit = 80% des Inhalts' },
       { minute: '3-4', aktion: 'Alle Grafiken und Charts scannen', warum: 'Grafiken zeigen die Story hinter den Zahlen' },
@@ -528,6 +537,7 @@ export const INVESTOR_EXTRAS = {
       { minute: '9-10', aktion: '5-Punkte Zusammenfassung schreiben', warum: 'Schreiben = Verarbeiten. 5 Punkte = Kernessenz.' },
     ],
   },
+  // Synthese-Training (ehemals Investor)
   synthese_training: {
     titel: 'The Dot Connector: Synthese-Training',
     erklaerung: '2 scheinbar unverwandte Branchen → 60 Sekunden → Synergie formulieren.',
@@ -539,9 +549,10 @@ export const INVESTOR_EXTRAS = {
     ],
     timer: 60,
   },
+  // Entscheidungs-Journal (ehemals Investor)
   entscheidungs_journal: {
     titel: 'Entscheidungs-Journal: Lerne aus deinen eigenen Entscheidungen',
-    erklaerung: 'Investoren lernen nicht aus Büchern — sie lernen aus EIGENEN Entscheidungen.',
+    erklaerung: 'Führungskräfte lernen nicht aus Büchern — sie lernen aus EIGENEN Entscheidungen.',
     felder: [
       { name: 'Datum', placeholder: 'TT.MM.JJJJ' },
       { name: 'Entscheidung', placeholder: 'Was habe ich entschieden?' },
@@ -551,6 +562,7 @@ export const INVESTOR_EXTRAS = {
       { name: 'Learning', placeholder: 'Was habe ich gelernt?' },
     ],
   },
+  // Schnellbewertung (ehemals Investor)
   schnellbewertung: {
     titel: '2-Minuten Due Diligence',
     erklaerung: '50 Pitch-Decks pro Woche? Dieser 5-Fragen Filter entscheidet in 2 Minuten.',
@@ -562,6 +574,7 @@ export const INVESTOR_EXTRAS = {
       { frage: 'Passt ins Portfolio?', ja: 'Deep Dive', nein: 'Weiterleiten' },
     ],
   },
+  // Netzwerk-Intelligence (ehemals Investor)
   netzwerk_intelligence: {
     titel: 'Netzwerk-Intelligence: 15 Min Gespräch > 10h Selbststudium',
     methoden: [

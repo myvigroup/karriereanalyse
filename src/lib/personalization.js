@@ -8,11 +8,10 @@ const FIELD_TO_COURSE = {
 };
 
 const PHASE_MODULES = {
-  student:         ['dashboard', 'coach', 'analyse', 'masterclass', 'applications', 'gehalt', 'career'],
-  einsteiger:      ['dashboard', 'coach', 'analyse', 'masterclass', 'applications', 'gehalt', 'network', 'career', 'branding'],
-  professional:    ['dashboard', 'coach', 'analyse', 'masterclass', 'applications', 'marktwert', 'network', 'gehalt', 'career', 'branding', 'strategy/exit'],
+  studierende:     ['dashboard', 'coach', 'analyse', 'masterclass', 'applications', 'gehalt', 'career'],
+  berufseinsteiger:['dashboard', 'coach', 'analyse', 'masterclass', 'applications', 'gehalt', 'network', 'career', 'branding'],
+  berufserfahren:  ['dashboard', 'coach', 'analyse', 'masterclass', 'applications', 'marktwert', 'network', 'gehalt', 'career', 'branding', 'strategy/exit'],
   fuehrungskraft:  ['dashboard', 'coach', 'analyse', 'masterclass', 'marktwert', 'network', 'gehalt', 'career', 'branding', 'strategy/exit'],
-  investor:        ['dashboard', 'coach', 'analyse', 'marktwert', 'network', 'career'],
   pre_coaching:    null, // show all (default)
   active:          null,
   alumni:          null,
