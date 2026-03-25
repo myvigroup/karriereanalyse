@@ -2227,7 +2227,7 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
     setCurrentIndex(index);
   }
 
-  async function markComplete(xp = 30) {
+  async function markComplete(xp) {
     if (!currentLesson) return;
     setSaving(true);
     await supabase.from('lesson_progress').upsert({
@@ -2241,28 +2241,25 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
       ...prev,
       [currentLesson.id]: { ...prev[currentLesson.id], completed: true },
     }));
-    // Award XP
-    const { data: prof } = await supabase.from('profiles').select('total_points').eq('id', userId).single().catch(() => ({ data: null }));
-    if (prof) {
-      await supabase.from('profiles').update({ total_points: (prof.total_points || 0) + xp }).eq('id', userId);
-    }
-    // Award completion bonus if all done after this
+    // Award XP via zentrale Funktion (verhindert Dopplung)
+    const finalXP = xp || getXpForType(currentLesson?.lesson_type || currentLesson?.type || 'video');
+    await awardPoints(supabase, userId, null, finalXP);
+    // Kurs-Abschluss Bonus (150 XP) wenn alle Lektionen fertig
     const newCompleted = filteredLessons.filter(l => l.id === currentLesson.id || progressMap[l.id]?.completed).length;
     if (newCompleted === totalCount && totalCount > 0) {
-      const { data: prof2 } = await supabase.from('profiles').select('total_points').eq('id', userId).single().catch(() => ({ data: null }));
-      if (prof2) {
-        await supabase.from('profiles').update({ total_points: (prof2.total_points || 0) + 200 }).eq('id', userId);
-      }
+      await awardPoints(supabase, userId, 'COMPLETE_COURSE');
     }
     setSaving(false);
   }
 
   function getXpForType(type) {
-    // Schwache Bereiche bekommen XP-Boost als Anreiz
+    // Schwächen-Boost: 2x für kritisch, 1.5x für schwach (basierend auf Analyse-Score)
     const boost = courseCompetency?.level === 'kritisch' ? 2 : courseCompetency?.level === 'schwach' ? 1.5 : 1;
-    if (type === 'exercise') return Math.round(40 * boost);
-    if (type === 'quiz') return 0; // quiz awards its own XP
-    return Math.round(30 * boost);
+    if (type === 'exercise' || type === 'interactive') return Math.round(40 * boost);
+    if (type === 'boss_fight' || type === 'boss-fight') return Math.round(60 * boost);
+    if (type === 'quiz') return 0; // Quiz vergibt eigene XP
+    if (type === 'abschlusstest') return Math.round(100 * boost);
+    return Math.round(30 * boost); // Standard: Video, Text, etc.
   }
 
   const isCompleted = currentLesson ? !!progressMap[currentLesson.id]?.completed : false;

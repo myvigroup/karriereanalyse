@@ -1,28 +1,75 @@
+// src/lib/gamification.js
+// ══════════════════════════════════════════════════
+// XP-System — Balanciert & Realistisch
+// ══════════════════════════════════════════════════
+//
+// DESIGN-PRINZIPIEN:
+// 1. Eine Lektion = Basis-Einheit (30 XP)
+// 2. Übungen = höherer Aufwand → 40 XP
+// 3. Quiz = Wissens-Check → 50 XP
+// 4. Kurs-Abschluss = großes Ziel → 150 XP
+// 5. Analyse = einmaliger Meilenstein → 100 XP
+// 6. Schwächen-Kurse = 2x Multiplikator (aus personalization.js)
+// 7. Streaks belohnen Konsistenz, nicht Glück
+//
+// REALISMUS-CHECK (für einen aktiven User):
+// - 1 Lektion/Tag = ~30 XP/Tag (normal) oder ~60 XP/Tag (Schwäche)
+// - 1 Kurs (12 Module, ~36 Lektionen) = ~1.080 XP normal, ~2.160 XP Schwäche
+// - 6 Kurse komplett = ~6.480 bis ~12.960 XP + Boni
+// - Level 6 (5.000 XP) = erreichbar nach ~3-4 abgeschlossenen Kursen
+// ══════════════════════════════════════════════════
+
 export const POINT_ACTIONS = {
-  COMPLETE_LESSON: 50,
-  COMPLETE_QUIZ: 100,
-  FIRST_ANALYSIS: 200,
-  ADD_APPLICATION: 30,
-  WIN_LOGGED: 40,
-  DAILY_LOGIN: 10,
-  STREAK_3: 50,
-  STREAK_7: 150,
-  STREAK_30: 500,
-  CONTACT_ADDED: 20,
-  DOCUMENT_UPLOADED: 30,
-  INTERVIEW_BRIEFING: 75,
-  EXIT_PLAN_COMPLETE: 200,
-  VALUE_ASSESSMENT: 150,
-  COACH_SESSION: 20,
+  // ── Kern-Aktivitäten ──
+  COMPLETE_LESSON:      30,   // Standard-Lektion (Video, Text, etc.)
+  COMPLETE_EXERCISE:    40,   // Interaktive Übung (Drag-Drop, Szenario, etc.)
+  COMPLETE_QUIZ:        50,   // Modul-Quiz bestanden
+  COMPLETE_BOSS_FIGHT:  60,   // Boss-Fight Szenario gemeistert
+  COMPLETE_COURSE:     150,   // Ganzen Kurs abgeschlossen (6 Kurse insgesamt)
+  COMPLETE_ABSCHLUSS:  100,   // Abschlusstest eines Kurses
+
+  // ── Analyse & Profil ──
+  FIRST_ANALYSIS:      100,   // Erste Karriere-Analyse abgeschlossen
+  VALUE_ASSESSMENT:     75,   // Marktwert-Assessment durchgeführt
+
+  // ── Alltägliche Aktionen ──
+  ADD_APPLICATION:      15,   // Bewerbung hinzugefügt
+  WIN_LOGGED:           20,   // Erfolg dokumentiert
+  CONTACT_ADDED:        10,   // Netzwerk-Kontakt hinzugefügt
+  DOCUMENT_UPLOADED:    15,   // Dokument hochgeladen
+  COACH_SESSION:        20,   // Coach-Frage gestellt
+  INTERVIEW_BRIEFING:   40,   // Interview-Vorbereitung abgeschlossen
+  EXIT_PLAN_COMPLETE:  100,   // Exit-Strategie erstellt
+
+  // ── Streaks (tägliche Konsistenz) ──
+  DAILY_LOGIN:          10,   // Täglicher Login
+  STREAK_3:             20,   // 3-Tage Streak
+  STREAK_7:             50,   // 7-Tage Streak (+ Freeze-Token)
+  STREAK_14:           100,   // 14-Tage Streak
+  STREAK_30:           200,   // 30-Tage Streak (ein Monat!)
+
+  // ── Journal & Reflexion ──
+  JOURNAL_ENTRY:        15,   // Journal-Eintrag geschrieben
 };
 
+// ══════════════════════════════════════════════════
+// LEVEL-SYSTEM
+// ══════════════════════════════════════════════════
+// Progression: Realistische Stufen basierend auf Aktivität
+//
+// Level 1 → 2:   200 XP  ≈ 1-2 Tage aktiv (7 Lektionen)
+// Level 2 → 3:   500 XP  ≈ 1 Woche (Analyse + 10 Lektionen)
+// Level 3 → 4: 1.200 XP  ≈ 2-3 Wochen (1 Kurs fast fertig)
+// Level 4 → 5: 2.500 XP  ≈ 1-2 Monate (2 Kurse + Streaks)
+// Level 5 → 6: 5.000 XP  ≈ 3-4 Monate (3-4 Kurse + Extras)
+
 export const LEVELS = [
-  { level: 1, name: 'Einsteiger', minXP: 0, icon: '\u{1F331}' },
-  { level: 2, name: 'Entdecker', minXP: 200, icon: '\u{1F50D}' },
-  { level: 3, name: 'Aufsteiger', minXP: 500, icon: '\u{1F4C8}' },
-  { level: 4, name: 'Stratege', minXP: 1200, icon: '\u{1F9E0}' },
-  { level: 5, name: 'Leader', minXP: 2500, icon: '\u{1F451}' },
-  { level: 6, name: 'Executive', minXP: 5000, icon: '\u{1F3C6}' },
+  { level: 1, name: 'Einsteiger',  minXP:     0, icon: '🌱' },
+  { level: 2, name: 'Entdecker',   minXP:   200, icon: '🔍' },
+  { level: 3, name: 'Aufsteiger',  minXP:   500, icon: '📈' },
+  { level: 4, name: 'Stratege',    minXP: 1200, icon: '🧠' },
+  { level: 5, name: 'Leader',      minXP: 2500, icon: '👑' },
+  { level: 6, name: 'Executive',   minXP: 5000, icon: '🏆' },
 ];
 
 export function getLevel(xp) {
@@ -43,8 +90,12 @@ export function getLevelProgress(xp) {
   return { current, next: nextLevel, progress: Math.round((done / range) * 100) };
 }
 
-export async function awardPoints(supabase, userId, action) {
-  const points = POINT_ACTIONS[action];
+// ══════════════════════════════════════════════════
+// XP VERGABE (zentral, verhindert Dopplung)
+// ══════════════════════════════════════════════════
+
+export async function awardPoints(supabase, userId, action, customPoints) {
+  const points = customPoints || POINT_ACTIONS[action];
   if (!points) return { awarded: 0, levelUp: false };
 
   const { data: profile } = await supabase
@@ -71,6 +122,10 @@ export async function awardPoints(supabase, userId, action) {
   };
 }
 
+// ══════════════════════════════════════════════════
+// STREAK-SYSTEM
+// ══════════════════════════════════════════════════
+
 export async function checkStreak(supabase, userId) {
   const { data: profile } = await supabase
     .from('profiles')
@@ -93,7 +148,6 @@ export async function checkStreak(supabase, userId) {
   if (profile.last_streak_date === yesterday) {
     newStreak = (profile.streak_count || 0) + 1;
   } else if (newFreezes > 0 && profile.streak_count > 0) {
-    // Streak-Freeze: skip one day without losing streak
     newStreak = (profile.streak_count || 0) + 1;
     newFreezes -= 1;
     freezeUsed = true;
@@ -102,11 +156,12 @@ export async function checkStreak(supabase, userId) {
   }
 
   let bonusPoints = POINT_ACTIONS.DAILY_LOGIN;
-  if (newStreak === 3) bonusPoints += POINT_ACTIONS.STREAK_3;
+  if (newStreak === 3)  bonusPoints += POINT_ACTIONS.STREAK_3;
   if (newStreak === 7) {
     bonusPoints += POINT_ACTIONS.STREAK_7;
-    newFreezes = Math.min(newFreezes + 1, 3); // Earn a freeze token at 7-day streak
+    newFreezes = Math.min(newFreezes + 1, 3);
   }
+  if (newStreak === 14) bonusPoints += POINT_ACTIONS.STREAK_14;
   if (newStreak === 30) bonusPoints += POINT_ACTIONS.STREAK_30;
 
   const newTotal = (profile.total_points || 0) + bonusPoints;

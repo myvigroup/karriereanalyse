@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { LEVELS, getLevelProgress } from '@/lib/gamification';
+import { getPersonalization, FIELD_TO_COURSE, berechnePersonalisierung } from '@/lib/personalization';
 import InfoTooltip from '@/components/ui/InfoTooltip';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -602,7 +603,231 @@ function CheckItem({ done, label, sub, href }) {
   );
 }
 
-/* ── 7. Video Platzhalter ───────────────────────────────────────────────── */
+/* ── 7. Dynamische Roadmap ──────────────────────────────────────────────── */
+function DynamicRoadmap({ analysisSession, analysisResults, courses, progress, profile }) {
+  const completedIds = new Set((progress || []).filter(p => p.completed).map(p => p.lesson_id));
+  const hasAnalysis = !!analysisSession;
+  const pers = berechnePersonalisierung(analysisResults, profile?.phase);
+
+  // Build course progress map by courseId
+  const courseProgressMap = {};
+  (courses || []).forEach(course => {
+    const lessons = (course.modules || []).flatMap(m => m.lessons || []);
+    const done = lessons.filter(l => completedIds.has(l.id)).length;
+    courseProgressMap[course.id] = { done, total: lessons.length, isDone: lessons.length > 0 && done >= lessons.length };
+  });
+
+  // Empfohlene Kurse nach Relevanz (max 4 auf der Roadmap)
+  const recCourses = pers.empfohleneKurse.slice(0, 4).map(kurs => {
+    const prog = courseProgressMap[kurs.kursId] || { done: 0, total: 0, isDone: false };
+    const topFeld = kurs.felder?.[0];
+    return {
+      title: kurs.title + ' E-Learning',
+      fieldTitle: topFeld?.label || kurs.title,
+      score: topFeld?.score != null ? Math.round(topFeld.score) : null,
+      href: `/masterclass/${kurs.kursId}`,
+      done: prog.done,
+      total: prog.total,
+      isDone: prog.isDone,
+      istSchwaeche: kurs.istSchwaeche,
+      empfehlung: kurs.empfehlung,
+    };
+  });
+
+  const STRUKTURGRAMM_URL = 'https://www.daskarriereinstitut.de/de/e/structogram-82?uId=2';
+  const INSIGHTS_URL = 'https://www.daskarriereinstitut.de/de/e/insights-mdi-trimetrix-eq-analyse-und-auswertungsgespr%C3%A4ch-94?uId=2';
+
+  const steps = [
+    {
+      id: 'analyse',
+      status: hasAnalysis ? 'done' : 'current',
+      title: 'Karriere-Analyse',
+      sub: hasAnalysis
+        ? `Abgeschlossen — Gesamtscore: ${Math.round(analysisSession.overall_score)}%`
+        : '13 Kompetenzfelder in 10 Min. analysieren',
+      href: '/analyse',
+      cta: hasAnalysis ? 'Ergebnis ansehen →' : 'Jetzt starten →',
+    },
+    ...recCourses.map((rc, i) => ({
+      id: `rec-${i}`,
+      status: rc.isDone ? 'done' : (hasAnalysis && i === 0 ? 'current' : 'recommended'),
+      title: rc.title,
+      sub: rc.isDone
+        ? 'Abgeschlossen'
+        : rc.empfehlung
+          ? `${rc.empfehlung} — ${rc.done}/${rc.total} Lektionen`
+          : rc.score != null
+            ? `${rc.fieldTitle} (${rc.score}%) — ${rc.done}/${rc.total} Lektionen`
+            : `${rc.done}/${rc.total} Lektionen`,
+      href: rc.href,
+      cta: rc.isDone ? 'Zertifikat ansehen →' : rc.istSchwaeche ? '2x XP — Jetzt starten →' : 'Jetzt starten →',
+      progress: rc.total > 0 ? Math.round((rc.done / rc.total) * 100) : 0,
+    })),
+    {
+      id: 'strukturgramm',
+      status: profile?.strukturgramm_done ? 'done' : 'locked',
+      title: 'Strukturgramm®',
+      sub: 'Premium-Analyse: Verstehe deine biologisch fundierte Persönlichkeitsstruktur',
+      href: STRUKTURGRAMM_URL,
+      cta: 'Mehr erfahren →',
+      external: true,
+    },
+    {
+      id: 'insights',
+      status: profile?.insights_done ? 'done' : 'locked',
+      title: 'INSIGHTS MDI® EQ',
+      sub: 'Premium-Analyse: TriMetrix EQ — Talente, Motivatoren & emotionale Intelligenz',
+      href: INSIGHTS_URL,
+      cta: 'Mehr erfahren →',
+      external: true,
+    },
+    {
+      id: 'marktwert',
+      status: pers.marktwertPotenzial > 0 ? 'recommended' : 'locked',
+      title: `Marktwert +${pers.marktwertPotenzial}%`,
+      sub: pers.marktwertPotenzial > 0
+        ? `${pers.schwaechen.length} Wachstumsfelder identifiziert — jedes verbesserte Feld steigert deinen Marktwert`
+        : 'Starte die Analyse um dein Potenzial zu berechnen',
+      href: '/marktwert',
+      cta: 'Marktwert ansehen →',
+    },
+    {
+      id: 'goal',
+      status: 'locked',
+      title: 'Ziel',
+      sub: profile?.target_salary
+        ? `Dein Zielgehalt: ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(profile.target_salary)}`
+        : profile?.career_goal
+          ? profile.career_goal
+          : 'Definiere dein Karriereziel im Profil',
+      href: '/profile',
+      cta: profile?.target_salary || profile?.career_goal ? 'Profil bearbeiten →' : 'Ziel setzen →',
+    },
+  ];
+
+  const statusIcon = (status) => {
+    if (status === 'done') return '✅';
+    if (status === 'current' || status === 'recommended') return '⭐';
+    return '○';
+  };
+
+  return (
+    <section style={{ marginBottom: 40 }}>
+      <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8 }}>
+        Deine Karriere-Roadmap
+      </h2>
+      <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24 }}>
+        Dein individueller Weg — basierend auf deinen Analyse-Ergebnissen.
+      </p>
+
+      <div style={{ position: 'relative', paddingLeft: 40 }}>
+        {/* Vertical connecting line */}
+        <div style={{
+          position: 'absolute',
+          left: 18,
+          top: 24,
+          bottom: 24,
+          width: 3,
+          background: 'linear-gradient(to bottom, var(--ki-red), var(--ki-border))',
+          borderRadius: 2,
+        }} />
+
+        {steps.map((step, i) => {
+          const isDone = step.status === 'done';
+          const isCurrent = step.status === 'current' || step.status === 'recommended';
+          const isLocked = step.status === 'locked';
+
+          return (
+            <div
+              key={step.id}
+              className={`animate-in delay-${Math.min(i + 1, 4)}`}
+              style={{ marginBottom: i < steps.length - 1 ? 8 : 0 }}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 16,
+                padding: '14px 16px 14px 0',
+                borderRadius: 'var(--r-md)',
+              }}>
+                {/* Node */}
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 16,
+                  flexShrink: 0,
+                  position: 'relative',
+                  left: -21,
+                  zIndex: 2,
+                  background: isDone ? 'var(--ki-success)' : isCurrent ? 'var(--ki-red)' : 'var(--ki-bg-alt)',
+                  color: isDone || isCurrent ? 'white' : 'var(--ki-text-tertiary)',
+                  border: isCurrent ? '3px solid var(--ki-red)' : isDone ? '2px solid var(--ki-success)' : '2px solid var(--ki-border)',
+                  boxShadow: isCurrent ? '0 0 0 4px rgba(204,20,38,0.15)' : 'none',
+                }}>
+                  {statusIcon(step.status)}
+                </div>
+
+                {/* Content */}
+                <div style={{ flex: 1, marginLeft: -8 }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    marginBottom: 4,
+                  }}>
+                    <span style={{
+                      fontSize: isCurrent ? 16 : 15,
+                      fontWeight: isCurrent ? 700 : 600,
+                      color: isLocked ? 'var(--ki-text-tertiary)' : 'var(--ki-text)',
+                    }}>
+                      {step.title}
+                    </span>
+                    {isCurrent && <span className="pill pill-red" style={{ fontSize: 10 }}>Empfohlen</span>}
+                    {isDone && <span className="pill pill-green" style={{ fontSize: 10 }}>Erledigt</span>}
+                    {isLocked && step.external && <span className="pill pill-grey" style={{ fontSize: 10 }}>Premium</span>}
+                  </div>
+
+                  <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 8 }}>
+                    {step.sub}
+                  </div>
+
+                  {/* Progress bar for courses */}
+                  {step.progress !== undefined && step.progress > 0 && step.progress < 100 && (
+                    <div style={{ marginBottom: 8, maxWidth: 280 }}>
+                      <div className="progress-bar" style={{ height: 6 }}>
+                        <div className="progress-bar-fill" style={{ width: `${step.progress}%`, background: 'var(--ki-red)' }} />
+                      </div>
+                    </div>
+                  )}
+
+                  <a
+                    href={step.href}
+                    {...(step.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    style={{
+                      display: 'inline-block',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: isLocked ? 'var(--ki-text-tertiary)' : 'var(--ki-red)',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    {step.cta}
+                  </a>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ── 8. Video Platzhalter ───────────────────────────────────────────────── */
 function VideoPlaceholder() {
   return (
     <section style={{ marginBottom: 40 }}>
@@ -660,7 +885,7 @@ function VideoPlaceholder() {
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  Main component                                                             */
 /* ─────────────────────────────────────────────────────────────────────────── */
-export default function CareerClient({ profile, progress, analysisSession, certificates, courses }) {
+export default function CareerClient({ profile, progress, analysisSession, analysisResults, certificates, courses }) {
   const xp = profile?.xp || profile?.total_points || 0;
   const { current, next, progress: levelPct } = getLevelProgress(xp);
 
@@ -687,6 +912,15 @@ export default function CareerClient({ profile, progress, analysisSession, certi
 
       {/* Video teaser */}
       <VideoPlaceholder />
+
+      {/* Dynamische Roadmap */}
+      <DynamicRoadmap
+        analysisSession={analysisSession}
+        analysisResults={analysisResults}
+        courses={courses}
+        progress={progress}
+        profile={profile}
+      />
 
       {/* Nächster Schritt */}
       <NextStepCard courses={courses} progress={progress} profile={profile} />
