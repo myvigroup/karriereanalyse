@@ -28,25 +28,28 @@ export default async function MasterclassPage() {
     .select('lesson_id, completed')
     .eq('user_id', user.id);
 
-  const { data: analysisSession } = await supabase
-    .from('analysis_sessions')
-    .select('scores')
-    .eq('user_id', user.id)
-    .eq('status', 'completed')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // Analyse-Ergebnisse aus analysis_results Tabelle (nicht analysis_sessions.scores)
+  const { data: analysisResults } = await supabase
+    .from('analysis_results')
+    .select('*, competency_fields(title, icon, slug)')
+    .eq('user_id', user.id);
+
+  const formattedResults = (analysisResults || []).map(r => ({
+    ...r,
+    field_slug: r.competency_fields?.slug,
+    field_title: r.competency_fields?.title,
+  }));
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('total_points, subscription_plan, purchased_products')
+    .select('total_points, subscription_plan, purchased_products, phase')
     .eq('id', user.id)
     .single();
 
   return <MasterclassClient
     courses={courses || []}
     progress={progress || []}
-    analysisScores={analysisSession?.scores || null}
+    analysisResults={formattedResults}
     profile={profile}
   />;
 }
