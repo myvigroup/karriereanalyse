@@ -4,23 +4,47 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { AUDIO_INTROS, AUDIO_TTS_FALLBACKS } from '@/lib/audio-config';
 import { getPersonalization } from '@/lib/personalization';
+import { getLevel, getLevelProgress } from '@/lib/gamification';
 
-const NAV_ITEMS = [
-  { label: 'Dashboard', path: '/dashboard', icon: '◻' },
-  { label: 'KI-Coach', path: '/coach', icon: '🤖' },
-  { label: 'Kompass', path: '/strategy/decision', icon: '🧭' },
-  { label: 'Karriereanalyse', path: '/analyse', icon: '◎' },
-  { label: 'Masterclass', path: '/masterclass', icon: '▶' },
-  { label: 'Gehaltsdatenbank', path: '/gehalt', icon: '📊' },
-  { label: 'Marktwert', path: '/marktwert', icon: '💰' },
-  { label: 'Bewerbungen', path: '/applications', icon: '✉' },
-  { label: 'Netzwerk', path: '/network', icon: '🤝' },
-  { label: 'Jobportale & Plattformen', path: '/branding', icon: '🔗' },
-  { label: 'Exit-Strategie', path: '/strategy/exit', icon: '🚪' },
-  { label: 'Karrierepfad', path: '/career', icon: '\u2197' },
-  { label: 'Community', path: '/community', icon: '\u{1F465}' },
-  { label: 'Profil', path: '/profile', icon: '\u25CB' },
+// ── Gruppierte Navigation (MYVI-Style) ──
+const NAV_GROUPS = [
+  {
+    label: null, // Kein Header für Hauptgruppe
+    items: [
+      { label: 'Dashboard', path: '/dashboard', icon: '◻' },
+      { label: 'Karriere-Analyse', path: '/analyse', icon: '◎' },
+      { label: 'Masterclass', path: '/masterclass', icon: '▶' },
+      { label: 'KI-Coach', path: '/coach', icon: '🤖' },
+    ],
+  },
+  {
+    label: 'Karriere-Tools',
+    items: [
+      { label: 'Karrierepfad', path: '/career', icon: '↗' },
+      { label: 'Marktwert', path: '/marktwert', icon: '💰' },
+      { label: 'Gehaltsdatenbank', path: '/gehalt', icon: '📊' },
+      { label: 'Bewerbungen', path: '/applications', icon: '✉' },
+      { label: 'Kompass', path: '/strategy/decision', icon: '🧭' },
+    ],
+  },
+  {
+    label: 'Netzwerk & Community',
+    items: [
+      { label: 'Netzwerk', path: '/network', icon: '🤝' },
+      { label: 'Community', path: '/community', icon: '👥' },
+      { label: 'Jobportale', path: '/branding', icon: '🔗' },
+    ],
+  },
+  {
+    label: 'Premium',
+    items: [
+      { label: 'Exit-Strategie', path: '/strategy/exit', icon: '🚪' },
+    ],
+  },
 ];
+
+// Flat list for backward compatibility
+const NAV_ITEMS = NAV_GROUPS.flatMap(g => g.items);
 
 const ADMIN_ITEMS = [
   { label: 'Coaching-Cockpit', path: '/admin/coaching', icon: '\u2295' },
@@ -208,49 +232,68 @@ export default function Sidebar({ profile, analysisResults }) {
         <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginTop: 2 }}>{profile?.name || 'Lädt...'}</div>
       </div>
 
-      {/* Level Badge */}
-      {profile && (
-        <div style={{ padding: '12px 16px', marginBottom: 16, background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-md)' }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dein Level</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ki-text)' }}>{profile.xp || 0} KI-P</div>
-          <div className="progress-bar" style={{ marginTop: 8 }}>
-            <div className="progress-bar-fill" style={{ width: `${Math.min((profile.xp || 0) / 10, 100)}%` }} />
-          </div>
-        </div>
-      )}
-
-      {/* Navigation */}
-      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {NAV_ITEMS.filter(item => {
-          if (!visibleModules) return true;
-          const pathKey = item.path.replace(/^\//, '');
-          return visibleModules.some(m => pathKey === m || pathKey.startsWith(m + '/'));
-        }).map(item => {
-          const tourAttr = item.path === '/dashboard' ? { 'data-tour-dashboard': '' }
-            : item.path === '/coach' ? { 'data-tour-coach': '' }
-            : item.path === '/analyse' ? { 'data-tour-analyse': '' }
-            : item.path === '/profile' ? { 'data-tour-profile': '' }
-            : {};
-          const isRecommended = recommendations.some(r => item.path.includes(r.title?.toLowerCase?.() || '___'));
-          return (
-          <a key={item.path} href={item.path} style={linkStyle(item.path)} {...tourAttr}>
-            <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>{item.icon}</span>
-            <span style={{ flex: 1 }}>{item.label}</span>
-            {isRecommended && (
-              <span style={{
-                fontSize: 10, fontWeight: 600, color: 'var(--ki-red)', background: 'rgba(204,20,38,0.08)',
-                padding: '2px 6px', borderRadius: 'var(--r-sm)', lineHeight: 1.4,
-              }}>Empfohlen</span>
-            )}
-            {AUDIO_INTROS[item.path] && (
-              <span
-                onClick={(e) => playIntro(item.path, e)}
-                style={{ fontSize: 12, opacity: 0.4, cursor: 'pointer', transition: 'opacity var(--t-fast)' }}
-                onMouseEnter={e => e.target.style.opacity = 1}
-                onMouseLeave={e => e.target.style.opacity = 0.4}
-              >{'\u{1F50A}'}</span>
-            )}
+      {/* Level Badge (MYVI-Style) */}
+      {profile && (() => {
+        const xp = profile.total_points || profile.xp || 0;
+        const { current, next, progress: lvlPct } = getLevelProgress(xp);
+        return (
+          <a href="/career" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div style={{ padding: '12px 16px', marginBottom: 16, background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-md)', cursor: 'pointer', transition: 'background var(--t-fast)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Level {current.level}
+                </div>
+                <span style={{ fontSize: 14 }}>{current.icon}</span>
+              </div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ki-text)', marginBottom: 2 }}>{current.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginBottom: 8 }}>{xp} KI-Points</div>
+              <div className="progress-bar" style={{ height: 4 }}>
+                <div className="progress-bar-fill" style={{ width: `${lvlPct}%` }} />
+              </div>
+              {next && (
+                <div style={{ fontSize: 10, color: 'var(--ki-text-tertiary)', marginTop: 4 }}>
+                  {next.minXP - xp} XP bis {next.name}
+                </div>
+              )}
+            </div>
           </a>
+        );
+      })()}
+
+      {/* Navigation — Gruppiert (MYVI-Style) */}
+      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
+        {NAV_GROUPS.map((group, gi) => {
+          const visibleItems = group.items.filter(item => {
+            if (!visibleModules) return true;
+            const pathKey = item.path.replace(/^\//, '');
+            return visibleModules.some(m => pathKey === m || pathKey.startsWith(m + '/'));
+          });
+          if (visibleItems.length === 0) return null;
+          return (
+            <div key={gi}>
+              {group.label && (
+                <div style={{
+                  fontSize: 10, fontWeight: 600, color: 'var(--ki-text-tertiary)',
+                  padding: gi === 0 ? '4px 16px 6px' : '16px 16px 6px',
+                  textTransform: 'uppercase', letterSpacing: '0.1em',
+                }}>
+                  {group.label}
+                </div>
+              )}
+              {visibleItems.map(item => {
+                const tourAttr = item.path === '/dashboard' ? { 'data-tour-dashboard': '' }
+                  : item.path === '/coach' ? { 'data-tour-coach': '' }
+                  : item.path === '/analyse' ? { 'data-tour-analyse': '' }
+                  : item.path === '/profile' ? { 'data-tour-profile': '' }
+                  : {};
+                return (
+                  <a key={item.path} href={item.path} style={linkStyle(item.path)} {...tourAttr}>
+                    <span style={{ fontSize: 15, width: 20, textAlign: 'center' }}>{item.icon}</span>
+                    <span style={{ flex: 1, fontSize: 13 }}>{item.label}</span>
+                  </a>
+                );
+              })}
+            </div>
           );
         })}
 
@@ -269,14 +312,20 @@ export default function Sidebar({ profile, analysisResults }) {
         )}
       </nav>
 
-      {/* Logout */}
-      <button onClick={handleLogout} style={{
-        ...linkStyle('/logout'), marginTop: 'auto', color: 'var(--ki-text-tertiary)',
-        background: 'transparent', border: 'none', width: '100%',
-      }}>
-        <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>⏻</span>
-        Abmelden
-      </button>
+      {/* Profil + Logout */}
+      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 2, borderTop: '1px solid var(--ki-border)', paddingTop: 12 }}>
+        <a href="/profile" style={linkStyle('/profile')} data-tour-profile="">
+          <span style={{ fontSize: 15, width: 20, textAlign: 'center' }}>○</span>
+          <span style={{ flex: 1, fontSize: 13 }}>Profil</span>
+        </a>
+        <button onClick={handleLogout} style={{
+          ...linkStyle('/logout'), color: 'var(--ki-text-tertiary)',
+          background: 'transparent', border: 'none', width: '100%',
+        }}>
+          <span style={{ fontSize: 15, width: 20, textAlign: 'center' }}>⏻</span>
+          <span style={{ fontSize: 13 }}>Abmelden</span>
+        </button>
+      </div>
     </aside>
   );
 }

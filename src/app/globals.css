@@ -1,18 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 :root {
-  /* Karriere-Institut Palette */
+  /* Karriere-Institut Palette — MYVI-Style Warm */
   --ki-red: #CC1426;
   --ki-red-light: #E8283C;
   --ki-red-dark: #A01020;
-  --ki-charcoal: #353A3B;
-  --ki-bg: #FBFBFD;
-  --ki-bg-alt: #F5F5F7;
+  --ki-charcoal: #2C2C2E;
+  --ki-bg: #FAFAF8;
+  --ki-bg-alt: #F4F3F0;
   --ki-card: #FFFFFF;
-  --ki-border: #E8E8ED;
-  --ki-text: #1D1D1F;
-  --ki-text-secondary: #86868B;
-  --ki-text-tertiary: #AEAEB2;
+  --ki-border: #E8E6E1;
+  --ki-text: #1A1A1A;
+  --ki-text-secondary: #6B6B6B;
+  --ki-text-tertiary: #9A9A9A;
   --ki-success: #2D6A4F;
   --ki-warning: #D4A017;
   --ki-error: #CC1426;
