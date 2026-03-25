@@ -164,6 +164,40 @@ function getMilestone(completed) {
   return { label: null, next: 1 };
 }
 
+// ─── Course Card ─────────────────────────────────────────────────────────────
+function CourseCard({ course, i, hasAnalyseData }) {
+  return (
+    <a
+      href={`/masterclass/${course.id}`}
+      className="card animate-in"
+      style={{
+        textDecoration: 'none', color: 'inherit', position: 'relative', overflow: 'hidden',
+        cursor: 'pointer', animationDelay: `${(i || 0) * 0.05}s`, display: 'flex', flexDirection: 'column',
+      }}
+    >
+      {course.isTopEmpfehlung ? (
+        <span className="pill pill-red" style={{ position: 'absolute', top: 12, right: 12, fontSize: 11, fontWeight: 700 }}>#1 Empfehlung</span>
+      ) : course.isPrio ? (
+        <span className="pill pill-gold" style={{ position: 'absolute', top: 12, right: 12, fontSize: 11, fontWeight: 700 }}>2x XP</span>
+      ) : null}
+      <div style={{ fontSize: 36, marginBottom: 10 }}>{course.icon || '📘'}</div>
+      <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.02em', marginBottom: 4 }}>{course.title}</div>
+      {course.description && <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginBottom: 10, lineHeight: 1.5, flex: 1 }}>{course.description}</div>}
+      {course.empfehlung && hasAnalyseData && <div style={{ fontSize: 11, color: 'var(--ki-text-secondary)', marginBottom: 8, lineHeight: 1.4, fontStyle: 'italic' }}>{course.empfehlung}</div>}
+      <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginBottom: 10 }}>
+        {(course.modules || []).length} Module &bull; {course.total} Lektionen{course.isPrio ? ' • 2x XP' : ''}
+      </div>
+      <div className="progress-bar" style={{ marginBottom: 4 }}>
+        <div className="progress-bar-fill" style={{ width: `${course.pct}%`, background: course.pct === 100 ? 'var(--ki-success)' : 'var(--ki-red)' }} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ki-text-secondary)' }}>
+        <span>{course.done}/{course.total}</span>
+        <span style={{ fontWeight: 600, color: course.pct === 100 ? 'var(--ki-success)' : 'var(--ki-text)' }}>{course.pct}%</span>
+      </div>
+    </a>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function MasterclassClient({ courses, progress, analysisResults, profile }) {
   const router = useRouter();
@@ -343,129 +377,59 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
         </div>
       )}
 
-      {/* ── E-Learnings Section ── */}
-      {showELearnings && (
-        <section style={{ marginBottom: 48 }}>
-          <h2
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              letterSpacing: '-0.03em',
-              marginBottom: 16,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
-            📚 E-Learnings
-            <span className="pill pill-grey" style={{ fontSize: 12 }}>
-              {eLearnings.length} Kurse
-            </span>
-          </h2>
-          {eLearnings.length === 0 ? (
-            <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--ki-text-secondary)' }}>
-              Keine E-Learnings verfügbar.
+      {/* ── E-Learnings Section (3 Kategorien) ── */}
+      {showELearnings && (() => {
+        const hasAnalyseData = analysisResults && analysisResults.length > 0;
+        // Kategorisiere: Fokus (Schwächen), Booster (mittel), Stärken (hoch)
+        const fokusKurse = hasAnalyseData ? eLearnings.filter(c => c.isPrio || c.isTopEmpfehlung) : [];
+        const staerkenKurse = hasAnalyseData ? eLearnings.filter(c => !c.isPrio && !c.isTopEmpfehlung && c.relevanz < 20) : [];
+        const boosterKurse = hasAnalyseData ? eLearnings.filter(c => !fokusKurse.includes(c) && !staerkenKurse.includes(c)) : eLearnings;
+
+        const CategorySection = ({ title, badge, badgeClass, description, items }) => {
+          if (items.length === 0) return null;
+          return (
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <h3 style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h3>
+                <span className={`pill ${badgeClass}`} style={{ fontSize: 11 }}>{badge}</span>
+              </div>
+              {description && <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>{description}</p>}
+              <div className="grid-3">
+                {items.map((course, i) => (
+                  <CourseCard key={course.id} course={course} i={i} hasAnalyseData={hasAnalyseData} />
+                ))}
+              </div>
             </div>
-          ) : (
-            <div className="grid-3">
-              {eLearnings.map((course, i) => (
-                <a
-                  key={course.id}
-                  href={`/masterclass/${course.id}`}
-                  className="card animate-in"
-                  style={{
-                    textDecoration: 'none',
-                    color: 'inherit',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    animationDelay: `${i * 0.05}s`,
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  {/* Relevanz-Badge */}
-                  {course.isTopEmpfehlung ? (
-                    <span
-                      className="pill pill-red"
-                      style={{ position: 'absolute', top: 12, right: 12, fontSize: 11, fontWeight: 700 }}
-                    >
-                      #1 Empfehlung
-                    </span>
-                  ) : course.isPrio ? (
-                    <span
-                      className="pill pill-gold"
-                      style={{ position: 'absolute', top: 12, right: 12, fontSize: 11, fontWeight: 700 }}
-                    >
-                      Potenzial
-                    </span>
-                  ) : null}
+          );
+        };
 
-                  {/* Icon */}
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>{course.icon || '📘'}</div>
+        return (
+          <section style={{ marginBottom: 48 }}>
+            <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+              📚 E-Learnings
+              <span className="pill pill-grey" style={{ fontSize: 12 }}>{eLearnings.length} Kurse</span>
+            </h2>
 
-                  {/* Title & Subtitle */}
-                  <div style={{ fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em', marginBottom: 4 }}>
-                    {course.title}
-                  </div>
-                  {course.description && (
-                    <div
-                      style={{
-                        fontSize: 13,
-                        color: 'var(--ki-text-secondary)',
-                        marginBottom: 12,
-                        lineHeight: 1.5,
-                        flex: 1,
-                      }}
-                    >
-                      {course.description}
-                    </div>
-                  )}
-
-                  {/* Empfehlung (personalisiert) */}
-                  {course.empfehlung && analysisResults?.length > 0 && (
-                    <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginBottom: 8, lineHeight: 1.4 }}>
-                      {course.empfehlung}
-                    </div>
-                  )}
-
-                  {/* Module count */}
-                  <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginBottom: 12 }}>
-                    {(course.modules || []).length} Module &bull; {course.total} Lektionen
-                    {course.isPrio && ' • 2x XP'}
-                  </div>
-
-                  {/* Progress bar */}
-                  <div className="progress-bar" style={{ marginBottom: 6 }}>
-                    <div
-                      className="progress-bar-fill"
-                      style={{
-                        width: `${course.pct}%`,
-                        background: course.pct === 100 ? 'var(--ki-success)' : 'var(--ki-red)',
-                      }}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      fontSize: 12,
-                      color: 'var(--ki-text-secondary)',
-                    }}
-                  >
-                    <span>
-                      {course.done}/{course.total} abgeschlossen
-                    </span>
-                    <span style={{ fontWeight: 600, color: course.pct === 100 ? 'var(--ki-success)' : 'var(--ki-text)' }}>
-                      {course.pct}%
-                    </span>
-                  </div>
-                </a>
-              ))}
-            </div>
-          )}
-        </section>
-      )}
+            {eLearnings.length === 0 ? (
+              <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--ki-text-secondary)' }}>
+                Keine E-Learnings verfügbar.
+              </div>
+            ) : hasAnalyseData ? (
+              <>
+                <CategorySection title="Dein Fokus" badge="Höchste Relevanz" badgeClass="pill-red" description="Hier liegt dein größtes Wachstumspotenzial — 2x XP!" items={fokusKurse} />
+                <CategorySection title="Karriere-Booster" badge="Empfohlen" badgeClass="pill-gold" items={boosterKurse} />
+                <CategorySection title="Deine Stärken" badge="Solide" badgeClass="pill-green" description="Bereits gut — verfeinere dein Können." items={staerkenKurse} />
+              </>
+            ) : (
+              <div className="grid-3">
+                {eLearnings.map((course, i) => (
+                  <CourseCard key={course.id} course={course} i={i} hasAnalyseData={false} />
+                ))}
+              </div>
+            )}
+          </section>
+        );
+      })()}
 
       {/* ── Analyse-Tools Section ── */}
       {showAnalyse && (
