@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import { Bot, User } from 'lucide-react';
 
 /* ─── Quick-Prompts ─────────────────────────────────────────────────────── */
 const QUICK_PROMPTS = [
@@ -285,7 +286,7 @@ export default function CoachClient({ chats: initialChats, userId, profile }) {
           {/* ── Empty state: Mood-Check + Welcome ─────────────────── */}
           {isNewSession && (
             <div className="animate-in" style={{ textAlign: 'center', paddingTop: 32 }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>🤖</div>
+              <div style={{ marginBottom: 12 }}><Bot size={48} strokeWidth={1.2} style={{ color: 'var(--ki-text-tertiary)' }} /></div>
               <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 8 }}>
                 Hallo{profile?.first_name ? `, ${profile.first_name}` : ''}!
               </h2>
@@ -428,7 +429,7 @@ export default function CoachClient({ chats: initialChats, userId, profile }) {
               <div style={{
                 width: 32, height: 32, borderRadius: '50%', background: 'var(--ki-red)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0,
-              }}>🤖</div>
+              }}><Bot size={20} strokeWidth={1.8} /></div>
               <div style={{
                 padding: '12px 16px', borderRadius: 16, background: 'var(--ki-card)',
                 boxShadow: 'var(--sh-sm)', borderBottomLeftRadius: 4,

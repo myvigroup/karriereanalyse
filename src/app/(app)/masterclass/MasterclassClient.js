@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/ui/InfoTooltip';
 import { berechnePersonalisierung } from '@/lib/personalization';
+import { BookOpen, Search, GraduationCap, Target, Monitor, Calendar, CheckCircle2 } from 'lucide-react';
 
 // ─── Hardcoded Analyse-Tools ──────────────────────────────────────────────────
 const ANALYSE_TOOLS = [
@@ -319,7 +320,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
             borderLeft: '3px solid var(--ki-warning)',
           }}
         >
-          <div style={{ fontSize: 36 }}>🩸</div>
+          <Target size={36} strokeWidth={1.4} style={{ color: 'var(--ki-warning)', flexShrink: 0 }} />
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>
               Mach zuerst dein Karriere-Blutbild
@@ -349,7 +350,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
             border: '1px solid var(--ki-border)',
           }}
         >
-          <div style={{ fontSize: 40, flexShrink: 0 }}>{inProgressCourse.icon || '📚'}</div>
+          <BookOpen size={36} strokeWidth={1.4} style={{ flexShrink: 0, color: 'var(--ki-text-secondary)' }} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', fontWeight: 500, marginBottom: 2 }}>
               Weiterlernen
@@ -405,8 +406,9 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
 
         return (
           <section style={{ marginBottom: 48 }}>
-            <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-              📚 E-Learnings
+            <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <BookOpen size={22} strokeWidth={1.8} />
+              E-Learnings
               <span className="pill pill-grey" style={{ fontSize: 12 }}>{eLearnings.length} Kurse</span>
             </h2>
 
@@ -445,7 +447,8 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
               gap: 8,
             }}
           >
-            🔍 Analyse-Tools
+            <Search size={22} strokeWidth={1.8} style={{ marginRight: 2 }} />
+            Analyse-Tools
             <span className="pill pill-gold" style={{ fontSize: 12 }}>
               Premium
             </span>
@@ -465,7 +468,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                 }}
               >
                 {/* Icon */}
-                <div style={{ fontSize: 48, flexShrink: 0 }}>{tool.icon}</div>
+                <Search size={40} strokeWidth={1.3} style={{ flexShrink: 0, color: 'var(--ki-warning)' }} />
 
                 {/* Content */}
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -517,7 +520,8 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
               gap: 8,
             }}
           >
-            🎓 Seminare
+            <GraduationCap size={22} strokeWidth={1.8} style={{ marginRight: 2 }} />
+            Seminare
             <span className="pill pill-green" style={{ fontSize: 12 }}>
               Live
             </span>
@@ -537,7 +541,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <span style={{ fontSize: 32 }}>{seminar.icon}</span>
+                    <GraduationCap size={28} strokeWidth={1.5} style={{ color: 'var(--ki-text-secondary)' }} />
                     <div>
                       <div style={{ fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em', lineHeight: 1.3 }}>{seminar.title}</div>
                       <div style={{ fontSize: 13, color: 'var(--ki-red)', fontWeight: 500 }}>{seminar.subtitle}</div>
@@ -551,11 +555,11 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
 
                 {/* Meta */}
                 <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <span>{'\u{1F4C5}'} Samstags</span>
+                  <span>Samstags</span>
                   <span>|</span>
-                  <span>{'\u23F0'} 09:30 â 12:00</span>
+                  <span>09:30 â 12:00</span>
                   <span>|</span>
-                  <span style={{ fontWeight: 600, color: 'var(--ki-text)' }}>Ab 99\u20AC</span>
+                  <span style={{ fontWeight: 600, color: 'var(--ki-text)' }}>Ab 99 €</span>
                 </div>
 
                 {/* Includes */}
@@ -585,7 +589,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                         display: 'inline-flex', alignItems: 'center', gap: 6,
                       }}
                     >
-                      {'\uD83D\uDD34'} JETZT LIVE — Teilnehmen
+                      JETZT LIVE — Teilnehmen
                     </a>
                   ) : (
                     <span
@@ -598,7 +602,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                         border: '1px solid var(--ki-border)',
                       }}
                     >
-                      {'\u{1F4BB}'} {seminar.next_date
+                      {seminar.next_date
                         ? `Nächster Termin: ${new Date(seminar.next_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`
                         : 'Termin folgt'}
                     </span>
@@ -638,19 +642,19 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
               className={`pill ${completedCourses >= 1 ? 'pill-gold' : 'pill-grey'}`}
               style={{ fontSize: 12 }}
             >
-              🥉 1/6 Bronze
+              1/6 Bronze
             </span>
             <span
               className={`pill ${completedCourses >= 3 ? 'pill-gold' : 'pill-grey'}`}
               style={{ fontSize: 12 }}
             >
-              🥈 3/6 Silber
+              3/6 Silber
             </span>
             <span
               className={`pill ${completedCourses >= 6 ? 'pill-gold' : 'pill-grey'}`}
               style={{ fontSize: 12 }}
             >
-              🥇 6/6 Gold
+              6/6 Gold
             </span>
           </div>
         </div>

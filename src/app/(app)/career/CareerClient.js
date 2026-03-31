@@ -498,7 +498,7 @@ function CertificateGallery({ certificates }) {
                 pointerEvents: 'none',
               }} />
 
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🏆</div>
+              <div style={{ fontSize: 40, marginBottom: 12 }}></div>
 
               <div style={{
                 fontSize: 11, fontWeight: 600, color: 'var(--ki-red)',
@@ -549,7 +549,7 @@ function CertificateGallery({ certificates }) {
         </div>
       ) : (
         <div className="card" style={{ textAlign: 'center', padding: '48px 32px', color: 'var(--ki-text-tertiary)' }}>
-          <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>🏆</div>
+          <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}></div>
           <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8, color: 'var(--ki-text-secondary)' }}>
             Noch keine Zertifikate
           </div>

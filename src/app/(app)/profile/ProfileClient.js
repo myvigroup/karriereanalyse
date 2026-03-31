@@ -228,7 +228,7 @@ export default function ProfileClient({ profile: initialProfile, userBadges, all
                 }}
                 title={!earned ? `Bedingung: ${badge.condition_type || 'Unbekannt'}` : ''}
               >
-                <div style={{ fontSize: 36, marginBottom: 8 }}>{badge.icon || '🏅'}</div>
+                <div style={{ fontSize: 36, marginBottom: 8 }}>{badge.icon || ''}</div>
                 <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{badge.title}</div>
                 <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>{badge.description}</div>
                 {earned && userBadge?.earned_at && (
