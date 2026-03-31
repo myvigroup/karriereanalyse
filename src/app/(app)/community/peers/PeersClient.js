@@ -55,7 +55,7 @@ export default function PeersClient({ profile, potentialMatches, requests: initi
   return (
     <div className="page-container">
       <h1 className="page-title">Peer-Matching</h1>
-      <p className="page-subtitle" style={{ marginBottom: 8 }}>Finde Gleichgesinnte f\u00FCr deinen Karriereweg</p>
+      <p className="page-subtitle" style={{ marginBottom: 8 }}>Finde Gleichgesinnte für deinen Karriereweg</p>
 
       {!profile?.peer_matching_enabled && (
         <div className="card" style={{ marginBottom: 24, padding: 16, background: 'rgba(204,20,38,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

@@ -46,7 +46,7 @@ export default function InfoTooltip({ moduleId, profile }) {
         }}>
           <button
             onClick={() => setOpen(false)}
-            aria-label="Schlie\u00DFen"
+            aria-label="Schließen"
             style={{
               position: 'absolute', top: 12, right: 12, background: 'none', border: 'none',
               cursor: 'pointer', fontSize: 16, color: 'var(--ki-text-tertiary)', padding: 4,

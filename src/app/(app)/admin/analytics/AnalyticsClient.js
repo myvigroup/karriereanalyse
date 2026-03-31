@@ -56,7 +56,7 @@ export default function AnalyticsClient({ activeUsers7d, totalUsers, recentEvent
   return (
     <div className="page-container">
       <h1 className="page-title">Analytics</h1>
-      <p className="page-subtitle" style={{ marginBottom: 32 }}>Plattform-\u00DCbersicht der letzten 30 Tage</p>
+      <p className="page-subtitle" style={{ marginBottom: 32 }}>Plattform-Übersicht der letzten 30 Tage</p>
 
       {/* KPIs */}
       <div className="grid-4" style={{ marginBottom: 32 }}>

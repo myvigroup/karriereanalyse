@@ -16,8 +16,8 @@ const PRODUCTS = [
   {
     key: 'ANALYSE_PRO',
     name: 'Karriere-Analyse',
-    audience: 'F\u00FCr Berufst\u00E4tige & Selbstst\u00E4ndige',
-    description: 'Dein Karriere-Blutbild: Fundierter \u00DCberblick \u00FCber deinen Ist-Zustand.',
+    audience: 'Für Berufstätige & Selbstständige',
+    description: 'Dein Karriere-Blutbild: Fundierter Überblick über deinen Ist-Zustand.',
     features: ['65 Fragen Assessment', '50+ Seiten Report', 'Coach-Auswertung', 'Karriere-Roadmap'],
     fallbackPrice: 'Preis auf Anfrage',
     badge: null,
@@ -39,8 +39,8 @@ const PRODUCTS = [
     key: 'SEMINAR',
     name: 'Seminare',
     audience: 'Intensiv-Seminar',
-    description: 'Ganzt\u00E4gige Workshops mit erfahrenen Coaches.',
-    features: ['Ganzt\u00E4giges Intensiv-Seminar', 'Arbeitsmaterialien', 'Teilnahme-Zertifikat'],
+    description: 'Ganztägige Workshops mit erfahrenen Coaches.',
+    features: ['Ganztägiges Intensiv-Seminar', 'Arbeitsmaterialien', 'Teilnahme-Zertifikat'],
     fallbackPrice: 'ab 99\u20AC',
     badge: null,
     cta: 'Seminar buchen',
@@ -50,8 +50,8 @@ const PRODUCTS = [
     key: 'COACHING',
     name: 'Privat-Coaching',
     audience: '1:1 Coaching',
-    description: 'Pers\u00F6nliches Coaching mit zertifiziertem Karriere-Coach.',
-    features: ['60 Min. 1:1 Session', 'Pers\u00F6nlicher Aktionsplan', 'Follow-up Email'],
+    description: 'Persönliches Coaching mit zertifiziertem Karriere-Coach.',
+    features: ['60 Min. 1:1 Session', 'Persönlicher Aktionsplan', 'Follow-up Email'],
     fallbackPrice: 'ab 199\u20AC',
     badge: 'Premium',
     cta: 'Coaching buchen',
@@ -97,7 +97,7 @@ export default function AngeboteClient() {
           Unsere Angebote
         </h1>
         <p style={{ fontSize: 17, color: 'var(--ki-text-secondary)', lineHeight: 1.6 }}>
-          Die Blaupause f\u00FCr deinen beruflichen Erfolg. Finde das passende Angebot f\u00FCr deine Karrieresituation.
+          Die Blaupause für deinen beruflichen Erfolg. Finde das passende Angebot für deine Karrieresituation.
         </p>
       </section>
 
@@ -115,7 +115,7 @@ export default function AngeboteClient() {
           className={`btn ${interval === 'yearly' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ fontSize: 13, padding: '8px 20px', borderRadius: '0 8px 8px 0' }}
         >
-          J\u00E4hrlich <span style={{ fontSize: 11, opacity: 0.7 }}>(-20%)</span>
+          Jährlich <span style={{ fontSize: 11, opacity: 0.7 }}>(-20%)</span>
         </button>
       </div>
 

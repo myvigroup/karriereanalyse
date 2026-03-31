@@ -44,7 +44,7 @@ const SEMINARE = [
     id: 'sem-achtsamkeit', icon: '\u{1F9D8}',
     title: 'Achtsamkeit',
     subtitle: 'Gelassenheit ist trainierbar',
-    description: 'Nur selten nimmt man sich neben dem Beruf und reiz\u00FCberfluteten Alltag Zeit f\u00FCr sich und die eigenen Bed\u00FCrfnisse.',
+    description: 'Nur selten nimmt man sich neben dem Beruf und reizüberfluteten Alltag Zeit für sich und die eigenen Bedürfnisse.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
     next_date: null,
   },
@@ -59,16 +59,16 @@ const SEMINARE = [
   {
     id: 'sem-knigge', icon: '\u{1F454}',
     title: 'Business Knigge',
-    subtitle: 'Der erste Eindruck z\u00E4hlt, der zweite bleibt',
-    description: 'Die richtigen Formen und Kommunikationsf\u00E4higkeiten im Berufs- und Gesch\u00E4ftsumfeld.',
+    subtitle: 'Der erste Eindruck zählt, der zweite bleibt',
+    description: 'Die richtigen Formen und Kommunikationsfähigkeiten im Berufs- und Geschäftsumfeld.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
     next_date: null,
   },
   {
     id: 'sem-kommunikation', icon: '\u{1F4AC}',
     title: 'Kommunikation',
-    subtitle: 'Verst\u00E4ndigung als Schl\u00FCssel zum Erfolg',
-    description: 'Effektive Kommunikation mit Kollegen und Gesch\u00E4ftspartnern.',
+    subtitle: 'Verständigung als Schlüssel zum Erfolg',
+    description: 'Effektive Kommunikation mit Kollegen und Geschäftspartnern.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
     next_date: null,
   },
@@ -76,7 +76,7 @@ const SEMINARE = [
     id: 'sem-konflikt', icon: '\u{1F91C}',
     title: 'Konfliktmanagement',
     subtitle: 'Aus Krisen Chancen machen',
-    description: 'Strategien und Techniken zur erfolgreichen Konfliktbew\u00E4ltigung.',
+    description: 'Strategien und Techniken zur erfolgreichen Konfliktbewältigung.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
     next_date: null,
   },
@@ -91,31 +91,31 @@ const SEMINARE = [
   {
     id: 'sem-networking', icon: '\u{1F91D}',
     title: 'Networking',
-    subtitle: 'Kontakte kn\u00FCpfen, Vertrauen aufbauen',
-    description: 'F\u00E4higkeiten im Aufbau und der Pflege von beruflichen Beziehungen verbessern.',
+    subtitle: 'Kontakte knüpfen, Vertrauen aufbauen',
+    description: 'Fähigkeiten im Aufbau und der Pflege von beruflichen Beziehungen verbessern.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
     next_date: null,
   },
   {
     id: 'sem-leadership', icon: '\u{1F451}',
     title: 'Personal Leadership',
-    subtitle: 'Authentisch f\u00FChren, wirksam bleiben',
-    description: 'Wie du aus W\u00FCnschen echte Ziele machst und diese erreichen kannst.',
+    subtitle: 'Authentisch führen, wirksam bleiben',
+    description: 'Wie du aus Wünschen echte Ziele machst und diese erreichen kannst.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
     next_date: null,
   },
   {
     id: 'sem-prioritaeten', icon: '\u{1F3AF}',
-    title: 'Priorit\u00E4tenmanagement',
+    title: 'Prioritätenmanagement',
     subtitle: 'Nicht alles gleichzeitig, sondern das Richtige zuerst',
-    description: 'Bewusster Umgang mit unserer Zeit als Schl\u00FCssel zum beruflichen Erfolg.',
+    description: 'Bewusster Umgang mit unserer Zeit als Schlüssel zum beruflichen Erfolg.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
     next_date: null,
   },
   {
     id: 'sem-rhetorik', icon: '\u{1F3A4}',
     title: 'Rhetorik, Dialektik, Kinesik',
-    subtitle: '\u00DCberzeugen mit Worten und Wirkung',
+    subtitle: 'Überzeugen mit Worten und Wirkung',
     description: 'Wirkungsvoll, passend und adressatengerecht kommunizieren in jeder Situation.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
     next_date: null,
@@ -123,8 +123,8 @@ const SEMINARE = [
   {
     id: 'sem-speedreading', icon: '\u{1F4D6}',
     title: 'Speedreading',
-    subtitle: 'Geschwindigkeit trifft Verst\u00E4ndnis',
-    description: 'Grundlagen des \u00FCberdurchschnittlich schnellen Lesens mit hohem Textverst\u00E4ndnis.',
+    subtitle: 'Geschwindigkeit trifft Verständnis',
+    description: 'Grundlagen des überdurchschnittlich schnellen Lesens mit hohem Textverständnis.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
     next_date: null,
   },
@@ -553,7 +553,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                 <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
                   <span>{'\u{1F4C5}'} Samstags</span>
                   <span>|</span>
-                  <span>{'\u23F0'} 09:30 \u2013 12:00</span>
+                  <span>{'\u23F0'} 09:30 â 12:00</span>
                   <span>|</span>
                   <span style={{ fontWeight: 600, color: 'var(--ki-text)' }}>Ab 99\u20AC</span>
                 </div>
@@ -599,7 +599,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                       }}
                     >
                       {'\u{1F4BB}'} {seminar.next_date
-                        ? `N\u00E4chster Termin: ${new Date(seminar.next_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`
+                        ? `Nächster Termin: ${new Date(seminar.next_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`
                         : 'Termin folgt'}
                     </span>
                   )}

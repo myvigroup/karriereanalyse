@@ -55,10 +55,10 @@ export default function FeedbackTemplates({ templates = [], onComplete }) {
   };
 
   const tipps = [
-    'Gib Feedback zeitnah \u2013 je frischer die Situation, desto wirksamer.',
+    'Gib Feedback zeitnah â je frischer die Situation, desto wirksamer.',
     'Fokussiere auf beobachtbares Verhalten, nicht auf Interpretationen.',
     'Beschreibe die Wirkung aus deiner Perspektive mit Ich-Botschaften.',
-    'Frage nach: "Wie siehst du das?" \u2013 Feedback ist ein Dialog.',
+    'Frage nach: "Wie siehst du das?" â Feedback ist ein Dialog.',
     'Positives Feedback ist genauso wichtig wie kritisches.',
   ];
 

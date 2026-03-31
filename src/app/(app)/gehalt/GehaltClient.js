@@ -30,10 +30,10 @@ function fmtK(val) {
 
 function erfahrungLabel(key) {
   const map = {
-    '0-2': '0\u20132 Jahre',
-    '3-5': '3\u20135 Jahre',
-    '6-10': '6\u201310 Jahre',
-    '10+': '\u00DCber 10 Jahre',
+    '0-2': '0â2 Jahre',
+    '3-5': '3â5 Jahre',
+    '6-10': '6â10 Jahre',
+    '10+': 'Über 10 Jahre',
   };
   return map[key] || key;
 }
@@ -82,7 +82,7 @@ function QuartileBar({ p25, median, p75, maxVal }) {
         rx={6}
         fill="var(--card-border, #e2e8f0)"
       />
-      {/* colored range p25\u2013p75 */}
+      {/* colored range p25âp75 */}
       <rect
         x={x25}
         y={BAR_Y}
@@ -492,7 +492,7 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
             <input
               type="text"
               className="form-input"
-              value={selectedBeruf?.berufsgruppe || '\u2014'}
+              value={selectedBeruf?.berufsgruppe || 'â'}
               readOnly
               style={{
                 background: 'var(--card-border, #f1f5f9)',
@@ -519,7 +519,7 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
         <EmptyState
           icon="\uD83D\uDCB0"
           title="Gehaltsvergleich starten"
-          description="W\u00E4hle einen Beruf aus unserer Datenbank mit \u00FCber 35 Berufsbildern und vergleiche Geh\u00E4lter nach Region, Erfahrung und Unternehmensgr\u00F6\u00DFe."
+          description="Wähle einen Beruf aus unserer Datenbank mit über 35 Berufsbildern und vergleiche Gehälter nach Region, Erfahrung und Unternehmensgröße."
         />
       )}
 
@@ -621,7 +621,7 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
                     marginBottom: 4,
                   }}
                 >
-                  Spanne (P25\u2013P75)
+                  Spanne (P25âP75)
                 </div>
                 <div
                   style={{
@@ -630,7 +630,7 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
                     color: 'var(--foreground, #1e293b)',
                   }}
                 >
-                  {fmt(gehaltData.p25 * 12)} \u2013 {fmt(gehaltData.p75 * 12)}
+                  {fmt(gehaltData.p25 * 12)} â {fmt(gehaltData.p75 * 12)}
                 </div>
               </div>
             </div>
@@ -650,7 +650,7 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
                 marginBottom: 16,
               }}
             >
-              Median-Bruttogeh\u00E4lter f\u00FCr {selectedBeruf.titel} nach
+              Median-Bruttogehälter für {selectedBeruf.titel} nach
               Berufserfahrung
             </p>
             {ERFAHRUNGSSTUFEN.map((stufe, i) => {
@@ -678,11 +678,11 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
           </div>
 
           {/* ─────────────────────────────────────────────────────────────
-              5. GEHALT NACH UNTERNEHMENSGR\u00D6SSE
+              5. GEHALT NACH UNTERNEHMENSGRÖSSE
               ───────────────────────────────────────────────────────────── */}
           <div className="card">
             <h2 className="card-title" style={{ marginBottom: 16 }}>
-              Gehalt nach Unternehmensgr\u00F6\u00DFe
+              Gehalt nach Unternehmensgröße
             </h2>
             <p
               style={{
@@ -691,7 +691,7 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
                 marginBottom: 16,
               }}
             >
-              Wie die Firmengr\u00F6\u00DFe das Gehalt beeinflusst
+              Wie die Firmengröße das Gehalt beeinflusst
             </p>
             {UNTERNEHMENSGROESSEN.map((gr) => {
               const val = selectedBeruf.gehalt_nach_groesse[gr] || 0;
@@ -730,8 +730,8 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
                 marginBottom: 16,
               }}
             >
-              Median-Bruttogeh\u00E4lter f\u00FCr {selectedBeruf.titel} in
-              allen 16 Bundesl\u00E4ndern
+              Median-Bruttogehälter für {selectedBeruf.titel} in
+              allen 16 Bundesländern
             </p>
 
             <div
@@ -791,7 +791,7 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
                         setSelectedRegion(land);
                       }
                     }}
-                    title={`Klicken um ${land} auszuw\u00E4hlen`}
+                    title={`Klicken um ${land} auszuwählen`}
                   >
                     <span
                       style={{
@@ -873,7 +873,7 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
           </div>
 
           {/* ─────────────────────────────────────────────────────────────
-              7. WAS BEDEUTET DAS F\u00DCR DICH? (Personalized)
+              7. WAS BEDEUTET DAS FÜR DICH? (Personalized)
               ───────────────────────────────────────────────────────────── */}
           <div
             className="card"
@@ -884,7 +884,7 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
             }}
           >
             <h2 className="card-title" style={{ marginBottom: 12 }}>
-              Was bedeutet das f\u00FCr dich?
+              Was bedeutet das für dich?
             </h2>
 
             {profile?.industry || profile?.position ? (
@@ -916,8 +916,8 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
                   lineHeight: 1.65,
                 }}
               >
-                Vervollst\u00E4ndige dein Profil, um eine personalisierte
-                Gehaltseinsch\u00E4tzung basierend auf deiner Branche und
+                Vervollständige dein Profil, um eine personalisierte
+                Gehaltseinschätzung basierend auf deiner Branche und
                 Position zu erhalten.
               </p>
             )}
@@ -941,7 +941,7 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
               >
                 <strong>Tipp:</strong> Mit unseren Zertifikaten und
                 Weiterbildungen hebst du dich von anderen Bewerbern ab
-                \u2014 das obere Quartil (ab{' '}
+                â das obere Quartil (ab{' '}
                 {fmtK(gehaltData.p75)}/Monat) wird dadurch realistisch
                 erreichbar. Investiere in deine Qualifikation und steigere
                 deinen Marktwert nachhaltig.
@@ -977,9 +977,9 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
                 lineHeight: 1.6,
               }}
             >
-              Die dargestellten Gehaltsdaten basieren auf \u00F6ffentlich
-              zug\u00E4nglichen Statistiken und dienen als Orientierung.
-              Individuelle Geh\u00E4lter k\u00F6nnen je nach Qualifikation,
+              Die dargestellten Gehaltsdaten basieren auf öffentlich
+              zugänglichen Statistiken und dienen als Orientierung.
+              Individuelle Gehälter können je nach Qualifikation,
               Verhandlungsgeschick und Unternehmenskontext abweichen.
             </p>
 
@@ -1008,7 +1008,7 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
                 <span style={{ fontSize: 20 }}>\uD83C\uDFE2</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 600 }}>
-                    Entgeltatlas der Bundesagentur f\u00FCr Arbeit
+                    Entgeltatlas der Bundesagentur für Arbeit
                   </div>
                   <div
                     style={{
@@ -1059,7 +1059,7 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
                       color: 'var(--foreground-muted, #94a3b8)',
                     }}
                   >
-                    destatis.de \u2014 Verdienste &amp; Arbeitskosten
+                    destatis.de â Verdienste &amp; Arbeitskosten
                   </div>
                 </div>
                 <span
@@ -1082,10 +1082,10 @@ export default function GehaltClient({ benchmarks, stats, userId, profile }) {
               }}
             >
               Hinweis: Alle Gehaltsangaben sind Brutto-Werte und basieren
-              auf Vollzeitbesch\u00E4ftigung. Die Daten dienen
-              ausschlie\u00DFlich der Orientierung und stellen keine
+              auf Vollzeitbeschäftigung. Die Daten dienen
+              ausschließlich der Orientierung und stellen keine
               Gehaltsgarantie dar. Quelle: Entgeltatlas der Bundesagentur
-              f\u00FCr Arbeit, Statistisches Bundesamt, eigene Berechnung.
+              für Arbeit, Statistisches Bundesamt, eigene Berechnung.
             </p>
           </div>
         </div>

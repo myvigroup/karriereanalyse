@@ -6,7 +6,7 @@ export function getRecommendations(profile, analysisSession, lessonsCompleted, d
     recs.push({
       icon: '\u25CE',
       title: 'Starte mit dem Karriere-Blutbild',
-      description: 'Die Analyse ist die Basis f\u00FCr alle Empfehlungen.',
+      description: 'Die Analyse ist die Basis für alle Empfehlungen.',
       link: '/analyse',
       priority: 10,
     });
@@ -29,7 +29,7 @@ export function getRecommendations(profile, analysisSession, lessonsCompleted, d
     recs.push({
       icon: '\u{1F4C4}',
       title: 'Lade deinen CV hoch',
-      description: 'F\u00FCr KI-Analyse und Bewerbungsmappe.',
+      description: 'Für KI-Analyse und Bewerbungsmappe.',
       link: '/pre-coaching',
       priority: 6,
     });
@@ -51,7 +51,7 @@ export function getRecommendations(profile, analysisSession, lessonsCompleted, d
     recs.push({
       icon: '\u{1F916}',
       title: 'Dein Coach vermisst dich',
-      description: 'Komm zur\u00FCck und halte deinen Streak am Leben.',
+      description: 'Komm zurück und halte deinen Streak am Leben.',
       link: '/coach',
       priority: 4,
     });
@@ -62,7 +62,7 @@ export function getRecommendations(profile, analysisSession, lessonsCompleted, d
     recs.push({
       icon: '\u{1F3C6}',
       title: 'Trage deinen ersten Win ein',
-      description: 'Dokumentiere deine Erfolge f\u00FCr die n\u00E4chste Verhandlung.',
+      description: 'Dokumentiere deine Erfolge für die nächste Verhandlung.',
       link: '/salary-log',
       priority: 3,
     });

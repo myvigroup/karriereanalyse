@@ -4,14 +4,14 @@ import { createClient } from '@/lib/supabase/client';
 import { isExecutive } from '@/lib/executive-mode';
 
 const TOUR_STEPS = [
-  { target: 'data-tour-sidebar', title: 'Dein Men\u00FC', description: 'Alle Module findest du hier. Klicke dich durch und entdecke dein Karriere-OS.', position: 'right' },
+  { target: 'data-tour-sidebar', title: 'Dein Menü', description: 'Alle Module findest du hier. Klicke dich durch und entdecke dein Karriere-OS.', position: 'right' },
   { target: 'data-tour-dashboard', title: 'Dashboard', description: 'Starte jeden Tag hier. Streak und Aufgaben auf einen Blick.', position: 'bottom' },
-  { target: 'data-tour-streak', title: 'Streak-Counter', description: 'Jeden Tag einloggen h\u00E4lt deinen Streak am Leben. \u{1F525}', position: 'bottom' },
-  { target: 'data-tour-coach', title: 'KI-Coach', description: 'Dein pers\u00F6nlicher Mentor. Frag ihn wenn du nicht weiterwei\u00DFt.', position: 'right' },
-  { target: 'data-tour-analyse', title: 'Karriereanalyse', description: 'Starte hier \u2014 das ist die Basis f\u00FCr alles. 15 Minuten.', position: 'right' },
+  { target: 'data-tour-streak', title: 'Streak-Counter', description: 'Jeden Tag einloggen hält deinen Streak am Leben. \u{1F525}', position: 'bottom' },
+  { target: 'data-tour-coach', title: 'KI-Coach', description: 'Dein persönlicher Mentor. Frag ihn wenn du nicht weiterweißt.', position: 'right' },
+  { target: 'data-tour-analyse', title: 'Karriereanalyse', description: 'Starte hier â das ist die Basis für alles. 15 Minuten.', position: 'right' },
   { target: 'data-tour-notifications', title: 'Benachrichtigungen', description: 'Erinnerungen und Updates findest du hier.', position: 'bottom' },
-  { target: 'data-tour-profile', title: 'Profil', description: 'Halte es aktuell f\u00FCr bessere Empfehlungen.', position: 'right' },
-  { target: 'data-tour-tooltip', title: 'Hilfe-Icons', description: 'Diese Fragezeichen erkl\u00E4ren jedes Modul. Klicke sie jederzeit an.', position: 'bottom' },
+  { target: 'data-tour-profile', title: 'Profil', description: 'Halte es aktuell für bessere Empfehlungen.', position: 'right' },
+  { target: 'data-tour-tooltip', title: 'Hilfe-Icons', description: 'Diese Fragezeichen erklären jedes Modul. Klicke sie jederzeit an.', position: 'bottom' },
 ];
 
 export default function AppTour({ profile, userId }) {
@@ -68,7 +68,7 @@ export default function AppTour({ profile, userId }) {
           <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)', marginBottom: 32, lineHeight: 1.6 }}>
             {executive
               ? 'Beginnen Sie mit der strategischen Standortbestimmung.'
-              : 'Starte mit der Karriereanalyse \u2014 das ist die Basis f\u00FCr alles Weitere.'}
+              : 'Starte mit der Karriereanalyse â das ist die Basis für alles Weitere.'}
           </p>
           <div style={{ display: 'flex', gap: 12 }}>
             <a href="/dashboard" onClick={completeTour} className="btn btn-secondary" style={{ flex: 1 }}>Zum Dashboard</a>

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import AnalyseClient from './AnalyseClient';
 
-export default async function AnalysePage() {
+export default async function AnalysePage({ searchParams }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
@@ -22,5 +22,6 @@ export default async function AnalysePage() {
     .limit(1)
     .maybeSingle();
 
-  return <AnalyseClient profile={profile} existingSession={existingSession} userId={user.id} />;
+  const autoStart = searchParams?.start === 'true';
+  return <AnalyseClient profile={profile} existingSession={existingSession} userId={user.id} autoStart={autoStart} />;
 }

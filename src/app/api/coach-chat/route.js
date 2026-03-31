@@ -11,7 +11,7 @@ export async function POST(request) {
 
     const rateCheck = await checkRateLimit(supabase, user.id, 'coach-chat');
     if (!rateCheck.allowed) {
-      return NextResponse.json({ error: 'Rate limit erreicht. Versuche es sp\u00E4ter erneut.', remaining: 0 }, { status: 429 });
+      return NextResponse.json({ error: 'Rate limit erreicht. Versuche es später erneut.', remaining: 0 }, { status: 429 });
     }
 
     const { chatId, message, contextType } = await request.json();

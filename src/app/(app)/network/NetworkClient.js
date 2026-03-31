@@ -13,7 +13,7 @@ const TAG_OPTIONS = [
   { key: 'mentor',   label: 'Mentor',           icon: '\u{1F9E0}' },
   { key: 'kollege',  label: 'Kollege',          icon: '\u{1F91D}' },
   { key: 'hr',       label: 'HR',               icon: '\u{1F454}' },
-  { key: 'fuehrung', label: 'F\u00FChrungskraft', icon: '\u{1F451}' },
+  { key: 'fuehrung', label: 'Führungskraft', icon: '\u{1F451}' },
   { key: 'branche',  label: 'Branche-Kontakt',  icon: '\u{1F3E2}' },
   { key: 'freund',   label: 'Freund',           icon: '\u{1F4AC}' },
   { key: 'coach',    label: 'Coach',            icon: '\u{1F3AF}' },
@@ -312,7 +312,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
   }
 
   async function deleteContact(id) {
-    if (!confirm('Kontakt wirklich l\u00F6schen?')) return;
+    if (!confirm('Kontakt wirklich löschen?')) return;
     await supabase.from('contacts').delete().eq('id', id);
     setContacts(prev => prev.filter(c => c.id !== id));
   }
@@ -468,7 +468,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 20 }}>
         <input
           className="input"
-          placeholder="Kontakt oder Firma suchen\u2026"
+          placeholder="Kontakt oder Firma suchenâ¦"
           value={search}
           onChange={e => setSearch(e.target.value)}
           style={{ flex: '1 1 240px', maxWidth: 360 }}
@@ -809,7 +809,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
             <textarea
               className="input"
               rows={4}
-              placeholder="Notiz eingeben\u2026"
+              placeholder="Notiz eingebenâ¦"
               value={noteText}
               onChange={e => setNoteText(e.target.value)}
               style={{ width: '100%', resize: 'vertical', marginBottom: 16 }}
@@ -918,7 +918,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
               <input
                 className="input" value={form.city}
                 onChange={e => f('city', e.target.value)}
-                placeholder="M\u00FCnchen" style={{ width: '100%' }}
+                placeholder="München" style={{ width: '100%' }}
               />
             </div>
 
@@ -975,7 +975,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
               <input
                 className="input" value={form.how_met}
                 onChange={e => f('how_met', e.target.value)}
-                placeholder="z.B. Messe, LinkedIn, Empfehlung\u2026"
+                placeholder="z.B. Messe, LinkedIn, Empfehlungâ¦"
                 style={{ width: '100%' }}
               />
             </div>
@@ -987,7 +987,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
                 className="input" rows={2}
                 value={form.what_can_i_give}
                 onChange={e => f('what_can_i_give', e.target.value)}
-                placeholder="z.B. Kontakte vermitteln, Fachwissen teilen, Feedback geben\u2026"
+                placeholder="z.B. Kontakte vermitteln, Fachwissen teilen, Feedback gebenâ¦"
                 style={{ width: '100%', resize: 'vertical' }}
               />
             </div>
@@ -999,7 +999,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
                 className="input" rows={3}
                 value={form.notes}
                 onChange={e => f('notes', e.target.value)}
-                placeholder="Pers\u00F6nliche Notizen zum Kontakt\u2026"
+                placeholder="Persönliche Notizen zum Kontaktâ¦"
                 style={{ width: '100%', resize: 'vertical' }}
               />
             </div>
@@ -1010,7 +1010,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
                 Abbrechen
               </button>
               <button className="btn btn-primary" onClick={saveContact} disabled={busy}>
-                {busy ? 'Speichern\u2026' : editId ? 'Aktualisieren' : 'Kontakt anlegen'}
+                {busy ? 'Speichernâ¦' : editId ? 'Aktualisieren' : 'Kontakt anlegen'}
               </button>
             </div>
           </div>

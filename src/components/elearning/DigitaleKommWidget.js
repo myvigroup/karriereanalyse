@@ -25,7 +25,7 @@ const DEFAULT_KANAL_QUIZ = [
   { situation: 'Formelle Projektfreigabe dokumentieren', correct: 'Email', feedback: 'E-Mails sind dokumentiert und formal. Perfekt f\u00fcr offizielle Freigaben.' },
   { situation: 'Dringende Frage zu einem Kundenanruf in 10 Minuten', correct: 'Anruf', feedback: 'Bei Zeitdruck ist ein kurzer Anruf der schnellste Kanal.' },
   { situation: 'Wochenbericht ans Team senden', correct: 'Email', feedback: 'Strukturierte Informationen, die nachgelesen werden sollen, geh\u00f6ren in eine E-Mail.' },
-  { situation: 'Brainstorming-Session mit 4 Personen', correct: 'Video', feedback: 'Kreative Zusammenarbeit braucht Interaktion \u2013 Video ist ideal f\u00fcr Brainstorming.' },
+  { situation: 'Brainstorming-Session mit 4 Personen', correct: 'Video', feedback: 'Kreative Zusammenarbeit braucht Interaktion â Video ist ideal f\u00fcr Brainstorming.' },
 ];
 
 const CHANNEL_OPTIONS = [
@@ -129,7 +129,7 @@ export default function DigitaleKommWidget({ onComplete }) {
             <p style={styles.resultFeedback}>
               {quizPassed
                 ? 'Du wei\u00dft genau, welcher Kanal wann passt!'
-                : 'Schau dir die Regeln nochmal an \u2013 der richtige Kanal macht den Unterschied.'}
+                : 'Schau dir die Regeln nochmal an â der richtige Kanal macht den Unterschied.'}
             </p>
           </div>
           {quizPassed && (
@@ -208,7 +208,7 @@ export default function DigitaleKommWidget({ onComplete }) {
                 ...styles.feedbackTitle,
                 color: quizAnswer === current.correct ? '#10B981' : '#EF4444',
               }}>
-                {quizAnswer === current.correct ? 'Richtig!' : `Nicht ganz \u2013 richtig w\u00e4re: ${current.correct}`}
+                {quizAnswer === current.correct ? 'Richtig!' : `Nicht ganz â richtig w\u00e4re: ${current.correct}`}
               </p>
               <p style={styles.feedbackText}>{current.feedback}</p>
             </div>

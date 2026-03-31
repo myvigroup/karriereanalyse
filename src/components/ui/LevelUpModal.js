@@ -42,7 +42,7 @@ export default function LevelUpModal({ level, onClose }) {
         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-red)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Level Up!</div>
         <h2 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.04em', marginBottom: 8 }}>Level {level.level}: {level.name}</h2>
         <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)', marginBottom: 32 }}>
-          Gl\u00FCckwunsch! Du hast {level.minXP} XP erreicht.
+          Glückwunsch! Du hast {level.minXP} XP erreicht.
         </p>
         <button className="btn btn-primary" onClick={onClose} style={{ width: '100%' }}>Weiter</button>
       </div>

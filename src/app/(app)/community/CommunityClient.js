@@ -247,7 +247,7 @@ export default function CommunityClient({ profile, posts: initialPosts, courses,
       setComposerText('');
       setComposerType('text');
       setPollOptions(['', '']);
-      showToast('+10 XP \u2014 Beitrag ver\u00F6ffentlicht!');
+      showToast('+10 XP â Beitrag veröffentlicht!');
     } catch (err) {
       console.error('Post error:', err);
       showToast('Fehler beim Posten');
@@ -336,7 +336,7 @@ export default function CommunityClient({ profile, posts: initialPosts, courses,
       } else {
         setCommentInputs(prev => ({ ...prev, [postId]: '' }));
       }
-      showToast('+5 XP \u2014 Kommentar hinzugef\u00FCgt!');
+      showToast('+5 XP â Kommentar hinzugefügt!');
     } catch (err) {
       console.error('Comment error:', err);
     }
@@ -377,7 +377,7 @@ export default function CommunityClient({ profile, posts: initialPosts, courses,
         post_id: postId,
         reporter_id: userId,
       });
-      showToast('Beitrag gemeldet \u2014 danke!');
+      showToast('Beitrag gemeldet â danke!');
     } catch (err) {
       console.error('Report error:', err);
     }
@@ -613,7 +613,7 @@ export default function CommunityClient({ profile, posts: initialPosts, courses,
         <div className="card animate-in" style={{ padding: 20, marginBottom: 24 }}>
           <textarea
             className="input"
-            placeholder="Was besch\u00E4ftigt dich gerade?"
+            placeholder="Was beschäftigt dich gerade?"
             value={composerText}
             onChange={e => setComposerText(e.target.value)}
             rows={3}
@@ -655,7 +655,7 @@ export default function CommunityClient({ profile, posts: initialPosts, courses,
               {pollOptions.length < 4 && (
                 <button className="btn btn-ghost" onClick={addPollOption}
                   style={{ fontSize: 13, alignSelf: 'flex-start' }}>
-                  + Option hinzuf\u00FCgen
+                  + Option hinzufügen
                 </button>
               )}
             </div>
@@ -711,8 +711,8 @@ export default function CommunityClient({ profile, posts: initialPosts, courses,
         {/* Posts */}
         {sortedPosts.length === 0 ? (
           <EmptyState
-            title="Noch keine Beitr\u00E4ge"
-            description="Starte die Diskussion \u2014 teile deine Gedanken mit der Community!"
+            title="Noch keine Beiträge"
+            description="Starte die Diskussion â teile deine Gedanken mit der Community!"
           />
         ) : (
           sortedPosts.map(post => renderPostCard(post))
@@ -733,7 +733,7 @@ export default function CommunityClient({ profile, posts: initialPosts, courses,
         <>
           <button className="btn btn-ghost" style={{ marginBottom: 16, fontSize: 13 }}
             onClick={() => setSelectedCourseId(null)}>
-            {'\u2190'} Zur\u00FCck zu allen Kursen
+            {'\u2190'} Zurück zu allen Kursen
           </button>
           <h3 style={{ color: 'var(--ki-text)', marginBottom: 16, fontSize: 18 }}>
             {course?.title || 'Kurs-Diskussion'}
@@ -753,7 +753,7 @@ export default function CommunityClient({ profile, posts: initialPosts, courses,
     return (
       <>
         <p style={{ color: 'var(--ki-text-secondary)', marginBottom: 20, fontSize: 14 }}>
-          W\u00E4hle einen Kurs, um Diskussionen zu sehen und Fragen zu stellen.
+          Wähle einen Kurs, um Diskussionen zu sehen und Fragen zu stellen.
         </p>
         <div className="grid-3">
           {courses.map(course => {
@@ -775,14 +775,14 @@ export default function CommunityClient({ profile, posts: initialPosts, courses,
                   {'\uD83D\uDCDA'} {course.title}
                 </h4>
                 <span style={{ fontSize: 13, color: 'var(--ki-text-tertiary)' }}>
-                  {count} Beitr\u00E4g{count !== 1 ? 'e' : ''}
+                  {count} Beiträg{count !== 1 ? 'e' : ''}
                 </span>
               </button>
             );
           })}
         </div>
         {courses.length === 0 && (
-          <EmptyState title="Keine Kurse verf\u00FCgbar" description="Kurse werden bald hinzugef\u00FCgt." />
+          <EmptyState title="Keine Kurse verfügbar" description="Kurse werden bald hinzugefügt." />
         )}
       </>
     );
@@ -852,14 +852,14 @@ export default function CommunityClient({ profile, posts: initialPosts, courses,
             {'\uD83E\uDD1D'} Finde einen Accountability-Partner
           </h3>
           <p style={{ color: 'var(--ki-text-secondary)', fontSize: 14, lineHeight: 1.6 }}>
-            Verbinde dich mit anderen Mitgliedern, die \u00E4hnliche Ziele verfolgen.
+            Verbinde dich mit anderen Mitgliedern, die ähnliche Ziele verfolgen.
             Gemeinsam erreicht ihr mehr!
           </p>
         </div>
 
         {peers.length === 0 ? (
           <EmptyState
-            title="Noch keine Partner verf\u00FCgbar"
+            title="Noch keine Partner verfügbar"
             description="Aktiviere dein Profil unter Einstellungen, um hier sichtbar zu werden."
           />
         ) : (

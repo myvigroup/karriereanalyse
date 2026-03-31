@@ -10,7 +10,7 @@ export async function POST(request) {
 
     const rateCheck = await checkRateLimit(supabase, user.id, 'zeugnis-decode');
     if (!rateCheck.allowed) {
-      return NextResponse.json({ error: 'Rate limit erreicht. Versuche es sp\u00E4ter erneut.' }, { status: 429 });
+      return NextResponse.json({ error: 'Rate limit erreicht. Versuche es später erneut.' }, { status: 429 });
     }
 
     const { text } = await request.json();
@@ -34,7 +34,7 @@ export async function POST(request) {
           max_tokens: 1500,
           messages: [{
             role: 'user',
-            content: `Analysiere das folgende deutsche Arbeitszeugnis und entschl\u00FCssle die Geheimcodes.
+            content: `Analysiere das folgende deutsche Arbeitszeugnis und entschlüssle die Geheimcodes.
 
 Arbeitszeugnis-Text:
 ${text}
@@ -42,10 +42,10 @@ ${text}
 Antworte NUR als JSON:
 {
   "decoded_phrases": [
-    { "original": "Originalformulierung", "meaning": "Tats\u00E4chliche Bedeutung", "grade": 1-6 }
+    { "original": "Originalformulierung", "meaning": "Tatsächliche Bedeutung", "grade": 1-6 }
   ],
   "overall_grade": 1-6,
-  "summary": "Zusammenfassung in 2-3 S\u00E4tzen"
+  "summary": "Zusammenfassung in 2-3 Sätzen"
 }
 
 Bekannte Codes:
@@ -53,8 +53,8 @@ Bekannte Codes:
 - "stets zu unserer vollen Zufriedenheit" = Note 2
 - "zu unserer vollen Zufriedenheit" = Note 3
 - "zu unserer Zufriedenheit" = Note 4
-- "im Gro\u00DFen und Ganzen zu unserer Zufriedenheit" = Note 5
-- "hat sich bem\u00FCht" = Note 6`,
+- "im Großen und Ganzen zu unserer Zufriedenheit" = Note 5
+- "hat sich bemüht" = Note 6`,
           }],
         }),
       });
@@ -79,10 +79,10 @@ function getMockDecode(text) {
   if (text.includes('vollsten Zufriedenheit')) phrases.push({ original: 'stets zu unserer vollsten Zufriedenheit', meaning: 'Hervorragende Leistung', grade: 1 });
   if (text.includes('vollen Zufriedenheit')) phrases.push({ original: 'zu unserer vollen Zufriedenheit', meaning: 'Gute Leistung', grade: 2 });
   if (text.includes('Zufriedenheit')) phrases.push({ original: 'zu unserer Zufriedenheit', meaning: 'Befriedigende Leistung', grade: 3 });
-  if (text.includes('bem\u00FCht')) phrases.push({ original: 'hat sich bem\u00FCht', meaning: 'Ungen\u00FCgende Leistung', grade: 6 });
+  if (text.includes('bemüht')) phrases.push({ original: 'hat sich bemüht', meaning: 'Ungenügende Leistung', grade: 6 });
   return {
-    decoded_phrases: phrases.length > 0 ? phrases : [{ original: 'Textanalyse', meaning: 'Detaillierte Analyse ben\u00F6tigt API-Key', grade: 0 }],
+    decoded_phrases: phrases.length > 0 ? phrases : [{ original: 'Textanalyse', meaning: 'Detaillierte Analyse benötigt API-Key', grade: 0 }],
     overall_grade: phrases.length > 0 ? phrases[0].grade : 0,
-    summary: 'F\u00FCr eine detaillierte Analyse wird der API-Key ben\u00F6tigt.',
+    summary: 'Für eine detaillierte Analyse wird der API-Key benötigt.',
   };
 }

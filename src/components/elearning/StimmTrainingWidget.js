@@ -13,14 +13,14 @@ const DEFAULT_EXERCISES = [
       'Atme tief in den Bauch ein (4 Sekunden).',
       'Halte kurz (2 Sekunden).',
       'Sprich den Satz langsam beim Ausatmen.',
-      'Wiederhole 3x \u2013 jedes Mal etwas lauter.',
+      'Wiederhole 3x â jedes Mal etwas lauter.',
     ],
     tips: 'Die Atemst\u00fctze gibt deiner Stimme Kraft und verhindert, dass sie am Satzende wegbricht.',
   },
   {
     name: 'Betonung & Pausen',
     icon: '\u{23F8}\u{FE0F}',
-    sentence: 'Wir m\u00fcssen JETZT handeln \u2013 [Pause] \u2013 bevor es zu sp\u00e4t ist.',
+    sentence: 'Wir m\u00fcssen JETZT handeln â [Pause] â bevor es zu sp\u00e4t ist.',
     steps: [
       'Lies den Satz zun\u00e4chst monoton vor.',
       'Betone nun das Wort in Gro\u00dfbuchstaben.',
@@ -36,10 +36,10 @@ const DEFAULT_EXERCISES = [
     steps: [
       'Summe ein tiefes "Mmmm" f\u00fcr 10 Sekunden.',
       'Sprich den Satz in deiner normalen Stimmlage.',
-      'Sprich ihn erneut, etwas tiefer \u2013 stell dir vor, du sprichst "aus dem Brustkorb".',
+      'Sprich ihn erneut, etwas tiefer â stell dir vor, du sprichst "aus dem Brustkorb".',
       'Finde deine nat\u00fcrliche, resonante Stimmlage.',
     ],
-    tips: 'Eine tiefere Stimme wirkt kompetenter. Aber erzwinge es nicht \u2013 finde DEINE beste Lage.',
+    tips: 'Eine tiefere Stimme wirkt kompetenter. Aber erzwinge es nicht â finde DEINE beste Lage.',
   },
   {
     name: 'Tempo & Klarheit',
@@ -47,11 +47,11 @@ const DEFAULT_EXERCISES = [
     sentence: 'Unsere drei Priorit\u00e4ten sind: Erstens Kundenservice, zweitens Innovation, drittens Effizienz.',
     steps: [
       'Sprich den Satz in normalem Tempo (nimm die Zeit).',
-      'Sprich ihn 50% langsamer \u2013 betone jede Priorit\u00e4t.',
-      'Sprich ihn z\u00fcgig aber deutlich \u2013 jede Silbe muss erkennbar sein.',
+      'Sprich ihn 50% langsamer â betone jede Priorit\u00e4t.',
+      'Sprich ihn z\u00fcgig aber deutlich â jede Silbe muss erkennbar sein.',
       'Finde das Tempo, bei dem du klar UND nat\u00fcrlich klingst.',
     ],
-    tips: 'Gutes Sprechtempo: 120\u2013150 W\u00f6rter pro Minute. Bei wichtigen Punkten: langsamer!',
+    tips: 'Gutes Sprechtempo: 120â150 W\u00f6rter pro Minute. Bei wichtigen Punkten: langsamer!',
   },
 ];
 
@@ -220,7 +220,7 @@ export default function StimmTrainingWidget({ onComplete }) {
       {allChecked && (
         <div style={styles.completeSection}>
           <p style={styles.completeText}>
-            Alle \u00dcbungen absolviert! Trainiere regelm\u00e4\u00dfig \u2013 deine Stimme wird st\u00e4rker.
+            Alle \u00dcbungen absolviert! Trainiere regelm\u00e4\u00dfig â deine Stimme wird st\u00e4rker.
           </p>
           <button
             className="btn btn-primary"

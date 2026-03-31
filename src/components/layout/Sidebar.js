@@ -1,8 +1,133 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { AUDIO_INTROS, AUDIO_TTS_FALLBACKS } from '@/lib/audio-config';
+import {
+  LayoutDashboard, Play, Crown, Award, TrendingUp, Target, BarChart3, Bot, Trophy,
+  DollarSign, Mail, Users, Link, Compass, DoorOpen, MessageCircle,
+  User, Settings, LogOut, Bell, UserCog, BookOpen, GraduationCap, BarChart2, ClipboardList,
+} from 'lucide-react';
+
+// ── Notification Bell (Portal-based) ──
+function NotificationBell({ notifications, unreadCount, showNotifs, setShowNotifs, markAllRead, handleNotifClick }) {
+  const bellRef = useRef(null);
+  const panelRef = useRef(null);
+  const [panelPos, setPanelPos] = useState({ top: 0, left: 0 });
+
+  // Position Panel next to bell
+  useEffect(() => {
+    if (showNotifs && bellRef.current) {
+      const rect = bellRef.current.getBoundingClientRect();
+      setPanelPos({ top: rect.bottom + 8, left: rect.left });
+    }
+  }, [showNotifs]);
+
+  // Close on outside click or Escape
+  useEffect(() => {
+    if (!showNotifs) return;
+    const handleClick = (e) => {
+      if (panelRef.current && !panelRef.current.contains(e.target) && bellRef.current && !bellRef.current.contains(e.target)) {
+        setShowNotifs(false);
+      }
+    };
+    const handleEsc = (e) => { if (e.key === 'Escape') setShowNotifs(false); };
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleEsc);
+    return () => { document.removeEventListener('mousedown', handleClick); document.removeEventListener('keydown', handleEsc); };
+  }, [showNotifs, setShowNotifs]);
+
+  return (
+    <>
+      <button
+        ref={bellRef}
+        data-tour-notifications=""
+        onClick={() => setShowNotifs(!showNotifs)}
+        style={{
+          background: showNotifs ? 'var(--ki-bg-alt)' : 'none', border: 'none', cursor: 'pointer',
+          fontSize: 18, color: 'var(--ki-text-secondary)', position: 'relative', padding: '4px 6px',
+          borderRadius: 'var(--r-sm)', transition: 'background 0.15s ease',
+        }}
+      >
+        🔔
+        {unreadCount > 0 && (
+          <span style={{
+            position: 'absolute', top: 0, right: 0, minWidth: 16, height: 16, borderRadius: '50%',
+            background: 'var(--ki-red)', color: 'white', fontSize: 10, fontWeight: 700,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px',
+          }}>{unreadCount}</span>
+        )}
+      </button>
+
+      {showNotifs && typeof document !== 'undefined' && createPortal(
+        <div ref={panelRef} style={{
+          position: 'fixed', top: panelPos.top, left: panelPos.left, width: 360,
+          background: 'var(--ki-card)', borderRadius: 'var(--r-lg)',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06)',
+          zIndex: 9999, maxHeight: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column',
+          animation: 'fadeUp 0.15s ease',
+        }}>
+          {/* Header */}
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '14px 18px', borderBottom: '1px solid var(--ki-border)', flexShrink: 0,
+          }}>
+            <span style={{ fontSize: 14, fontWeight: 700 }}>Benachrichtigungen</span>
+            {unreadCount > 0 && (
+              <button onClick={markAllRead} style={{
+                fontSize: 12, color: 'var(--ki-red)', background: 'none', border: 'none',
+                cursor: 'pointer', fontWeight: 500,
+              }}>
+                Alle gelesen
+              </button>
+            )}
+          </div>
+
+          {/* Content */}
+          <div style={{ overflowY: 'auto', flex: 1 }}>
+            {notifications.length === 0 ? (
+              <div style={{ padding: '40px 24px', textAlign: 'center' }}>
+                <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.4 }}>🔔</div>
+                <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)' }}>Keine Benachrichtigungen</div>
+              </div>
+            ) : (
+              notifications.map(n => (
+                <div
+                  key={n.id}
+                  onClick={() => handleNotifClick(n)}
+                  style={{
+                    padding: '12px 18px', cursor: 'pointer',
+                    borderBottom: '1px solid var(--ki-border)',
+                    background: n.read ? 'transparent' : 'rgba(204,20,38,0.02)',
+                    transition: 'background 0.15s ease',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--ki-bg-alt)'}
+                  onMouseLeave={e => e.currentTarget.style.background = n.read ? 'transparent' : 'rgba(204,20,38,0.02)'}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                    <span style={{ fontSize: 16, marginTop: 1, flexShrink: 0 }}>
+                      {n.type === 'coaching_impulse' ? '💡' : n.type === 'badge' ? '🏅' : n.type === 'achievement' ? '🏆' : '📌'}
+                    </span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: n.read ? 400 : 600, lineHeight: 1.4 }}>{n.title}</div>
+                      {n.content && <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginTop: 3, lineHeight: 1.4 }}>{n.content}</div>}
+                      <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginTop: 4 }}>
+                        {new Date(n.created_at).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                    {!n.read && <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--ki-red)', flexShrink: 0, marginTop: 5 }} />}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
+  );
+}
 import { getPersonalization } from '@/lib/personalization';
 import { getLevel, getLevelProgress } from '@/lib/gamification';
 
@@ -26,27 +151,27 @@ const NAV_GROUPS = [
   {
     label: null,
     items: [
-      { label: 'Dashboard',         path: '/dashboard',    icon: '◻' },
-      { label: 'Masterclass',       path: '/masterclass',  icon: '▶' },
-      { label: 'Premium',           path: '/marketplace',  icon: '⭐' },
-      { label: 'Badges & XP',       path: '/community/achievements', icon: '🏅' },
-      { label: 'Karrierepfad',      path: '/career',       icon: '↗' },
-      { label: 'Karriere-Analyse',  path: '/analyse',      icon: '◎' },
-      { label: 'Mein Fortschritt',  path: '/marktwert',    icon: '📊' },
-      { label: 'KI-Coach',          path: '/coach',        icon: '🤖' },
-      { label: 'Rangliste',         path: '/community/peers', icon: '🏆' },
+      { label: 'Dashboard',         path: '/dashboard',    Icon: LayoutDashboard },
+      { label: 'Masterclass',       path: '/masterclass',  Icon: Play },
+      { label: 'Premium',           path: '/marketplace',  Icon: Crown },
+      { label: 'Badges & XP',       path: '/community/achievements', Icon: Award },
+      { label: 'Karrierepfad',      path: '/career',       Icon: TrendingUp },
+      { label: 'Karriere-Analyse',  path: '/analyse',      Icon: Target },
+      { label: 'Mein Fortschritt',  path: '/marktwert',    Icon: BarChart3 },
+      { label: 'KI-Coach',          path: '/coach',        Icon: Bot },
+      { label: 'Rangliste',         path: '/community/peers', Icon: Trophy },
     ],
   },
   {
     label: 'Karriere-Tools',
     items: [
-      { label: 'Gehaltsdatenbank',  path: '/gehalt',             icon: '💰' },
-      { label: 'Bewerbungen',       path: '/applications',       icon: '✉' },
-      { label: 'Netzwerk',          path: '/network',            icon: '🤝' },
-      { label: 'Jobportale',        path: '/branding',           icon: '🔗' },
-      { label: 'Kompass',           path: '/strategy/decision',  icon: '🧭' },
-      { label: 'Exit-Strategie',    path: '/strategy/exit',      icon: '🚪' },
-      { label: 'Community',         path: '/community',          icon: '👥' },
+      { label: 'Gehaltsdatenbank',  path: '/gehalt',             Icon: DollarSign },
+      { label: 'Bewerbungen',       path: '/applications',       Icon: Mail },
+      { label: 'Netzwerk',          path: '/network',            Icon: Users },
+      { label: 'Jobportale',        path: '/branding',           Icon: Link },
+      { label: 'Kompass',           path: '/strategy/decision',  Icon: Compass },
+      { label: 'Exit-Strategie',    path: '/strategy/exit',      Icon: DoorOpen },
+      { label: 'Community',         path: '/community',          Icon: MessageCircle },
     ],
   },
 ];
@@ -55,12 +180,12 @@ const NAV_GROUPS = [
 const NAV_ITEMS = NAV_GROUPS.flatMap(g => g.items);
 
 const ADMIN_ITEMS = [
-  { label: 'Userverwaltung',    path: '/admin/users',     icon: '👤' },
-  { label: 'Kursverwaltung',    path: '/admin/courses',   icon: '📚' },
-  { label: 'Seminarverwaltung', path: '/admin/content',   icon: '🎓' },
-  { label: 'Badges',            path: '/admin/coaching',  icon: '🏅' },
-  { label: 'Analytics',         path: '/admin/analytics', icon: '📈' },
-  { label: 'FK Dashboard',      path: '/coach-dashboard', icon: '📋' },
+  { label: 'Userverwaltung',    path: '/admin/users',     Icon: UserCog },
+  { label: 'Kursverwaltung',    path: '/admin/courses',   Icon: BookOpen },
+  { label: 'Seminarverwaltung', path: '/admin/content',   Icon: GraduationCap },
+  { label: 'Badges',            path: '/admin/coaching',  Icon: Award },
+  { label: 'Analytics',         path: '/admin/analytics', Icon: BarChart2 },
+  { label: 'FK Dashboard',      path: '/coach-dashboard', Icon: ClipboardList },
 ];
 
 export default function Sidebar({ profile, analysisResults }) {
@@ -167,75 +292,22 @@ export default function Sidebar({ profile, analysisResults }) {
 
   return (
     <aside data-tour-sidebar="" className="sidebar" style={{
-      width: 240, minHeight: '100vh', background: 'var(--ki-card)',
+      width: 240, height: '100vh', background: 'var(--ki-card)',
       borderRight: '1px solid var(--ki-border)', display: 'flex', flexDirection: 'column',
-      padding: '24px 12px', position: 'fixed', left: 0, top: 0,
+      padding: '24px 12px', position: 'fixed', left: 0, top: 0, overflowY: 'auto',
     }}>
       {/* Logo + Notifications */}
       <div style={{ padding: '0 16px 24px', borderBottom: '1px solid var(--ki-border)', marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', color: 'var(--ki-red)', textTransform: 'uppercase' }}>Karriere-Institut</div>
-          <div style={{ position: 'relative' }}>
-            <button
-              data-tour-notifications=""
-              onClick={() => setShowNotifs(!showNotifs)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--ki-text-secondary)', position: 'relative', padding: 4 }}
-            >
-              🔔
-              {unreadCount > 0 && (
-                <span style={{
-                  position: 'absolute', top: 0, right: 0, width: 16, height: 16, borderRadius: '50%',
-                  background: 'var(--ki-red)', color: 'white', fontSize: 10, fontWeight: 700,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>{unreadCount}</span>
-              )}
-            </button>
-            {showNotifs && (
-              <div style={{
-                position: 'absolute', top: '100%', right: -12, width: 300, background: 'var(--ki-card)',
-                borderRadius: 'var(--r-lg)', boxShadow: 'var(--sh-xl)', zIndex: 1000, marginTop: 8,
-                maxHeight: 400, overflow: 'auto', border: '1px solid var(--ki-border)',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--ki-border)' }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>Benachrichtigungen</span>
-                  {unreadCount > 0 && (
-                    <button onClick={markAllRead} style={{ fontSize: 12, color: 'var(--ki-red)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>
-                      Alle gelesen
-                    </button>
-                  )}
-                </div>
-                {notifications.length === 0 ? (
-                  <div style={{ padding: 24, textAlign: 'center', color: 'var(--ki-text-tertiary)', fontSize: 13 }}>Keine Benachrichtigungen</div>
-                ) : (
-                  notifications.map(n => (
-                    <div
-                      key={n.id}
-                      onClick={() => handleNotifClick(n)}
-                      style={{
-                        padding: '10px 16px', cursor: 'pointer', borderBottom: '1px solid var(--ki-border)',
-                        background: n.read ? 'transparent' : 'rgba(204,20,38,0.03)',
-                        transition: 'background var(--t-fast)',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 14 }}>
-                          {n.type === 'coaching_impulse' ? '💡' : n.type === 'badge' ? '🏅' : n.type === 'achievement' ? '🏆' : '📌'}
-                        </span>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 13, fontWeight: n.read ? 400 : 600 }}>{n.title}</div>
-                          {n.content && <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginTop: 2 }}>{n.content}</div>}
-                        </div>
-                        {!n.read && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--ki-red)', flexShrink: 0 }} />}
-                      </div>
-                      <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginTop: 4, paddingLeft: 22 }}>
-                        {new Date(n.created_at).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
+          <NotificationBell
+            notifications={notifications}
+            unreadCount={unreadCount}
+            showNotifs={showNotifs}
+            setShowNotifs={setShowNotifs}
+            markAllRead={markAllRead}
+            handleNotifClick={handleNotifClick}
+          />
         </div>
         <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginTop: 2 }}>{profile?.name || 'Lädt...'}</div>
       </div>
@@ -296,7 +368,7 @@ export default function Sidebar({ profile, analysisResults }) {
                   : {};
                 return (
                   <a key={item.path} href={item.path} style={linkStyle(item.path)} {...tourAttr}>
-                    <span style={{ fontSize: 15, width: 20, textAlign: 'center' }}>{item.icon}</span>
+                    <item.Icon size={18} strokeWidth={1.8} style={{ width: 20, flexShrink: 0 }} />
                     <span style={{ flex: 1, fontSize: 13 }}>{item.label}</span>
                   </a>
                 );
@@ -312,8 +384,8 @@ export default function Sidebar({ profile, analysisResults }) {
             </div>
             {ADMIN_ITEMS.map(item => (
               <a key={item.path} href={item.path} style={linkStyle(item.path)}>
-                <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>{item.icon}</span>
-                {item.label}
+                <item.Icon size={18} strokeWidth={1.8} style={{ width: 20, flexShrink: 0 }} />
+                <span style={{ fontSize: 13 }}>{item.label}</span>
               </a>
             ))}
           </>
@@ -323,14 +395,14 @@ export default function Sidebar({ profile, analysisResults }) {
       {/* Profil + Logout */}
       <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 2, borderTop: '1px solid var(--ki-border)', paddingTop: 12 }}>
         <a href="/profile" style={linkStyle('/profile')} data-tour-profile="">
-          <span style={{ fontSize: 15, width: 20, textAlign: 'center' }}>○</span>
+          <User size={18} strokeWidth={1.8} style={{ width: 20, flexShrink: 0 }} />
           <span style={{ flex: 1, fontSize: 13 }}>Profil</span>
         </a>
         <button onClick={handleLogout} style={{
           ...linkStyle('/logout'), color: 'var(--ki-text-tertiary)',
           background: 'transparent', border: 'none', width: '100%',
         }}>
-          <span style={{ fontSize: 15, width: 20, textAlign: 'center' }}>⏻</span>
+          <LogOut size={18} strokeWidth={1.8} style={{ width: 20, flexShrink: 0 }} />
           <span style={{ fontSize: 13 }}>Abmelden</span>
         </button>
       </div>

@@ -3,31 +3,71 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { awardPoints } from '@/lib/gamification';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import { Eye, Flame, MessageCircle, Compass, Check } from 'lucide-react';
+
+// ── Kompaktere Fortschrittsanzeige für alle 13 Felder ──
+function FieldProgress({ fields, currentIndex, scores }) {
+  return (
+    <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
+      {fields.map((f, i) => {
+        const done = !!scores[f.id];
+        const active = i === currentIndex;
+        return (
+          <div key={f.id} title={f.name} style={{
+            width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 10, fontWeight: 600, transition: 'all 0.2s ease',
+            background: done ? 'var(--ki-success)' : active ? 'var(--ki-red)' : 'var(--ki-bg-alt)',
+            color: done || active ? 'white' : 'var(--ki-text-tertiary)',
+            border: active ? '2px solid var(--ki-red)' : done ? 'none' : '1px solid var(--ki-border)',
+          }}>
+            {done ? <Check size={14} strokeWidth={2.5} /> : i + 1}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 // ============================================================
 // 13 KOMPETENZFELDER
 // ============================================================
 const KOMPETENZFELDER = [
-  { id: 'selbstwertgefuehl', name: 'Selbstwertgef\u00FChl', icon: '\u{1F6E1}\uFE0F', category: 'Wahrnehmung', color: '#CC1426' },
-  { id: 'prioritaeten', name: 'Priorit\u00E4tenmanagement', icon: '\u{1F3AF}', category: 'Wahrnehmung', color: '#E63946' },
+  { id: 'selbstwertgefuehl', name: 'Selbstwertgefühl', icon: '\u{1F6E1}\uFE0F', category: 'Wahrnehmung', color: '#CC1426' },
+  { id: 'prioritaeten', name: 'Prioritätenmanagement', icon: '\u{1F3AF}', category: 'Wahrnehmung', color: '#E63946' },
   { id: 'selbstreflexion', name: 'Selbstreflexion', icon: '\u{1FA9E}', category: 'Intrapersonal', color: '#8B5CF6' },
-  { id: 'selbstfuersorge', name: 'Selbstf\u00FCrsorge', icon: '\u{1F9D8}', category: 'Intrapersonal', color: '#A78BFA' },
+  { id: 'selbstfuersorge', name: 'Selbstfürsorge', icon: '\u{1F9D8}', category: 'Intrapersonal', color: '#A78BFA' },
   { id: 'kompetenzbewusstsein', name: 'Kompetenzbewusstsein', icon: '\u{1F48E}', category: 'Intrapersonal', color: '#7C3AED' },
   { id: 'kommunikation', name: 'Kommunikation', icon: '\u{1F4AC}', category: 'Interpersonal', color: '#2563EB' },
   { id: 'sozialkompetenz', name: 'Sozialkompetenz', icon: '\u{1F91D}', category: 'Interpersonal', color: '#3B82F6' },
   { id: 'sozialisationskompetenz', name: 'Sozialisationskompetenz', icon: '\u{1F310}', category: 'Interpersonal', color: '#60A5FA' },
-  { id: 'praesentation', name: 'Pr\u00E4sentationskompetenz', icon: '\u{1F3A4}', category: 'Interpersonal', color: '#1D4ED8' },
+  { id: 'praesentation', name: 'Präsentationskompetenz', icon: '\u{1F3A4}', category: 'Interpersonal', color: '#1D4ED8' },
   { id: 'emotionale_intelligenz', name: 'Emotionale Intelligenz', icon: '\u2764\uFE0F', category: 'Regulierung', color: '#059669' },
   { id: 'charisma', name: 'Charisma', icon: '\u2728', category: 'Regulierung', color: '#10B981' },
   { id: 'resilienz', name: 'Resilienz', icon: '\u{1F525}', category: 'Regulierung', color: '#34D399' },
-  { id: 'fuehrung', name: 'F\u00FChrungskompetenz', icon: '\u{1F451}', category: 'Regulierung', color: '#047857' },
+  { id: 'fuehrung', name: 'Führungskompetenz', icon: '\u{1F451}', category: 'Regulierung', color: '#047857' },
 ];
 
 const CATEGORY_INTROS = {
-  'Wahrnehmung': { emoji: '\u{1F441}\uFE0F', text: 'Wie nimmst du dich selbst und deine Umgebung wahr?' },
-  'Intrapersonal': { emoji: '\u{1FA9E}', text: 'Jetzt geht es um dein Inneres \u2014 Reflexion, F\u00FCrsorge und Bewusstsein.' },
-  'Interpersonal': { emoji: '\u{1F4AC}', text: 'Wie wirkst du auf andere? Kommunikation, Auftreten, Soziales.' },
-  'Regulierung': { emoji: '\u{1F9E0}', text: 'Emotionen, Widerstandskraft und F\u00FChrung \u2014 die K\u00F6nigsdisziplinen.' },
+  'Wahrnehmung': {
+    num: '1 / 4', title: 'Wahrnehmung',
+    text: 'Wie nimmst du dich selbst und deine Umgebung wahr? In dieser Dimension geht es um dein Auftreten, deine soziale Wahrnehmung und wie du dich präsentierst.',
+    fields: ['Selbstwertgefühl', 'Prioritätenmanagement'],
+  },
+  'Intrapersonal': {
+    num: '2 / 4', title: 'Intrapersonal',
+    text: 'Jetzt geht es um dein Inneres — Reflexion, Fürsorge und Bewusstsein. Wie gut kennst du dich selbst, und wie gehst du mit deinen Ressourcen um?',
+    fields: ['Selbstreflexion', 'Selbstfürsorge', 'Kompetenzbewusstsein'],
+  },
+  'Interpersonal': {
+    num: '3 / 4', title: 'Interpersonal',
+    text: 'Wie wirkst du auf andere? Hier analysieren wir deine Kommunikation, dein soziales Geschick und wie du in Gruppen auftrittst.',
+    fields: ['Kommunikation', 'Sozialkompetenz', 'Sozialisationskompetenz', 'Präsentationskompetenz'],
+  },
+  'Regulierung': {
+    num: '4 / 4', title: 'Regulierung',
+    text: 'Die Königsdisziplinen: Emotionale Intelligenz, Widerstandskraft, Charisma und Führung. Wie steuerst du dich in anspruchsvollen Situationen?',
+    fields: ['Emotionale Intelligenz', 'Charisma', 'Resilienz', 'Führungskompetenz'],
+  },
 };
 
 // ============================================================
@@ -35,53 +75,53 @@ const CATEGORY_INTROS = {
 // ============================================================
 const SZENARIEN = {
   selbstwertgefuehl: [
-    { scenario: 'Dein Chef bittet dich spontan, in 10 Minuten eine Pr\u00E4sentation vor dem gesamten Team zu halten.', options: [
-      { text: 'Kein Problem \u2014 ich stehe gerne im Rampenlicht', score: 10, emoji: '\u{1F60E}' },
-      { text: 'Nerv\u00F6s, aber ich zieh\'s durch', score: 7, emoji: '\u{1F624}' },
+    { scenario: 'Dein Chef bittet dich spontan, in 10 Minuten eine Präsentation vor dem gesamten Team zu halten.', options: [
+      { text: 'Kein Problem — ich stehe gerne im Rampenlicht', score: 10, emoji: '\u{1F60E}' },
+      { text: 'Nervös, aber ich zieh\'s durch', score: 7, emoji: '\u{1F624}' },
       { text: 'Ich versuche es, aber mir wird unwohl', score: 4, emoji: '\u{1F630}' },
-      { text: 'Ich bitte jemand anderen, das zu \u00FCbernehmen', score: 1, emoji: '\u{1F648}' },
+      { text: 'Ich bitte jemand anderen, das zu übernehmen', score: 1, emoji: '\u{1F648}' },
     ]},
     { scenario: 'Ein Kollege kritisiert deine Arbeit vor versammelter Runde. Was passiert in dir?', options: [
-      { text: 'Ich nehme es sachlich auf und antworte souver\u00E4n', score: 10, emoji: '\u{1F60C}' },
+      { text: 'Ich nehme es sachlich auf und antworte souverän', score: 10, emoji: '\u{1F60C}' },
       { text: 'Es trifft mich kurz, aber ich fange mich schnell', score: 7, emoji: '\u{1F914}' },
-      { text: 'Ich gr\u00FCble den Rest des Tages dar\u00FCber', score: 4, emoji: '\u{1F614}' },
+      { text: 'Ich grüble den Rest des Tages darüber', score: 4, emoji: '\u{1F614}' },
       { text: 'Ich zweifle danach an meiner gesamten Kompetenz', score: 1, emoji: '\u{1F622}' },
     ]},
-    { scenario: 'Du sollst in deinem Lebenslauf deine drei gr\u00F6\u00DFten St\u00E4rken aufschreiben. Wie f\u00E4llt dir das?', options: [
-      { text: 'Leicht \u2014 ich kenne meine St\u00E4rken genau', score: 10, emoji: '\u{1F4AA}' },
+    { scenario: 'Du sollst in deinem Lebenslauf deine drei größten Stärken aufschreiben. Wie fällt dir das?', options: [
+      { text: 'Leicht — ich kenne meine Stärken genau', score: 10, emoji: '\u{1F4AA}' },
       { text: 'Ich brauche etwas Zeit, finde aber gute Punkte', score: 7, emoji: '\u{1F4DD}' },
-      { text: 'Ich bin unsicher, was wirklich meine St\u00E4rken sind', score: 4, emoji: '\u{1F937}' },
-      { text: 'Ich f\u00E4nde es einfacher, Schw\u00E4chen aufzuz\u00E4hlen', score: 1, emoji: '\u{1F625}' },
+      { text: 'Ich bin unsicher, was wirklich meine Stärken sind', score: 4, emoji: '\u{1F937}' },
+      { text: 'Ich fände es einfacher, Schwächen aufzuzählen', score: 1, emoji: '\u{1F625}' },
     ]},
-    { scenario: 'Du bekommst ein Jobangebot mit 30% mehr Gehalt, aber in einem v\u00F6llig neuen Bereich.', options: [
-      { text: 'Ich bin \u00FCberzeugt, das schaffe ich', score: 10, emoji: '\u{1F680}' },
-      { text: 'Ich w\u00FCrde es versuchen \u2014 ich lerne schnell', score: 7, emoji: '\u{1F4C8}' },
+    { scenario: 'Du bekommst ein Jobangebot mit 30% mehr Gehalt, aber in einem völlig neuen Bereich.', options: [
+      { text: 'Ich bin überzeugt, das schaffe ich', score: 10, emoji: '\u{1F680}' },
+      { text: 'Ich würde es versuchen — ich lerne schnell', score: 7, emoji: '\u{1F4C8}' },
       { text: 'Ich bin unsicher, ob ich dem gewachsen bin', score: 4, emoji: '\u{1F615}' },
-      { text: 'Ich bleibe lieber, wo ich mich sicher f\u00FChle', score: 1, emoji: '\u{1F3E0}' },
+      { text: 'Ich bleibe lieber, wo ich mich sicher fühle', score: 1, emoji: '\u{1F3E0}' },
     ]},
     { scenario: 'Bei einem Networking-Event wirst du gefragt: "Was macht Sie besonders?" Deine Reaktion:', options: [
       { text: 'Ich habe einen klaren Elevator Pitch parat', score: 10, emoji: '\u{1F3AF}' },
-      { text: 'Ich erz\u00E4hle frei \u00FCber meine Erfahrungen', score: 7, emoji: '\u{1F5E3}\uFE0F' },
+      { text: 'Ich erzähle frei über meine Erfahrungen', score: 7, emoji: '\u{1F5E3}\uFE0F' },
       { text: 'Ich werde verlegen und halte mich bedeckt', score: 4, emoji: '\u{1F633}' },
       { text: 'Ich wechsle schnell das Thema', score: 1, emoji: '\u{1F605}' },
     ]},
   ],
   prioritaeten: [
     { scenario: 'Montag 9 Uhr: Du hast 15 E-Mails, 3 Meeting-Anfragen und ein dringendes Projekt. Was tust du zuerst?', options: [
-      { text: 'Projekt zuerst \u2014 Wichtiges vor Dringendem', score: 10, emoji: '\u{1F3AF}' },
+      { text: 'Projekt zuerst — Wichtiges vor Dringendem', score: 10, emoji: '\u{1F3AF}' },
       { text: 'Ich scanne die E-Mails kurz und plane dann', score: 7, emoji: '\u{1F4CB}' },
       { text: 'Ich beantworte erst mal alle E-Mails', score: 4, emoji: '\u{1F4E8}' },
-      { text: 'Ich f\u00FChle mich \u00FCberw\u00E4ltigt und wei\u00DF nicht, wo anfangen', score: 1, emoji: '\u{1F635}' },
+      { text: 'Ich fühle mich überwältigt und weiß nicht, wo anfangen', score: 1, emoji: '\u{1F635}' },
     ]},
     { scenario: 'Dein Vorgesetzter gibt dir eine neue Aufgabe, obwohl du schon am Limit bist.', options: [
-      { text: 'Ich kommuniziere klar, was realistisch ist, und schlage Priorit\u00E4ten vor', score: 10, emoji: '\u{1F4AC}' },
+      { text: 'Ich kommuniziere klar, was realistisch ist, und schlage Prioritäten vor', score: 10, emoji: '\u{1F4AC}' },
       { text: 'Ich nehme es an und reorganisiere meinen Plan', score: 7, emoji: '\u{1F504}' },
-      { text: 'Ich nehme es an, auch wenn ich \u00DCberstunden machen muss', score: 4, emoji: '\u{1F62B}' },
+      { text: 'Ich nehme es an, auch wenn ich Überstunden machen muss', score: 4, emoji: '\u{1F62B}' },
       { text: 'Ich sage ja und hoffe, dass es irgendwie klappt', score: 1, emoji: '\u{1F91E}' },
     ]},
     { scenario: 'Du arbeitest konzentriert, als ein Kollege "nur kurz" etwas fragt. Das passiert 5x am Tag.', options: [
       { text: 'Ich habe feste Fokus-Zeiten und kommuniziere das klar', score: 10, emoji: '\u{1F6D1}' },
-      { text: 'Ich sage meistens "sp\u00E4ter" und blocke meine Zeit', score: 7, emoji: '\u23F0' },
+      { text: 'Ich sage meistens "später" und blocke meine Zeit', score: 7, emoji: '\u23F0' },
       { text: 'Ich helfe meistens sofort, verliere aber den Faden', score: 4, emoji: '\u{1F500}' },
       { text: 'Ich kann schlecht Nein sagen und komme nie zu meinen Sachen', score: 1, emoji: '\u{1F614}' },
     ]},
@@ -91,146 +131,146 @@ const SZENARIEN = {
       { text: 'Ich mache das Spannende zuerst, der Rest kann warten', score: 4, emoji: '\u2728' },
       { text: 'Ich springe zwischen allen hin und her', score: 1, emoji: '\u{1F3C3}' },
     ]},
-    { scenario: 'Am Abend merkst du: Du warst den ganzen Tag besch\u00E4ftigt, aber nichts Wichtiges geschafft.', options: [
-      { text: 'Passiert mir fast nie \u2014 ich plane meinen Tag strategisch', score: 10, emoji: '\u{1F4CA}' },
+    { scenario: 'Am Abend merkst du: Du warst den ganzen Tag beschäftigt, aber nichts Wichtiges geschafft.', options: [
+      { text: 'Passiert mir fast nie — ich plane meinen Tag strategisch', score: 10, emoji: '\u{1F4CA}' },
       { text: 'Manchmal, dann passe ich meine Methode an', score: 7, emoji: '\u{1F504}' },
-      { text: 'Kommt h\u00E4ufiger vor, als mir lieb ist', score: 4, emoji: '\u{1F62C}' },
+      { text: 'Kommt häufiger vor, als mir lieb ist', score: 4, emoji: '\u{1F62C}' },
       { text: 'Das ist leider mein Alltag', score: 1, emoji: '\u{1F629}' },
     ]},
   ],
   selbstreflexion: [
     { scenario: 'Ein Projekt ist grandios gescheitert. Was machst du als Erstes?', options: [
       { text: 'Ich analysiere systematisch, was schiefgelaufen ist', score: 10, emoji: '\u{1F50D}' },
-      { text: 'Ich spreche mit dem Team \u00FCber Learnings', score: 7, emoji: '\u{1F4AC}' },
-      { text: 'Ich \u00E4rgere mich erst mal und analysiere sp\u00E4ter', score: 4, emoji: '\u{1F620}' },
-      { text: 'Ich verdr\u00E4nge es und mache weiter', score: 1, emoji: '\u{1F648}' },
+      { text: 'Ich spreche mit dem Team über Learnings', score: 7, emoji: '\u{1F4AC}' },
+      { text: 'Ich ärgere mich erst mal und analysiere später', score: 4, emoji: '\u{1F620}' },
+      { text: 'Ich verdränge es und mache weiter', score: 1, emoji: '\u{1F648}' },
     ]},
-    { scenario: 'Du erh\u00E4ltst ein 360-Grad-Feedback. Dein Score bei "Teamf\u00E4higkeit" ist \u00FCberraschend niedrig.', options: [
+    { scenario: 'Du erhältst ein 360-Grad-Feedback. Dein Score bei "Teamfähigkeit" ist überraschend niedrig.', options: [
       { text: 'Ich nehme es als wertvolles Signal und frage nach Details', score: 10, emoji: '\u{1F4A1}' },
-      { text: 'Ich \u00FCberlege, welche Situationen gemeint sein k\u00F6nnten', score: 7, emoji: '\u{1F914}' },
+      { text: 'Ich überlege, welche Situationen gemeint sein könnten', score: 7, emoji: '\u{1F914}' },
       { text: 'Ich bin verletzt, aber versuche offen zu bleiben', score: 4, emoji: '\u{1F622}' },
-      { text: 'Ich finde das unfair \u2014 die anderen kennen mich nicht richtig', score: 1, emoji: '\u{1F624}' },
+      { text: 'Ich finde das unfair — die anderen kennen mich nicht richtig', score: 1, emoji: '\u{1F624}' },
     ]},
-    { scenario: 'Wie oft reflektierst du bewusst \u00FCber deine Karriere-Entscheidungen?', options: [
-      { text: 'Regelm\u00E4\u00DFig \u2014 ich f\u00FChre Tagebuch oder mache Reviews', score: 10, emoji: '\u{1F4D3}' },
+    { scenario: 'Wie oft reflektierst du bewusst über deine Karriere-Entscheidungen?', options: [
+      { text: 'Regelmäßig — ich führe Tagebuch oder mache Reviews', score: 10, emoji: '\u{1F4D3}' },
       { text: 'Alle paar Monate, wenn ich Zeit habe', score: 7, emoji: '\u{1F4C5}' },
       { text: 'Nur wenn etwas schiefgeht', score: 4, emoji: '\u26A0\uFE0F' },
       { text: 'Ehrlich gesagt: fast nie', score: 1, emoji: '\u{1F937}' },
     ]},
     { scenario: 'Du hast im Meeting eine Idee vorgetragen, die nicht ankam. Danach:', options: [
-      { text: 'Ich \u00FCberlege, wie ich es n\u00E4chstes Mal besser pr\u00E4sentiere', score: 10, emoji: '\u{1F4C8}' },
+      { text: 'Ich überlege, wie ich es nächstes Mal besser präsentiere', score: 10, emoji: '\u{1F4C8}' },
       { text: 'Ich hole Feedback ein, warum es nicht ankam', score: 7, emoji: '\u{1F4AC}' },
-      { text: 'Ich bin entt\u00E4uscht und bringe seltener Ideen ein', score: 4, emoji: '\u{1F614}' },
-      { text: 'Ich gebe anderen die Schuld f\u00FCr mangelndes Verst\u00E4ndnis', score: 1, emoji: '\u{1F612}' },
+      { text: 'Ich bin enttäuscht und bringe seltener Ideen ein', score: 4, emoji: '\u{1F614}' },
+      { text: 'Ich gebe anderen die Schuld für mangelndes Verständnis', score: 1, emoji: '\u{1F612}' },
     ]},
     { scenario: 'Ein Freund sagt: "Du bist manchmal zu direkt." Wie reagierst du?', options: [
-      { text: 'Ich danke f\u00FCr die Ehrlichkeit und reflektiere darüber', score: 10, emoji: '\u{1F64F}' },
-      { text: 'Ich \u00FCberlege, in welchen Situationen das zutreffen k\u00F6nnte', score: 7, emoji: '\u{1F914}' },
+      { text: 'Ich danke für die Ehrlichkeit und reflektiere darüber', score: 10, emoji: '\u{1F64F}' },
+      { text: 'Ich überlege, in welchen Situationen das zutreffen könnte', score: 7, emoji: '\u{1F914}' },
       { text: 'Ich finde es schwer, das anzunehmen', score: 4, emoji: '\u{1F615}' },
-      { text: 'Ich finde Direktheit ist eine St\u00E4rke, nicht mein Problem', score: 1, emoji: '\u{1F4AA}' },
+      { text: 'Ich finde Direktheit ist eine Stärke, nicht mein Problem', score: 1, emoji: '\u{1F4AA}' },
     ]},
   ],
   selbstfuersorge: [
-    { scenario: 'Du hast seit 3 Wochen jeden Abend \u00DCberstunden gemacht. Wie gehst du damit um?', options: [
+    { scenario: 'Du hast seit 3 Wochen jeden Abend Überstunden gemacht. Wie gehst du damit um?', options: [
       { text: 'Ich setze klare Grenzen und nehme mir bewusst frei', score: 10, emoji: '\u{1F6D1}' },
       { text: 'Ich plane ein Wochenende zum Aufladen', score: 7, emoji: '\u{1F3D6}\uFE0F' },
-      { text: 'Ich wei\u00DF, dass ich was tun sollte, aber kann nicht loslassen', score: 4, emoji: '\u{1F62B}' },
-      { text: 'Ich mache weiter \u2014 von alleine wird es nicht besser', score: 1, emoji: '\u{1F9DF}' },
+      { text: 'Ich weiß, dass ich was tun sollte, aber kann nicht loslassen', score: 4, emoji: '\u{1F62B}' },
+      { text: 'Ich mache weiter — von alleine wird es nicht besser', score: 1, emoji: '\u{1F9DF}' },
     ]},
-    { scenario: 'Dein K\u00F6rper zeigt Stresssymptome (Schlafprobleme, Kopfschmerzen). Was tust du?', options: [
-      { text: 'Sofort Gegenma\u00DFnahmen: Sport, Achtsamkeit, Arzttermin', score: 10, emoji: '\u{1F3CB}\uFE0F' },
+    { scenario: 'Dein Körper zeigt Stresssymptome (Schlafprobleme, Kopfschmerzen). Was tust du?', options: [
+      { text: 'Sofort Gegenmaßnahmen: Sport, Achtsamkeit, Arzttermin', score: 10, emoji: '\u{1F3CB}\uFE0F' },
       { text: 'Ich reduziere Stress wo ich kann', score: 7, emoji: '\u{1F4C9}' },
-      { text: 'Ich nehme es wahr, \u00E4ndere aber nichts', score: 4, emoji: '\u{1F611}' },
+      { text: 'Ich nehme es wahr, ändere aber nichts', score: 4, emoji: '\u{1F611}' },
       { text: 'Ich ignoriere die Signale und mache weiter', score: 1, emoji: '\u{1F635}' },
     ]},
     { scenario: 'Wie sieht dein typischer Feierabend aus?', options: [
       { text: 'Bewusste Erholung: Sport, Hobby, Quality Time', score: 10, emoji: '\u{1F31F}' },
       { text: 'Meistens entspannt, manchmal checke ich nochmal E-Mails', score: 7, emoji: '\u{1F4F1}' },
-      { text: 'Ich bin oft zu m\u00FCde f\u00FCr irgendwas Au\u00DFer Netflix', score: 4, emoji: '\u{1F4FA}' },
-      { text: 'Feierabend? Der \u00DCbergang ist flie\u00DFend...', score: 1, emoji: '\u{1F4BB}' },
+      { text: 'Ich bin oft zu müde für irgendwas Außer Netflix', score: 4, emoji: '\u{1F4FA}' },
+      { text: 'Feierabend? Der Übergang ist fließend...', score: 1, emoji: '\u{1F4BB}' },
     ]},
-    { scenario: 'Dein bester Freund sagt seinen Termin ab. Du hast pl\u00F6tzlich 3 Stunden frei.', options: [
-      { text: 'Perfekt \u2014 ich nutze die Zeit f\u00FCr mich bewusst', score: 10, emoji: '\u{1F9D8}' },
-      { text: 'Ich freue mich und mache etwas Sch\u00F6nes', score: 7, emoji: '\u{1F60A}' },
+    { scenario: 'Dein bester Freund sagt seinen Termin ab. Du hast plötzlich 3 Stunden frei.', options: [
+      { text: 'Perfekt — ich nutze die Zeit für mich bewusst', score: 10, emoji: '\u{1F9D8}' },
+      { text: 'Ich freue mich und mache etwas Schönes', score: 7, emoji: '\u{1F60A}' },
       { text: 'Ich arbeite stattdessen einfach weiter', score: 4, emoji: '\u{1F4BC}' },
-      { text: 'Ich langweile mich und wei\u00DF nichts mit mir anzufangen', score: 1, emoji: '\u{1F611}' },
+      { text: 'Ich langweile mich und weiß nichts mit mir anzufangen', score: 1, emoji: '\u{1F611}' },
     ]},
-    { scenario: 'Wie oft sagst du "Nein" zu Anfragen, die deine Grenzen \u00FCberschreiten?', options: [
-      { text: 'Regelm\u00E4\u00DFig und selbstbewusst', score: 10, emoji: '\u{1F6E1}\uFE0F' },
+    { scenario: 'Wie oft sagst du "Nein" zu Anfragen, die deine Grenzen überschreiten?', options: [
+      { text: 'Regelmäßig und selbstbewusst', score: 10, emoji: '\u{1F6E1}\uFE0F' },
       { text: 'Meistens, wenn es wirklich zu viel wird', score: 7, emoji: '\u{1F44D}' },
-      { text: 'Selten \u2014 ich will niemanden entt\u00E4uschen', score: 4, emoji: '\u{1F614}' },
-      { text: 'Praktisch nie \u2014 ich sage immer ja', score: 1, emoji: '\u{1F62A}' },
+      { text: 'Selten — ich will niemanden enttäuschen', score: 4, emoji: '\u{1F614}' },
+      { text: 'Praktisch nie — ich sage immer ja', score: 1, emoji: '\u{1F62A}' },
     ]},
   ],
   kompetenzbewusstsein: [
     { scenario: 'Jemand fragt dich: "Was kannst du besser als die meisten?" Deine Reaktion:', options: [
       { text: 'Ich kann 3 Dinge sofort benennen', score: 10, emoji: '\u{1F48E}' },
-      { text: 'Ich \u00FCberlege kurz, finde aber gute Antworten', score: 7, emoji: '\u{1F914}' },
+      { text: 'Ich überlege kurz, finde aber gute Antworten', score: 7, emoji: '\u{1F914}' },
       { text: 'Ich tu mich schwer damit, mich hervorzuheben', score: 4, emoji: '\u{1F615}' },
-      { text: 'Keine Ahnung \u2014 ich bin halt durchschnittlich', score: 1, emoji: '\u{1F937}' },
+      { text: 'Keine Ahnung — ich bin halt durchschnittlich', score: 1, emoji: '\u{1F937}' },
     ]},
-    { scenario: 'Du siehst eine Stellenanzeige, die 80% zu dir passt aber 20% Anforderungen hat, die du nicht erf\u00FCllst.', options: [
-      { text: 'Ich bewerbe mich \u2014 die 20% lerne ich schnell', score: 10, emoji: '\u{1F680}' },
-      { text: 'Ich bewerbe mich und bin ehrlich \u00FCber die L\u00FCcken', score: 7, emoji: '\u{1F4DD}' },
-      { text: 'Ich z\u00F6gere und warte auf eine 100%-Passende', score: 4, emoji: '\u23F3' },
-      { text: 'Ich bewerbe mich nicht \u2014 ich erf\u00FClle ja nicht alles', score: 1, emoji: '\u{1F6AB}' },
+    { scenario: 'Du siehst eine Stellenanzeige, die 80% zu dir passt aber 20% Anforderungen hat, die du nicht erfüllst.', options: [
+      { text: 'Ich bewerbe mich — die 20% lerne ich schnell', score: 10, emoji: '\u{1F680}' },
+      { text: 'Ich bewerbe mich und bin ehrlich über die Lücken', score: 7, emoji: '\u{1F4DD}' },
+      { text: 'Ich zögere und warte auf eine 100%-Passende', score: 4, emoji: '\u23F3' },
+      { text: 'Ich bewerbe mich nicht — ich erfülle ja nicht alles', score: 1, emoji: '\u{1F6AB}' },
     ]},
-    { scenario: 'Im Jahresgespr\u00E4ch sollst du deine gr\u00F6\u00DFten Erfolge des Jahres nennen.', options: [
-      { text: 'Ich habe sie dokumentiert und pr\u00E4sentiere sie klar', score: 10, emoji: '\u{1F4CA}' },
-      { text: 'Mir fallen einige ein, ich h\u00E4tte sie besser tracken sollen', score: 7, emoji: '\u{1F4DD}' },
+    { scenario: 'Im Jahresgespräch sollst du deine größten Erfolge des Jahres nennen.', options: [
+      { text: 'Ich habe sie dokumentiert und präsentiere sie klar', score: 10, emoji: '\u{1F4CA}' },
+      { text: 'Mir fallen einige ein, ich hätte sie besser tracken sollen', score: 7, emoji: '\u{1F4DD}' },
       { text: 'Ich finde es schwer, meine Leistungen "zu verkaufen"', score: 4, emoji: '\u{1F633}' },
-      { text: 'Mir f\u00E4llt spontan nichts Besonderes ein', score: 1, emoji: '\u{1F610}' },
+      { text: 'Mir fällt spontan nichts Besonderes ein', score: 1, emoji: '\u{1F610}' },
     ]},
     { scenario: 'Ein Headhunter ruft an und fragt nach deinem Marktwert. Du:', options: [
       { text: 'Kenne meinen Marktwert und nenne selbstbewusst eine Zahl', score: 10, emoji: '\u{1F4B0}' },
-      { text: 'Habe eine ungef\u00E4hre Vorstellung und nenne eine Range', score: 7, emoji: '\u{1F4C8}' },
-      { text: 'Bin unsicher und sage "markt\u00FCblich"', score: 4, emoji: '\u{1F937}' },
-      { text: 'Habe keine Ahnung und f\u00FChle mich unwohl bei dem Thema', score: 1, emoji: '\u{1F630}' },
+      { text: 'Habe eine ungefähre Vorstellung und nenne eine Range', score: 7, emoji: '\u{1F4C8}' },
+      { text: 'Bin unsicher und sage "marktüblich"', score: 4, emoji: '\u{1F937}' },
+      { text: 'Habe keine Ahnung und fühle mich unwohl bei dem Thema', score: 1, emoji: '\u{1F630}' },
     ]},
-    { scenario: 'Du vergleichst dich mit erfolgreichen Menschen in deiner Branche. Dein Gef\u00FChl:', options: [
-      { text: 'Inspiration \u2014 ich sehe, was m\u00F6glich ist', score: 10, emoji: '\u{1F31F}' },
-      { text: 'Motivation \u2014 ich arbeite daran, besser zu werden', score: 7, emoji: '\u{1F4AA}' },
-      { text: 'Verunsicherung \u2014 die sind so viel weiter', score: 4, emoji: '\u{1F614}' },
-      { text: 'Frustration \u2014 ich werde das nie schaffen', score: 1, emoji: '\u{1F61E}' },
+    { scenario: 'Du vergleichst dich mit erfolgreichen Menschen in deiner Branche. Dein Gefühl:', options: [
+      { text: 'Inspiration — ich sehe, was möglich ist', score: 10, emoji: '\u{1F31F}' },
+      { text: 'Motivation — ich arbeite daran, besser zu werden', score: 7, emoji: '\u{1F4AA}' },
+      { text: 'Verunsicherung — die sind so viel weiter', score: 4, emoji: '\u{1F614}' },
+      { text: 'Frustration — ich werde das nie schaffen', score: 1, emoji: '\u{1F61E}' },
     ]},
   ],
   kommunikation: [
-    { scenario: 'Du musst einem schwierigen Stakeholder eine schlechte Nachricht \u00FCberbringen.', options: [
-      { text: 'Direkt, klar und mit L\u00F6sungsvorschlag', score: 10, emoji: '\u{1F4AC}' },
-      { text: 'Ich bereite mich vor und w\u00E4hle den richtigen Moment', score: 7, emoji: '\u{1F4CB}' },
-      { text: 'Ich schreibe lieber eine E-Mail als pers\u00F6nlich zu reden', score: 4, emoji: '\u{1F4E7}' },
-      { text: 'Ich schiebe es so lange wie m\u00F6glich auf', score: 1, emoji: '\u{1F62C}' },
+    { scenario: 'Du musst einem schwierigen Stakeholder eine schlechte Nachricht überbringen.', options: [
+      { text: 'Direkt, klar und mit Lösungsvorschlag', score: 10, emoji: '\u{1F4AC}' },
+      { text: 'Ich bereite mich vor und wähle den richtigen Moment', score: 7, emoji: '\u{1F4CB}' },
+      { text: 'Ich schreibe lieber eine E-Mail als persönlich zu reden', score: 4, emoji: '\u{1F4E7}' },
+      { text: 'Ich schiebe es so lange wie möglich auf', score: 1, emoji: '\u{1F62C}' },
     ]},
     { scenario: 'In einer hitzigen Diskussion ist jemand anderer Meinung als du.', options: [
-      { text: 'Ich argumentiere sachlich und h\u00F6re aktiv zu', score: 10, emoji: '\u{1F9D0}' },
+      { text: 'Ich argumentiere sachlich und höre aktiv zu', score: 10, emoji: '\u{1F9D0}' },
       { text: 'Ich bringe meine Punkte vor, auch wenn es unbequem ist', score: 7, emoji: '\u{1F5E3}\uFE0F' },
       { text: 'Ich gebe meistens nach, um Konflikte zu vermeiden', score: 4, emoji: '\u{1F54A}\uFE0F' },
-      { text: 'Ich schweige und \u00E4rgere mich innerlich', score: 1, emoji: '\u{1F910}' },
+      { text: 'Ich schweige und ärgere mich innerlich', score: 1, emoji: '\u{1F910}' },
     ]},
     { scenario: 'Du schreibst eine wichtige E-Mail an einen C-Level Manager.', options: [
-      { text: 'Pr\u00E4gnant, auf den Punkt, mit klarem Call-to-Action', score: 10, emoji: '\u{1F3AF}' },
+      { text: 'Prägnant, auf den Punkt, mit klarem Call-to-Action', score: 10, emoji: '\u{1F3AF}' },
       { text: 'Professionell formuliert mit gutem Aufbau', score: 7, emoji: '\u{1F4DD}' },
-      { text: 'Ich \u00FCberarbeite sie 5x und bin trotzdem unsicher', score: 4, emoji: '\u{1F504}' },
+      { text: 'Ich überarbeite sie 5x und bin trotzdem unsicher', score: 4, emoji: '\u{1F504}' },
       { text: 'Ich lasse jemand anderen die Mail schreiben', score: 1, emoji: '\u{1F64B}' },
     ]},
-    { scenario: 'Ein neuer Kollege hat etwas nicht verstanden. Du erkl\u00E4rst es:', options: [
+    { scenario: 'Ein neuer Kollege hat etwas nicht verstanden. Du erklärst es:', options: [
       { text: 'Klar, geduldig und mit Beispielen angepasst an sein Level', score: 10, emoji: '\u{1F4A1}' },
-      { text: 'Ich erkl\u00E4re es gerne, aber manchmal zu detailliert', score: 7, emoji: '\u{1F4DA}' },
+      { text: 'Ich erkläre es gerne, aber manchmal zu detailliert', score: 7, emoji: '\u{1F4DA}' },
       { text: 'Ich verweise auf Dokumentation oder andere Kollegen', score: 4, emoji: '\u{1F449}' },
       { text: 'Ich werde ungeduldig, wenn jemand es nicht schnell versteht', score: 1, emoji: '\u{1F612}' },
     ]},
-    { scenario: 'Du merkst, dass dein Gegen\u00FCber in einem Gespr\u00E4ch abschaltet.', options: [
+    { scenario: 'Du merkst, dass dein Gegenüber in einem Gespräch abschaltet.', options: [
       { text: 'Ich passe sofort meinen Stil an und stelle eine Frage', score: 10, emoji: '\u{1F50D}' },
-      { text: 'Ich bemerke es und versuche k\u00FCrzer zu werden', score: 7, emoji: '\u{1F4CF}' },
+      { text: 'Ich bemerke es und versuche kürzer zu werden', score: 7, emoji: '\u{1F4CF}' },
       { text: 'Ich merke es oft erst danach', score: 4, emoji: '\u{1F914}' },
-      { text: 'Mir f\u00E4llt so etwas selten auf', score: 1, emoji: '\u{1F636}' },
+      { text: 'Mir fällt so etwas selten auf', score: 1, emoji: '\u{1F636}' },
     ]},
   ],
   sozialkompetenz: [
-    { scenario: 'Zwei Kollegen streiten sich offen im B\u00FCro. Du:', options: [
+    { scenario: 'Zwei Kollegen streiten sich offen im Büro. Du:', options: [
       { text: 'Ich vermittle diplomatisch und finde einen Kompromiss', score: 10, emoji: '\u2696\uFE0F' },
-      { text: 'Ich spreche sp\u00E4ter einzeln mit beiden', score: 7, emoji: '\u{1F4AC}' },
-      { text: 'Ich halte mich raus \u2014 nicht mein Problem', score: 4, emoji: '\u{1F645}' },
+      { text: 'Ich spreche später einzeln mit beiden', score: 7, emoji: '\u{1F4AC}' },
+      { text: 'Ich halte mich raus — nicht mein Problem', score: 4, emoji: '\u{1F645}' },
       { text: 'Konflikte machen mich so unwohl, dass ich den Raum verlasse', score: 1, emoji: '\u{1F6B6}' },
     ]},
     { scenario: 'Ein neuer Mitarbeiter wirkt am ersten Tag verloren. Du:', options: [
@@ -240,21 +280,21 @@ const SZENARIEN = {
       { text: 'Das ist Aufgabe von HR, nicht meine', score: 1, emoji: '\u{1F937}' },
     ]},
     { scenario: 'Bei einem Teamabend sitzt du neben jemandem, den du nicht kennst.', options: [
-      { text: 'Perfekt \u2014 ich liebe es, neue Leute kennenzulernen', score: 10, emoji: '\u{1F929}' },
-      { text: 'Ich starte ein Gespr\u00E4ch und finde Gemeinsamkeiten', score: 7, emoji: '\u{1F60A}' },
-      { text: 'Ich warte, bis die andere Person das Gespr\u00E4ch beginnt', score: 4, emoji: '\u{1F610}' },
-      { text: 'Ich f\u00FChle mich unwohl und schaue aufs Handy', score: 1, emoji: '\u{1F4F1}' },
+      { text: 'Perfekt — ich liebe es, neue Leute kennenzulernen', score: 10, emoji: '\u{1F929}' },
+      { text: 'Ich starte ein Gespräch und finde Gemeinsamkeiten', score: 7, emoji: '\u{1F60A}' },
+      { text: 'Ich warte, bis die andere Person das Gespräch beginnt', score: 4, emoji: '\u{1F610}' },
+      { text: 'Ich fühle mich unwohl und schaue aufs Handy', score: 1, emoji: '\u{1F4F1}' },
     ]},
     { scenario: 'Ein Teammitglied leistet seit Wochen weniger. Das Team leidet darunter.', options: [
-      { text: 'Ich suche das Gespr\u00E4ch und frage, wie ich helfen kann', score: 10, emoji: '\u{1F4AC}' },
+      { text: 'Ich suche das Gespräch und frage, wie ich helfen kann', score: 10, emoji: '\u{1F4AC}' },
       { text: 'Ich spreche es im Team an, konstruktiv', score: 7, emoji: '\u{1F465}' },
       { text: 'Ich kompensiere still seine Arbeit', score: 4, emoji: '\u{1F62A}' },
       { text: 'Ich beschwere mich beim Chef', score: 1, emoji: '\u{1F4E2}' },
     ]},
-    { scenario: 'Du musst mit jemandem zusammenarbeiten, den du pers\u00F6nlich nicht magst.', options: [
-      { text: 'Professionell \u2014 pers\u00F6nliche Differenzen trenne ich von der Arbeit', score: 10, emoji: '\u{1F454}' },
-      { text: 'Ich gebe mir M\u00FChe, es funktioniert meistens', score: 7, emoji: '\u{1F44C}' },
-      { text: 'Es f\u00E4llt mir schwer, meine Abneigung zu verbergen', score: 4, emoji: '\u{1F612}' },
+    { scenario: 'Du musst mit jemandem zusammenarbeiten, den du persönlich nicht magst.', options: [
+      { text: 'Professionell — persönliche Differenzen trenne ich von der Arbeit', score: 10, emoji: '\u{1F454}' },
+      { text: 'Ich gebe mir Mühe, es funktioniert meistens', score: 7, emoji: '\u{1F44C}' },
+      { text: 'Es fällt mir schwer, meine Abneigung zu verbergen', score: 4, emoji: '\u{1F612}' },
       { text: 'Ich vermeide die Zusammenarbeit wo es geht', score: 1, emoji: '\u{1F6AB}' },
     ]},
   ],
@@ -262,61 +302,61 @@ const SZENARIEN = {
     { scenario: 'Du wechselst in ein neues Unternehmen mit komplett anderer Kultur.', options: [
       { text: 'Ich beobachte, lerne und passe mich bewusst an', score: 10, emoji: '\u{1F50D}' },
       { text: 'Ich bin offen und versuche, schnell Anschluss zu finden', score: 7, emoji: '\u{1F91D}' },
-      { text: 'Ich brauche lange, um mich wohlzuf\u00FChlen', score: 4, emoji: '\u{1F422}' },
-      { text: 'Ich vermisse mein altes Team und vergleiche st\u00E4ndig', score: 1, emoji: '\u{1F622}' },
+      { text: 'Ich brauche lange, um mich wohlzufühlen', score: 4, emoji: '\u{1F422}' },
+      { text: 'Ich vermisse mein altes Team und vergleiche ständig', score: 1, emoji: '\u{1F622}' },
     ]},
-    { scenario: 'Dein Team wird international \u2014 pl\u00F6tzlich sind 5 verschiedene Kulturen vertreten.', options: [
+    { scenario: 'Dein Team wird international — plötzlich sind 5 verschiedene Kulturen vertreten.', options: [
       { text: 'Fantastisch! Ich liebe kulturelle Vielfalt', score: 10, emoji: '\u{1F30D}' },
-      { text: 'Ich bin neugierig und offen f\u00FCr andere Arbeitsweisen', score: 7, emoji: '\u{1F914}' },
-      { text: 'Ich finde es manchmal anstrengend, alles zu ber\u00FCcksichtigen', score: 4, emoji: '\u{1F62B}' },
+      { text: 'Ich bin neugierig und offen für andere Arbeitsweisen', score: 7, emoji: '\u{1F914}' },
+      { text: 'Ich finde es manchmal anstrengend, alles zu berücksichtigen', score: 4, emoji: '\u{1F62B}' },
       { text: 'Ich bevorzuge ein homogenes Team', score: 1, emoji: '\u{1F3E0}' },
     ]},
     { scenario: 'Bei einer Konferenz kennst du niemanden. 200 Leute im Raum.', options: [
       { text: 'Ich spreche aktiv 5-10 Leute an und sammle Kontakte', score: 10, emoji: '\u{1F4BC}' },
-      { text: 'Ich suche eine offene Gruppe und schlie\u00DFe mich an', score: 7, emoji: '\u{1F465}' },
+      { text: 'Ich suche eine offene Gruppe und schließe mich an', score: 7, emoji: '\u{1F465}' },
       { text: 'Ich bleibe am Buffet und hoffe, angesprochen zu werden', score: 4, emoji: '\u{1F37D}\uFE0F' },
-      { text: 'Am liebsten w\u00FCrde ich sofort wieder gehen', score: 1, emoji: '\u{1F6AA}' },
+      { text: 'Am liebsten würde ich sofort wieder gehen', score: 1, emoji: '\u{1F6AA}' },
     ]},
     { scenario: 'Deine Abteilung wird umstrukturiert. Neues Team, neuer Chef, neue Prozesse.', options: [
       { text: 'Ich sehe es als Chance und gestalte aktiv mit', score: 10, emoji: '\u{1F680}' },
       { text: 'Ich passe mich an, auch wenn es unbequem ist', score: 7, emoji: '\u{1F504}' },
-      { text: 'Ich hadere mit der Ver\u00E4nderung und brauche Zeit', score: 4, emoji: '\u{1F615}' },
-      { text: 'Ich \u00FCberlege, ob ich nicht lieber k\u00FCndige', score: 1, emoji: '\u{1F6AA}' },
+      { text: 'Ich hadere mit der Veränderung und brauche Zeit', score: 4, emoji: '\u{1F615}' },
+      { text: 'Ich überlege, ob ich nicht lieber kündige', score: 1, emoji: '\u{1F6AA}' },
     ]},
-    { scenario: 'Du ziehst f\u00FCr den Job in eine neue Stadt, wo du niemanden kennst.', options: [
+    { scenario: 'Du ziehst für den Job in eine neue Stadt, wo du niemanden kennst.', options: [
       { text: 'Abenteuer! Ich baue mir schnell ein neues Netzwerk auf', score: 10, emoji: '\u{1F31F}' },
-      { text: 'Aufregend und etwas nerv\u00F6s, aber ich freue mich', score: 7, emoji: '\u{1F60A}' },
+      { text: 'Aufregend und etwas nervös, aber ich freue mich', score: 7, emoji: '\u{1F60A}' },
       { text: 'Ich habe Angst vor der Einsamkeit', score: 4, emoji: '\u{1F614}' },
-      { text: 'Ich w\u00FCrde das nur tun, wenn es absolut nicht anders geht', score: 1, emoji: '\u{1F6AB}' },
+      { text: 'Ich würde das nur tun, wenn es absolut nicht anders geht', score: 1, emoji: '\u{1F6AB}' },
     ]},
   ],
   praesentation: [
-    { scenario: '100 Leute, Spotlight, B\u00FChne. Du sollst eine Keynote halten.', options: [
-      { text: 'Das ist mein Element \u2014 ich liebe es, auf der B\u00FChne zu stehen', score: 10, emoji: '\u{1F3A4}' },
+    { scenario: '100 Leute, Spotlight, Bühne. Du sollst eine Keynote halten.', options: [
+      { text: 'Das ist mein Element — ich liebe es, auf der Bühne zu stehen', score: 10, emoji: '\u{1F3A4}' },
       { text: 'Aufgeregt, aber gut vorbereitet schaffe ich das', score: 7, emoji: '\u{1F4AA}' },
-      { text: 'Mir wird schlecht bei dem Gedanken, aber ich w\u00FCrde es versuchen', score: 4, emoji: '\u{1F630}' },
-      { text: 'Ausgeschlossen \u2014 das \u00FCberlasse ich anderen', score: 1, emoji: '\u{1F645}' },
+      { text: 'Mir wird schlecht bei dem Gedanken, aber ich würde es versuchen', score: 4, emoji: '\u{1F630}' },
+      { text: 'Ausgeschlossen — das überlasse ich anderen', score: 1, emoji: '\u{1F645}' },
     ]},
-    { scenario: 'Mitten in deiner Pr\u00E4sentation f\u00E4llt der Beamer aus. Was jetzt?', options: [
-      { text: 'Ich improvisiere souver\u00E4n und mache ohne Slides weiter', score: 10, emoji: '\u{1F60E}' },
-      { text: 'Ich mache eine kurze Pause und finde eine L\u00F6sung', score: 7, emoji: '\u{1F504}' },
+    { scenario: 'Mitten in deiner Präsentation fällt der Beamer aus. Was jetzt?', options: [
+      { text: 'Ich improvisiere souverän und mache ohne Slides weiter', score: 10, emoji: '\u{1F60E}' },
+      { text: 'Ich mache eine kurze Pause und finde eine Lösung', score: 7, emoji: '\u{1F504}' },
       { text: 'Ich gerate in Panik, fange mich aber', score: 4, emoji: '\u{1F630}' },
-      { text: 'Ich bitte darum, die Pr\u00E4sentation zu verschieben', score: 1, emoji: '\u{1F64F}' },
+      { text: 'Ich bitte darum, die Präsentation zu verschieben', score: 1, emoji: '\u{1F64F}' },
     ]},
-    { scenario: 'Nach deiner Pr\u00E4sentation stellt jemand eine aggressive Frage.', options: [
+    { scenario: 'Nach deiner Präsentation stellt jemand eine aggressive Frage.', options: [
       { text: 'Ich bleibe ruhig und beantworte sie sachlich', score: 10, emoji: '\u{1F9D0}' },
       { text: 'Ich versuche diplomatisch zu antworten', score: 7, emoji: '\u{1F4AC}' },
       { text: 'Ich werde unsicher und stottere', score: 4, emoji: '\u{1F633}' },
       { text: 'Ich werde defensiv oder aggressiv', score: 1, emoji: '\u{1F620}' },
     ]},
-    { scenario: 'Du sollst dein Team von einer unpopul\u00E4ren Entscheidung \u00FCberzeugen.', options: [
-      { text: 'Ich baue eine \u00FCberzeugende Story mit Fakten und Vision', score: 10, emoji: '\u{1F4CA}' },
-      { text: 'Ich erkl\u00E4re die Gr\u00FCnde offen und h\u00F6re Bedenken an', score: 7, emoji: '\u{1F4AC}' },
+    { scenario: 'Du sollst dein Team von einer unpopulären Entscheidung überzeugen.', options: [
+      { text: 'Ich baue eine überzeugende Story mit Fakten und Vision', score: 10, emoji: '\u{1F4CA}' },
+      { text: 'Ich erkläre die Gründe offen und höre Bedenken an', score: 7, emoji: '\u{1F4AC}' },
       { text: 'Ich sage es einfach und hoffe auf Akzeptanz', score: 4, emoji: '\u{1F91E}' },
       { text: 'Ich lasse es meinen Chef kommunizieren', score: 1, emoji: '\u{1F449}' },
     ]},
-    { scenario: 'Wie bereitest du dich auf eine wichtige Pr\u00E4sentation vor?', options: [
-      { text: 'Story, Struktur, ge\u00FCbt, Backup-Plan, Probelauf', score: 10, emoji: '\u{1F3AF}' },
+    { scenario: 'Wie bereitest du dich auf eine wichtige Präsentation vor?', options: [
+      { text: 'Story, Struktur, geübt, Backup-Plan, Probelauf', score: 10, emoji: '\u{1F3AF}' },
       { text: 'Gute Slides, einmal durchgesprochen', score: 7, emoji: '\u{1F4DD}' },
       { text: 'Slides am Vorabend, den Rest improvisiere ich', score: 4, emoji: '\u{1F937}' },
       { text: 'Ich bereite mich kaum vor und hoffe auf das Beste', score: 1, emoji: '\u{1F91E}' },
@@ -325,78 +365,78 @@ const SZENARIEN = {
   emotionale_intelligenz: [
     { scenario: 'Dein Kollege ist offensichtlich gestresst und schnauzt dich an.', options: [
       { text: 'Ich erkenne seinen Stress und reagiere empathisch', score: 10, emoji: '\u2764\uFE0F' },
-      { text: 'Ich nehme es nicht pers\u00F6nlich und spreche ihn sp\u00E4ter an', score: 7, emoji: '\u{1F44D}' },
+      { text: 'Ich nehme es nicht persönlich und spreche ihn später an', score: 7, emoji: '\u{1F44D}' },
       { text: 'Es verletzt mich, aber ich sage nichts', score: 4, emoji: '\u{1F614}' },
-      { text: 'Ich schnauze zur\u00FCck', score: 1, emoji: '\u{1F620}' },
+      { text: 'Ich schnauze zurück', score: 1, emoji: '\u{1F620}' },
     ]},
-    { scenario: 'Du merkst, dass du w\u00FCtend bist, bevor du in ein wichtiges Meeting gehst.', options: [
+    { scenario: 'Du merkst, dass du wütend bist, bevor du in ein wichtiges Meeting gehst.', options: [
       { text: 'Ich nehme mir 5 Minuten, atme durch und reguliere mich', score: 10, emoji: '\u{1F9D8}' },
       { text: 'Ich versuche die Wut beiseitezuschieben', score: 7, emoji: '\u{1F636}' },
       { text: 'Ich gehe rein und hoffe, dass man es nicht merkt', score: 4, emoji: '\u{1F610}' },
       { text: 'Meine Emotionen bestimmen meistens mein Verhalten', score: 1, emoji: '\u{1F4A5}' },
     ]},
     { scenario: 'Eine Kollegin weint im Meeting. Niemand reagiert. Du:', options: [
-      { text: 'Ich spreche sie empathisch an und biete Unterst\u00FCtzung', score: 10, emoji: '\u{1F917}' },
+      { text: 'Ich spreche sie empathisch an und biete Unterstützung', score: 10, emoji: '\u{1F917}' },
       { text: 'Ich spreche sie nach dem Meeting unter vier Augen an', score: 7, emoji: '\u{1F4AC}' },
-      { text: 'Ich f\u00FChle mich unwohl und wei\u00DF nicht, was tun', score: 4, emoji: '\u{1F615}' },
-      { text: 'Emotionen geh\u00F6ren nicht ins B\u00FCro', score: 1, emoji: '\u{1F610}' },
+      { text: 'Ich fühle mich unwohl und weiß nicht, was tun', score: 4, emoji: '\u{1F615}' },
+      { text: 'Emotionen gehören nicht ins Büro', score: 1, emoji: '\u{1F610}' },
     ]},
-    { scenario: 'Du erh\u00E4ltst eine Bef\u00F6rderung. Dein Kollege, der auch kandidiert hat, nicht.', options: [
-      { text: 'Ich freue mich und spreche empathisch mit ihm dar\u00FCber', score: 10, emoji: '\u{1F91D}' },
-      { text: 'Ich feiere leise und bin sensibel ihm gegen\u00FCber', score: 7, emoji: '\u{1F60C}' },
-      { text: 'Ich freue mich offen und denke nicht weiter dar\u00FCber nach', score: 4, emoji: '\u{1F389}' },
-      { text: 'Mir ist egal, wie er sich f\u00FChlt \u2014 ich habe gewonnen', score: 1, emoji: '\u{1F3C6}' },
+    { scenario: 'Du erhältst eine Beförderung. Dein Kollege, der auch kandidiert hat, nicht.', options: [
+      { text: 'Ich freue mich und spreche empathisch mit ihm darüber', score: 10, emoji: '\u{1F91D}' },
+      { text: 'Ich feiere leise und bin sensibel ihm gegenüber', score: 7, emoji: '\u{1F60C}' },
+      { text: 'Ich freue mich offen und denke nicht weiter darüber nach', score: 4, emoji: '\u{1F389}' },
+      { text: 'Mir ist egal, wie er sich fühlt — ich habe gewonnen', score: 1, emoji: '\u{1F3C6}' },
     ]},
     { scenario: 'Nach einem langen Tag bemerkst du, dass du gereizt auf alles reagierst.', options: [
-      { text: 'Ich erkenne das Muster und ergreife sofort Gegenma\u00DFnahmen', score: 10, emoji: '\u{1F9E0}' },
-      { text: 'Ich merke es und versuche mich zusammenzurei\u00DFen', score: 7, emoji: '\u{1F504}' },
+      { text: 'Ich erkenne das Muster und ergreife sofort Gegenmaßnahmen', score: 10, emoji: '\u{1F9E0}' },
+      { text: 'Ich merke es und versuche mich zusammenzureißen', score: 7, emoji: '\u{1F504}' },
       { text: 'Ich bemerke es erst, wenn jemand mich darauf hinweist', score: 4, emoji: '\u{1F914}' },
       { text: 'Ich merke es meistens gar nicht', score: 1, emoji: '\u{1F636}' },
     ]},
   ],
   charisma: [
     { scenario: 'Du betrittst einen Raum voller Fremder. Was passiert?', options: [
-      { text: 'Ich sp\u00FCre Blicke und strahle Selbstsicherheit aus', score: 10, emoji: '\u2728' },
-      { text: 'Ich trete freundlich auf und komme schnell ins Gespr\u00E4ch', score: 7, emoji: '\u{1F60A}' },
+      { text: 'Ich spüre Blicke und strahle Selbstsicherheit aus', score: 10, emoji: '\u2728' },
+      { text: 'Ich trete freundlich auf und komme schnell ins Gespräch', score: 7, emoji: '\u{1F60A}' },
       { text: 'Ich suche eine vertraute Person oder Ecke', score: 4, emoji: '\u{1F50D}' },
-      { text: 'Ich f\u00FChle mich unsichtbar', score: 1, emoji: '\u{1F47B}' },
+      { text: 'Ich fühle mich unsichtbar', score: 1, emoji: '\u{1F47B}' },
     ]},
-    { scenario: 'Du erz\u00E4hlst eine Geschichte auf einer Party. Die Reaktion:', options: [
-      { text: 'Alle h\u00F6ren gebannt zu und lachen an den richtigen Stellen', score: 10, emoji: '\u{1F3AD}' },
-      { text: 'Die meisten h\u00F6ren zu und reagieren positiv', score: 7, emoji: '\u{1F44D}' },
-      { text: 'Manche h\u00F6ren zu, andere schweifen ab', score: 4, emoji: '\u{1F615}' },
-      { text: 'Ich erz\u00E4hle selten Geschichten in Gruppen', score: 1, emoji: '\u{1F910}' },
+    { scenario: 'Du erzählst eine Geschichte auf einer Party. Die Reaktion:', options: [
+      { text: 'Alle hören gebannt zu und lachen an den richtigen Stellen', score: 10, emoji: '\u{1F3AD}' },
+      { text: 'Die meisten hören zu und reagieren positiv', score: 7, emoji: '\u{1F44D}' },
+      { text: 'Manche hören zu, andere schweifen ab', score: 4, emoji: '\u{1F615}' },
+      { text: 'Ich erzähle selten Geschichten in Gruppen', score: 1, emoji: '\u{1F910}' },
     ]},
-    { scenario: 'Ein Recruiter beschreibt dich nach einem Gespr\u00E4ch. Was w\u00FCrde er sagen?', options: [
-      { text: '"Beeindruckende Pers\u00F6nlichkeit, starke Ausstrahlung"', score: 10, emoji: '\u{1F31F}' },
+    { scenario: 'Ein Recruiter beschreibt dich nach einem Gespräch. Was würde er sagen?', options: [
+      { text: '"Beeindruckende Persönlichkeit, starke Ausstrahlung"', score: 10, emoji: '\u{1F31F}' },
       { text: '"Sympathisch und kompetent"', score: 7, emoji: '\u{1F60A}' },
-      { text: '"Nett, aber unauff\u00E4llig"', score: 4, emoji: '\u{1F610}' },
+      { text: '"Nett, aber unauffällig"', score: 4, emoji: '\u{1F610}' },
       { text: '"Kann mich kaum an ihn/sie erinnern"', score: 1, emoji: '\u{1F47B}' },
     ]},
     { scenario: 'Du sollst jemanden motivieren, der gerade aufgeben will.', options: [
-      { text: 'Ich finde die richtigen Worte und entz\u00FCnde wieder ein Feuer', score: 10, emoji: '\u{1F525}' },
-      { text: 'Ich h\u00F6re zu und ermutige mit konkreten Vorschl\u00E4gen', score: 7, emoji: '\u{1F4AA}' },
+      { text: 'Ich finde die richtigen Worte und entzünde wieder ein Feuer', score: 10, emoji: '\u{1F525}' },
+      { text: 'Ich höre zu und ermutige mit konkreten Vorschlägen', score: 7, emoji: '\u{1F4AA}' },
       { text: 'Ich versuche es, bin aber unsicher ob es wirkt', score: 4, emoji: '\u{1F914}' },
-      { text: 'Das liegt mir nicht \u2014 ich bin kein Motivator', score: 1, emoji: '\u{1F937}' },
+      { text: 'Das liegt mir nicht — ich bin kein Motivator', score: 1, emoji: '\u{1F937}' },
     ]},
     { scenario: 'Nach einem Vortrag kommen Leute auf dich zu. Wie viele?', options: [
-      { text: 'Mehrere \u2014 sie wollen mehr erfahren und mich kennenlernen', score: 10, emoji: '\u{1F465}' },
-      { text: 'Ein paar \u2014 mit netten Kommentaren', score: 7, emoji: '\u{1F44B}' },
-      { text: 'Vielleicht einer, h\u00F6flich', score: 4, emoji: '\u{1F44D}' },
-      { text: 'Niemand \u2014 ich verschwinde schnell', score: 1, emoji: '\u{1F6B6}' },
+      { text: 'Mehrere — sie wollen mehr erfahren und mich kennenlernen', score: 10, emoji: '\u{1F465}' },
+      { text: 'Ein paar — mit netten Kommentaren', score: 7, emoji: '\u{1F44B}' },
+      { text: 'Vielleicht einer, höflich', score: 4, emoji: '\u{1F44D}' },
+      { text: 'Niemand — ich verschwinde schnell', score: 1, emoji: '\u{1F6B6}' },
     ]},
   ],
   resilienz: [
-    { scenario: 'Du bekommst eine Absage f\u00FCr deinen Traumjob. Deine Reaktion:', options: [
-      { text: 'Entt\u00E4uscht, aber ich lerne daraus und bewerbe mich weiter', score: 10, emoji: '\u{1F525}' },
+    { scenario: 'Du bekommst eine Absage für deinen Traumjob. Deine Reaktion:', options: [
+      { text: 'Enttäuscht, aber ich lerne daraus und bewerbe mich weiter', score: 10, emoji: '\u{1F525}' },
       { text: 'Ich brauche einen Tag, dann geht es weiter', score: 7, emoji: '\u{1F4AA}' },
       { text: 'Ich zweifle an mir und brauche Wochen um mich zu erholen', score: 4, emoji: '\u{1F614}' },
       { text: 'Ich gebe auf und bewerbe mich nie wieder auf so einen Job', score: 1, emoji: '\u{1F6AB}' },
     ]},
-    { scenario: 'Drei Dinge gehen gleichzeitig schief: Projekt verz\u00F6gert, Auto kaputt, Streit mit Partner.', options: [
-      { text: 'Ich priorisiere, l\u00F6se eins nach dem anderen', score: 10, emoji: '\u{1F9E0}' },
+    { scenario: 'Drei Dinge gehen gleichzeitig schief: Projekt verzögert, Auto kaputt, Streit mit Partner.', options: [
+      { text: 'Ich priorisiere, löse eins nach dem anderen', score: 10, emoji: '\u{1F9E0}' },
       { text: 'Stressig, aber ich halte durch', score: 7, emoji: '\u{1F62C}' },
-      { text: 'Ich f\u00FChle mich \u00FCberw\u00E4ltigt und funktioniere nur noch', score: 4, emoji: '\u{1F9DF}' },
+      { text: 'Ich fühle mich überwältigt und funktioniere nur noch', score: 4, emoji: '\u{1F9DF}' },
       { text: 'Ich breche zusammen und brauche Hilfe', score: 1, emoji: '\u{1F62D}' },
     ]},
     { scenario: 'Du wirst im Job ungerecht behandelt. Dein Chef ignoriert deinen Beitrag.', options: [
@@ -405,15 +445,15 @@ const SZENARIEN = {
       { text: 'Ich schlucke es runter und bin frustriert', score: 4, emoji: '\u{1F620}' },
       { text: 'Ich gebe innerlich auf und mache nur noch Dienst nach Vorschrift', score: 1, emoji: '\u{1F9DF}' },
     ]},
-    { scenario: 'Wie schnell erholst du dich nach einem gro\u00DFen R\u00FCckschlag?', options: [
-      { text: 'Schnell \u2014 R\u00FCckschl\u00E4ge sind Teil des Weges', score: 10, emoji: '\u{1F680}' },
+    { scenario: 'Wie schnell erholst du dich nach einem großen Rückschlag?', options: [
+      { text: 'Schnell — Rückschläge sind Teil des Weges', score: 10, emoji: '\u{1F680}' },
       { text: 'Ein paar Tage, dann bin ich wieder motiviert', score: 7, emoji: '\u{1F4C8}' },
-      { text: 'Wochen \u2014 es nagt lange an mir', score: 4, emoji: '\u23F3' },
-      { text: 'Ich erhole mich kaum \u2014 jeder R\u00FCckschlag h\u00E4uft sich', score: 1, emoji: '\u{1F4C9}' },
+      { text: 'Wochen — es nagt lange an mir', score: 4, emoji: '\u23F3' },
+      { text: 'Ich erhole mich kaum — jeder Rückschlag häuft sich', score: 1, emoji: '\u{1F4C9}' },
     ]},
     { scenario: 'Dein Lieblingsprojekt wird gestrichen. 6 Monate Arbeit umsonst.', options: [
-      { text: 'Ich sichere die Learnings und nutze sie f\u00FCr das n\u00E4chste Projekt', score: 10, emoji: '\u{1F4A1}' },
-      { text: '\u00C4rgerlich, aber so ist Business', score: 7, emoji: '\u{1F937}' },
+      { text: 'Ich sichere die Learnings und nutze sie für das nächste Projekt', score: 10, emoji: '\u{1F4A1}' },
+      { text: 'Ärgerlich, aber so ist Business', score: 7, emoji: '\u{1F937}' },
       { text: 'Ich bin lange frustriert und demotiviert', score: 4, emoji: '\u{1F61E}' },
       { text: 'Ich verliere das Vertrauen in mein Unternehmen', score: 1, emoji: '\u{1F494}' },
     ]},
@@ -422,32 +462,32 @@ const SZENARIEN = {
     { scenario: 'Dein Team schafft die Deadline nicht. Was tust du?', options: [
       { text: 'Ich priorisiere mit dem Team, kommuniziere klar nach oben, und packe mit an', score: 10, emoji: '\u{1F451}' },
       { text: 'Ich helfe wo ich kann und motiviere das Team', score: 7, emoji: '\u{1F4AA}' },
-      { text: 'Ich erh\u00F6he den Druck und erwarte mehr Einsatz', score: 4, emoji: '\u{1F4A2}' },
+      { text: 'Ich erhöhe den Druck und erwarte mehr Einsatz', score: 4, emoji: '\u{1F4A2}' },
       { text: 'Ich gebe die Verantwortung ab und melde es meinem Chef', score: 1, emoji: '\u{1F449}' },
     ]},
-    { scenario: 'Ein Teammitglied macht einen gro\u00DFen Fehler, der Konsequenzen hat.', options: [
-      { text: 'Ich sch\u00FCtze das Teammitglied nach au\u00DFen und kl\u00E4re intern', score: 10, emoji: '\u{1F6E1}\uFE0F' },
+    { scenario: 'Ein Teammitglied macht einen großen Fehler, der Konsequenzen hat.', options: [
+      { text: 'Ich schütze das Teammitglied nach außen und kläre intern', score: 10, emoji: '\u{1F6E1}\uFE0F' },
       { text: 'Ich bespreche den Fehler konstruktiv im 1:1', score: 7, emoji: '\u{1F4AC}' },
-      { text: 'Ich zeige meine Entt\u00E4uschung deutlich', score: 4, emoji: '\u{1F612}' },
-      { text: 'Ich mache den Fehler \u00F6ffentlich als Warnung f\u00FCr andere', score: 1, emoji: '\u{1F4E2}' },
+      { text: 'Ich zeige meine Enttäuschung deutlich', score: 4, emoji: '\u{1F612}' },
+      { text: 'Ich mache den Fehler öffentlich als Warnung für andere', score: 1, emoji: '\u{1F4E2}' },
     ]},
-    { scenario: 'Du musst eine schwierige Entscheidung treffen, die nicht alle gl\u00FCcklich macht.', options: [
+    { scenario: 'Du musst eine schwierige Entscheidung treffen, die nicht alle glücklich macht.', options: [
       { text: 'Ich entscheide faktenbasiert, kommuniziere transparent und stehe dazu', score: 10, emoji: '\u{1F3AF}' },
-      { text: 'Ich w\u00E4ge ab, entscheide und erkl\u00E4re meine Gr\u00FCnde', score: 7, emoji: '\u2696\uFE0F' },
-      { text: 'Ich z\u00F6gere lange und versuche es allen recht zu machen', score: 4, emoji: '\u{1F504}' },
-      { text: 'Ich vermeide die Entscheidung so lange wie m\u00F6glich', score: 1, emoji: '\u{1F648}' },
+      { text: 'Ich wäge ab, entscheide und erkläre meine Gründe', score: 7, emoji: '\u2696\uFE0F' },
+      { text: 'Ich zögere lange und versuche es allen recht zu machen', score: 4, emoji: '\u{1F504}' },
+      { text: 'Ich vermeide die Entscheidung so lange wie möglich', score: 1, emoji: '\u{1F648}' },
     ]},
-    { scenario: 'Du \u00FCbernimmst ein demoralisiertes Team. Dein erster Schritt:', options: [
-      { text: 'Zuh\u00F6ren, Vertrauen aufbauen, gemeinsame Vision entwickeln', score: 10, emoji: '\u{1F91D}' },
+    { scenario: 'Du übernimmst ein demoralisiertes Team. Dein erster Schritt:', options: [
+      { text: 'Zuhören, Vertrauen aufbauen, gemeinsame Vision entwickeln', score: 10, emoji: '\u{1F91D}' },
       { text: 'Quick Wins identifizieren und erste Erfolge feiern', score: 7, emoji: '\u{1F389}' },
       { text: 'Klare Ziele setzen und Leistung einfordern', score: 4, emoji: '\u{1F4CB}' },
       { text: 'Ich bin unsicher, wie man ein Team dreht', score: 1, emoji: '\u{1F937}' },
     ]},
-    { scenario: 'Dein Star-Performer will k\u00FCndigen. Was tust du?', options: [
-      { text: 'Sofortiges 1:1, Gr\u00FCnde verstehen, individuelles Angebot machen', score: 10, emoji: '\u{1F4AC}' },
-      { text: 'Ich versuche herauszufinden, was ihn h\u00E4lt', score: 7, emoji: '\u{1F50D}' },
+    { scenario: 'Dein Star-Performer will kündigen. Was tust du?', options: [
+      { text: 'Sofortiges 1:1, Gründe verstehen, individuelles Angebot machen', score: 10, emoji: '\u{1F4AC}' },
+      { text: 'Ich versuche herauszufinden, was ihn hält', score: 7, emoji: '\u{1F50D}' },
       { text: 'Schade, aber jeder ist ersetzbar', score: 4, emoji: '\u{1F937}' },
-      { text: 'Ich lasse ihn gehen, ohne gro\u00DF zu reagieren', score: 1, emoji: '\u{1F44B}' },
+      { text: 'Ich lasse ihn gehen, ohne groß zu reagieren', score: 1, emoji: '\u{1F44B}' },
     ]},
   ],
 };
@@ -457,69 +497,69 @@ const SZENARIEN = {
 // ============================================================
 const AUSWERTUNGSTEXTE = {
   selbstwertgefuehl: {
-    low: 'Das Benennen der eigenen St\u00E4rken ist f\u00FCr Sie mit einem nicht zu untersch\u00E4tzenden Aufwand verbunden. In herausfordernden Situationen zweifeln Sie daran, ob Sie auf Ihre F\u00E4higkeiten vertrauen k\u00F6nnen. Ihr Karriereindex zeigt: Hier liegt enormes Potenzial. Denn Ihr Einkommen und Ihre Lebensqualit\u00E4t stehen und fallen mit Ihrem Selbstwertempfinden.',
-    mid: 'Sie wissen, wo Ihre St\u00E4rken liegen und vertrauen in der Regel auf Ihre F\u00E4higkeiten. Allerdings f\u00E4llt es Ihnen nicht immer leicht, andere Menschen aktiv von sich zu \u00FCberzeugen. Mit gezieltem Training k\u00F6nnen Sie dieses Feld zur echten Karriere-Waffe ausbauen.',
-    high: 'Hervorragend \u2014 Sie haben ein starkes Selbstwertgef\u00FChl und strahlen das auch aus. Sie kennen Ihre St\u00E4rken, k\u00F6nnen sie kommunizieren und \u00FCberzeugen andere von Ihrem Wert. Diese Kompetenz ist Ihr Karriere-Turbo.',
+    low: 'Das Benennen der eigenen Stärken ist für Sie mit einem nicht zu unterschätzenden Aufwand verbunden. In herausfordernden Situationen zweifeln Sie daran, ob Sie auf Ihre Fähigkeiten vertrauen können. Ihr Karriereindex zeigt: Hier liegt enormes Potenzial. Denn Ihr Einkommen und Ihre Lebensqualität stehen und fallen mit Ihrem Selbstwertempfinden.',
+    mid: 'Sie wissen, wo Ihre Stärken liegen und vertrauen in der Regel auf Ihre Fähigkeiten. Allerdings fällt es Ihnen nicht immer leicht, andere Menschen aktiv von sich zu überzeugen. Mit gezieltem Training können Sie dieses Feld zur echten Karriere-Waffe ausbauen.',
+    high: 'Hervorragend — Sie haben ein starkes Selbstwertgefühl und strahlen das auch aus. Sie kennen Ihre Stärken, können sie kommunizieren und überzeugen andere von Ihrem Wert. Diese Kompetenz ist Ihr Karriere-Turbo.',
   },
   prioritaeten: {
-    low: 'Die Priorisierung von Aufgaben f\u00E4llt Ihnen schwer. Sie neigen dazu, Dringendes vor Wichtigem zu erledigen und verlieren dadurch den Fokus auf strategische Ziele. Ein strukturierter Ansatz kann hier einen enormen Unterschied machen.',
-    mid: 'Sie haben ein Grundgef\u00FChl f\u00FCr Priorit\u00E4ten, k\u00F6nnten aber strategischer vorgehen. Manchmal lassen Sie sich von der Masse der Aufgaben \u00FCberw\u00E4ltigen. Mit den richtigen Methoden heben Sie Ihre Produktivit\u00E4t auf das n\u00E4chste Level.',
-    high: 'Sie sind ein Meister der Priorisierung. Sie unterscheiden klar zwischen wichtig und dringend, setzen Grenzen und arbeiten fokussiert an den Dingen, die den gr\u00F6\u00DFten Impact haben.',
+    low: 'Die Priorisierung von Aufgaben fällt Ihnen schwer. Sie neigen dazu, Dringendes vor Wichtigem zu erledigen und verlieren dadurch den Fokus auf strategische Ziele. Ein strukturierter Ansatz kann hier einen enormen Unterschied machen.',
+    mid: 'Sie haben ein Grundgefühl für Prioritäten, könnten aber strategischer vorgehen. Manchmal lassen Sie sich von der Masse der Aufgaben überwältigen. Mit den richtigen Methoden heben Sie Ihre Produktivität auf das nächste Level.',
+    high: 'Sie sind ein Meister der Priorisierung. Sie unterscheiden klar zwischen wichtig und dringend, setzen Grenzen und arbeiten fokussiert an den Dingen, die den größten Impact haben.',
   },
   selbstreflexion: {
-    low: 'Selbstreflexion ist derzeit kein fester Bestandteil Ihres Alltags. Sie neigen dazu, aus Misserfolgen keine systematischen Learnings abzuleiten. Dabei ist genau diese F\u00E4higkeit der Schl\u00FCssel zu nachhaltigem Karrierewachstum.',
-    mid: 'Sie reflektieren gelegentlich \u00FCber Ihr Handeln und k\u00F6nnen Feedback annehmen. Ein regelm\u00E4\u00DFigerer Reflexionsprozess w\u00FCrde Ihnen helfen, blinde Flecken zu erkennen und schneller zu wachsen.',
-    high: 'Sie sind hervorragend darin, Ihr eigenes Handeln zu hinterfragen und daraus zu lernen. Diese F\u00E4higkeit zur Metakognition ist ein enormer Wettbewerbsvorteil.',
+    low: 'Selbstreflexion ist derzeit kein fester Bestandteil Ihres Alltags. Sie neigen dazu, aus Misserfolgen keine systematischen Learnings abzuleiten. Dabei ist genau diese Fähigkeit der Schlüssel zu nachhaltigem Karrierewachstum.',
+    mid: 'Sie reflektieren gelegentlich über Ihr Handeln und können Feedback annehmen. Ein regelmäßigerer Reflexionsprozess würde Ihnen helfen, blinde Flecken zu erkennen und schneller zu wachsen.',
+    high: 'Sie sind hervorragend darin, Ihr eigenes Handeln zu hinterfragen und daraus zu lernen. Diese Fähigkeit zur Metakognition ist ein enormer Wettbewerbsvorteil.',
   },
   selbstfuersorge: {
-    low: 'Ihre Work-Life-Balance ist deutlich aus dem Gleichgewicht. Sie neigen dazu, eigene Bed\u00FCrfnisse hintanzustellen und Grenzen nicht zu setzen. Langfristig gef\u00E4hrdet das sowohl Ihre Gesundheit als auch Ihre Karriere.',
-    mid: 'Sie achten grundlegend auf sich, aber in stressigen Phasen vernachl\u00E4ssigen Sie Ihre Selbstf\u00FCrsorge. Klare Routinen und Grenzen k\u00F6nnen hier den Unterschied machen.',
-    high: 'Sie pflegen einen gesunden Umgang mit sich selbst, setzen klare Grenzen und sorgen aktiv f\u00FCr Ausgleich. Diese emotionale Hygiene ist die Basis f\u00FCr nachhaltige Hochleistung.',
+    low: 'Ihre Work-Life-Balance ist deutlich aus dem Gleichgewicht. Sie neigen dazu, eigene Bedürfnisse hintanzustellen und Grenzen nicht zu setzen. Langfristig gefährdet das sowohl Ihre Gesundheit als auch Ihre Karriere.',
+    mid: 'Sie achten grundlegend auf sich, aber in stressigen Phasen vernachlässigen Sie Ihre Selbstfürsorge. Klare Routinen und Grenzen können hier den Unterschied machen.',
+    high: 'Sie pflegen einen gesunden Umgang mit sich selbst, setzen klare Grenzen und sorgen aktiv für Ausgleich. Diese emotionale Hygiene ist die Basis für nachhaltige Hochleistung.',
   },
   kompetenzbewusstsein: {
-    low: 'Sie tun sich schwer damit, Ihre eigenen Kompetenzen klar zu benennen und Ihren Marktwert einzusch\u00E4tzen. Das f\u00FChrt dazu, dass Sie Chancen nicht ergreifen und in Verhandlungen unter Ihrem Wert bleiben.',
-    mid: 'Sie haben ein Grundbewusstsein f\u00FCr Ihre Kompetenzen, k\u00F6nnten aber strategischer damit umgehen. Eine klarere Positionierung w\u00FCrde Ihre Karrierechancen deutlich verbessern.',
-    high: 'Sie kennen Ihren Marktwert, k\u00F6nnen Ihre Kompetenzen klar benennen und positionieren sich selbstbewusst. Das ist die Grundlage f\u00FCr erfolgreiche Gehaltsverhandlungen.',
+    low: 'Sie tun sich schwer damit, Ihre eigenen Kompetenzen klar zu benennen und Ihren Marktwert einzuschätzen. Das führt dazu, dass Sie Chancen nicht ergreifen und in Verhandlungen unter Ihrem Wert bleiben.',
+    mid: 'Sie haben ein Grundbewusstsein für Ihre Kompetenzen, könnten aber strategischer damit umgehen. Eine klarere Positionierung würde Ihre Karrierechancen deutlich verbessern.',
+    high: 'Sie kennen Ihren Marktwert, können Ihre Kompetenzen klar benennen und positionieren sich selbstbewusst. Das ist die Grundlage für erfolgreiche Gehaltsverhandlungen.',
   },
   kommunikation: {
-    low: 'Ihre Kommunikation l\u00E4sst Raum f\u00FCr Verbesserung. Schwierige Gespr\u00E4che vermeiden Sie und Ihre Botschaften kommen nicht immer klar an. Gezielte \u00DCbung kann hier Wunder wirken.',
-    mid: 'Sie kommunizieren solide, aber in Drucksituationen oder mit schwierigen Gegen\u00FCbern gibt es Verbesserungspotenzial. Klarheit und \u00DCberzeugungskraft lassen sich trainieren.',
-    high: 'Sie sind ein herausragender Kommunikator. Klar, \u00FCberzeugend und empathisch \u2014 Sie passen Ihre Botschaft an Ihr Gegen\u00FCber an und kommen immer auf den Punkt.',
+    low: 'Ihre Kommunikation lässt Raum für Verbesserung. Schwierige Gespräche vermeiden Sie und Ihre Botschaften kommen nicht immer klar an. Gezielte Übung kann hier Wunder wirken.',
+    mid: 'Sie kommunizieren solide, aber in Drucksituationen oder mit schwierigen Gegenübern gibt es Verbesserungspotenzial. Klarheit und Überzeugungskraft lassen sich trainieren.',
+    high: 'Sie sind ein herausragender Kommunikator. Klar, überzeugend und empathisch — Sie passen Ihre Botschaft an Ihr Gegenüber an und kommen immer auf den Punkt.',
   },
   sozialkompetenz: {
-    low: 'Der Umgang mit anderen Menschen kostet Sie Energie. Konflikte vermeiden Sie und in sozialen Situationen f\u00FChlen Sie sich unwohl. Gezielte Schritte k\u00F6nnen hier enormen Impact haben.',
-    mid: 'Sie kommen mit den meisten Menschen gut aus, aber in Konfliktsituationen oder mit schwierigen Pers\u00F6nlichkeiten sto\u00DFen Sie an Ihre Grenzen. Hier liegt ungenutztes Potenzial.',
-    high: 'Sie bewegen sich sicher in jeder sozialen Situation. Konflikte l\u00F6sen Sie diplomatisch und Sie bauen schnell Vertrauen auf. Eine Schl\u00FCsselkompetenz f\u00FCr F\u00FChrungsrollen.',
+    low: 'Der Umgang mit anderen Menschen kostet Sie Energie. Konflikte vermeiden Sie und in sozialen Situationen fühlen Sie sich unwohl. Gezielte Schritte können hier enormen Impact haben.',
+    mid: 'Sie kommen mit den meisten Menschen gut aus, aber in Konfliktsituationen oder mit schwierigen Persönlichkeiten stoßen Sie an Ihre Grenzen. Hier liegt ungenutztes Potenzial.',
+    high: 'Sie bewegen sich sicher in jeder sozialen Situation. Konflikte lösen Sie diplomatisch und Sie bauen schnell Vertrauen auf. Eine Schlüsselkompetenz für Führungsrollen.',
   },
   sozialisationskompetenz: {
-    low: 'Ver\u00E4nderungen fallen Ihnen schwer. Neue Umgebungen, Teams oder Kulturen verunsichern Sie. In der heutigen Arbeitswelt ist Anpassungsf\u00E4higkeit jedoch essentiell f\u00FCr Karrierewachstum.',
-    mid: 'Sie passen sich an neue Situationen an, brauchen aber Zeit. In einer Welt, die sich immer schneller ver\u00E4ndert, w\u00FCrde schnellere Adaptionsf\u00E4higkeit Ihre Karrierechancen deutlich erh\u00F6hen.',
-    high: 'Sie sind ein Chamäleon im besten Sinne. Neue Umgebungen, Teams und Kulturen bereichern Sie. Diese Anpassungsf\u00E4higkeit ist in der globalen Arbeitswelt Gold wert.',
+    low: 'Veränderungen fallen Ihnen schwer. Neue Umgebungen, Teams oder Kulturen verunsichern Sie. In der heutigen Arbeitswelt ist Anpassungsfähigkeit jedoch essentiell für Karrierewachstum.',
+    mid: 'Sie passen sich an neue Situationen an, brauchen aber Zeit. In einer Welt, die sich immer schneller verändert, würde schnellere Adaptionsfähigkeit Ihre Karrierechancen deutlich erhöhen.',
+    high: 'Sie sind ein Chamäleon im besten Sinne. Neue Umgebungen, Teams und Kulturen bereichern Sie. Diese Anpassungsfähigkeit ist in der globalen Arbeitswelt Gold wert.',
   },
   praesentation: {
-    low: 'Pr\u00E4sentationen und \u00F6ffentliches Sprechen bereiten Ihnen erhebliches Unbehagen. Da Sichtbarkeit jedoch entscheidend f\u00FCr den Karriereaufstieg ist, lohnt sich gezieltes Training hier besonders.',
-    mid: 'Sie k\u00F6nnen pr\u00E4sentieren, aber Ihre Wirkung k\u00F6nnte st\u00E4rker sein. Mit besserer Vorbereitung und mehr Souver\u00E4nit\u00E4t bei Zwischenfragen werden Sie \u00FCberzeugender.',
-    high: 'Sie sind ein Natural auf der B\u00FChne. Sicher, \u00FCberzeugend und charismatisch \u2014 Ihre Pr\u00E4sentationsf\u00E4higkeit \u00F6ffnet Ihnen T\u00FCren, die anderen verschlossen bleiben.',
+    low: 'Präsentationen und öffentliches Sprechen bereiten Ihnen erhebliches Unbehagen. Da Sichtbarkeit jedoch entscheidend für den Karriereaufstieg ist, lohnt sich gezieltes Training hier besonders.',
+    mid: 'Sie können präsentieren, aber Ihre Wirkung könnte stärker sein. Mit besserer Vorbereitung und mehr Souveränität bei Zwischenfragen werden Sie überzeugender.',
+    high: 'Sie sind ein Natural auf der Bühne. Sicher, überzeugend und charismatisch — Ihre Präsentationsfähigkeit öffnet Ihnen Türen, die anderen verschlossen bleiben.',
   },
   emotionale_intelligenz: {
-    low: 'Das Erkennen und Steuern von Emotionen \u2014 bei sich selbst und anderen \u2014 ist eine Herausforderung f\u00FCr Sie. Emotionale Intelligenz ist jedoch der st\u00E4rkste Pr\u00E4diktor f\u00FCr beruflichen Erfolg.',
-    mid: 'Sie sp\u00FCren Emotionen bei anderen und reagieren meistens angemessen. In Drucksituationen k\u00F6nnte Ihre emotionale Regulation jedoch st\u00E4rker sein.',
-    high: 'Ihre emotionale Intelligenz ist au\u00DFergew\u00F6hnlich. Sie erkennen feinste Nuancen bei anderen, regulieren Ihre eigenen Emotionen und schaffen dadurch Vertrauen und Verbindung.',
+    low: 'Das Erkennen und Steuern von Emotionen — bei sich selbst und anderen — ist eine Herausforderung für Sie. Emotionale Intelligenz ist jedoch der stärkste Prädiktor für beruflichen Erfolg.',
+    mid: 'Sie spüren Emotionen bei anderen und reagieren meistens angemessen. In Drucksituationen könnte Ihre emotionale Regulation jedoch stärker sein.',
+    high: 'Ihre emotionale Intelligenz ist außergewöhnlich. Sie erkennen feinste Nuancen bei anderen, regulieren Ihre eigenen Emotionen und schaffen dadurch Vertrauen und Verbindung.',
   },
   charisma: {
-    low: 'Ihre Ausstrahlung und Pr\u00E4senz in Gruppen k\u00F6nnte st\u00E4rker sein. Charisma ist erlernbar \u2014 und der R\u00FCckgrat jeder F\u00FChrungspers\u00F6nlichkeit.',
-    mid: 'Sie haben eine sympathische Ausstrahlung, aber Ihr Charisma k\u00F6nnte magnetischer sein. Mit bewusstem Auftreten und Storytelling verst\u00E4rken Sie Ihre Wirkung.',
-    high: 'Sie verf\u00FCgen \u00FCber eine beeindruckende Ausstrahlung. Menschen h\u00F6ren Ihnen zu, folgen Ihnen und erinnern sich an Sie. Diese nat\u00FCrliche Autorität ist ein Karriere-Beschleuniger.',
+    low: 'Ihre Ausstrahlung und Präsenz in Gruppen könnte stärker sein. Charisma ist erlernbar — und der Rückgrat jeder Führungspersönlichkeit.',
+    mid: 'Sie haben eine sympathische Ausstrahlung, aber Ihr Charisma könnte magnetischer sein. Mit bewusstem Auftreten und Storytelling verstärken Sie Ihre Wirkung.',
+    high: 'Sie verfügen über eine beeindruckende Ausstrahlung. Menschen hören Ihnen zu, folgen Ihnen und erinnern sich an Sie. Diese natürliche Autorität ist ein Karriere-Beschleuniger.',
   },
   resilienz: {
-    low: 'R\u00FCckschl\u00E4ge treffen Sie hart und die Erholung dauert lange. In einer Karriere voller Auf und Abs ist Resilienz jedoch die Schl\u00FCsselkompetenz, die Gewinner von Aufgebern unterscheidet.',
-    mid: 'Sie erholen sich von R\u00FCckschl\u00E4gen, aber es kostet Sie Energie und Zeit. Mit den richtigen Strategien k\u00F6nnen Sie Ihre Widerstandskraft deutlich steigern.',
-    high: 'Sie sind au\u00DFergew\u00F6hnlich widerstandsf\u00E4hig. R\u00FCckschl\u00E4ge betrachten Sie als Lernchancen und erholen sich schnell. Diese Resilienz ist Ihr Fundament f\u00FCr langfristigen Erfolg.',
+    low: 'Rückschläge treffen Sie hart und die Erholung dauert lange. In einer Karriere voller Auf und Abs ist Resilienz jedoch die Schlüsselkompetenz, die Gewinner von Aufgebern unterscheidet.',
+    mid: 'Sie erholen sich von Rückschlägen, aber es kostet Sie Energie und Zeit. Mit den richtigen Strategien können Sie Ihre Widerstandskraft deutlich steigern.',
+    high: 'Sie sind außergewöhnlich widerstandsfähig. Rückschläge betrachten Sie als Lernchancen und erholen sich schnell. Diese Resilienz ist Ihr Fundament für langfristigen Erfolg.',
   },
   fuehrung: {
-    low: 'F\u00FChrung ist derzeit nicht Ihre St\u00E4rke. Entscheidungen treffen, Verantwortung \u00FCbernehmen und andere inspirieren \u2014 das sind F\u00E4higkeiten, die sich gezielt entwickeln lassen.',
-    mid: 'Sie haben F\u00FChrungspotenzial, aber Ihre F\u00E4higkeit, Teams zu f\u00FChren und schwierige Entscheidungen zu treffen, k\u00F6nnte ausgepr\u00E4gter sein. Gezielte Entwicklung bringt Sie auf das n\u00E4chste Level.',
-    high: 'Sie sind eine geborene F\u00FChrungsperson. Sie treffen mutige Entscheidungen, sch\u00FCtzen Ihr Team und inspirieren andere. Diese Kompetenz pr\u00E4destiniert Sie f\u00FCr C-Level-Positionen.',
+    low: 'Führung ist derzeit nicht Ihre Stärke. Entscheidungen treffen, Verantwortung übernehmen und andere inspirieren — das sind Fähigkeiten, die sich gezielt entwickeln lassen.',
+    mid: 'Sie haben Führungspotenzial, aber Ihre Fähigkeit, Teams zu führen und schwierige Entscheidungen zu treffen, könnte ausgeprägter sein. Gezielte Entwicklung bringt Sie auf das nächste Level.',
+    high: 'Sie sind eine geborene Führungsperson. Sie treffen mutige Entscheidungen, schützen Ihr Team und inspirieren andere. Diese Kompetenz prädestiniert Sie für C-Level-Positionen.',
   },
 };
 
@@ -535,8 +575,8 @@ function getScoreLevel(score) {
   if (score >= 91) return { label: 'Exzellent', color: '#059669', badge: '\u{1F3C6}' };
   if (score >= 71) return { label: 'Stark', color: '#10B981', badge: '\u{1F4AA}' };
   if (score >= 51) return { label: 'Gut aufgestellt', color: '#F59E0B', badge: '\u{1F44D}' };
-  if (score >= 31) return { label: 'Ausbauf\u00E4hig', color: '#F97316', badge: '\u{1F4C8}' };
-  return { label: 'Gro\u00DFes Potenzial', color: '#EF4444', badge: '\u{1F331}' };
+  if (score >= 31) return { label: 'Ausbaufähig', color: '#F97316', badge: '\u{1F4C8}' };
+  return { label: 'Großes Potenzial', color: '#EF4444', badge: '\u{1F331}' };
 }
 
 function calculateFieldScore(answers) {
@@ -597,15 +637,16 @@ function RadarChart({ scores, size = 380 }) {
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function AnalyseClient({ profile, existingSession, userId }) {
+export default function AnalyseClient({ profile, existingSession, userId, autoStart }) {
   const supabase = createClient();
-  const [phase, setPhase] = useState(existingSession?.status === 'completed' ? 3 : existingSession?.status === 'in_progress' ? 2 : 1);
+  const initialPhase = existingSession?.status === 'completed' ? 3 : existingSession?.status === 'in_progress' ? 2 : (autoStart ? 2 : 1);
+  const [phase, setPhase] = useState(initialPhase);
   const [fieldIndex, setFieldIndex] = useState(existingSession?.current_field || 0);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState(existingSession?.answers || {});
   const [fieldScores, setFieldScores] = useState(existingSession?.scores || {});
   const [showFieldResult, setShowFieldResult] = useState(false);
-  const [showCategoryIntro, setShowCategoryIntro] = useState(false);
+  const [showCategoryIntro, setShowCategoryIntro] = useState(initialPhase === 2 && !existingSession?.current_field);
   const [selectedOption, setSelectedOption] = useState(null);
   const [dsgvoConsent, setDsgvoConsent] = useState(!!existingSession);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -620,6 +661,31 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
   // Check if category changed
   const prevCategory = fieldIndex > 0 ? KOMPETENZFELDER[fieldIndex - 1]?.category : null;
   const currentCategory = currentField?.category;
+
+  const goBack = useCallback(() => {
+    if (selectedOption) return; // Nicht während Animation
+    if (questionIndex > 0) {
+      // Zurück zur vorherigen Frage im selben Feld
+      setQuestionIndex(questionIndex - 1);
+      const fieldId = currentField.id;
+      const fieldAnswers = [...(answers[fieldId] || [])];
+      fieldAnswers[questionIndex - 1] = undefined;
+      setAnswers({ ...answers, [fieldId]: fieldAnswers });
+    } else if (fieldIndex > 0) {
+      // Zurück zum letzten Feld, letzte Frage
+      const prevIdx = fieldIndex - 1;
+      const prevFieldId = KOMPETENZFELDER[prevIdx].id;
+      // Score entfernen
+      const newScores = { ...fieldScores };
+      delete newScores[prevFieldId];
+      setFieldScores(newScores);
+      setFieldIndex(prevIdx);
+      setQuestionIndex(4); // Letzte Frage des vorherigen Feldes
+    } else {
+      // Ganz am Anfang — zurück zur Preview
+      setPhase(1);
+    }
+  }, [questionIndex, fieldIndex, currentField, answers, fieldScores, selectedOption]);
 
   const handleOptionClick = useCallback((option) => {
     setSelectedOption(option);
@@ -762,7 +828,7 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
             <div style={{ fontSize: 48, marginBottom: 16 }}>{'\u{1F504}'}</div>
             <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Weitermachen?</h2>
             <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)', marginBottom: 24 }}>
-              Du hast {completed}/13 Felder abgeschlossen. M\u00F6chtest du fortfahren?
+              Du hast {completed}/13 Felder abgeschlossen. Möchtest du fortfahren?
             </p>
             <div style={{ display: 'flex', gap: 12 }}>
               <button className="btn btn-secondary" onClick={() => handleResume(false)} style={{ flex: 1 }}>Neu starten</button>
@@ -774,36 +840,61 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
     }
 
     return (
-      <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div className="page-container" style={{ maxWidth: 640 }}>
         <AnimStyles />
-        <div className="card animate-in" style={{ maxWidth: 520, textAlign: 'center', padding: 48 }}>
-          <div style={{ fontSize: 56, marginBottom: 16 }}>{'\u{1F9E0}'}</div>
-          <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.04em', marginBottom: 8 }}>Dein Karriere-Blutbild</h1>
-          <p style={{ fontSize: 16, color: 'var(--ki-text-secondary)', marginBottom: 24, lineHeight: 1.6 }}>
-            Die Blaupause f\u00FCr deine berufliche Zukunft
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32 }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 24, fontWeight: 700 }}>13</div>
-              <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>Kompetenzfelder</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 24, fontWeight: 700 }}>~15</div>
-              <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>Minuten</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 24, fontWeight: 700 }}>65</div>
-              <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>Szenarien</div>
-            </div>
+
+        {/* ── Hero ── */}
+        <div style={{ textAlign: 'center', padding: '40px 0 44px' }}>
+          <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', marginBottom: 20 }}>
+            Kostenlos · ca. 15 Minuten
           </div>
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, textAlign: 'left', marginBottom: 24, cursor: 'pointer', fontSize: 13, color: 'var(--ki-text-secondary)' }}>
-            <input type="checkbox" checked={dsgvoConsent} onChange={e => setDsgvoConsent(e.target.checked)} style={{ marginTop: 3, accentColor: 'var(--ki-red)', width: 16, height: 16, flexShrink: 0 }} />
-            <span>Ich stimme der Verarbeitung meiner Analysedaten gem\u00E4\u00DF der <a href="/datenschutz" target="_blank" style={{ color: 'var(--ki-red)' }}>Datenschutzerkl\u00E4rung</a> zu.</span>
-          </label>
-          <button className="btn btn-primary" disabled={!dsgvoConsent} onClick={() => setPhase(2)} style={{ width: '100%', padding: '14px 24px', fontSize: 16, opacity: dsgvoConsent ? 1 : 0.5 }}>
-            Analyse starten {'\u2192'}
+
+          <h1 style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: 14 }}>
+            Dein Karriere-Blutbild
+          </h1>
+
+          <p style={{ fontSize: 16, color: 'var(--ki-text-secondary)', lineHeight: 1.65, maxWidth: 420, margin: '0 auto 32px' }}>
+            13 Kompetenzfelder. 4 Dimensionen. Ein klares Bild deiner beruflichen Stärken und Potenziale.
+          </p>
+
+          <button className="btn btn-primary" onClick={() => setPhase(2)} style={{ padding: '14px 36px', fontSize: 15 }}>
+            Analyse starten
           </button>
+
+          <p style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 14 }}>
+            Kein Standardtest — eine strukturierte Analyse deiner Karriere-DNA.
+          </p>
         </div>
+
+        {/* ── 4 Dimensionen ── */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 36,
+        }}>
+          {[
+            { Icon: Eye, title: 'Wahrnehmung', desc: 'Wie du auftrittst und auf andere wirkst.', fields: 'Sozialkompetenz · Sozialisation · Präsentation' },
+            { Icon: Flame, title: 'Antrieb', desc: 'Was dich innerlich leitet und dir Stabilität gibt.', fields: 'Selbstwertgefühl · Kompetenzbewusstsein · Resilienz' },
+            { Icon: MessageCircle, title: 'Wirkung', desc: 'Wie du überzeugst, führst und Vertrauen aufbaust.', fields: 'Kommunikation · Charisma · Führung' },
+            { Icon: Compass, title: 'Steuerung', desc: 'Wie du Prioritäten setzt und dich regulierst.', fields: 'Prioritäten · Selbstfürsorge · Emotionale Intelligenz · Selbstreflexion' },
+          ].map((dim, i) => (
+            <div key={i} className="card" style={{ padding: '22px 24px' }}>
+              <dim.Icon size={26} strokeWidth={1.5} style={{ marginBottom: 12, color: 'var(--ki-text-secondary)' }} />
+              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 6 }}>{dim.title}</div>
+              <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.5, marginBottom: 8 }}>{dim.desc}</div>
+              <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', lineHeight: 1.5 }}>{dim.fields}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Stats ── */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 36, paddingBottom: 32 }}>
+          {[['18.000+', 'Mitglieder'], ['13', 'Kompetenzfelder'], ['65', 'Szenarien']].map(([val, label]) => (
+            <div key={label} style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>{val}</div>
+              <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginTop: 2 }}>{label}</div>
+            </div>
+          ))}
+        </div>
+
       </div>
     );
   }
@@ -812,15 +903,39 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
   if (phase === 2) {
     // Category intro
     if (showCategoryIntro) {
-      const nextCat = KOMPETENZFELDER[fieldIndex + 1]?.category;
-      const intro = CATEGORY_INTROS[nextCat];
+      // Bei erstem Start: aktuelle Kategorie zeigen, sonst nächste
+      const introCat = fieldIndex === 0 && questionIndex === 0 ? currentCategory : KOMPETENZFELDER[fieldIndex + 1]?.category;
+      const intro = CATEGORY_INTROS[introCat];
       return (
         <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
           <AnimStyles />
-          <div className="animate-in" style={{ textAlign: 'center', maxWidth: 400 }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>{intro?.emoji}</div>
-            <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>{nextCat}</h2>
-            <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)' }}>{intro?.text}</p>
+          <div className="animate-in" style={{ textAlign: 'center', maxWidth: 440 }}>
+            <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', marginBottom: 16, letterSpacing: '0.04em' }}>
+              Dimension {intro?.num}
+            </div>
+            <h2 style={{ fontSize: 26, fontWeight: 700, marginBottom: 12, letterSpacing: '-0.02em' }}>{intro?.title}</h2>
+            <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)', lineHeight: 1.6, marginBottom: 24 }}>{intro?.text}</p>
+
+            {/* Felder dieser Dimension */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
+              {(intro?.fields || []).map(f => (
+                <span key={f} style={{
+                  padding: '6px 14px', borderRadius: 'var(--r-pill)',
+                  background: 'var(--ki-bg-alt)', border: '1px solid var(--ki-border)',
+                  fontSize: 13, fontWeight: 500, color: 'var(--ki-text-secondary)',
+                }}>{f}</span>
+              ))}
+            </div>
+
+            <button className="btn btn-primary" onClick={() => {
+              setShowCategoryIntro(false);
+              if (fieldIndex > 0 || questionIndex > 0) {
+                setFieldIndex(fieldIndex + 1);
+                setQuestionIndex(0);
+              }
+            }} style={{ padding: '12px 32px', fontSize: 15 }}>
+              Weiter
+            </button>
           </div>
         </div>
       );
@@ -833,8 +948,8 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
       return (
         <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
           <AnimStyles />
-          <div className="card animate-in" style={{ maxWidth: 480, textAlign: 'center', padding: 40 }}>
-            <div style={{ fontSize: 48, marginBottom: 8 }}>{currentField.icon}</div>
+          <div className="card animate-in" style={{ maxWidth: 520, textAlign: 'center', padding: 40 }}>
+            <FieldProgress fields={KOMPETENZFELDER} currentIndex={fieldIndex} scores={fieldScores} />
             <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>{currentField.name}</h2>
 
             {/* Score bar */}
@@ -858,7 +973,7 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
 
             {fieldIndex < 12 && (
               <p style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 16 }}>
-                N\u00E4chstes Feld: {KOMPETENZFELDER[fieldIndex + 1]?.icon} {KOMPETENZFELDER[fieldIndex + 1]?.name}
+                Nächstes Feld: {KOMPETENZFELDER[fieldIndex + 1]?.icon} {KOMPETENZFELDER[fieldIndex + 1]?.name}
               </p>
             )}
 
@@ -874,54 +989,78 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
     if (!currentScenario) return null;
 
     return (
-      <div className="page-container" style={{ maxWidth: 640 }}>
+      <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <AnimStyles />
-        {/* Top bar */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <span style={{ fontSize: 12, color: 'var(--ki-text-tertiary)' }}>{currentCategory} {'>'} {currentField.name}</span>
-            <span style={{ fontSize: 20 }}>{currentField.icon}</span>
+        <div className="animate-in" style={{ maxWidth: 580, width: '100%' }}>
+
+          {/* Field Progress Circles */}
+          <FieldProgress fields={KOMPETENZFELDER} currentIndex={fieldIndex} scores={fieldScores} />
+
+          {/* Top: Progress + Context */}
+          <div style={{ marginBottom: 28 }}>
+            <div className="progress-bar" style={{ height: 3, marginBottom: 12 }}>
+              <div className="progress-bar-fill" style={{ width: `${overallProgress}%`, transition: 'width 0.5s ease' }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button onClick={goBack} style={{
+                  background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px',
+                  fontSize: 14, color: 'var(--ki-text-tertiary)', borderRadius: 'var(--r-sm)',
+                  transition: 'color 0.15s ease',
+                }} onMouseEnter={e => e.target.style.color = 'var(--ki-text)'} onMouseLeave={e => e.target.style.color = 'var(--ki-text-tertiary)'}>
+                  ←
+                </button>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>{currentField.name}</span>
+              </div>
+              <span style={{ fontSize: 12, color: 'var(--ki-text-tertiary)' }}>{questionIndex + 1} / 5</span>
+            </div>
           </div>
-          {/* Progress bar */}
-          <div className="progress-bar" style={{ height: 4 }}>
-            <div className="progress-bar-fill" style={{ width: `${overallProgress}%`, transition: 'width 0.5s ease' }} />
+
+          {/* Scenario */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Situation</div>
+            <p style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.55, color: 'var(--ki-text)' }}>{currentScenario.scenario}</p>
           </div>
-        </div>
 
-        {/* Scenario card */}
-        <div className="card" style={{ padding: 28, marginBottom: 20, borderLeft: `4px solid ${currentField.color}` }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', marginBottom: 8 }}>{'\u{1F4CD}'} Szenario:</div>
-          <p style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.6 }}>{currentScenario.scenario}</p>
-        </div>
+          {/* Options */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {currentScenario.options.map((opt, i) => {
+              const isSelected = selectedOption === opt;
+              return (
+                <button key={i} onClick={() => !selectedOption && handleOptionClick(opt)} style={{
+                  display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px',
+                  borderRadius: 'var(--r-md)', cursor: selectedOption ? 'default' : 'pointer',
+                  textAlign: 'left', width: '100%',
+                  border: isSelected ? '2px solid var(--ki-red)' : '2px solid var(--ki-border)',
+                  background: isSelected ? 'rgba(204,20,38,0.04)' : 'var(--ki-card)',
+                  animation: isSelected ? 'optPulse 0.3s ease' : 'none',
+                  transition: 'all 0.2s ease',
+                  opacity: selectedOption && !isSelected ? 0.4 : 1,
+                  transform: isSelected ? 'scale(1.01)' : 'scale(1)',
+                }}>
+                  <span style={{
+                    width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                    background: 'var(--ki-bg-alt)', border: '1px solid var(--ki-border)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)',
+                  }}>{String.fromCharCode(65 + i)}</span>
+                  <span style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.5 }}>{opt.text}</span>
+                </button>
+              );
+            })}
+          </div>
 
-        {/* Options 2x2 grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-          {currentScenario.options.map((opt, i) => {
-            const isSelected = selectedOption === opt;
-            return (
-              <button key={i} onClick={() => !selectedOption && handleOptionClick(opt)} className="card" style={{
-                cursor: selectedOption ? 'default' : 'pointer', padding: 20, textAlign: 'left', border: isSelected ? '2px solid var(--ki-red)' : '2px solid transparent',
-                background: isSelected ? 'rgba(204,20,38,0.06)' : 'var(--ki-card)',
-                animation: isSelected ? 'optPulse 0.4s ease' : 'none',
-                transition: 'all 0.2s ease', opacity: selectedOption && !isSelected ? 0.5 : 1,
-              }}>
-                <div style={{ fontSize: 24, marginBottom: 8 }}>{opt.emoji}</div>
-                <div style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.5 }}>{opt.text}</div>
-              </button>
-            );
-          })}
-        </div>
+          {/* Progress dots */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 24 }}>
+            {[0, 1, 2, 3, 4].map(i => (
+              <div key={i} style={{
+                width: i === questionIndex ? 20 : 6, height: 6, borderRadius: 3,
+                background: i <= questionIndex ? 'var(--ki-red)' : 'var(--ki-border)',
+                transition: 'all 0.3s ease',
+              }} />
+            ))}
+          </div>
 
-        {/* Scenario dots */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 20 }}>
-          {[0, 1, 2, 3, 4].map(i => (
-            <div key={i} style={{
-              width: i === questionIndex ? 24 : 8, height: 8, borderRadius: 4,
-              background: i < questionIndex ? 'var(--ki-red)' : i === questionIndex ? 'var(--ki-red)' : 'var(--grey-4)',
-              transition: 'all 0.3s ease',
-            }} />
-          ))}
-          <span style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginLeft: 8 }}>Szenario {questionIndex + 1}/5</span>
         </div>
       </div>
     );
@@ -930,10 +1069,10 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
   // PHASE 3: KARRIERE-PHASE AUSWAHL
   if (phase === 3) {
     const KARRIERE_PHASEN_AUSWAHL = [
-      { id: 'studierende', label: '🎓 Studierende', desc: 'Studium, Praktika, Berufseinstieg vorbereiten' },
-      { id: 'berufseinsteiger', label: '🚀 Berufseinsteiger (0-3 Jahre)', desc: 'Erste Festanstellung, Orientierung, Skills aufbauen' },
-      { id: 'berufserfahren', label: '💼 Berufserfahren (3-10 Jahre)', desc: 'Expertise vertiefen, Karriere beschleunigen, Gehalt optimieren' },
-      { id: 'fuehrungskraft', label: '👑 Führungskraft / Executive', desc: 'Team leiten, strategisch denken, C-Level Netzwerk' },
+      { id: 'studierende', label: 'Studierende', desc: 'Studium, Praktika, Berufseinstieg vorbereiten' },
+      { id: 'berufseinsteiger', label: 'Berufseinsteiger (0–3 Jahre)', desc: 'Erste Festanstellung, Orientierung, Skills aufbauen' },
+      { id: 'berufserfahren', label: 'Berufserfahren (3–10 Jahre)', desc: 'Expertise vertiefen, Karriere beschleunigen, Gehalt optimieren' },
+      { id: 'fuehrungskraft', label: 'Führungskraft / Executive', desc: 'Team leiten, strategisch denken, C-Level Netzwerk' },
     ];
 
     async function selectPhase(phaseId) {
@@ -1016,7 +1155,7 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
         {/* Top 3 / Bottom 3 */}
         <div className="grid-2" style={{ marginBottom: 24 }}>
           <div className="card animate-in">
-            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Deine Top 3 St\u00E4rken</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Deine Top 3 Stärken</h3>
             {top3.map((f, i) => (
               <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--ki-border)' }}>
                 <span style={{ fontSize: 16 }}>{['\u{1F947}', '\u{1F948}', '\u{1F949}'][i]}</span>
@@ -1045,8 +1184,8 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
             <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>Impostor-Check</h3>
             <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', lineHeight: 1.6 }}>
               {impostorDelta > 0
-                ? `Dein objektiver Score liegt ${impostorDelta}% \u00FCber deiner Selbsteinsch\u00E4tzung. Du untersch\u00E4tzt dich systematisch \u2014 ein klassisches Impostor-Syndrom-Muster.`
-                : `Deine Selbsteinsch\u00E4tzung liegt ${Math.abs(impostorDelta)}% \u00FCber deinem objektiven Score. Etwas mehr kritische Reflexion k\u00F6nnte dir helfen.`
+                ? `Dein objektiver Score liegt ${impostorDelta}% über deiner Selbsteinschätzung. Du unterschätzt dich systematisch — ein klassisches Impostor-Syndrom-Muster.`
+                : `Deine Selbsteinschätzung liegt ${Math.abs(impostorDelta)}% über deinem objektiven Score. Etwas mehr kritische Reflexion könnte dir helfen.`
               }
             </p>
           </div>
@@ -1062,7 +1201,7 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
 
         {/* Actions */}
         <div style={{ marginBottom: 32 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Was willst du als N\u00E4chstes tun?</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Was willst du als Nächstes tun?</h3>
           <div className="grid-3">
             <a href="/coach" className="card" style={{ textDecoration: 'none', color: 'inherit', textAlign: 'center', padding: 20 }}>
               <div style={{ fontSize: 28, marginBottom: 8 }}>{'\u{1F916}'}</div>
@@ -1070,7 +1209,7 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
             </a>
             <a href="/masterclass" className="card" style={{ textDecoration: 'none', color: 'inherit', textAlign: 'center', padding: 20 }}>
               <div style={{ fontSize: 28, marginBottom: 8 }}>{'\u25B6'}</div>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>Schw\u00E4chsten Bereich trainieren</div>
+              <div style={{ fontSize: 13, fontWeight: 600 }}>Schwächsten Bereich trainieren</div>
             </a>
             <button className="card" onClick={() => { setPhase(1); setResumePrompt(false); setAnswers({}); setFieldScores({}); setFieldIndex(0); setQuestionIndex(0); }} style={{ textAlign: 'center', padding: 20, cursor: 'pointer', border: 'none' }}>
               <div style={{ fontSize: 28, marginBottom: 8 }}>{'\u{1F504}'}</div>
@@ -1083,7 +1222,7 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
         <div className="card" style={{ aspectRatio: '16/9', maxHeight: 220, background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
           <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(204,20,38,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: 'white' }}>{'\u25B6'}</div>
           <div style={{ color: 'white', fontSize: 15, fontWeight: 600 }}>Wie liest du dein Karriere-Blutbild?</div>
-          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>Video verf\u00FCgbar ab April 2026</div>
+          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>Video verfügbar ab April 2026</div>
         </div>
       </div>
     );

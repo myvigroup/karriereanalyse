@@ -37,14 +37,14 @@ export async function GET() {
       suggestedAction = 'Kontakt aufnehmen';
       moduleLink = '/network';
     } else if ((profile?.streak_count || 0) >= 3) {
-      message = `${profile.streak_count} Tage Streak! Du bist auf einem Roll. Nutze den Schwung f\u00FCr deine n\u00E4chste Lektion.`;
-      suggestedAction = 'N\u00E4chste Lektion starten';
+      message = `${profile.streak_count} Tage Streak! Du bist auf einem Roll. Nutze den Schwung für deine nächste Lektion.`;
+      suggestedAction = 'Nächste Lektion starten';
       moduleLink = '/masterclass';
     } else {
       const impulses = [
         { message: 'Starte den Tag mit einer kurzen Karriere-Reflexion. Was ist dein wichtigstes Ziel diese Woche?', suggestedAction: 'Ziele definieren', moduleLink: '/strategy/decision' },
         { message: 'Hast du dein LinkedIn-Profil diese Woche aktualisiert? 85% der Recruiter nutzen LinkedIn.', suggestedAction: 'Profil optimieren', moduleLink: '/branding' },
-        { message: 'Dokumentiere einen Erfolg von gestern. Dein zuk\u00FCnftiges Ich wird dir danken!', suggestedAction: 'Win eintragen', moduleLink: '/salary-log' },
+        { message: 'Dokumentiere einen Erfolg von gestern. Dein zukünftiges Ich wird dir danken!', suggestedAction: 'Win eintragen', moduleLink: '/salary-log' },
       ];
       const daily = impulses[new Date().getDay() % impulses.length];
       message = daily.message;

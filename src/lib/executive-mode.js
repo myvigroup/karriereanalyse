@@ -12,7 +12,7 @@ export function getGreeting(profile) {
   const timeGreeting = hour < 12 ? 'Guten Morgen' : hour < 18 ? 'Guten Tag' : 'Guten Abend';
 
   if (isExecutive(profile)) {
-    return `${timeGreeting}, ${name}. Bereit f\u00FCr strategische Entscheidungen?`;
+    return `${timeGreeting}, ${name}. Bereit für strategische Entscheidungen?`;
   }
   return `${timeGreeting}, ${name}`;
 }

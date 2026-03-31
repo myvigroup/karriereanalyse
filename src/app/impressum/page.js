@@ -5,10 +5,10 @@ export default function ImpressumPage() {
       <h1 style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-0.04em', margin: '24px 0 32px' }}>Impressum</h1>
 
       <div style={{ fontSize: 14, color: 'var(--ki-text-secondary)', lineHeight: 1.8 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--ki-text)', marginBottom: 12 }}>Angaben gem\u00E4\u00DF \u00A7 5 TMG</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--ki-text)', marginBottom: 12 }}>Angaben gemäß \u00A7 5 TMG</h2>
         <p>
           Karriere-Institut GmbH (Platzhalter)<br />
-          Musterstra\u00DFe 1<br />
+          Musterstraße 1<br />
           10115 Berlin
         </p>
 
@@ -19,7 +19,7 @@ export default function ImpressumPage() {
         </p>
 
         <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--ki-text)', margin: '24px 0 12px' }}>Vertreten durch</h2>
-        <p>[Gesch\u00E4ftsf\u00FChrer Name]</p>
+        <p>[Geschäftsführer Name]</p>
 
         <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--ki-text)', margin: '24px 0 12px' }}>Registereintrag</h2>
         <p>
@@ -31,10 +31,10 @@ export default function ImpressumPage() {
         <p>USt-IdNr.: DE XXXXXXXXX</p>
 
         <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--ki-text)', margin: '24px 0 12px' }}>Streitschlichtung</h2>
-        <p>Die Europ\u00E4ische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit. Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+        <p>Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit. Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
       </div>
 
-      <p style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 48 }}>Stand: M\u00E4rz 2026</p>
+      <p style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 48 }}>Stand: März 2026</p>
     </div>
   );
 }

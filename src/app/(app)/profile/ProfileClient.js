@@ -256,12 +256,12 @@ export default function ProfileClient({ profile: initialProfile, userBadges, all
           <div>
             <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Status</div>
             <span className={`pill ${profile?.subscription_status === 'active' || profile?.subscription_status === 'trialing' ? 'pill-green' : profile?.subscription_status === 'past_due' ? 'pill-gold' : 'pill-grey'}`}>
-              {profile?.subscription_status === 'active' ? 'Aktiv' : profile?.subscription_status === 'trialing' ? 'Testphase' : profile?.subscription_status === 'past_due' ? '\u00DCberf\u00E4llig' : profile?.subscription_status === 'canceled' ? 'Gek\u00FCndigt' : 'Inaktiv'}
+              {profile?.subscription_status === 'active' ? 'Aktiv' : profile?.subscription_status === 'trialing' ? 'Testphase' : profile?.subscription_status === 'past_due' ? 'Überfällig' : profile?.subscription_status === 'canceled' ? 'Gekündigt' : 'Inaktiv'}
             </span>
           </div>
           {profile?.subscription_ends_at && (
             <div>
-              <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>L\u00E4uft bis</div>
+              <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Läuft bis</div>
               <div style={{ fontSize: 14, fontWeight: 600 }}>{new Date(profile.subscription_ends_at).toLocaleDateString('de-DE')}</div>
             </div>
           )}
@@ -310,14 +310,14 @@ export default function ProfileClient({ profile: initialProfile, userBadges, all
             className="btn btn-ghost"
             style={{ justifyContent: 'flex-start', fontSize: 13, color: 'var(--ki-error)' }}
             onClick={async () => {
-              if (!confirm('Bist du sicher? Alle deine Daten werden unwiderruflich gel\u00F6scht.')) return;
-              if (!confirm('Letzte Warnung: Dies kann NICHT r\u00FCckg\u00E4ngig gemacht werden.')) return;
+              if (!confirm('Bist du sicher? Alle deine Daten werden unwiderruflich gelöscht.')) return;
+              if (!confirm('Letzte Warnung: Dies kann NICHT rückgängig gemacht werden.')) return;
               await supabase.rpc('delete_user_data', { target_user_id: userId });
               await supabase.auth.signOut();
               window.location.href = '/auth/login';
             }}
           >
-            {'\u{1F5D1}\uFE0F'} Konto und alle Daten l\u00F6schen
+            {'\u{1F5D1}\uFE0F'} Konto und alle Daten löschen
           </button>
         </div>
       </div>

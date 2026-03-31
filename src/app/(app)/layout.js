@@ -20,7 +20,14 @@ export default async function AppLayout({ children }) {
     .eq('id', user.id)
     .single();
 
-  if (profile && profile.onboarding_complete === false) redirect('/onboarding');
+  // Onboarding entfernt — neue User starten direkt mit der Karriere-Analyse
+  // Basis-Profildaten (DSGVO, onboarding) werden beim ersten Zugriff gesetzt
+  if (profile && !profile.onboarding_complete) {
+    await supabase.from('profiles').update({
+      onboarding_complete: true,
+      dsgvo_consent_at: profile.dsgvo_consent_at || new Date().toISOString(),
+    }).eq('id', user.id);
+  }
 
   // Check if user has completed analysis (robust: bei Fehler → nicht blockieren)
   let hasCompletedAnalysis = true; // Default: nicht blockieren

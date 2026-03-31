@@ -1,12 +1,12 @@
 export default function LandingPage() {
   const features = [
-    { icon: '\u25CE', title: 'KI-Karriereanalyse', desc: '13 Kompetenzfelder in 10 Minuten analysiert. Finde heraus, wo dein gr\u00F6\u00DFtes Potenzial liegt.' },
-    { icon: '\u{1F916}', title: 'KI-Coach', desc: 'Dein pers\u00F6nlicher Karriere-Mentor, verf\u00FCgbar 24/7. Kontextbewusst und auf dich zugeschnitten.' },
-    { icon: '\u{1F4CA}', title: 'Gehaltsintelligenz', desc: 'Erfahre deinen Marktwert, vergleiche Geh\u00E4lter und verhandle mit Daten statt Bauchgef\u00FChl.' },
+    { icon: '\u25CE', title: 'KI-Karriereanalyse', desc: '13 Kompetenzfelder in 10 Minuten analysiert. Finde heraus, wo dein größtes Potenzial liegt.' },
+    { icon: '\u{1F916}', title: 'KI-Coach', desc: 'Dein persönlicher Karriere-Mentor, verfügbar 24/7. Kontextbewusst und auf dich zugeschnitten.' },
+    { icon: '\u{1F4CA}', title: 'Gehaltsintelligenz', desc: 'Erfahre deinen Marktwert, vergleiche Gehälter und verhandle mit Daten statt Bauchgefühl.' },
   ];
 
   const tiers = [
-    { name: 'Free', price: '0\u20AC', sub: 'f\u00FCr immer', features: ['Karriereanalyse', 'Dashboard', 'Gehaltsdatenbank'], cta: 'Kostenlos starten', primary: false },
+    { name: 'Free', price: '0\u20AC', sub: 'für immer', features: ['Karriereanalyse', 'Dashboard', 'Gehaltsdatenbank'], cta: 'Kostenlos starten', primary: false },
     { name: 'Pro', price: '49\u20AC', sub: '/Monat', features: ['Alles aus Free', 'KI-Coach unbegrenzt', 'Masterclass-Zugang', 'LinkedIn-Optimizer', 'Bewerbungs-Assistent'], cta: 'Pro starten', primary: true },
     { name: 'Team', price: '29\u20AC', sub: '/User/Monat', features: ['Alles aus Pro', 'Admin-Dashboard', 'Team-Analytics', 'Coaching-Cockpit'], cta: 'Team anfragen', primary: false },
   ];
@@ -21,12 +21,12 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section style={{ textAlign: 'center', padding: '80px 24px 60px', maxWidth: 800, margin: '0 auto' }}>
-        <div className="pill pill-red" style={{ marginBottom: 16 }}>Die Blaupause f\u00FCr deine berufliche Zukunft</div>
+        <div className="pill pill-red" style={{ marginBottom: 16 }}>Die Blaupause für deine berufliche Zukunft</div>
         <h1 style={{ fontSize: 52, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 16, color: 'var(--ki-text)' }}>
           Erhalte jetzt dein<br />Karriere-Blutbild.
         </h1>
         <p style={{ fontSize: 18, color: 'var(--ki-text-secondary)', maxWidth: 560, margin: '0 auto 32px', lineHeight: 1.6 }}>
-          KI-gest\u00FCtzte Analyse, pers\u00F6nliches Coaching und strategische Tools \u2014 alles in einer Plattform f\u00FCr deinen beruflichen Erfolg.
+          KI-gestützte Analyse, persönliches Coaching und strategische Tools â alles in einer Plattform für deinen beruflichen Erfolg.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a href="/auth/register" className="btn btn-primary" style={{ fontSize: 16, padding: '14px 32px' }}>
@@ -59,7 +59,7 @@ export default function LandingPage() {
 
       {/* Pricing */}
       <section style={{ maxWidth: 1000, margin: '0 auto', padding: '80px 24px' }}>
-        <h2 style={{ textAlign: 'center', fontSize: 34, fontWeight: 700, letterSpacing: '-0.04em', marginBottom: 48 }}>W\u00E4hle deinen Plan</h2>
+        <h2 style={{ textAlign: 'center', fontSize: 34, fontWeight: 700, letterSpacing: '-0.04em', marginBottom: 48 }}>Wähle deinen Plan</h2>
         <div className="grid-3">
           {tiers.map((t, i) => (
             <div key={i} className="card" style={{ padding: 32, border: t.primary ? '2px solid var(--ki-red)' : '1px solid var(--ki-border)', position: 'relative' }}>

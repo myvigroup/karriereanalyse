@@ -16,10 +16,10 @@ export async function POST(req) {
     event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
-    return NextResponse.json({ error: 'Ung\u00FCltige Signatur' }, { status: 400 });
+    return NextResponse.json({ error: 'Ungültige Signatur' }, { status: 400 });
   }
 
-  // IDEMPOTENZ: Pr\u00FCfe ob Event schon verarbeitet
+  // IDEMPOTENZ: Prüfe ob Event schon verarbeitet
   const { data: existing } = await supabaseAdmin
     .from('stripe_events')
     .select('id')

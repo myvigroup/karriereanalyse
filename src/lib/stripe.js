@@ -18,15 +18,15 @@ export const PRODUCTS = {
     name: 'Seminare',
     type: 'one_time',
     stripePrice: process.env.STRIPE_PRICE_SEMINAR,
-    features: ['Ganzt\u00E4giges Intensiv-Seminar', 'Arbeitsmaterialien', 'Teilnahme-Zertifikat'],
-    description: 'Ganzt\u00E4gige Workshops mit erfahrenen Coaches',
+    features: ['Ganztägiges Intensiv-Seminar', 'Arbeitsmaterialien', 'Teilnahme-Zertifikat'],
+    description: 'Ganztägige Workshops mit erfahrenen Coaches',
   },
   COACHING: {
     name: 'Privat-Coaching',
     type: 'one_time',
     stripePrice: process.env.STRIPE_PRICE_COACHING,
-    features: ['60 Min. 1:1 Session', 'Pers\u00F6nlicher Aktionsplan', 'Follow-up Email'],
-    description: 'Pers\u00F6nliches Coaching mit zertifiziertem Karriere-Coach',
+    features: ['60 Min. 1:1 Session', 'Persönlicher Aktionsplan', 'Follow-up Email'],
+    description: 'Persönliches Coaching mit zertifiziertem Karriere-Coach',
     calendlyUrl: process.env.CALENDLY_COACHING_URL,
   },
   ANALYSE_STUDENT: {
@@ -34,14 +34,14 @@ export const PRODUCTS = {
     type: 'one_time',
     stripePrice: process.env.STRIPE_PRICE_ANALYSE_STUDENT,
     features: ['65 Fragen Assessment', '50+ Seiten Report', 'Radar-Chart', 'Handlungsempfehlungen'],
-    description: 'Lege den Grundstein f\u00FCr deine Karriere',
+    description: 'Lege den Grundstein für deine Karriere',
   },
   ANALYSE_PRO: {
-    name: 'Karriere-Analyse (Berufst\u00E4tige)',
+    name: 'Karriere-Analyse (Berufstätige)',
     type: 'one_time',
     stripePrice: process.env.STRIPE_PRICE_ANALYSE_PRO,
     features: ['65 Fragen Assessment', '50+ Seiten Report', 'Coach-Auswertung', 'Karriere-Roadmap'],
-    description: 'Dein Karriere-Blutbild: Fundierter \u00DCberblick \u00FCber deinen Ist-Zustand',
+    description: 'Dein Karriere-Blutbild: Fundierter Überblick über deinen Ist-Zustand',
   },
 };
 
