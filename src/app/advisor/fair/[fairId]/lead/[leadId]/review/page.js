@@ -51,6 +51,8 @@ export default function CVReview() {
   const [summary, setSummary] = useState('');
   const [activeTab, setActiveTab] = useState('struktur');
   const [loading, setLoading] = useState(true);
+  const [aiStatus, setAiStatus] = useState('idle'); // idle | analyzing | done | error
+  const [aiSuggested, setAiSuggested] = useState(new Set()); // Track welche Items KI-Vorschläge sind
 
   const debounceRef = useRef(null);
 
@@ -126,6 +128,7 @@ export default function CVReview() {
       setSummary(existingFeedback?.summary || '');
 
       // Bestehende Feedback-Items laden
+      let hasExistingItems = false;
       if (existingFeedback) {
         const { data: items } = await supabase
           .from('cv_feedback_items')
@@ -146,15 +149,105 @@ export default function CVReview() {
           }
         });
 
+        hasExistingItems = selected.size > 0 || Object.keys(texts).length > 0;
         setSelectedItems(selected);
         setFreetexts(texts);
         setCategoryRatings(ratings);
+
+        // Wenn KI-Analyse schon da, Status auf done
+        if (existingFeedback.ai_analysis) {
+          setAiStatus('done');
+        }
       }
 
       setLoading(false);
+
+      // KI-Analyse automatisch triggern wenn:
+      // - Dokument existiert
+      // - Feedback existiert
+      // - Noch keine KI-Analyse da
+      // - Noch keine manuellen Items
+      if (doc && existingFeedback && !existingFeedback.ai_analysis && !hasExistingItems) {
+        triggerAiAnalysis(doc.id, existingFeedback.id);
+      }
     }
     load();
   }, [leadId, supabase]);
+
+  // KI-Analyse triggern
+  async function triggerAiAnalysis(documentId, feedbackId) {
+    setAiStatus('analyzing');
+    try {
+      const res = await fetch('/api/cv/parse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId, feedbackId }),
+      });
+      const data = await res.json();
+
+      if (data.success && data.aiAnalysis) {
+        applyAiSuggestions(data.aiAnalysis, feedbackId);
+        setAiStatus('done');
+      } else {
+        setAiStatus('error');
+      }
+    } catch {
+      setAiStatus('error');
+    }
+  }
+
+  // KI-Vorschläge anwenden
+  async function applyAiSuggestions(analysis, feedbackId) {
+    const suggested = new Set();
+    const newSelected = new Set();
+    const newFreetexts = {};
+    const newRatings = {};
+
+    if (analysis.categories) {
+      for (const [category, catData] of Object.entries(analysis.categories)) {
+        // Presets auswählen
+        if (catData.selectedPresets) {
+          for (const presetLabel of catData.selectedPresets) {
+            newSelected.add(presetLabel);
+            suggested.add(presetLabel);
+            // In DB speichern
+            const preset = presets.find(p => p.label === presetLabel && p.category === category);
+            if (preset && feedbackId) {
+              await toggleFeedbackItem(feedbackId, preset, true);
+            }
+          }
+        }
+        // Freitext
+        if (catData.comment) {
+          newFreetexts[category] = catData.comment;
+          if (feedbackId) {
+            await saveFeedbackFreetext(feedbackId, category, catData.comment);
+          }
+        }
+        // Rating
+        if (catData.rating) {
+          newRatings[category] = catData.rating;
+          if (feedbackId) {
+            await saveCategoryRating(feedbackId, category, catData.rating);
+          }
+        }
+      }
+    }
+
+    // Gesamtbewertung
+    if (analysis.overallRating && feedbackId) {
+      setOverallRating(analysis.overallRating);
+      await saveFeedback(feedbackId, { overallRating: analysis.overallRating, summary: analysis.summary || '' });
+    }
+    if (analysis.summary) {
+      setSummary(analysis.summary);
+    }
+
+    setSelectedItems(newSelected);
+    setAiSuggested(suggested);
+    setFreetexts(newFreetexts);
+    setCategoryRatings(newRatings);
+  }
 
   // Auto-Save für Gesamtbewertung + Zusammenfassung
   useEffect(() => {
@@ -173,6 +266,12 @@ export default function CVReview() {
       const next = new Set(prev);
       if (isActive) next.add(preset.label);
       else next.delete(preset.label);
+      return next;
+    });
+    // Entferne aus AI-Vorschlägen wenn manuell getoggelt
+    setAiSuggested(prev => {
+      const next = new Set(prev);
+      next.delete(preset.label);
       return next;
     });
     await toggleFeedbackItem(feedback.id, preset, isActive);
@@ -268,7 +367,56 @@ export default function CVReview() {
             CV-Review: {lead?.name}
           </h1>
         </div>
+        {/* KI-Status Badge */}
+        {aiStatus !== 'idle' && (
+          <div style={{
+            padding: '6px 14px',
+            borderRadius: 980,
+            fontSize: 13,
+            fontWeight: 600,
+            background: aiStatus === 'analyzing' ? '#FEF3C7' : aiStatus === 'done' ? '#D1FAE5' : '#FEE2E2',
+            color: aiStatus === 'analyzing' ? '#D97706' : aiStatus === 'done' ? '#059669' : '#DC2626',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}>
+            {aiStatus === 'analyzing' && (
+              <>
+                <span style={{ animation: 'pulse 1.5s infinite' }}>⏳</span>
+                KI analysiert...
+              </>
+            )}
+            {aiStatus === 'done' && '✓ KI-Vorschläge angewendet'}
+            {aiStatus === 'error' && (
+              <>
+                KI-Analyse fehlgeschlagen
+                <button
+                  onClick={() => document && feedback && triggerAiAnalysis(document.id, feedback.id)}
+                  style={{ background: 'none', border: 'none', color: '#DC2626', cursor: 'pointer', textDecoration: 'underline', fontSize: 13 }}
+                >
+                  Nochmal
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* KI-Analyse Banner */}
+      {aiStatus === 'analyzing' && (
+        <div style={{
+          background: 'linear-gradient(135deg, #1A1A1A 0%, #2C2C2E 100%)',
+          borderRadius: 16,
+          padding: 24,
+          marginBottom: 20,
+          textAlign: 'center',
+          color: '#fff',
+        }}>
+          <div style={{ fontSize: 28, marginBottom: 8 }}>🤖</div>
+          <p style={{ fontWeight: 600, fontSize: 16, margin: '0 0 4px' }}>KI analysiert den Lebenslauf...</p>
+          <p style={{ fontSize: 13, opacity: 0.7, margin: 0 }}>Die Feedback-Chips werden automatisch vorausgefüllt. Du kannst sie danach anpassen.</p>
+        </div>
+      )}
 
       {/* Split View */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, minHeight: 600 }}>
@@ -296,6 +444,9 @@ export default function CVReview() {
           border: '1px solid #E8E6E1',
           display: 'flex',
           flexDirection: 'column',
+          opacity: aiStatus === 'analyzing' ? 0.6 : 1,
+          pointerEvents: aiStatus === 'analyzing' ? 'none' : 'auto',
+          transition: 'opacity 0.3s',
         }}>
           {/* Tabs */}
           <div style={{
@@ -347,6 +498,7 @@ export default function CVReview() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {categoryPresets.map(preset => {
                   const isSelected = selectedItems.has(preset.label);
+                  const isAiSuggestion = aiSuggested.has(preset.label);
                   const bgColor = isSelected
                     ? preset.sentiment === 'positive' ? '#D1FAE5'
                     : preset.sentiment === 'negative' ? '#FEE2E2'
@@ -379,9 +531,17 @@ export default function CVReview() {
                         cursor: 'pointer',
                         transition: 'all 0.15s',
                         lineHeight: 1.4,
+                        position: 'relative',
                       }}
                     >
                       {preset.sentiment === 'positive' ? '✓ ' : preset.sentiment === 'negative' ? '✗ ' : ''}{preset.label}
+                      {isSelected && isAiSuggestion && (
+                        <span style={{
+                          marginLeft: 4,
+                          fontSize: 10,
+                          opacity: 0.7,
+                        }} title="KI-Vorschlag">🤖</span>
+                      )}
                     </button>
                   );
                 })}
@@ -464,8 +624,11 @@ export default function CVReview() {
         </div>
       </div>
 
-      {/* Responsive: Stack on small screens */}
       <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
         @media (max-width: 900px) {
           div[style*="gridTemplateColumns: '1fr 1fr'"] {
             grid-template-columns: 1fr !important;
