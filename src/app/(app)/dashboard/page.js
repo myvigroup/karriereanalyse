@@ -19,6 +19,9 @@ export default async function DashboardPage() {
     );
   }
 
+  // Berater → direkt zum Advisor-Bereich
+  if (profile.role === 'advisor') redirect('/advisor');
+
   // Messe-Besucher mit CV-Check → direkt zum Lebenslauf-Check
   if (profile.membership_type === 'basis') {
     const { data: cvDoc } = await supabase
