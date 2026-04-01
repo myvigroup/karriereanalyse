@@ -168,9 +168,9 @@ export default function Sidebar({ profile, analysisResults }) {
 
   return (
     <aside data-tour-sidebar="" className="sidebar" style={{
-      width: 240, minHeight: '100vh', background: 'var(--ki-card)',
+      width: 240, height: '100vh', background: 'var(--ki-card)',
       borderRight: '1px solid var(--ki-border)', display: 'flex', flexDirection: 'column',
-      padding: '24px 12px', position: 'fixed', left: 0, top: 0,
+      padding: '24px 12px', position: 'fixed', left: 0, top: 0, overflowY: 'auto',
     }}>
       {/* Logo + Notifications */}
       <div style={{ padding: '0 16px 24px', borderBottom: '1px solid var(--ki-border)', marginBottom: 16 }}>
