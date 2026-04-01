@@ -19,7 +19,7 @@ export default async function DashboardPage() {
     );
   }
 
-  // Berater → direkt zum Advisor-Bereich
+  // Berater → Messe-Dashboard
   if (profile.role === 'advisor') redirect('/advisor');
 
   // Messe-Besucher mit CV-Check → direkt zum Lebenslauf-Check

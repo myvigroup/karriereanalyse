@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { createLead } from '@/app/advisor/actions';
+import { createLead } from '@/app/(app)/advisor/actions';
 import Link from 'next/link';
 
 export default function NewLead() {
