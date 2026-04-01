@@ -31,7 +31,23 @@
       "Bash(ls \"src/app/\\(app\\)/advisor-fair-tmp/\")",
       "Bash(xargs kill:*)",
       "Bash(find \"src/app/\\(app\\)/advisor\" -name \"*.js\" -exec sed -i '' \"s|@/app/advisor/actions|@/app/\\(app\\)/advisor/actions|g\" {} +)",
-      "Bash(ls /Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\\\\\(app\\\\\\)/)"
+      "Bash(ls /Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\\\\\(app\\\\\\)/)",
+      "Bash(mkdir -p /Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\\\\\(advisor\\\\\\)/advisor/fair/[fairId]/lead/[leadId])",
+      "Bash(mkdir -p /Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\\\\\(advisor\\\\\\)/advisor/fair/[fairId]/new-lead)",
+      "Bash(mkdir -p /Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\\\\\(advisor-session\\\\\\)/advisor/fair/[fairId]/lead/[leadId])",
+      "Bash(mkdir -p /Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\\\\\(advisor-session\\\\\\)/advisor/fair/[fairId]/new-lead)",
+      "Bash(BASE=\"/Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\(advisor-session\\)/advisor/fair/[fairId]/lead/[leadId]\")",
+      "Bash(mkdir -p \"$BASE/upload\" \"$BASE/review\" \"$BASE/contact\" \"$BASE/summary\" \"$BASE/done\")",
+      "Bash(__NEW_LINE_e81dc1c33832222e__ SRC=\"/Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\(app\\)/advisor/fair/[fairId]\")",
+      "Bash(cp \"$SRC/page.js\" \"/Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\(advisor-session\\)/advisor/fair/[fairId]/page.js\")",
+      "Bash(cp \"$SRC/lead/[leadId]/upload/page.js\" \"$BASE/upload/page.js\")",
+      "Bash(sed 's|@/app/\\(app\\)/advisor/actions|@/app/\\(advisor-session\\)/advisor/actions|g' \"/Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\(app\\)/advisor/fair/[fairId]/lead/[leadId]/review/page.js\")",
+      "Bash(\"/Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\(advisor-session\\)/advisor/fair/[fairId]/lead/[leadId]/review/page.js\")",
+      "Bash(__NEW_LINE_eabc2cc0beaa1de8__ sed:*)",
+      "Bash(\"/Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\(advisor-session\\)/advisor/fair/[fairId]/lead/[leadId]/contact/page.js\")",
+      "Bash(\"/Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\(advisor-session\\)/advisor/fair/[fairId]/lead/[leadId]/summary/page.js\")",
+      "Bash(find \"/Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\(advisor\\)\" -type f)",
+      "Bash(sort echo:*)"
     ]
   }
 }

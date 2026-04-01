@@ -20,7 +20,7 @@ export default async function AppLayout({ children }) {
     .eq('id', user.id)
     .single();
 
-  if (profile && profile.onboarding_complete === false && profile.role !== 'advisor') redirect('/onboarding');
+  if (profile && profile.onboarding_complete === false) redirect('/onboarding');
 
   // Check if user has completed analysis (robust: bei Fehler → nicht blockieren)
   let hasCompletedAnalysis = true; // Default: nicht blockieren

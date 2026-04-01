@@ -55,16 +55,6 @@ const NAV_GROUPS = [
 // Flat list for backward compatibility
 const NAV_ITEMS = NAV_GROUPS.flatMap(g => g.items);
 
-const ADVISOR_NAV_GROUPS = [
-  {
-    label: null,
-    items: [
-      { label: 'Messe-Dashboard',   path: '/advisor',          icon: '📋' },
-      { label: 'Lebenslauf-Check',  path: '/cv-check',         icon: '📄' },
-    ],
-  },
-];
-
 const ADMIN_ITEMS = [
   { label: 'Userverwaltung',    path: '/admin/users',     icon: '👤' },
   { label: 'Kursverwaltung',    path: '/admin/courses',   icon: '📚' },
@@ -79,8 +69,7 @@ export default function Sidebar({ profile, analysisResults }) {
   const router = useRouter();
   const supabase = createClient();
   const isAdmin = profile?.role === 'admin' || profile?.role === 'coach';
-  const isAdvisor = profile?.role === 'advisor';
-  const navGroups = isAdvisor ? ADVISOR_NAV_GROUPS : NAV_GROUPS;
+  const navGroups = NAV_GROUPS;
 
   const { visibleModules, recommendations } = getPersonalization(analysisResults, profile?.phase);
   const recommendedCourseIds = recommendations.map(r => r.courseId);

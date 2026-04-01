@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { saveFeedback, toggleFeedbackItem, saveFeedbackFreetext, saveCategoryRating } from '@/app/(app)/advisor/actions';
+import { saveFeedback, toggleFeedbackItem, saveFeedbackFreetext, saveCategoryRating } from '@/app/(advisor-session)/advisor/actions';
 
 const CATEGORIES = [
   { key: 'struktur', label: 'Struktur', icon: '📐' },
