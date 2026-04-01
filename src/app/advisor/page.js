@@ -6,11 +6,19 @@ export default async function AdvisorHome() {
   const { data: { user } } = await supabase.auth.getUser();
 
   // Advisor-Profil laden
-  const { data: advisor } = await supabase
+  const { data: advisor, error: advisorError } = await supabase
     .from('advisors')
     .select('id')
     .eq('user_id', user.id)
-    .single();
+    .maybeSingle();
+
+  if (!advisor) {
+    return (
+      <div style={{ textAlign: 'center', padding: 64 }}>
+        <p style={{ color: '#86868b' }}>Kein Berater-Profil gefunden. (Debug: user_id={user.id}, error={advisorError?.message})</p>
+      </div>
+    );
+  }
 
   // Zugewiesene Messen laden
   const { data: assignments } = await supabase
