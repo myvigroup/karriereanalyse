@@ -25,11 +25,17 @@ export default async function AdvisorHome() {
   // Zugewiesene Messen laden
   const { data: assignments } = await admin
     .from('fair_advisors')
-    .select('fair_id, fairs(id, name, location, date_start, date_end, status)')
+    .select('fair_id')
     .eq('advisor_user_id', user.id);
 
-  // Lead-Counts pro Messe laden
   const fairIds = (assignments || []).map(a => a.fair_id);
+
+  // Messe-Details separat laden
+  const { data: fairs } = fairIds.length > 0
+    ? await admin.from('fairs').select('*').in('id', fairIds)
+    : { data: [] };
+
+  // Lead-Counts pro Messe laden
   const { data: leads } = fairIds.length > 0
     ? await admin.from('fair_leads').select('fair_id').in('fair_id', fairIds)
     : { data: [] };
@@ -39,9 +45,8 @@ export default async function AdvisorHome() {
     return acc;
   }, {});
 
-  const activeFairs = (assignments || [])
-    .filter(a => a.fairs && ['upcoming', 'active'].includes(a.fairs.status))
-    .map(a => a.fairs);
+  const activeFairs = (fairs || [])
+    .filter(f => ['upcoming', 'active'].includes(f.status));
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -70,7 +75,7 @@ export default async function AdvisorHome() {
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
-          {activeFairs.map(fair => (
+          {activeFairs.map((fair) => (
             <Link
               key={fair.id}
               href={`/advisor/fair/${fair.id}`}
