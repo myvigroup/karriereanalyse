@@ -8,10 +8,11 @@ import { redirect } from 'next/navigation';
 // Hole advisor-ID des eingeloggten Users
 async function getAdvisorId() {
   const supabase = createClient();
+  const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Nicht eingeloggt');
 
-  const { data: advisor } = await supabase
+  const { data: advisor } = await admin
     .from('advisors')
     .select('id')
     .eq('user_id', user.id)
@@ -21,16 +22,52 @@ async function getAdvisorId() {
   return { advisorId: advisor.id, userId: user.id };
 }
 
-// Lead erstellen + User anlegen falls nötig
+// Lead erstellen — nur mit Vorname, ohne Email/User
 export async function createLead(fairId, formData) {
   const { advisorId } = await getAdvisorId();
   const admin = createAdminClient();
 
   const name = formData.get('name');
+  if (!name) throw new Error('Name ist ein Pflichtfeld');
+
+  // Fair-Lead erstellen (ohne email, ohne user_id)
+  const { data: lead, error: leadError } = await admin.from('fair_leads').insert({
+    fair_id: fairId,
+    advisor_id: advisorId,
+    name,
+    status: 'registered',
+  }).select('id').single();
+
+  if (leadError) throw new Error(`Lead-Erstellung fehlgeschlagen: ${leadError.message}`);
+
+  // Funnel-Event loggen
+  await admin.from('analytics_events').insert({
+    event_name: 'fair_registered',
+    fair_id: fairId,
+    advisor_id: advisorId,
+    metadata: { lead_id: lead.id, source: 'messe' },
+  });
+
+  redirect(`/advisor/fair/${fairId}/lead/${lead.id}/upload`);
+}
+
+// Kontaktdaten erfassen + User erstellen (nach dem CV-Check)
+export async function saveContactDetails(leadId, formData) {
+  const { advisorId } = await getAdvisorId();
+  const admin = createAdminClient();
+
   const email = formData.get('email')?.toLowerCase().trim();
   const phone = formData.get('phone') || null;
 
-  if (!name || !email) throw new Error('Name und E-Mail sind Pflichtfelder');
+  if (!email) throw new Error('E-Mail ist ein Pflichtfeld');
+
+  // Lead laden
+  const { data: lead } = await admin.from('fair_leads')
+    .select('id, name, fair_id')
+    .eq('id', leadId)
+    .single();
+
+  if (!lead) throw new Error('Lead nicht gefunden');
 
   // Prüfe ob User existiert
   const { data: existingUsers } = await admin.auth.admin.listUsers();
@@ -41,46 +78,43 @@ export async function createLead(fairId, formData) {
   if (existingUser) {
     userId = existingUser.id;
   } else {
-    // Neuen User erstellen (ohne E-Mail-Bestätigung)
     const { data: newUser, error: createError } = await admin.auth.admin.createUser({
       email,
-      email_confirm: true, // Setze bestätigt, damit Magic Link funktioniert
-      user_metadata: { name, source: 'fair' },
+      email_confirm: true,
+      user_metadata: { name: lead.name, source: 'fair' },
     });
     if (createError) throw new Error(`User-Erstellung fehlgeschlagen: ${createError.message}`);
     userId = newUser.user.id;
 
-    // Profile-Eintrag wird automatisch durch trigger erstellt,
-    // aber wir aktualisieren membership_type
     await admin.from('profiles').update({
-      name,
+      name: lead.name,
       membership_type: 'basis',
     }).eq('id', userId);
   }
 
-  // Fair-Lead erstellen
-  const { data: lead, error: leadError } = await admin.from('fair_leads').insert({
-    fair_id: fairId,
-    advisor_id: advisorId,
-    user_id: userId,
-    name,
+  // Lead updaten mit Email, Phone, User-ID
+  await admin.from('fair_leads').update({
     email,
     phone,
-    status: 'registered',
-  }).select('id').single();
+    user_id: userId,
+    updated_at: new Date().toISOString(),
+  }).eq('id', leadId);
 
-  if (leadError) throw new Error(`Lead-Erstellung fehlgeschlagen: ${leadError.message}`);
+  // CV-Dokumente dem User zuordnen
+  await admin.from('cv_documents').update({
+    user_id: userId,
+  }).eq('fair_lead_id', leadId);
 
-  // Funnel-Event loggen
+  // Funnel-Event
   await admin.from('analytics_events').insert({
     user_id: userId,
-    event_name: 'fair_registered',
-    fair_id: fairId,
+    event_name: 'fair_contact_captured',
+    fair_id: lead.fair_id,
     advisor_id: advisorId,
-    metadata: { lead_id: lead.id, source: 'messe' },
+    metadata: { lead_id: leadId },
   });
 
-  redirect(`/advisor/fair/${fairId}/lead/${lead.id}/upload`);
+  redirect(`/advisor/fair/${lead.fair_id}/lead/${leadId}/summary`);
 }
 
 // Feedback speichern (Auto-Save)

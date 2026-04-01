@@ -37,24 +37,24 @@ export default function NewLead() {
         Neues Gespräch
       </h1>
       <p style={{ color: '#86868b', marginBottom: 32 }}>
-        Erfasse die Kontaktdaten des Besuchers.
+        Wie heißt dein Gesprächspartner?
       </p>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 24 }}>
           <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
-            Name *
+            Vorname *
           </label>
           <input
             type="text"
             name="name"
             required
             autoFocus
-            placeholder="Vor- und Nachname"
+            placeholder="z.B. Max"
             style={{
               width: '100%',
-              padding: '14px 16px',
-              fontSize: 16,
+              padding: '16px 18px',
+              fontSize: 18,
               border: '1px solid #E8E6E1',
               borderRadius: 12,
               outline: 'none',
@@ -63,54 +63,6 @@ export default function NewLead() {
             }}
           />
         </div>
-
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
-            E-Mail *
-          </label>
-          <input
-            type="email"
-            name="email"
-            required
-            placeholder="besucher@email.de"
-            style={{
-              width: '100%',
-              padding: '14px 16px',
-              fontSize: 16,
-              border: '1px solid #E8E6E1',
-              borderRadius: 12,
-              outline: 'none',
-              background: '#fff',
-              boxSizing: 'border-box',
-            }}
-          />
-        </div>
-
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
-            Telefon <span style={{ fontWeight: 400, color: '#86868b' }}>(empfohlen)</span>
-          </label>
-          <input
-            type="tel"
-            name="phone"
-            placeholder="+49 151 ..."
-            style={{
-              width: '100%',
-              padding: '14px 16px',
-              fontSize: 16,
-              border: '1px solid #E8E6E1',
-              borderRadius: 12,
-              outline: 'none',
-              background: '#fff',
-              boxSizing: 'border-box',
-            }}
-          />
-        </div>
-
-        <p style={{ fontSize: 12, color: '#86868b', lineHeight: 1.5, marginBottom: 24 }}>
-          Mit der Teilnahme stimmt der Besucher der Verarbeitung seiner Daten gemäß unserer{' '}
-          <a href="/datenschutz" target="_blank" style={{ color: '#CC1426' }}>Datenschutzerklärung</a> zu.
-        </p>
 
         {error && (
           <div style={{
