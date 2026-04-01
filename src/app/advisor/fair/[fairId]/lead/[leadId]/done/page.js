@@ -1,20 +1,22 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
 
 export default async function DonePage({ params }) {
   const { fairId, leadId } = params;
   const supabase = createClient();
+  const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   // Lead laden
-  const { data: lead } = await supabase
+  const { data: lead } = await admin
     .from('fair_leads')
     .select('name, email')
     .eq('id', leadId)
     .single();
 
   // Advisor laden
-  const { data: advisor } = await supabase
+  const { data: advisor } = await admin
     .from('advisors')
     .select('id')
     .eq('user_id', user.id)
@@ -22,7 +24,7 @@ export default async function DonePage({ params }) {
 
   // Tages-Count
   const today = new Date().toISOString().split('T')[0];
-  const { count: todayCount } = await supabase
+  const { count: todayCount } = await admin
     .from('fair_leads')
     .select('*', { count: 'exact', head: true })
     .eq('fair_id', fairId)

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
@@ -24,10 +25,11 @@ function getNextStep(lead) {
 export default async function FairDashboard({ params }) {
   const { fairId } = params;
   const supabase = createClient();
+  const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   // Messe laden
-  const { data: fair } = await supabase
+  const { data: fair } = await admin
     .from('fairs')
     .select('*')
     .eq('id', fairId)
@@ -36,14 +38,16 @@ export default async function FairDashboard({ params }) {
   if (!fair) redirect('/advisor');
 
   // Berater-ID prüfen
-  const { data: advisor } = await supabase
+  const { data: advisor } = await admin
     .from('advisors')
     .select('id')
     .eq('user_id', user.id)
     .single();
 
+  if (!advisor) redirect('/advisor');
+
   // Prüfe Zuordnung
-  const { data: assignment } = await supabase
+  const { data: assignment } = await admin
     .from('fair_advisors')
     .select('id')
     .eq('fair_id', fairId)
@@ -54,7 +58,7 @@ export default async function FairDashboard({ params }) {
 
   // Leads laden (heute)
   const today = new Date().toISOString().split('T')[0];
-  const { data: todayLeads } = await supabase
+  const { data: todayLeads } = await admin
     .from('fair_leads')
     .select('*')
     .eq('fair_id', fairId)
@@ -63,7 +67,7 @@ export default async function FairDashboard({ params }) {
     .order('created_at', { ascending: false });
 
   // Alle Leads zählen
-  const { count: totalLeads } = await supabase
+  const { count: totalLeads } = await admin
     .from('fair_leads')
     .select('*', { count: 'exact', head: true })
     .eq('fair_id', fairId)

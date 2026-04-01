@@ -1,12 +1,14 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
 
 export default async function AdvisorHome() {
   const supabase = createClient();
+  const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Advisor-Profil laden
-  const { data: advisor, error: advisorError } = await supabase
+  // Advisor-Profil laden (admin client umgeht RLS)
+  const { data: advisor, error: advisorError } = await admin
     .from('advisors')
     .select('id')
     .eq('user_id', user.id)
@@ -21,7 +23,7 @@ export default async function AdvisorHome() {
   }
 
   // Zugewiesene Messen laden
-  const { data: assignments } = await supabase
+  const { data: assignments } = await admin
     .from('fair_advisors')
     .select('fair_id, fairs(id, name, location, date_start, date_end, status)')
     .eq('advisor_id', advisor.id);
@@ -29,7 +31,7 @@ export default async function AdvisorHome() {
   // Lead-Counts pro Messe laden
   const fairIds = (assignments || []).map(a => a.fair_id);
   const { data: leads } = fairIds.length > 0
-    ? await supabase.from('fair_leads').select('fair_id').in('fair_id', fairIds)
+    ? await admin.from('fair_leads').select('fair_id').in('fair_id', fairIds)
     : { data: [] };
 
   const leadCountByFair = (leads || []).reduce((acc, l) => {
