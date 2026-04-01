@@ -35,6 +35,7 @@ const NAV_GROUPS = [
       { label: 'Mein Fortschritt',  path: '/marktwert',    icon: '📊' },
       { label: 'KI-Coach',          path: '/coach',        icon: '🤖' },
       { label: 'Rangliste',         path: '/community/peers', icon: '🏆' },
+      { label: 'Lebenslauf-Check',  path: '/cv-check',       icon: '📋' },
     ],
   },
   {
