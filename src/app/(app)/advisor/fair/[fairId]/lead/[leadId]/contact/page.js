@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { saveContactDetails } from '@/app/advisor/actions';
+import { saveContactDetails } from '@/app/(app)/advisor/actions';
 import Link from 'next/link';
 
 export default function ContactPage() {

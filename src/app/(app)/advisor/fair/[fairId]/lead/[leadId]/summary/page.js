@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { completeFeedback } from '@/app/advisor/actions';
+import { completeFeedback } from '@/app/(app)/advisor/actions';
 import Link from 'next/link';
 
 const CATEGORY_LABELS = {

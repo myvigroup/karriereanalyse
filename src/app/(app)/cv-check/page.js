@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
@@ -19,11 +20,12 @@ function Stars({ count }) {
 
 export default async function CVCheckPage() {
   const supabase = createClient();
+  const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
   // CV-Dokument laden
-  const { data: doc } = await supabase
+  const { data: doc } = await admin
     .from('cv_documents')
     .select('*')
     .eq('user_id', user.id)
@@ -35,7 +37,7 @@ export default async function CVCheckPage() {
   if (!doc) redirect('/dashboard');
 
   // Feedback laden
-  const { data: feedback } = await supabase
+  const { data: feedback } = await admin
     .from('cv_feedback')
     .select('*')
     .eq('cv_document_id', doc.id)
@@ -52,7 +54,7 @@ export default async function CVCheckPage() {
     : { data: [] };
 
   // Messe-Kontext
-  const { data: lead } = await supabase
+  const { data: lead } = await admin
     .from('fair_leads')
     .select('*, fairs(name, date_start), advisors(display_name)')
     .eq('user_id', user.id)
@@ -63,14 +65,14 @@ export default async function CVCheckPage() {
   // Signed URL für CV-Preview
   let previewUrl = null;
   if (doc) {
-    const { data: urlData } = await supabase.storage
+    const { data: urlData } = await admin.storage
       .from('cv-documents')
       .createSignedUrl(doc.file_path, 3600);
     previewUrl = urlData?.signedUrl;
   }
 
   // Logge first_login event (nur einmal)
-  const { data: existingLogin } = await supabase
+  const { data: existingLogin } = await admin
     .from('analytics_events')
     .select('id')
     .eq('user_id', user.id)
@@ -79,7 +81,7 @@ export default async function CVCheckPage() {
     .maybeSingle();
 
   if (!existingLogin) {
-    await supabase.from('analytics_events').insert({
+    await admin.from('analytics_events').insert({
       user_id: user.id,
       event_name: 'cv_check_first_login',
       metadata: { source: 'magic_link' },

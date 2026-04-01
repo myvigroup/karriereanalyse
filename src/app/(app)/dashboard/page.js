@@ -19,6 +19,20 @@ export default async function DashboardPage() {
     );
   }
 
+  // Berater → Messe-Dashboard
+  if (profile.role === 'advisor') redirect('/advisor');
+
+  // Messe-Besucher mit CV-Check → direkt zum Lebenslauf-Check
+  if (profile.membership_type === 'basis') {
+    const { data: cvDoc } = await supabase
+      .from('cv_documents')
+      .select('id')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle();
+    if (cvDoc) redirect('/cv-check');
+  }
+
   const { data: analysisSession } = await supabase
     .from('analysis_sessions').select('*').eq('user_id', user.id).order('completed_at', { ascending: false }).limit(1).single();
 
