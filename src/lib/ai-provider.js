@@ -134,6 +134,103 @@ Gib mir als JSON:
   }
 }
 
+/**
+ * Analysiert einen CV-Text speziell für den Messe-CV-Check.
+ * Gibt strukturiertes Feedback zurück, das direkt den Preset-Kategorien entspricht.
+ * @param {string} cvText - Extrahierter Text aus dem CV
+ * @returns {Object} Strukturierte Analyse mit Preset-Vorschlägen pro Kategorie
+ */
+export async function analyzeCVForFair(cvText) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+
+  if (!apiKey) {
+    console.warn('ANTHROPIC_API_KEY nicht gesetzt — verwende Mock-Analyse');
+    return getMockFairAnalysis();
+  }
+
+  try {
+    const response = await fetch(ANTHROPIC_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2500,
+        system: `Du bist ein erfahrener Karrierecoach auf einer Karrieremesse. Analysiere den Lebenslauf und gib strukturiertes Feedback.
+
+Antworte NUR als valides JSON-Objekt ohne Markdown-Backticks. Format:
+{
+  "overallRating": 3,
+  "summary": "2-3 Sätze Gesamteinschätzung",
+  "categories": {
+    "struktur": {
+      "rating": 3,
+      "selectedPresets": ["Klarer chronologischer Aufbau", "Kontaktdaten vollständig"],
+      "comment": "Kurzer Freitext-Kommentar zur Struktur"
+    },
+    "inhalt": {
+      "rating": 3,
+      "selectedPresets": ["Relevante Erfahrungen gut hervorgehoben"],
+      "comment": "Kurzer Freitext-Kommentar zum Inhalt"
+    },
+    "design": {
+      "rating": 3,
+      "selectedPresets": ["Professionelles, modernes Layout"],
+      "comment": "Kurzer Freitext-Kommentar zum Design"
+    },
+    "wirkung": {
+      "rating": 3,
+      "selectedPresets": ["Starker erster Eindruck"],
+      "comment": "Kurzer Freitext-Kommentar zur Wirkung"
+    }
+  }
+}
+
+WICHTIG: Die selectedPresets müssen EXAKT aus dieser Liste stammen:
+Struktur: "Klarer chronologischer Aufbau", "Chronologische Lücken vorhanden", "Übersichtliche Gliederung", "Zu unübersichtlich / überladen", "Kontaktdaten vollständig", "Kontaktdaten unvollständig", "Gute Länge (1-2 Seiten)", "Zu lang / zu kurz"
+Inhalt: "Relevante Erfahrungen gut hervorgehoben", "Wichtige Erfahrungen fehlen oder sind versteckt", "Kompetenzen klar formuliert", "Kompetenzen zu vage beschrieben", "Messbare Erfolge genannt", "Keine konkreten Ergebnisse / Zahlen", "Gute Keyword-Optimierung", "Keywords für Zielbranche fehlen"
+Design: "Professionelles, modernes Layout", "Layout veraltet oder unprofessionell", "Gute Lesbarkeit und Schriftgröße", "Schwer lesbar / zu kleine Schrift", "Konsistente Formatierung", "Inkonsistente Formatierung", "Angemessenes Foto", "Foto fehlt oder unvorteilhaft"
+Wirkung: "Starker erster Eindruck", "Erster Eindruck verbesserungswürdig", "Persönlichkeit kommt rüber", "Wirkt austauschbar / generisch", "Klare Positionierung erkennbar", "Positionierung unklar", "Motivierender Gesamteindruck", "Gesamteindruck eher schwach"
+
+Ratings sind 1-5 (1=schlecht, 5=sehr gut). Sei ehrlich aber konstruktiv.`,
+        messages: [{
+          role: 'user',
+          content: `Analysiere diesen Lebenslauf:\n\n${cvText.substring(0, 8000)}`,
+        }],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('AI API Error:', response.status);
+      return getMockFairAnalysis();
+    }
+
+    const data = await response.json();
+    const text = data.content?.[0]?.text || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  } catch (error) {
+    console.error('CV Fair Analysis failed:', error);
+    return getMockFairAnalysis();
+  }
+}
+
+function getMockFairAnalysis() {
+  return {
+    overallRating: 3,
+    summary: 'Der Lebenslauf bietet eine solide Basis, hat aber Optimierungspotenzial in Struktur und Wirkung.',
+    categories: {
+      struktur: { rating: 3, selectedPresets: ['Klarer chronologischer Aufbau', 'Gute Länge (1-2 Seiten)'], comment: 'Grundstruktur ist vorhanden, könnte aber übersichtlicher sein.' },
+      inhalt: { rating: 3, selectedPresets: ['Relevante Erfahrungen gut hervorgehoben', 'Keine konkreten Ergebnisse / Zahlen'], comment: 'Erfahrungen sind relevant, aber es fehlen messbare Erfolge.' },
+      design: { rating: 3, selectedPresets: ['Gute Lesbarkeit und Schriftgröße'], comment: 'Design ist funktional, könnte moderner wirken.' },
+      wirkung: { rating: 3, selectedPresets: ['Erster Eindruck verbesserungswürdig', 'Positionierung unklar'], comment: 'Der CV wirkt noch etwas generisch.' },
+    },
+  };
+}
+
 // ============================================================
 // MOCK RESPONSES (Wenn kein API Key vorhanden)
 // ============================================================
@@ -184,5 +281,6 @@ function getMockCoachingInsights(analysisResults) {
 
 export default {
   analyzeCVWithAI,
+  analyzeCVForFair,
   generateCoachingInsights,
 };
