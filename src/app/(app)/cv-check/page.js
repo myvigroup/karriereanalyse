@@ -244,37 +244,58 @@ export default async function CVCheckPage() {
         </div>
       </div>
 
-      {/* CTA */}
-      <div style={{
-        background: 'linear-gradient(135deg, #1A1A1A 0%, #2C2C2E 100%)',
-        borderRadius: 20,
-        padding: 40,
-        marginTop: 40,
-        textAlign: 'center',
-        color: '#fff',
-      }}>
-        <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 12px' }}>
-          Das war nur die Oberfläche.
+      {/* Benefits + CTAs */}
+      <div style={{ marginTop: 40 }}>
+        <h2 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', marginBottom: 20, textAlign: 'center' }}>
+          Dein Karriere-Portal — das ist erst der Anfang
         </h2>
-        <p style={{ fontSize: 16, opacity: 0.8, lineHeight: 1.6, maxWidth: 500, margin: '0 auto 24px' }}>
-          Dein Lebenslauf zeigt, wie du dich präsentierst – aber nicht, was wirklich in dir steckt.
-          Mach jetzt die komplette Karriereanalyse und entdecke dein volles Potenzial.
-        </p>
-        <Link
-          href="/analyse"
-          style={{
-            display: 'inline-block',
-            padding: '16px 40px',
-            background: '#CC1426',
-            color: '#fff',
-            borderRadius: 980,
-            textDecoration: 'none',
-            fontWeight: 700,
-            fontSize: 16,
-          }}
-        >
-          Karriereanalyse starten
-        </Link>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, marginBottom: 32 }}>
+          {[
+            { icon: '🎯', title: 'Karriereanalyse', desc: '13 Kompetenzfelder analysieren und deinen persönlichen Karriere-Score entdecken.', link: '/analyse', cta: 'Analyse starten' },
+            { icon: '🎓', title: 'Masterclass', desc: 'Karriere-Grundlagen und Expertenwissen in kompakten E-Learning-Modulen.', link: '/masterclass', cta: 'Module entdecken' },
+            { icon: '🤖', title: 'KI-Coach', desc: 'Dein persönlicher Karriere-Assistent — stelle jede Frage zu Bewerbung, Gehalt und Karriere.', link: '/coach', cta: 'Coach starten' },
+            { icon: '📊', title: 'Karrierepfad', desc: 'Verfolge deinen Fortschritt und sehe wo du im Vergleich stehst.', link: '/career', cta: 'Pfad ansehen' },
+          ].map((item, i) => (
+            <Link key={i} href={item.link} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div style={{
+                background: '#fff', borderRadius: 16, padding: 24,
+                border: '1px solid #E8E6E1', height: '100%',
+                transition: 'box-shadow 0.2s, transform 0.2s',
+                cursor: 'pointer',
+              }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>{item.icon}</div>
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 8px', color: '#1A1A1A' }}>{item.title}</h3>
+                <p style={{ fontSize: 14, color: '#86868b', lineHeight: 1.5, margin: '0 0 16px' }}>{item.desc}</p>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#CC1426' }}>{item.cta} &rarr;</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Haupt-CTA */}
+        <div style={{
+          background: 'linear-gradient(135deg, #1A1A1A 0%, #2C2C2E 100%)',
+          borderRadius: 20, padding: 40, textAlign: 'center', color: '#fff',
+        }}>
+          <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 12px' }}>
+            Das war nur die Oberfläche.
+          </h2>
+          <p style={{ fontSize: 16, opacity: 0.8, lineHeight: 1.6, maxWidth: 500, margin: '0 auto 24px' }}>
+            Dein Lebenslauf zeigt, wie du dich präsentierst – aber nicht, was wirklich in dir steckt.
+            Mach jetzt die komplette Karriereanalyse und entdecke dein volles Potenzial.
+          </p>
+          <Link
+            href="/analyse"
+            style={{
+              display: 'inline-block', padding: '16px 40px',
+              background: '#CC1426', color: '#fff', borderRadius: 980,
+              textDecoration: 'none', fontWeight: 700, fontSize: 16,
+            }}
+          >
+            Karriereanalyse starten
+          </Link>
+        </div>
       </div>
 
       <style>{`
