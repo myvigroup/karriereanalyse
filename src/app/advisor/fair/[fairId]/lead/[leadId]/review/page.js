@@ -605,7 +605,7 @@ export default function CVReview() {
               }}
             />
             <button
-              onClick={() => router.push(`/advisor/fair/${fairId}/lead/${leadId}/summary`)}
+              onClick={() => router.push(`/advisor/fair/${fairId}/lead/${leadId}/contact`)}
               style={{
                 width: '100%',
                 padding: '14px',
@@ -618,7 +618,7 @@ export default function CVReview() {
                 cursor: 'pointer',
               }}
             >
-              Weiter zur Zusammenfassung
+              Weiter zu Kontaktdaten
             </button>
           </div>
         </div>
