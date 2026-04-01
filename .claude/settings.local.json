@@ -1,7 +1,37 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(grep -r \"funnel\\\\|event\\\\|analytics\\\\|activity_log\" /Users/louisjacob/karriereanalyse/supabase/migrations/*.sql)",
+      "Bash(npm install:*)",
+      "Bash(mkdir -p /Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/advisor/fair/[fairId]/new-lead)",
+      "Bash(mkdir -p /Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/advisor/fair/[fairId]/lead/[leadId]/upload)",
+      "Bash(mkdir -p /Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/advisor/fair/[fairId]/lead/[leadId]/review)",
+      "Bash(mkdir -p /Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/advisor/fair/[fairId]/lead/[leadId]/summary)",
+      "Bash(mkdir -p /Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/advisor/fair/[fairId]/lead/[leadId]/done)",
+      "Bash(npx next:*)",
+      "Bash(supabase db:*)",
+      "Bash(supabase link:*)",
+      "Bash(curl -s -X POST \"https://pvqpbvxmtpuwzfzuynyq.supabase.co/rest/v1/rpc/exec_sql\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2cXBidnhtdHB1d3pmenV5bnlxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mzg0MDg2OCwiZXhwIjoyMDg5NDE2ODY4fQ.kqU6jnfvZuEGa9CWovYcPmM6ADQPB3Ch23asSvT8uIk\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2cXBidnhtdHB1d3pmenV5bnlxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mzg0MDg2OCwiZXhwIjoyMDg5NDE2ODY4fQ.kqU6jnfvZuEGa9CWovYcPmM6ADQPB3Ch23asSvT8uIk\" -H \"Content-Type: application/json\" -d @-)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git rm:*)",
+      "Bash(git restore:*)",
+      "Bash(gh pr:*)",
+      "Bash(node -e \"const b = require\\(''@getbrevo/brevo''\\); console.log\\(Object.keys\\(b\\).filter\\(k => k.includes\\(''Email''\\) || k.includes\\(''Api''\\)\\).join\\(''\\\\n''\\)\\)\")",
+      "Bash(node -e \"const b = require\\(''@getbrevo/brevo''\\); console.log\\(typeof b, Object.keys\\(b\\).slice\\(0,20\\).join\\('', ''\\)\\)\")",
+      "Bash(node -e \":*)",
+      "Bash(npm uninstall:*)",
+      "Bash(gh api:*)",
+      "Bash(cat \"src/app/\\(app\\)/dashboard/page.js\")",
+      "Bash(ls /Users/louisjacob/karriereanalyse/src/app/\\\\\\(app\\\\\\)/)",
+      "Bash(cp -r src/app/advisor/fair \"src/app/\\(app\\)/advisor-fair-tmp\")",
+      "Bash(ls \"src/app/\\(app\\)/advisor-fair-tmp/\")",
+      "Bash(xargs kill:*)",
+      "Bash(find \"src/app/\\(app\\)/advisor\" -name \"*.js\" -exec sed -i '' \"s|@/app/advisor/actions|@/app/\\(app\\)/advisor/actions|g\" {} +)",
+      "Bash(ls /Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\\\\\(app\\\\\\)/)"
     ]
   }
 }

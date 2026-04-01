@@ -26,7 +26,7 @@ export default async function AdvisorHome() {
   const { data: assignments } = await admin
     .from('fair_advisors')
     .select('fair_id, fairs(id, name, location, date_start, date_end, status)')
-    .eq('advisor_id', advisor.id);
+    .eq('advisor_user_id', user.id);
 
   // Lead-Counts pro Messe laden
   const fairIds = (assignments || []).map(a => a.fair_id);

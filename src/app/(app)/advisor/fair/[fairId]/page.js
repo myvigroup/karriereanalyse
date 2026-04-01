@@ -55,7 +55,7 @@ export default async function FairDashboard({ params }) {
     .from('fair_advisors')
     .select('id')
     .eq('fair_id', fairId)
-    .eq('advisor_id', advisor.id)
+    .eq('advisor_user_id', user.id)
     .maybeSingle();
 
   if (!assignment) redirect('/advisor');
