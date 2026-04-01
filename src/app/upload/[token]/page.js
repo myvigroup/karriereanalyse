@@ -87,9 +87,13 @@ export default function PublicUpload() {
     }
   }
 
-  // Schritt 3: Registrierung abgeschlossen
+  // Schritt 3: Registrierung abgeschlossen — Seite schließen
   if (signupDone) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de';
+    // Versuche die Seite zu schließen (funktioniert wenn via QR geöffnet)
+    if (typeof window !== 'undefined') {
+      try { window.close(); } catch {}
+    }
+
     return (
       <div style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -100,19 +104,12 @@ export default function PublicUpload() {
           <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 8 }}>
             Willkommen!
           </h1>
-          <p style={{ color: '#86868b', lineHeight: 1.6, marginBottom: 24 }}>
-            Dein Account ist bereit. Logge dich jetzt ein, um dein Feedback und alle Benefits zu sehen.
+          <p style={{ color: '#86868b', lineHeight: 1.6, marginBottom: 16 }}>
+            Dein Account ist bereit. Du erhältst eine E-Mail mit dem Zugang zu deinem Portal.
           </p>
-          <a
-            href={`${appUrl}/auth/login`}
-            style={{
-              display: 'inline-block', padding: '16px 40px',
-              background: '#CC1426', color: '#fff', borderRadius: 980,
-              textDecoration: 'none', fontWeight: 700, fontSize: 16,
-            }}
-          >
-            Jetzt einloggen
-          </a>
+          <p style={{ color: '#86868b', fontSize: 14 }}>
+            Du kannst diese Seite jetzt schließen.
+          </p>
         </div>
       </div>
     );
