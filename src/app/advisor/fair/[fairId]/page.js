@@ -17,7 +17,9 @@ function getNextStep(lead) {
     case 'registered': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/upload`;
     case 'cv_uploaded': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
     case 'feedback_given': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/summary`;
-    case 'completed': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/done`;
+    case 'completed': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
+    case 'activated': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
+    case 'converted': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
     default: return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/upload`;
   }
 }
