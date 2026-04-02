@@ -19,6 +19,8 @@ export default function NewLead() {
     try {
       await createLead(fairId, formData);
     } catch (err) {
+      // Next.js redirect() wirft intern einen NEXT_REDIRECT-Error → weiterwerfen
+      if (err?.digest?.startsWith('NEXT_REDIRECT')) throw err;
       setError(err.message || 'Ein Fehler ist aufgetreten');
       setLoading(false);
     }
