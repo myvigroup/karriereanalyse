@@ -15,7 +15,7 @@ export default async function AdvisorLayout({ children }) {
     .eq('id', user.id)
     .maybeSingle();
 
-  if (!profile || profile.role !== 'advisor') redirect('/dashboard');
+  if (!profile || !['advisor', 'admin'].includes(profile.role)) redirect('/dashboard');
 
   const { data: advisor } = await admin
     .from('advisors')

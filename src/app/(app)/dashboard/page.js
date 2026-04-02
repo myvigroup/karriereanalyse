@@ -19,8 +19,8 @@ export default async function DashboardPage() {
     );
   }
 
-  // Berater → Messe-Dashboard
-  if (profile.role === 'advisor') redirect('/advisor');
+  // Admin + Berater → Messe-Dashboard
+  if (profile.role === 'advisor' || profile.role === 'admin') redirect('/advisor');
 
   // Messe-Besucher mit CV-Check → direkt zum Lebenslauf-Check
   if (profile.membership_type === 'basis') {
