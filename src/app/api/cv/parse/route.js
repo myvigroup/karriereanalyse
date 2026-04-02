@@ -22,16 +22,12 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Dokument nicht gefunden' }, { status: 404 });
     }
 
-    // Status auf processing setzen
-    await admin.from('cv_documents').update({ extraction_status: 'processing' }).eq('id', documentId);
-
     // Datei aus Storage laden
     const { data: fileData, error: downloadError } = await admin.storage
       .from('cv-documents')
-      .download(doc.file_path);
+      .download(doc.storage_path);
 
     if (downloadError || !fileData) {
-      await admin.from('cv_documents').update({ extraction_status: 'failed' }).eq('id', documentId);
       return NextResponse.json({ error: 'Datei konnte nicht geladen werden' }, { status: 500 });
     }
 
@@ -53,17 +49,13 @@ export async function POST(request) {
     }
 
     if (!extractedText || extractedText.trim().length < 20) {
-      await admin.from('cv_documents').update({
-        extraction_status: 'failed',
-        extracted_text: extractedText || null,
-      }).eq('id', documentId);
       return NextResponse.json({ error: 'Kein Text extrahiert', extractedText }, { status: 422 });
     }
 
     // Text speichern
     await admin.from('cv_documents').update({
       extracted_text: extractedText,
-      extraction_status: 'success',
+      is_processed: true,
     }).eq('id', documentId);
 
     // KI-Analyse starten
@@ -106,7 +98,7 @@ async function extractTextFromImage(buffer, filename) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 4000,
         messages: [{
           role: 'user',

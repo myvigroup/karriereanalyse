@@ -33,7 +33,7 @@ export async function analyzeCVWithAI(cvText, careerGoal, analysisScores = {}) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 2000,
         system: `Du bist ein erfahrener Executive-Headhunter und Karrierecoach für den deutschsprachigen Markt.
 Analysiere Lebensläufe strategisch und gib konkretes, umsetzbares Feedback.
@@ -104,7 +104,7 @@ export async function generateCoachingInsights(analysisResults, profile) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1500,
         system: 'Du bist ein Karrierecoach. Gib strategische Empfehlungen basierend auf dem Kompetenzprofil. Antworte NUR als JSON.',
         messages: [{
@@ -157,7 +157,7 @@ export async function analyzeCVForFair(cvText) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 2500,
         system: `Du bist ein erfahrener Karrierecoach auf einer Karrieremesse. Analysiere den Lebenslauf und gib strukturiertes Feedback.
 
