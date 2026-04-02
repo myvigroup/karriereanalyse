@@ -39,7 +39,7 @@ export default function CVUpload() {
       setLead(data);
 
       // Wenn CV bereits hochgeladen, weiter zum Review
-      if (data?.status === 'cv_uploaded' || data?.status === 'feedback_given' || data?.status === 'completed') {
+      if (data?.status === 'analyzing' || data?.status === 'feedback_pending' || data?.status === 'completed') {
         router.push(`/advisor/fair/${fairId}/lead/${leadId}/review`);
       }
     }
@@ -101,7 +101,7 @@ export default function CVUpload() {
 
       // Lead-Status updaten
       await supabase.from('fair_leads')
-        .update({ status: 'cv_uploaded', updated_at: new Date().toISOString() })
+        .update({ status: 'analyzing', updated_at: new Date().toISOString() })
         .eq('id', leadId);
 
       setUploadProgress('Fertig!');

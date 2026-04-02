@@ -3,19 +3,20 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
 
 const STATUS_LABELS = {
-  registered: { label: 'Erfasst', bg: '#F3F4F6', color: '#6B7280' },
-  cv_uploaded: { label: 'CV vorhanden', bg: '#DBEAFE', color: '#1D4ED8' },
-  feedback_given: { label: 'Feedback offen', bg: '#FEF3C7', color: '#D97706' },
+  new: { label: 'Neu', bg: '#F3F4F6', color: '#6B7280' },
+  analyzing: { label: 'CV hochgeladen', bg: '#DBEAFE', color: '#1D4ED8' },
+  feedback_pending: { label: 'Feedback offen', bg: '#FEF3C7', color: '#D97706' },
   completed: { label: 'Abgeschlossen', bg: '#D1FAE5', color: '#059669' },
-  activated: { label: 'Aktiviert', bg: '#E8F5E9', color: '#2D6A4F' },
+  contacted: { label: 'Kontaktiert', bg: '#E8F5E9', color: '#2D6A4F' },
   converted: { label: 'Konvertiert', bg: '#FCE4EC', color: '#CC1426' },
+  lost: { label: 'Verloren', bg: '#F3F4F6', color: '#9CA3AF' },
 };
 
 function getNextStep(lead) {
   switch (lead.status) {
-    case 'registered': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/upload`;
-    case 'cv_uploaded': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
-    case 'feedback_given': return lead.email
+    case 'new': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/upload`;
+    case 'analyzing': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
+    case 'feedback_pending': return lead.email
       ? `/advisor/fair/${lead.fair_id}/lead/${lead.id}/summary`
       : `/advisor/fair/${lead.fair_id}/lead/${lead.id}/contact`;
     default: return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
@@ -75,9 +76,9 @@ export default async function LeadsPage({ searchParams }) {
   }
 
   if (statusFilter === 'open') {
-    query = query.in('status', ['registered', 'cv_uploaded', 'feedback_given']);
+    query = query.in('status', ['new', 'analyzing', 'feedback_pending']);
   } else if (statusFilter === 'completed') {
-    query = query.in('status', ['completed', 'activated', 'converted']);
+    query = query.in('status', ['completed', 'contacted', 'converted', 'lost']);
   }
 
   const { data: leads } = await query;
@@ -198,9 +199,9 @@ export default async function LeadsPage({ searchParams }) {
           </div>
 
           {leads.map((lead, i) => {
-            const statusInfo = STATUS_LABELS[lead.status] || STATUS_LABELS.registered;
+            const statusInfo = STATUS_LABELS[lead.status] || STATUS_LABELS.new;
             const fair = fairById[lead.fair_id];
-            const isOpen = ['registered', 'cv_uploaded', 'feedback_given'].includes(lead.status);
+            const isOpen = ['new', 'analyzing', 'feedback_pending'].includes(lead.status);
 
             return (
               <div

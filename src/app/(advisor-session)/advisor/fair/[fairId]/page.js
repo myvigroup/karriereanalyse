@@ -4,23 +4,24 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 const STATUS_LABELS = {
-  registered: { label: 'Registriert', bg: '#F3F4F6', color: '#6B7280' },
-  cv_uploaded: { label: 'CV hochgeladen', bg: '#DBEAFE', color: '#1D4ED8' },
-  feedback_given: { label: 'Feedback gegeben', bg: '#FEF3C7', color: '#D97706' },
+  new: { label: 'Neu', bg: '#F3F4F6', color: '#6B7280' },
+  analyzing: { label: 'CV hochgeladen', bg: '#DBEAFE', color: '#1D4ED8' },
+  feedback_pending: { label: 'Feedback offen', bg: '#FEF3C7', color: '#D97706' },
   completed: { label: 'Abgeschlossen', bg: '#D1FAE5', color: '#059669' },
-  activated: { label: 'Aktiviert', bg: '#E8F5E9', color: '#2D6A4F' },
+  contacted: { label: 'Kontaktiert', bg: '#E8F5E9', color: '#2D6A4F' },
   converted: { label: 'Konvertiert', bg: '#FCE4EC', color: '#CC1426' },
+  lost: { label: 'Verloren', bg: '#F3F4F6', color: '#9CA3AF' },
 };
 
 function getNextStep(lead) {
   switch (lead.status) {
-    case 'registered': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/upload`;
-    case 'cv_uploaded': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
-    case 'feedback_given': return lead.email
+    case 'new': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/upload`;
+    case 'analyzing': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
+    case 'feedback_pending': return lead.email
       ? `/advisor/fair/${lead.fair_id}/lead/${lead.id}/summary`
       : `/advisor/fair/${lead.fair_id}/lead/${lead.id}/contact`;
     case 'completed': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
-    case 'activated': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
+    case 'contacted': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
     case 'converted': return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`;
     default: return `/advisor/fair/${lead.fair_id}/lead/${lead.id}/upload`;
   }
@@ -162,7 +163,7 @@ export default async function FairDashboard({ params }) {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {todayLeads.map(lead => {
-            const statusInfo = STATUS_LABELS[lead.status] || STATUS_LABELS.registered;
+            const statusInfo = STATUS_LABELS[lead.status] || STATUS_LABELS.new;
             return (
               <Link
                 key={lead.id}

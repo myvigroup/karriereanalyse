@@ -37,7 +37,7 @@ export async function createLead(fairId, formData) {
     advisor_user_id: advisor.userId,
     first_name: name,
     last_name: '',
-    status: 'registered',
+    status: 'new',
   }).select('id').single();
 
   if (leadError) return { error: `Fehler beim Speichern: ${leadError.message}` };
