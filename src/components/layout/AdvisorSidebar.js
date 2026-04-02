@@ -16,7 +16,7 @@ export default function AdvisorSidebar({ profile, advisor }) {
     return pathname.startsWith(href);
   };
 
-  const displayName = advisor?.display_name || profile?.display_name || profile?.email || 'Berater';
+  const displayName = advisor?.display_name || profile?.name || profile?.email || 'Berater';
 
   return (
     <div style={{

@@ -11,7 +11,7 @@ export default async function AdvisorLayout({ children }) {
 
   const { data: profile } = await admin
     .from('profiles')
-    .select('id, display_name, avatar_url, role, email')
+    .select('id, name, avatar_url, role, email')
     .eq('id', user.id)
     .maybeSingle();
 
