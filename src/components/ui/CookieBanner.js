@@ -28,7 +28,7 @@ export default function CookieBanner() {
         <div style={{ flex: 1, minWidth: 280 }}>
           <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Wir verwenden Cookies</p>
           <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.5 }}>
-            F\u00FCr die Funktionalit\u00E4t der Plattform nutzen wir notwendige Cookies. Optionale Cookies helfen uns, das Erlebnis zu verbessern.{' '}
+            Für die Funktionalität der Plattform nutzen wir notwendige Cookies. Optionale Cookies helfen uns, das Erlebnis zu verbessern.{' '}
             <a href="/datenschutz" style={{ color: 'var(--ki-red)' }}>Mehr erfahren</a>
           </p>
         </div>
