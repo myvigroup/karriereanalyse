@@ -34,8 +34,9 @@ export async function createLead(fairId, formData) {
   // Fair-Lead erstellen (ohne email, ohne user_id)
   const { data: lead, error: leadError } = await admin.from('fair_leads').insert({
     fair_id: fairId,
-    advisor_id: advisor.advisorId,
-    name,
+    advisor_user_id: advisor.userId,
+    first_name: name,
+    last_name: '',
     status: 'registered',
   }).select('id').single();
 
@@ -93,11 +94,10 @@ export async function saveContactDetails(leadId, formData) {
     }).eq('id', userId);
   }
 
-  // Lead updaten mit Email, Phone, User-ID
+  // Lead updaten mit Email, Phone
   await admin.from('fair_leads').update({
     email,
     phone,
-    user_id: userId,
     updated_at: new Date().toISOString(),
   }).eq('id', leadId);
 
@@ -233,7 +233,7 @@ export async function completeFeedback(leadId) {
   // Lead abschließen
   await admin.from('fair_leads').update({
     status: 'completed',
-    conversation_ended_at: new Date().toISOString(),
+    completed_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }).eq('id', leadId);
 

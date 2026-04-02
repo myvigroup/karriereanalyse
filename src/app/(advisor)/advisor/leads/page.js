@@ -55,14 +55,14 @@ export default async function LeadsPage({ searchParams }) {
   // Leads laden — Messeleiter sieht alle Leads seiner Messen, Berater nur eigene
   let query = admin
     .from('fair_leads')
-    .select('id, name, email, phone, status, fair_id, advisor_id, created_at, updated_at')
+    .select('id, first_name, last_name, email, phone, status, fair_id, advisor_user_id, created_at, updated_at')
     .order('created_at', { ascending: false });
 
   // Für Manager-Messen: alle Leads; für normale: nur eigene
   if (fairFilter) {
     const isManagerForFair = managerFairIds.includes(fairFilter);
     query = query.eq('fair_id', fairFilter);
-    if (!isManagerForFair) query = query.eq('advisor_id', advisor.id);
+    if (!isManagerForFair) query = query.eq('advisor_user_id', user.id);
   } else if (fairIds.length > 0) {
     // Komplexere Logik: verschiedene Sichtbarkeiten je Messe
     // Vereinfacht: wenn mind. eine Manager-Messe → zeige alle Leads aller Messen
@@ -70,7 +70,7 @@ export default async function LeadsPage({ searchParams }) {
     if (managerFairIds.length > 0) {
       query = query.in('fair_id', fairIds);
     } else {
-      query = query.eq('advisor_id', advisor.id).in('fair_id', fairIds);
+      query = query.eq('advisor_user_id', user.id).in('fair_id', fairIds);
     }
   }
 
@@ -215,7 +215,7 @@ export default async function LeadsPage({ searchParams }) {
                 }}
               >
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A' }}>{lead.name}</div>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A' }}>{`${lead.first_name} ${lead.last_name || ''}`.trim()}</div>
                   <div style={{ fontSize: 12, color: '#86868b' }}>{lead.email || '–'}</div>
                 </div>
                 <div style={{ fontSize: 13, color: '#6B7280' }}>

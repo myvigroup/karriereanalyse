@@ -11,15 +11,8 @@ export default async function DonePage({ params }) {
   // Lead laden
   const { data: lead } = await admin
     .from('fair_leads')
-    .select('name, email')
+    .select('first_name, last_name, email')
     .eq('id', leadId)
-    .single();
-
-  // Advisor laden
-  const { data: advisor } = await admin
-    .from('advisors')
-    .select('id')
-    .eq('user_id', user.id)
     .single();
 
   // Tages-Count
@@ -28,7 +21,7 @@ export default async function DonePage({ params }) {
     .from('fair_leads')
     .select('*', { count: 'exact', head: true })
     .eq('fair_id', fairId)
-    .eq('advisor_id', advisor?.id)
+    .eq('advisor_user_id', user.id)
     .gte('created_at', today);
 
   return (
