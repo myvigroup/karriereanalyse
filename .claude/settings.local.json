@@ -47,7 +47,8 @@
       "Bash(\"/Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\(advisor-session\\)/advisor/fair/[fairId]/lead/[leadId]/contact/page.js\")",
       "Bash(\"/Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\(advisor-session\\)/advisor/fair/[fairId]/lead/[leadId]/summary/page.js\")",
       "Bash(find \"/Users/louisjacob/karriereanalyse/.claude/worktrees/suspicious-driscoll/src/app/\\(advisor\\)\" -type f)",
-      "Bash(sort echo:*)"
+      "Bash(sort echo:*)",
+      "Bash(git reset:*)"
     ]
   }
 }
