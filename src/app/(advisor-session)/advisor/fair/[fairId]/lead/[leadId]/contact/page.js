@@ -19,6 +19,7 @@ export default function ContactPage() {
     try {
       await saveContactDetails(leadId, formData);
     } catch (err) {
+      if (err?.digest?.startsWith('NEXT_REDIRECT')) throw err;
       setError(err.message || 'Ein Fehler ist aufgetreten');
       setLoading(false);
     }
