@@ -33,7 +33,7 @@ export default function CVUpload() {
     async function loadLead() {
       const { data } = await supabase
         .from('fair_leads')
-        .select('id, name, email, upload_token, status')
+        .select('id, first_name, last_name, email, magic_token, status')
         .eq('id', leadId)
         .single();
       setLead(data);
@@ -89,7 +89,6 @@ export default function CVUpload() {
       // DB-Eintrag
       const { error: dbError } = await supabase.from('cv_documents').insert({
         fair_lead_id: leadId,
-        user_id: lead?.user_id || null,
         version: 1,
         file_path: filePath,
         file_name: file.name,
@@ -127,7 +126,7 @@ export default function CVUpload() {
   };
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de';
-  const qrUrl = lead?.upload_token ? `${appUrl}/upload/${lead.upload_token}` : '';
+  const qrUrl = lead?.magic_token ? `${appUrl}/upload/${lead.magic_token}` : '';
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto' }}>
@@ -143,7 +142,7 @@ export default function CVUpload() {
       </h1>
       {lead && (
         <p style={{ color: '#86868b', marginBottom: 32 }}>
-          für <strong>{lead.name}</strong> ({lead.email})
+          für <strong>{`${lead.first_name} ${lead.last_name || ''}`.trim()}</strong> ({lead.email})
         </p>
       )}
 

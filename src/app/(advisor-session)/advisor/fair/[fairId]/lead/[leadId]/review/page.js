@@ -364,7 +364,7 @@ export default function CVReview() {
             &larr; Zurück
           </a>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '4px 0 0' }}>
-            CV-Review: {lead?.name}
+            CV-Review: {`${lead?.first_name || ''} ${lead?.last_name || ''}`.trim()}
           </h1>
         </div>
         {/* KI-Status Badge */}

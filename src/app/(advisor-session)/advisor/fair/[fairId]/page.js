@@ -70,7 +70,7 @@ export default async function FairDashboard({ params }) {
     .eq('fair_id', fairId)
     .gte('created_at', today)
     .order('created_at', { ascending: false });
-  if (!isManager) todayQuery = todayQuery.eq('advisor_id', advisor.id);
+  if (!isManager) todayQuery = todayQuery.eq('advisor_user_id', user.id);
   const { data: todayLeads } = await todayQuery;
 
   // Alle Leads zählen
@@ -78,7 +78,7 @@ export default async function FairDashboard({ params }) {
     .from('fair_leads')
     .select('*', { count: 'exact', head: true })
     .eq('fair_id', fairId);
-  if (!isManager) countQuery = countQuery.eq('advisor_id', advisor.id);
+  if (!isManager) countQuery = countQuery.eq('advisor_user_id', user.id);
   const { count: totalLeads } = await countQuery;
 
   const formatDate = (d) => new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -181,7 +181,7 @@ export default async function FairDashboard({ params }) {
                   transition: 'background 0.15s',
                 }}>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: 15 }}>{lead.name}</div>
+                    <div style={{ fontWeight: 600, fontSize: 15 }}>{lead.first_name} {lead.last_name || ''}</div>
                     <div style={{ fontSize: 13, color: '#86868b' }}>
                       {lead.email} · {formatTime(lead.created_at)}
                     </div>

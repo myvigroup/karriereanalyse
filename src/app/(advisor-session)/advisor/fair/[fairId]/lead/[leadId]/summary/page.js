@@ -123,7 +123,7 @@ export default function SummaryPage() {
         border: '1px solid #E8E6E1', marginBottom: 16,
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-          <strong>{lead?.name}</strong>
+          <strong>{`${lead?.first_name || ''} ${lead?.last_name || ''}`.trim()}</strong>
           <span style={{ color: '#86868b', fontSize: 14 }}>{lead?.email}</span>
         </div>
         {document && (
