@@ -98,12 +98,12 @@ export default function AdvisorSidebar({ profile, advisor }) {
 
       {/* Footer */}
       <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-        <Link
+        <a
           href="/api/auth/signout"
           style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'none' }}
         >
           Abmelden
-        </Link>
+        </a>
       </div>
     </div>
   );
