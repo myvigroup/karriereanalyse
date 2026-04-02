@@ -46,10 +46,10 @@ export default function SummaryPage() {
       const { data: doc } = await supabase
         .from('cv_documents')
         .select('*')
-        .eq('fair_lead_id', leadId)
-        .eq('is_current', true)
+        .eq('lead_id', leadId)
+        .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
       setDocument(doc);
 
       const { data: fb } = await supabase

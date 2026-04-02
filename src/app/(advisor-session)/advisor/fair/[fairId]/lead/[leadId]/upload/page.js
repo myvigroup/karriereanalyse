@@ -88,13 +88,11 @@ export default function CVUpload() {
 
       // DB-Eintrag
       const { error: dbError } = await supabase.from('cv_documents').insert({
-        fair_lead_id: leadId,
-        version: 1,
-        file_path: filePath,
+        lead_id: leadId,
+        storage_path: filePath,
         file_name: file.name,
         file_type: fileType,
         file_size_bytes: file.size,
-        is_current: true,
       });
 
       if (dbError) throw new Error(dbError.message);

@@ -71,18 +71,17 @@ export default function CVReview() {
       const { data: doc } = await supabase
         .from('cv_documents')
         .select('*')
-        .eq('fair_lead_id', leadId)
-        .eq('is_current', true)
+        .eq('lead_id', leadId)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
       setDocument(doc);
 
       // Signed URL für Preview
       if (doc) {
         const { data: urlData } = await supabase.storage
           .from('cv-documents')
-          .createSignedUrl(doc.file_path, 3600);
+          .createSignedUrl(doc.storage_path, 3600);
         setPreviewUrl(urlData?.signedUrl);
       }
 
