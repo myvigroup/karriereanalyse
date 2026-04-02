@@ -17,7 +17,11 @@ export default function NewLead() {
 
     const formData = new FormData(e.target);
     try {
-      await createLead(fairId, formData);
+      const result = await createLead(fairId, formData);
+      if (result?.error) {
+        setError(result.error);
+        setLoading(false);
+      }
     } catch (err) {
       // Next.js redirect() wirft intern einen NEXT_REDIRECT-Error → weiterwerfen
       if (err?.digest?.startsWith('NEXT_REDIRECT')) throw err;

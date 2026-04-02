@@ -10,43 +10,44 @@ async function getAdvisorId() {
   const supabase = createClient();
   const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Nicht eingeloggt');
+  if (!user) return null;
 
   const { data: advisor } = await admin
     .from('advisors')
     .select('id')
     .eq('user_id', user.id)
-    .single();
+    .maybeSingle();
 
-  if (!advisor) throw new Error('Kein Berater-Profil');
+  if (!advisor) return null;
   return { advisorId: advisor.id, userId: user.id };
 }
 
 // Lead erstellen — nur mit Vorname, ohne Email/User
 export async function createLead(fairId, formData) {
-  const { advisorId } = await getAdvisorId();
-  const admin = createAdminClient();
+  const advisor = await getAdvisorId();
+  if (!advisor) return { error: 'Kein Berater-Profil gefunden. Bitte neu einloggen.' };
 
+  const admin = createAdminClient();
   const name = formData.get('name');
-  if (!name) throw new Error('Name ist ein Pflichtfeld');
+  if (!name) return { error: 'Name ist ein Pflichtfeld' };
 
   // Fair-Lead erstellen (ohne email, ohne user_id)
   const { data: lead, error: leadError } = await admin.from('fair_leads').insert({
     fair_id: fairId,
-    advisor_id: advisorId,
+    advisor_id: advisor.advisorId,
     name,
     status: 'registered',
   }).select('id').single();
 
-  if (leadError) throw new Error(`Lead-Erstellung fehlgeschlagen: ${leadError.message}`);
+  if (leadError) return { error: `Fehler beim Speichern: ${leadError.message}` };
 
-  // Funnel-Event loggen
+  // Funnel-Event loggen (Fehler ignorieren, nicht blockieren)
   await admin.from('analytics_events').insert({
     event_name: 'fair_registered',
     fair_id: fairId,
-    advisor_id: advisorId,
+    advisor_id: advisor.advisorId,
     metadata: { lead_id: lead.id, source: 'messe' },
-  });
+  }).then(() => {}).catch(() => {});
 
   redirect(`/advisor/fair/${fairId}/lead/${lead.id}/upload`);
 }
