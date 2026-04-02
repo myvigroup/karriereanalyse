@@ -23,6 +23,11 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
   if (user && isAuthPage && request.nextUrl.pathname !== '/auth/callback') {
+    // Advisor/Admin direkt zum Berater-Dashboard (kein Flash über /dashboard)
+    const role = user.user_metadata?.role;
+    if (role === 'advisor' || role === 'admin') {
+      return NextResponse.redirect(new URL('/advisor', request.url));
+    }
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
   return response;
