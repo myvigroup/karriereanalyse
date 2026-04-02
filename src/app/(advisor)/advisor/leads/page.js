@@ -39,29 +39,39 @@ export default async function LeadsPage({ searchParams }) {
   const statusFilter = searchParams?.status || 'open';
   const fairFilter = searchParams?.fair || null;
 
-  // Alle zugewiesenen Messen
+  // Alle zugewiesenen Messen + Messeleiter-Status
   const { data: assignments } = await admin
     .from('fair_advisors')
-    .select('fair_id')
+    .select('fair_id, is_manager')
     .eq('advisor_user_id', user.id);
 
   const fairIds = (assignments || []).map(a => a.fair_id);
+  const managerFairIds = (assignments || []).filter(a => a.is_manager).map(a => a.fair_id);
 
   const { data: fairs } = fairIds.length > 0
     ? await admin.from('fairs').select('id, name').in('id', fairIds).order('start_date', { ascending: false })
     : { data: [] };
 
-  // Leads laden
+  // Leads laden — Messeleiter sieht alle Leads seiner Messen, Berater nur eigene
   let query = admin
     .from('fair_leads')
-    .select('id, name, email, phone, status, fair_id, created_at, updated_at')
-    .eq('advisor_id', advisor.id)
+    .select('id, name, email, phone, status, fair_id, advisor_id, created_at, updated_at')
     .order('created_at', { ascending: false });
 
+  // Für Manager-Messen: alle Leads; für normale: nur eigene
   if (fairFilter) {
+    const isManagerForFair = managerFairIds.includes(fairFilter);
     query = query.eq('fair_id', fairFilter);
+    if (!isManagerForFair) query = query.eq('advisor_id', advisor.id);
   } else if (fairIds.length > 0) {
-    query = query.in('fair_id', fairIds);
+    // Komplexere Logik: verschiedene Sichtbarkeiten je Messe
+    // Vereinfacht: wenn mind. eine Manager-Messe → zeige alle Leads aller Messen
+    // Sonst nur eigene
+    if (managerFairIds.length > 0) {
+      query = query.in('fair_id', fairIds);
+    } else {
+      query = query.eq('advisor_id', advisor.id).in('fair_id', fairIds);
+    }
   }
 
   if (statusFilter === 'open') {

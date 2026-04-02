@@ -50,32 +50,36 @@ export default async function FairDashboard({ params }) {
 
   if (!advisor) redirect('/advisor');
 
-  // Prüfe Zuordnung
+  // Prüfe Zuordnung + Messeleiter-Status
   const { data: assignment } = await admin
     .from('fair_advisors')
-    .select('id')
+    .select('id, is_manager')
     .eq('fair_id', fairId)
     .eq('advisor_user_id', user.id)
     .maybeSingle();
 
   if (!assignment) redirect('/advisor');
 
-  // Leads laden (heute)
+  const isManager = assignment.is_manager === true;
+
+  // Leads laden (heute) — Messeleiter sieht alle, Berater nur eigene
   const today = new Date().toISOString().split('T')[0];
-  const { data: todayLeads } = await admin
+  let todayQuery = admin
     .from('fair_leads')
     .select('*')
     .eq('fair_id', fairId)
-    .eq('advisor_id', advisor.id)
     .gte('created_at', today)
     .order('created_at', { ascending: false });
+  if (!isManager) todayQuery = todayQuery.eq('advisor_id', advisor.id);
+  const { data: todayLeads } = await todayQuery;
 
   // Alle Leads zählen
-  const { count: totalLeads } = await admin
+  let countQuery = admin
     .from('fair_leads')
     .select('*', { count: 'exact', head: true })
-    .eq('fair_id', fairId)
-    .eq('advisor_id', advisor.id);
+    .eq('fair_id', fairId);
+  if (!isManager) countQuery = countQuery.eq('advisor_id', advisor.id);
+  const { count: totalLeads } = await countQuery;
 
   const formatDate = (d) => new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const formatTime = (d) => new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
