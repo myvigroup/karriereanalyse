@@ -73,13 +73,11 @@ export async function POST(request, { params }) {
 
   // DB-Eintrag erstellen
   const { error: dbError } = await admin.from('cv_documents').insert({
-    fair_lead_id: lead.id,
-    version: 1,
-    file_path: filePath,
+    lead_id: lead.id,
+    storage_path: filePath,
     file_name: file.name,
     file_type: fileType,
     file_size_bytes: file.size,
-    is_current: true,
   });
 
   if (dbError) {
