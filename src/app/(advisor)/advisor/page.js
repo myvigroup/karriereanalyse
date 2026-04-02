@@ -7,41 +7,63 @@ export default async function AdvisorDashboard() {
   const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Profil + Rolle prüfen
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('role, name')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const isAdmin = profile?.role === 'admin';
+
   const { data: advisor } = await admin
     .from('advisors')
     .select('id, display_name')
     .eq('user_id', user.id)
     .maybeSingle();
 
-  if (!advisor) {
-    return (
-      <div style={{ textAlign: 'center', padding: 64 }}>
-        <p style={{ color: '#86868b' }}>Kein Berater-Profil gefunden.</p>
-      </div>
-    );
+  // Messen laden: Admin sieht alle, Berater nur zugewiesene
+  let fairs;
+  let fairIds;
+
+  if (isAdmin) {
+    const { data: allFairs } = await admin.from('fairs').select('*').order('start_date');
+    fairs = allFairs || [];
+    fairIds = fairs.map(f => f.id);
+  } else {
+    if (!advisor) {
+      return (
+        <div style={{ textAlign: 'center', padding: 64 }}>
+          <p style={{ color: '#86868b' }}>Kein Berater-Profil gefunden.</p>
+        </div>
+      );
+    }
+    const { data: assignments } = await admin
+      .from('fair_advisors')
+      .select('fair_id')
+      .eq('advisor_user_id', user.id);
+    fairIds = (assignments || []).map(a => a.fair_id);
+    const { data: assignedFairs } = fairIds.length > 0
+      ? await admin.from('fairs').select('*').in('id', fairIds).order('start_date')
+      : { data: [] };
+    fairs = assignedFairs || [];
   }
 
-  // Zugewiesene Messen
-  const { data: assignments } = await admin
-    .from('fair_advisors')
-    .select('fair_id')
-    .eq('advisor_user_id', user.id);
-
-  const fairIds = (assignments || []).map(a => a.fair_id);
-
-  const { data: fairs } = fairIds.length > 0
-    ? await admin.from('fairs').select('*').in('id', fairIds).order('start_date')
-    : { data: [] };
-
-  // Lead-Counts
+  // Lead-Counts — Admin sieht alle, Berater nur eigene
   const { data: allLeads } = fairIds.length > 0
-    ? await admin.from('fair_leads').select('fair_id, status, advisor_id').in('fair_id', fairIds).eq('advisor_id', advisor.id)
+    ? await admin.from('fair_leads')
+        .select('fair_id, status, advisor_user_id')
+        .in('fair_id', fairIds)
+        .then(r => isAdmin ? r : { ...r, data: (r.data || []).filter(l => l.advisor_user_id === user.id) })
     : { data: [] };
 
   const today = new Date().toISOString().split('T')[0];
-  const { data: todayLeads } = fairIds.length > 0
-    ? await admin.from('fair_leads').select('id').in('fair_id', fairIds).eq('advisor_id', advisor.id).gte('created_at', today)
+  const { data: todayLeadsRaw } = fairIds.length > 0
+    ? await admin.from('fair_leads').select('id, advisor_user_id').in('fair_id', fairIds).gte('created_at', today)
     : { data: [] };
+  const todayLeads = isAdmin
+    ? (todayLeadsRaw || [])
+    : (todayLeadsRaw || []).filter(l => l.advisor_user_id === user.id);
 
   const openChecks = (allLeads || []).filter(l => ['cv_uploaded', 'feedback_given'].includes(l.status)).length;
   const totalLeads = (allLeads || []).length;
@@ -59,7 +81,7 @@ export default async function AdvisorDashboard() {
   return (
     <div>
       <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
-        Guten Tag{advisor.display_name ? `, ${advisor.display_name.split(' ')[0]}` : ''}
+        Guten Tag{isAdmin ? `, ${profile.name?.split(' ')[0] || 'Admin'}` : (advisor?.display_name ? `, ${advisor.display_name.split(' ')[0]}` : '')}
       </h1>
       <p style={{ color: '#86868b', marginBottom: 32 }}>
         Dein Berater-Dashboard
@@ -88,7 +110,7 @@ export default async function AdvisorDashboard() {
 
       {/* Aktive Messen */}
       <h2 style={{ fontSize: 17, fontWeight: 600, color: '#1A1A1A', marginBottom: 16 }}>
-        Meine Messen
+        {isAdmin ? 'Alle Messen' : 'Meine Messen'}
       </h2>
 
       {activeFairs.length === 0 ? (
