@@ -14,19 +14,19 @@ export async function POST(request, { params }) {
   const { token } = params;
   const admin = createAdminClient();
 
-  // Token validieren
+  // Token validieren (magic_token ist die Produktions-Spalte)
   const { data: lead, error: leadError } = await admin
     .from('fair_leads')
-    .select('id, user_id, email, fair_id, advisor_id, upload_token_expires_at')
-    .eq('upload_token', token)
-    .single();
+    .select('id, email, fair_id, advisor_user_id, magic_token_expires_at')
+    .eq('magic_token', token)
+    .maybeSingle();
 
   if (leadError || !lead) {
     return NextResponse.json({ error: 'Ungültiger oder abgelaufener Link' }, { status: 404 });
   }
 
   // Token-Ablauf prüfen
-  if (new Date(lead.upload_token_expires_at) < new Date()) {
+  if (lead.magic_token_expires_at && new Date(lead.magic_token_expires_at) < new Date()) {
     return NextResponse.json({ error: 'Dieser Link ist abgelaufen' }, { status: 410 });
   }
 
@@ -74,7 +74,6 @@ export async function POST(request, { params }) {
   // DB-Eintrag erstellen
   const { error: dbError } = await admin.from('cv_documents').insert({
     fair_lead_id: lead.id,
-    user_id: lead.user_id,
     version: 1,
     file_path: filePath,
     file_name: file.name,
@@ -90,18 +89,16 @@ export async function POST(request, { params }) {
 
   // Lead-Status updaten
   await admin.from('fair_leads').update({
-    status: 'cv_uploaded',
+    status: 'analyzing',
     updated_at: new Date().toISOString(),
   }).eq('id', lead.id);
 
-  // Funnel-Event
+  // Funnel-Event (Fehler ignorieren)
   await admin.from('analytics_events').insert({
-    user_id: lead.user_id,
     event_name: 'cv_uploaded',
     fair_id: lead.fair_id,
-    advisor_id: lead.advisor_id,
     metadata: { lead_id: lead.id, source: 'qr_upload' },
-  });
+  }).then(() => {}).catch(() => {});
 
   return NextResponse.json({ success: true });
 }
