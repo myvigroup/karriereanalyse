@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { createAdvisorAccount } from '../../../actions';
+import { createAdvisorAccount } from '../../actions';
 
 export default async function NewAdvisorPage() {
   const supabase = createClient();
