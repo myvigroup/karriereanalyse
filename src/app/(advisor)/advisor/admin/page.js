@@ -198,13 +198,19 @@ export default async function AdminPage() {
           const prof = profileById[adv.user_id];
           const fairCount = fairCountByAdvisor[adv.user_id] || 0;
           return (
-            <div key={adv.id} style={{
+            <Link key={adv.id} href={`/advisor/admin/advisors/${adv.user_id}`} style={{
               display: 'grid',
               gridTemplateColumns: isAdmin ? '2fr 2fr 100px 100px 80px' : '2fr 2fr 120px 100px',
               padding: '14px 20px',
               alignItems: 'center',
               borderBottom: i < advisors.length - 1 ? '1px solid #F0EEE9' : 'none',
-            }}>
+              textDecoration: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              transition: 'background 0.15s',
+            }}
+            className="advisor-row"
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#CC1426', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
                   {adv.display_name?.charAt(0).toUpperCase() || '?'}
@@ -215,23 +221,23 @@ export default async function AdminPage() {
               <div style={{ fontSize: 13, color: '#6B7280' }}>
                 {fairCount} {fairCount === 1 ? 'Messe' : 'Messen'}
               </div>
-              <div>
-                <Link href={`/advisor/admin/advisors/${adv.user_id}`} style={{ fontSize: 13, fontWeight: 600, color: '#CC1426', textDecoration: 'none' }}>
-                  Verwalten →
-                </Link>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#CC1426' }}>
+                Öffnen →
               </div>
               {isAdmin && adv.user_id !== user.id && (
-                <form action={deleteAdvisor} style={{ margin: 0 }}>
+                <form action={deleteAdvisor} style={{ margin: 0 }} onClick={e => e.stopPropagation()}>
                   <input type="hidden" name="user_id" value={adv.user_id} />
                   <button type="submit" style={{ background: 'none', border: 'none', color: '#DC2626', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0 }}>
                     Löschen
                   </button>
                 </form>
               )}
-            </div>
+            </Link>
           );
         })}
       </div>
+
+      <style>{`.advisor-row:hover { background: #FAFAF8; }`}</style>
     </div>
   );
 }
