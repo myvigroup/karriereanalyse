@@ -118,19 +118,21 @@ export async function assignAdvisorToFair(formData) {
   const admin = await requireAdmin();
   const fair_id = formData.get('fair_id');
   const advisor_user_id = formData.get('advisor_user_id');
+  const redirectTo = formData.get('redirectTo');
 
   const { error } = await admin
     .from('fair_advisors')
     .upsert({ fair_id, advisor_user_id, is_manager: false });
 
   if (error) return { error: error.message };
-  redirect(`/advisor/admin/fairs/${fair_id}`);
+  redirect(redirectTo || `/advisor/admin/fairs/${fair_id}`);
 }
 
 export async function removeAdvisorFromFair(formData) {
   const admin = await requireAdmin();
   const fair_id = formData.get('fair_id');
   const advisor_user_id = formData.get('advisor_user_id');
+  const redirectTo = formData.get('redirectTo');
 
   await admin
     .from('fair_advisors')
@@ -138,5 +140,5 @@ export async function removeAdvisorFromFair(formData) {
     .eq('fair_id', fair_id)
     .eq('advisor_user_id', advisor_user_id);
 
-  redirect(`/advisor/admin/fairs/${fair_id}`);
+  redirect(redirectTo || `/advisor/admin/fairs/${fair_id}`);
 }

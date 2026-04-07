@@ -180,12 +180,12 @@ export default async function AdminPage() {
       <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden' }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isAdmin ? '2fr 2fr 100px 80px' : '2fr 2fr 120px',
+          gridTemplateColumns: isAdmin ? '2fr 2fr 100px 100px 80px' : '2fr 2fr 120px 100px',
           padding: '12px 20px',
           borderBottom: '1px solid #F0EEE9',
           background: '#FAFAF8',
         }}>
-          {[...['Name', 'E-Mail', 'Messen'], ...(isAdmin ? [''] : [])].map((h, i) => (
+          {[...['Name', 'E-Mail', 'Messen', ''], ...(isAdmin ? [''] : [])].map((h, i) => (
             <div key={i} style={{ fontSize: 11, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</div>
           ))}
         </div>
@@ -200,7 +200,7 @@ export default async function AdminPage() {
           return (
             <div key={adv.id} style={{
               display: 'grid',
-              gridTemplateColumns: isAdmin ? '2fr 2fr 100px 80px' : '2fr 2fr 120px',
+              gridTemplateColumns: isAdmin ? '2fr 2fr 100px 100px 80px' : '2fr 2fr 120px 100px',
               padding: '14px 20px',
               alignItems: 'center',
               borderBottom: i < advisors.length - 1 ? '1px solid #F0EEE9' : 'none',
@@ -214,6 +214,11 @@ export default async function AdminPage() {
               <div style={{ fontSize: 13, color: '#6B7280' }}>{prof?.email || '–'}</div>
               <div style={{ fontSize: 13, color: '#6B7280' }}>
                 {fairCount} {fairCount === 1 ? 'Messe' : 'Messen'}
+              </div>
+              <div>
+                <Link href={`/advisor/admin/advisors/${adv.user_id}`} style={{ fontSize: 13, fontWeight: 600, color: '#CC1426', textDecoration: 'none' }}>
+                  Verwalten →
+                </Link>
               </div>
               {isAdmin && adv.user_id !== user.id && (
                 <form action={deleteAdvisor} style={{ margin: 0 }}>
