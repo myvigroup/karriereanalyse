@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 export default async function AdvisorDashboard() {
+  try {
   const supabase = createClient();
   const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -30,7 +31,7 @@ export default async function AdvisorDashboard() {
 
   if (profile?.role === 'admin') {
     // Admin sieht alle Messen
-    const { data: allFairs } = await admin.from('fairs').select('*').order('start_date');
+    const { data: allFairs } = await admin.from('fairs').select('*').order('date_start');
     fairs = allFairs || [];
     fairIds = fairs.map(f => f.id);
   } else {
@@ -41,7 +42,7 @@ export default async function AdvisorDashboard() {
       .eq('advisor_user_id', user.id);
     fairIds = (assignments || []).map(a => a.fair_id);
     if (fairIds.length > 0) {
-      const { data: assignedFairs } = await admin.from('fairs').select('*').in('id', fairIds).order('start_date');
+      const { data: assignedFairs } = await admin.from('fairs').select('*').in('id', fairIds).order('date_start');
       fairs = assignedFairs || [];
     } else {
       fairs = [];
@@ -166,8 +167,8 @@ export default async function AdvisorDashboard() {
                   <p style={{ color: '#86868b', fontSize: 13, margin: '2px 0' }}>{fair.city}</p>
                 )}
                 <p style={{ color: '#86868b', fontSize: 13, margin: '2px 0 12px' }}>
-                  {formatDate(fair.start_date)}
-                  {fair.end_date && fair.end_date !== fair.start_date ? ` – ${formatDate(fair.end_date)}` : ''}
+                  {formatDate(fair.date_start)}
+                  {fair.date_end && fair.date_end !== fair.date_start ? ` – ${formatDate(fair.date_end)}` : ''}
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 13, color: '#86868b' }}>
@@ -202,7 +203,7 @@ export default async function AdvisorDashboard() {
               }}>
                 <div>
                   <span style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A' }}>{fair.name}</span>
-                  <span style={{ color: '#86868b', fontSize: 13, marginLeft: 12 }}>{formatDate(fair.start_date)}</span>
+                  <span style={{ color: '#86868b', fontSize: 13, marginLeft: 12 }}>{formatDate(fair.date_start)}</span>
                 </div>
                 <span style={{ fontSize: 13, color: '#86868b' }}>
                   {countByFair[fair.id] || 0} Gespräche
@@ -221,4 +222,18 @@ export default async function AdvisorDashboard() {
       `}</style>
     </div>
   );
+  } catch (err) {
+    // Allow Next.js redirects to propagate normally
+    if (err?.digest?.startsWith?.('NEXT_REDIRECT') || err?.message?.includes?.('NEXT_REDIRECT')) throw err;
+    // Render the actual error so we can see it in production
+    return (
+      <div style={{ padding: 40, background: '#FEF2F2', borderRadius: 16, border: '1px solid #FECACA', maxWidth: 700, margin: '40px auto' }}>
+        <h2 style={{ color: '#DC2626', marginBottom: 16 }}>Dashboard-Fehler (Debug)</h2>
+        <p style={{ fontWeight: 600, marginBottom: 8 }}>{err?.message || 'Kein Fehlertext'}</p>
+        <pre style={{ fontSize: 12, whiteSpace: 'pre-wrap', color: '#6B7280', background: '#FFF', padding: 16, borderRadius: 8 }}>
+          {err?.stack?.slice(0, 1000) || 'Kein Stack'}
+        </pre>
+      </div>
+    );
+  }
 }
