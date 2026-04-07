@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { deleteAdvisor } from './actions';
 
 const STATUS_BADGE = {
   upcoming: { label: 'Bevorstehend', bg: '#FFF3E0', color: '#D97706' },
@@ -179,13 +180,13 @@ export default async function AdminPage() {
       <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden' }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '2fr 2fr 120px',
+          gridTemplateColumns: isAdmin ? '2fr 2fr 100px 80px' : '2fr 2fr 120px',
           padding: '12px 20px',
           borderBottom: '1px solid #F0EEE9',
           background: '#FAFAF8',
         }}>
-          {['Name', 'E-Mail', 'Messen'].map(h => (
-            <div key={h} style={{ fontSize: 11, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</div>
+          {[...['Name', 'E-Mail', 'Messen'], ...(isAdmin ? [''] : [])].map((h, i) => (
+            <div key={i} style={{ fontSize: 11, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</div>
           ))}
         </div>
 
@@ -199,7 +200,7 @@ export default async function AdminPage() {
           return (
             <div key={adv.id} style={{
               display: 'grid',
-              gridTemplateColumns: '2fr 2fr 120px',
+              gridTemplateColumns: isAdmin ? '2fr 2fr 100px 80px' : '2fr 2fr 120px',
               padding: '14px 20px',
               alignItems: 'center',
               borderBottom: i < advisors.length - 1 ? '1px solid #F0EEE9' : 'none',
@@ -214,6 +215,14 @@ export default async function AdminPage() {
               <div style={{ fontSize: 13, color: '#6B7280' }}>
                 {fairCount} {fairCount === 1 ? 'Messe' : 'Messen'}
               </div>
+              {isAdmin && adv.user_id !== user.id && (
+                <form action={deleteAdvisor} style={{ margin: 0 }}>
+                  <input type="hidden" name="user_id" value={adv.user_id} />
+                  <button type="submit" style={{ background: 'none', border: 'none', color: '#DC2626', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0 }}>
+                    Löschen
+                  </button>
+                </form>
+              )}
             </div>
           );
         })}

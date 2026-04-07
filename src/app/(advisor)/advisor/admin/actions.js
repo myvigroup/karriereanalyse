@@ -98,6 +98,20 @@ export async function createAdvisorAccount(formData) {
   redirect('/advisor/admin');
 }
 
+export async function deleteAdvisor(formData) {
+  const admin = await requireAdmin();
+  const userId = formData.get('user_id');
+
+  // Aus allen Messen entfernen
+  await admin.from('fair_advisors').delete().eq('advisor_user_id', userId);
+  // Advisor-Eintrag löschen
+  await admin.from('advisors').delete().eq('user_id', userId);
+  // Auth-User deaktivieren (nicht löschen, um Datenkonsistenz zu wahren)
+  await admin.auth.admin.updateUserById(userId, { ban_duration: '876600h' });
+
+  redirect('/advisor/admin');
+}
+
 // ── Messe ↔ Berater ──────────────────────────────────────────────────────────
 
 export async function assignAdvisorToFair(formData) {
