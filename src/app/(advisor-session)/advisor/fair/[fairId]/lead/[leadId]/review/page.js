@@ -144,12 +144,8 @@ export default function CVReview() {
 
       setLoading(false);
 
-      // KI-Analyse automatisch triggern wenn:
-      // - Dokument existiert
-      // - Feedback existiert
-      // - Noch keine KI-Analyse da
-      // - Noch keine manuellen Items
-      if (doc && existingFeedback && !existingFeedback.ai_analysis && !hasExistingItems) {
+      // KI-Analyse automatisch triggern wenn Dokument + Feedback vorhanden und noch keine KI-Analyse
+      if (doc && existingFeedback && !existingFeedback.ai_analysis) {
         triggerAiAnalysis(doc.id, existingFeedback.id);
       }
     }

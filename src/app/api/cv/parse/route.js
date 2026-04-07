@@ -31,21 +31,23 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Datei konnte nicht geladen werden' }, { status: 500 });
     }
 
-    // Text extrahieren
+    // Text extrahieren — Dateityp aus storage_path oder file_type ableiten
     let extractedText = '';
     const buffer = Buffer.from(await fileData.arrayBuffer());
+    const ext = (doc.storage_path || doc.file_name || '').split('.').pop()?.toLowerCase();
+    const fileType = doc.file_type || (ext === 'pdf' ? 'pdf' : ext === 'docx' ? 'docx' : ['jpg','jpeg','png'].includes(ext) ? 'image' : null);
 
-    if (doc.file_type === 'pdf') {
+    if (fileType === 'pdf') {
       const pdfParse = (await import('pdf-parse')).default;
       const pdfData = await pdfParse(buffer);
       extractedText = pdfData.text;
-    } else if (doc.file_type === 'docx') {
+    } else if (fileType === 'docx') {
       const mammoth = await import('mammoth');
       const result = await mammoth.extractRawText({ buffer });
       extractedText = result.value;
-    } else if (doc.file_type === 'image') {
+    } else if (fileType === 'image') {
       // Claude Vision API für Bilder
-      extractedText = await extractTextFromImage(buffer, doc.file_name);
+      extractedText = await extractTextFromImage(buffer, doc.storage_path || doc.file_name || 'image.jpg');
     }
 
     if (!extractedText || extractedText.trim().length < 20) {
