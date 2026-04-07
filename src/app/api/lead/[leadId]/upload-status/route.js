@@ -8,7 +8,7 @@ export async function GET(request, { params }) {
   const { data: doc } = await supabase
     .from('cv_documents')
     .select('id')
-    .eq('fair_lead_id', leadId)
+    .eq('lead_id', leadId)
     .limit(1)
     .maybeSingle();
 
