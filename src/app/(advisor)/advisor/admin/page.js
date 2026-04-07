@@ -42,7 +42,7 @@ export default async function AdminPage() {
       ? Promise.resolve({ data: [] })
       : (fairIds ? admin.from('fair_leads').select('id, status, fair_id, advisor_user_id, created_at').in('fair_id', fairIds) : admin.from('fair_leads').select('id, status, fair_id, advisor_user_id, created_at')),
     admin.from('advisors').select('id, user_id, display_name'),
-    admin.from('profiles').select('id, email, name').in('role', ['advisor', 'admin']),
+    admin.from('profiles').select('id, email, name').in('role', ['advisor', 'messeleiter', 'admin']),
     admin.from('fair_advisors').select('fair_id, advisor_user_id'),
   ]);
 

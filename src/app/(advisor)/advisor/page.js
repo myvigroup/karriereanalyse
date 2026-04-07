@@ -14,7 +14,7 @@ export default async function AdvisorDashboard() {
     .eq('id', user.id)
     .maybeSingle();
 
-  const isAdmin = profile?.role === 'admin';
+  const isAdmin = ['admin', 'messeleiter'].includes(profile?.role);
 
   const { data: advisor } = await admin
     .from('advisors')
@@ -22,53 +22,57 @@ export default async function AdvisorDashboard() {
     .eq('user_id', user.id)
     .maybeSingle();
 
-  // Messen laden: Admin sieht alle, Berater nur zugewiesene
+  // Messen laden: Admin/Messeleiter sehen alle zugewiesenen Messen, Berater nur eigene
   let fairs;
   let fairIds;
 
-  if (isAdmin) {
+  if (profile?.role === 'admin') {
+    // Admin sieht alle Messen
     const { data: allFairs } = await admin.from('fairs').select('*').order('start_date');
     fairs = allFairs || [];
     fairIds = fairs.map(f => f.id);
   } else {
-    if (!advisor) {
-      return (
-        <div style={{ textAlign: 'center', padding: 64 }}>
-          <p style={{ color: '#86868b' }}>Kein Berater-Profil gefunden.</p>
-        </div>
-      );
-    }
+    // Messeleiter und Berater sehen nur zugewiesene Messen
     const { data: assignments } = await admin
       .from('fair_advisors')
       .select('fair_id')
       .eq('advisor_user_id', user.id);
     fairIds = (assignments || []).map(a => a.fair_id);
-    const { data: assignedFairs } = fairIds.length > 0
-      ? await admin.from('fairs').select('*').in('id', fairIds).order('start_date')
-      : { data: [] };
-    fairs = assignedFairs || [];
+    if (fairIds.length > 0) {
+      const { data: assignedFairs } = await admin.from('fairs').select('*').in('id', fairIds).order('start_date');
+      fairs = assignedFairs || [];
+    } else {
+      fairs = [];
+    }
   }
 
-  // Lead-Counts — Admin sieht alle, Berater nur eigene
-  const { data: allLeads } = fairIds.length > 0
-    ? await admin.from('fair_leads')
-        .select('fair_id, status, advisor_user_id')
-        .in('fair_id', fairIds)
-        .then(r => isAdmin ? r : { ...r, data: (r.data || []).filter(l => l.advisor_user_id === user.id) })
-    : { data: [] };
+  // Lead-Counts — Messeleiter/Admin sieht alle Leads der Messe, Berater nur eigene
+  let allLeads = [];
+  if (fairIds.length > 0) {
+    const { data: leadsData } = await admin
+      .from('fair_leads')
+      .select('fair_id, status, advisor_user_id')
+      .in('fair_id', fairIds);
+    const raw = leadsData || [];
+    allLeads = isAdmin ? raw : raw.filter(l => l.advisor_user_id === user.id);
+  }
 
   const today = new Date().toISOString().split('T')[0];
-  const { data: todayLeadsRaw } = fairIds.length > 0
-    ? await admin.from('fair_leads').select('id, advisor_user_id').in('fair_id', fairIds).gte('created_at', today)
-    : { data: [] };
-  const todayLeads = isAdmin
-    ? (todayLeadsRaw || [])
-    : (todayLeadsRaw || []).filter(l => l.advisor_user_id === user.id);
+  let todayLeads = [];
+  if (fairIds.length > 0) {
+    const { data: todayRaw } = await admin
+      .from('fair_leads')
+      .select('id, advisor_user_id')
+      .in('fair_id', fairIds)
+      .gte('created_at', today);
+    const raw = todayRaw || [];
+    todayLeads = isAdmin ? raw : raw.filter(l => l.advisor_user_id === user.id);
+  }
 
-  const openChecks = (allLeads || []).filter(l => ['cv_uploaded', 'feedback_given'].includes(l.status)).length;
-  const totalLeads = (allLeads || []).length;
+  const openChecks = allLeads.filter(l => ['cv_uploaded', 'feedback_given'].includes(l.status)).length;
+  const totalLeads = allLeads.length;
 
-  const countByFair = (allLeads || []).reduce((acc, l) => {
+  const countByFair = allLeads.reduce((acc, l) => {
     acc[l.fair_id] = (acc[l.fair_id] || 0) + 1;
     return acc;
   }, {});
@@ -81,7 +85,7 @@ export default async function AdvisorDashboard() {
   return (
     <div>
       <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
-        Guten Tag{isAdmin ? `, ${profile.name?.split(' ')[0] || 'Admin'}` : (advisor?.display_name ? `, ${advisor.display_name.split(' ')[0]}` : '')}
+        Guten Tag{advisor?.display_name ? `, ${advisor.display_name.split(' ')[0]}` : (profile?.name ? `, ${profile.name.split(' ')[0]}` : '')}
       </h1>
       <p style={{ color: '#86868b', marginBottom: 32 }}>
         Dein Berater-Dashboard
@@ -90,7 +94,7 @@ export default async function AdvisorDashboard() {
       {/* Kennzahlen */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40 }}>
         {[
-          { label: 'Gespräche heute', value: (todayLeads || []).length, color: '#CC1426' },
+          { label: 'Gespräche heute', value: todayLeads.length, color: '#CC1426' },
           { label: 'Offene CV-Checks', value: openChecks, color: '#D97706' },
           { label: 'Gespräche gesamt', value: totalLeads, color: '#059669' },
         ].map((stat, i) => (
