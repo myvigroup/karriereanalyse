@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { deleteAdvisor, assignAdvisorToFair, removeAdvisorFromFair } from '../../../actions';
+import { deleteAdvisor, assignAdvisorToFair, removeAdvisorFromFair } from '../../actions';
 
 const ROLE_LABELS = {
   advisor: 'Berater',
