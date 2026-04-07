@@ -17,7 +17,11 @@ export default function ContactPage() {
 
     const formData = new FormData(e.target);
     try {
-      await saveContactDetails(leadId, formData);
+      const result = await saveContactDetails(leadId, formData);
+      if (result?.error) {
+        setError(result.error);
+        setLoading(false);
+      }
     } catch (err) {
       if (err?.digest?.startsWith('NEXT_REDIRECT')) throw err;
       setError(err.message || 'Ein Fehler ist aufgetreten');

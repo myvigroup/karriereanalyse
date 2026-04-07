@@ -99,7 +99,7 @@ export default function CVReview() {
         .from('advisors')
         .select('id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       // Feedback laden oder erstellen
       let { data: existingFeedback } = await supabase
