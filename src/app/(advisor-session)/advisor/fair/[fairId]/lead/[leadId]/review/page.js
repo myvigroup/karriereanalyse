@@ -596,7 +596,7 @@ export default function CVReview() {
                 cursor: 'pointer',
               }}
             >
-              Weiter zu Kontaktdaten
+              Kontaktdaten aufnehmen →
             </button>
           </div>
         </div>
