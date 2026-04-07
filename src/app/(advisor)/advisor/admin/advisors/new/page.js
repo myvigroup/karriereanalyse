@@ -35,10 +35,15 @@ export default async function NewAdvisorPage({ searchParams }) {
 
   return (
     <div style={{ maxWidth: 520 }}>
-      <Link href="/advisor/admin" style={{ fontSize: 13, color: '#86868b', textDecoration: 'none' }}>← Zurück</Link>
+      <Link
+        href={returnFair ? `/advisor/admin/fairs/${returnFair}` : '/advisor/admin'}
+        style={{ fontSize: 13, color: '#86868b', textDecoration: 'none' }}
+      >
+        ← Zurück
+      </Link>
       <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '12px 0 8px' }}>Neuen Berater erstellen</h1>
       <p style={{ color: '#86868b', fontSize: 14, marginBottom: 32 }}>
-        Der Berater erhält Zugang zum Berater-Portal und kann Messen zugewiesen werden.
+        Der Berater erhält automatisch eine Einladungs-E-Mail und setzt sein Passwort selbst.
       </p>
 
       <form action={createAdvisorAccount}>
@@ -56,16 +61,16 @@ export default async function NewAdvisorPage({ searchParams }) {
           </div>
 
           <div>
-            <label style={labelStyle}>Temporäres Passwort *</label>
-            <input name="password" type="password" required minLength={8} placeholder="Mindestens 8 Zeichen" style={inputStyle} />
-            <p style={{ fontSize: 12, color: '#86868b', marginTop: 6, marginBottom: 0 }}>
-              Der Berater kann das Passwort nach dem ersten Login ändern.
-            </p>
+            <label style={labelStyle}>Rolle</label>
+            <select name="role" style={{ ...inputStyle, cursor: 'pointer' }}>
+              <option value="advisor">Berater — Zugriff auf Berater-Portal</option>
+              <option value="admin">Admin — Vollzugriff inkl. Verwaltung</option>
+            </select>
           </div>
 
-          <div style={{ background: '#FFF3E0', borderRadius: 10, padding: '12px 14px' }}>
-            <p style={{ fontSize: 13, color: '#D97706', margin: 0, fontWeight: 500 }}>
-              ℹ️ Das Konto wird sofort aktiviert. Teile die Zugangsdaten sicher mit dem Berater.
+          <div style={{ background: '#D1FAE5', borderRadius: 10, padding: '12px 14px' }}>
+            <p style={{ fontSize: 13, color: '#059669', margin: 0, fontWeight: 500 }}>
+              ✓ Eine Einladungs-E-Mail wird automatisch versendet. Kein Passwort nötig.
             </p>
           </div>
 
@@ -84,10 +89,10 @@ export default async function NewAdvisorPage({ searchParams }) {
                 cursor: 'pointer',
               }}
             >
-              Berater erstellen →
+              Einladung senden →
             </button>
             <Link
-              href="/advisor/admin"
+              href={returnFair ? `/advisor/admin/fairs/${returnFair}` : '/advisor/admin'}
               style={{
                 padding: '12px 20px',
                 background: '#F5F5F7',

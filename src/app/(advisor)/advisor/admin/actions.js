@@ -60,17 +60,15 @@ export async function createAdvisorAccount(formData) {
   const admin = await requireAdmin();
   const email = formData.get('email')?.trim().toLowerCase();
   const name = formData.get('name')?.trim();
-  const password = formData.get('password');
+  const role = formData.get('role') || 'advisor';
   const returnFair = formData.get('returnFair');
 
-  if (!email || !name || !password) return { error: 'Alle Felder sind erforderlich.' };
+  if (!email || !name) return { error: 'Name und E-Mail sind erforderlich.' };
 
-  // Supabase Auth User erstellen
-  const { data: authData, error: authError } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { name },
+  // Einladungs-E-Mail schicken — Berater setzt eigenes Passwort
+  const { data: authData, error: authError } = await admin.auth.admin.inviteUserByEmail(email, {
+    data: { name },
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de'}/advisor`,
   });
 
   if (authError) return { error: authError.message };
@@ -82,7 +80,7 @@ export async function createAdvisorAccount(formData) {
     id: userId,
     email,
     name,
-    role: 'advisor',
+    role,
   });
 
   // Advisor-Eintrag
