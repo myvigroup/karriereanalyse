@@ -8,6 +8,10 @@ const NAV_ITEMS = [
   { href: '/advisor/leads', label: 'Lebenslauf-Checks', icon: '📋' },
 ];
 
+const ADMIN_ITEMS = [
+  { href: '/advisor/admin', label: 'Admin-Übersicht', icon: '⚙️', exact: true },
+];
+
 export default function AdvisorSidebar({ profile, advisor }) {
   const pathname = usePathname();
 
@@ -17,6 +21,7 @@ export default function AdvisorSidebar({ profile, advisor }) {
   };
 
   const displayName = advisor?.display_name || profile?.name || profile?.email || 'Berater';
+  const isAdmin = profile?.role === 'admin';
 
   return (
     <div style={{
@@ -94,6 +99,41 @@ export default function AdvisorSidebar({ profile, advisor }) {
             </Link>
           );
         })}
+
+        {/* Admin-Bereich */}
+        {isAdmin && (
+          <div style={{ marginTop: 16 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '1.5px', padding: '0 12px', marginBottom: 6 }}>
+              Administration
+            </div>
+            {ADMIN_ITEMS.map(item => {
+              const active = isActive(item.href, item.exact);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    textDecoration: 'none',
+                    marginBottom: 2,
+                    background: active ? 'rgba(124, 58, 237, 0.2)' : 'transparent',
+                    color: active ? '#fff' : 'rgba(255,255,255,0.5)',
+                    fontSize: 14,
+                    fontWeight: active ? 600 : 400,
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <span style={{ fontSize: 16 }}>{item.icon}</span>
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </nav>
 
       {/* Footer */}
