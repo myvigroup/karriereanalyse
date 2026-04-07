@@ -93,35 +93,16 @@ export default function CVReview() {
         .order('sort_order');
       setPresets(presetsData || []);
 
-      // Advisor-ID
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data: advisor } = await supabase
-        .from('advisors')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      // Feedback laden oder erstellen
-      let { data: existingFeedback } = await supabase
-        .from('cv_feedback')
-        .select('*')
-        .eq('fair_lead_id', leadId)
-        .maybeSingle();
-
-      if (!existingFeedback && doc) {
-        const insertData = {
-          cv_document_id: doc.id,
-          fair_lead_id: leadId,
-          status: 'draft',
-        };
-        if (advisor?.id) insertData.advisor_id = advisor.id;
-
-        const { data: newFeedback } = await supabase
-          .from('cv_feedback')
-          .insert(insertData)
-          .select()
-          .single();
-        existingFeedback = newFeedback;
+      // Feedback laden oder via API erstellen (Admin-Client umgeht RLS)
+      let existingFeedback = null;
+      if (doc) {
+        const res = await fetch('/api/cv/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ leadId, documentId: doc.id }),
+        });
+        const data = await res.json();
+        existingFeedback = data.feedback || null;
       }
 
       setFeedback(existingFeedback);
