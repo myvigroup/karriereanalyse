@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import SetPasswordBanner from '@/components/cv-check/SetPasswordBanner';
 
 const CATEGORY_INFO = {
   struktur: { label: 'Struktur', icon: '📐' },
@@ -128,6 +129,9 @@ export default async function CVCheckPage() {
           </p>
         </div>
       )}
+
+      {/* Passwort-Banner */}
+      <SetPasswordBanner />
 
       <h1 style={{ fontSize: 28, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
         Dein Lebenslauf-Check
