@@ -55,65 +55,47 @@ export async function createLead(fairId, formData) {
 
 // Kontaktdaten erfassen + User erstellen (nach dem CV-Check)
 export async function saveContactDetails(leadId, formData) {
-  const { advisorId } = await getAdvisorId();
   const admin = createAdminClient();
 
   const email = formData.get('email')?.toLowerCase().trim();
   const phone = formData.get('phone') || null;
 
-  if (!email) throw new Error('E-Mail ist ein Pflichtfeld');
+  if (!email) return { error: 'E-Mail ist ein Pflichtfeld' };
 
   // Lead laden
   const { data: lead } = await admin.from('fair_leads')
-    .select('id, name, fair_id')
+    .select('id, first_name, last_name, fair_id')
     .eq('id', leadId)
-    .single();
+    .maybeSingle();
 
-  if (!lead) throw new Error('Lead nicht gefunden');
+  if (!lead) return { error: 'Lead nicht gefunden' };
+
+  const leadName = `${lead.first_name} ${lead.last_name || ''}`.trim();
 
   // Prüfe ob User existiert
   const { data: existingUsers } = await admin.auth.admin.listUsers();
   const existingUser = existingUsers?.users?.find(u => u.email === email);
 
-  let userId;
-
-  if (existingUser) {
-    userId = existingUser.id;
-  } else {
+  if (!existingUser) {
     const { data: newUser, error: createError } = await admin.auth.admin.createUser({
       email,
       email_confirm: true,
-      user_metadata: { name: lead.name, source: 'fair' },
+      user_metadata: { name: leadName, source: 'fair' },
     });
-    if (createError) throw new Error(`User-Erstellung fehlgeschlagen: ${createError.message}`);
-    userId = newUser.user.id;
+    if (createError) return { error: `User-Erstellung fehlgeschlagen: ${createError.message}` };
 
     await admin.from('profiles').update({
-      name: lead.name,
+      name: leadName,
       membership_type: 'basis',
-    }).eq('id', userId);
+    }).eq('id', newUser.user.id).then(() => {}).catch(() => {});
   }
 
-  // Lead updaten mit Email, Phone
+  // Lead updaten mit Email + Phone
   await admin.from('fair_leads').update({
     email,
     phone,
     updated_at: new Date().toISOString(),
   }).eq('id', leadId);
-
-  // CV-Dokumente dem User zuordnen
-  await admin.from('cv_documents').update({
-    user_id: userId,
-  }).eq('fair_lead_id', leadId);
-
-  // Funnel-Event
-  await admin.from('analytics_events').insert({
-    user_id: userId,
-    event_name: 'fair_contact_captured',
-    fair_id: lead.fair_id,
-    advisor_id: advisorId,
-    metadata: { lead_id: leadId },
-  });
 
   redirect(`/advisor/fair/${lead.fair_id}/lead/${leadId}/summary`);
 }
@@ -219,9 +201,9 @@ export async function completeFeedback(leadId) {
 
   // Lead laden
   const { data: lead } = await admin.from('fair_leads')
-    .select('*, fairs(name), advisors(display_name)')
+    .select('*, fairs(name)')
     .eq('id', leadId)
-    .single();
+    .maybeSingle();
 
   if (!lead) throw new Error('Lead nicht gefunden');
 
@@ -254,31 +236,19 @@ export async function completeFeedback(leadId) {
 
   // E-Mail senden
   const fairName = lead.fairs?.name || 'der Karrieremesse';
-  const advisorName = lead.advisors?.display_name || 'Dein Karriere-Coach';
+  const leadName = `${lead.first_name} ${lead.last_name || ''}`.trim();
 
   await sendEmail({
     to: lead.email,
     subject: 'Dein Lebenslauf-Check – Ergebnisse ansehen',
-    html: buildCvCheckEmail(lead.name, fairName, advisorName, magicLinkUrl),
+    html: buildCvCheckEmail(leadName, fairName, 'Dein Karriere-Coach', magicLinkUrl),
   });
 
-  // Funnel-Events loggen
+  // Funnel-Events loggen (Fehler ignorieren)
   await admin.from('analytics_events').insert([
-    {
-      user_id: lead.user_id,
-      event_name: 'feedback_completed',
-      fair_id: lead.fair_id,
-      advisor_id: advisorId,
-      metadata: { lead_id: leadId },
-    },
-    {
-      user_id: lead.user_id,
-      event_name: 'magic_link_sent',
-      fair_id: lead.fair_id,
-      advisor_id: advisorId,
-      metadata: { lead_id: leadId },
-    },
-  ]);
+    { event_name: 'feedback_completed', fair_id: lead.fair_id, metadata: { lead_id: leadId } },
+    { event_name: 'magic_link_sent', fair_id: lead.fair_id, metadata: { lead_id: leadId } },
+  ]).then(() => {}).catch(() => {});
 
   redirect(`/advisor/fair/${lead.fair_id}/lead/${leadId}/done`);
 }
