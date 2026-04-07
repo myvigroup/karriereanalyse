@@ -15,7 +15,7 @@ export default async function AdvisorSessionLayout({ children }) {
     .eq('id', user.id)
     .maybeSingle();
 
-  if (!profile || !['advisor', 'admin'].includes(profile.role)) redirect('/dashboard');
+  if (!profile || !['advisor', 'messeleiter', 'admin'].includes(profile.role)) redirect('/dashboard');
 
   return (
     <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column' }}>

@@ -1,11 +1,13 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 export default async function AdvisorDashboard() {
   const supabase = createClient();
   const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/auth/login');
 
   // Profil + Rolle prüfen
   const { data: profile } = await admin
@@ -80,7 +82,7 @@ export default async function AdvisorDashboard() {
   const activeFairs = (fairs || []).filter(f => ['upcoming', 'active'].includes(f.status));
   const pastFairs = (fairs || []).filter(f => f.status === 'completed');
 
-  const formatDate = (d) => new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const formatDate = (d) => d ? new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '–';
 
   return (
     <div>
