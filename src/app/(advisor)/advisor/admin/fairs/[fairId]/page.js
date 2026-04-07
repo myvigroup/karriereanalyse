@@ -190,9 +190,27 @@ export default async function FairManagePage({ params }) {
 
             {unassignedAdvisors.length === 0 && (assignments || []).length === 0 && (
               <p style={{ fontSize: 13, color: '#86868b', margin: 0 }}>
-                Keine Berater verfügbar. <Link href="/advisor/admin/advisors/new" style={{ color: '#CC1426' }}>Neuen Berater erstellen →</Link>
+                Keine Berater verfügbar.
               </p>
             )}
+
+            {/* Immer sichtbar: Neuen Berater anlegen */}
+            <div style={{ borderTop: '1px solid #F0EEE9', marginTop: 16, paddingTop: 16 }}>
+              <Link
+                href={`/advisor/admin/advisors/new?returnFair=${fairId}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: '#CC1426',
+                  textDecoration: 'none',
+                }}
+              >
+                + Neuen Berater anlegen
+              </Link>
+            </div>
           </div>
         </div>
       </div>

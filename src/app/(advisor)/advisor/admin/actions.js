@@ -61,6 +61,7 @@ export async function createAdvisorAccount(formData) {
   const email = formData.get('email')?.trim().toLowerCase();
   const name = formData.get('name')?.trim();
   const password = formData.get('password');
+  const returnFair = formData.get('returnFair');
 
   if (!email || !name || !password) return { error: 'Alle Felder sind erforderlich.' };
 
@@ -85,10 +86,16 @@ export async function createAdvisorAccount(formData) {
   });
 
   // Advisor-Eintrag
-  await admin.from('advisors').insert({
+  const { data: newAdvisor } = await admin.from('advisors').insert({
     user_id: userId,
     display_name: name,
-  });
+  }).select('id').single();
+
+  // Wenn von einer Messe aus aufgerufen: direkt zuweisen und zurück
+  if (returnFair) {
+    await admin.from('fair_advisors').upsert({ fair_id: returnFair, advisor_user_id: userId, is_manager: false });
+    redirect(`/advisor/admin/fairs/${returnFair}`);
+  }
 
   redirect('/advisor/admin');
 }

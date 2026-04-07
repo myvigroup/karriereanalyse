@@ -4,12 +4,14 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createAdvisorAccount } from '../../actions';
 
-export default async function NewAdvisorPage() {
+export default async function NewAdvisorPage({ searchParams }) {
   const supabase = createClient();
   const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (profile?.role !== 'admin') redirect('/advisor');
+
+  const returnFair = searchParams?.returnFair || null;
 
   const inputStyle = {
     width: '100%',
@@ -40,6 +42,7 @@ export default async function NewAdvisorPage() {
       </p>
 
       <form action={createAdvisorAccount}>
+        {returnFair && <input type="hidden" name="returnFair" value={returnFair} />}
         <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', padding: 28, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           <div>
