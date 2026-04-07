@@ -15,9 +15,21 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { setError(error.message); setLoading(false); return; }
-    router.push('/dashboard');
+
+    // Rolle prüfen → Advisor/Admin direkt zum Berater-Dashboard
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .maybeSingle();
+
+    if (profile?.role === 'advisor' || profile?.role === 'admin') {
+      router.push('/advisor');
+    } else {
+      router.push('/dashboard');
+    }
   }
 
   return (
