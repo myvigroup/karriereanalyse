@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { Scale, FileText, DollarSign, Handshake, Brain, CheckCircle2 } from 'lucide-react';
 
 const DEFAULT_CHECKLIST = [
   { id: 'c1', label: 'Kündigungsfrist im Vertrag geprüft', category: 'legal', done: false },
@@ -39,11 +40,11 @@ export default function ExitPlannerClient({ userId, existingPlan }) {
   };
 
   const categories = [
-    { key: 'legal', label: '⚖️ Rechtliches', color: 'var(--ki-red)' },
-    { key: 'documents', label: '📄 Dokumente', color: 'var(--ki-warning)' },
-    { key: 'finance', label: '💰 Finanzen', color: 'var(--ki-success)' },
-    { key: 'network', label: '🤝 Netzwerk', color: '#5856D6' },
-    { key: 'mental', label: '🧠 Mindset', color: 'var(--ki-text-secondary)' },
+    { key: 'legal', label: 'Rechtliches', color: 'var(--ki-red)', Icon: Scale },
+    { key: 'documents', label: 'Dokumente', color: 'var(--ki-warning)', Icon: FileText },
+    { key: 'finance', label: 'Finanzen', color: 'var(--ki-success)', Icon: DollarSign },
+    { key: 'network', label: 'Netzwerk', color: '#5856D6', Icon: Handshake },
+    { key: 'mental', label: 'Mindset', color: 'var(--ki-text-secondary)', Icon: Brain },
   ];
 
   return (

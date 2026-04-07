@@ -3,13 +3,14 @@ import { useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { awardPoints } from '@/lib/gamification';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import { Search, Mail, Calendar, Trophy, Handshake, GraduationCap, ClipboardList, FileText, FolderOpen, Paperclip, CheckCircle2, Sparkles, Clock, Mic, Users } from 'lucide-react';
 
 const COLUMNS = [
-  { key: 'research', label: '🔍 Recherche', color: '#86868B' },
-  { key: 'applied', label: '✉️ Beworben', color: '#5856D6' },
-  { key: 'interview', label: '📅 Interview', color: '#D4A017' },
-  { key: 'assessment', label: '🏆 AC / Finale', color: '#E8742A' },
-  { key: 'offer', label: '🤝 Angebot', color: '#2D6A4F' },
+  { key: 'research', label: 'Recherche', color: '#86868B', icon: Search },
+  { key: 'applied', label: 'Beworben', color: '#5856D6', icon: Mail },
+  { key: 'interview', label: 'Interview', color: '#D4A017', icon: Calendar },
+  { key: 'assessment', label: 'AC / Finale', color: '#E8742A', icon: Trophy },
+  { key: 'offer', label: 'Angebot', color: '#2D6A4F', icon: Handshake },
 ];
 
 /* ── Dokumenten-Safe constants ── */
@@ -22,17 +23,17 @@ const DOC_STATUS_CONFIG = {
 };
 
 const DOC_TYPE_FILTERS = [
-  { key: 'cv',          label: 'Lebenslauf',  icon: '📄' },
-  { key: 'certificate', label: 'Zeugnisse',   icon: '📜' },
-  { key: 'zertifikat',  label: 'Zertifikate', icon: '🎓' },
-  { key: 'reference',   label: 'Referenzen',  icon: '📋' },
-  { key: 'cover_letter',label: 'Anschreiben', icon: '📝' },
+  { key: 'cv',          label: 'Lebenslauf',  Icon: FileText },
+  { key: 'certificate', label: 'Zeugnisse',   Icon: ClipboardList },
+  { key: 'zertifikat',  label: 'Zertifikate', Icon: GraduationCap },
+  { key: 'reference',   label: 'Referenzen',  Icon: ClipboardList },
+  { key: 'cover_letter',label: 'Anschreiben', Icon: FileText },
 ];
 
 const PAGE_TABS = [
-  { key: 'bewerbungen', label: '✉️ Bewerbungen' },
-  { key: 'dokumente', label: '📂 Dokumenten-Safe' },
-  { key: 'vorlagen', label: '📋 Vorlagen' },
+  { key: 'bewerbungen', label: 'Bewerbungen', Icon: Mail },
+  { key: 'dokumente', label: 'Dokumenten-Safe', Icon: FolderOpen },
+  { key: 'vorlagen', label: 'Vorlagen', Icon: ClipboardList },
 ];
 
 export default function ApplicationsClient({ applications: initial, documents: initialDocs, userId }) {
@@ -270,7 +271,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
         {app.priority === 1 && <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--ki-red)', marginTop: 4 }} />}
         {app.interview_date && (
           <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginTop: 4 }}>
-            📅 {new Date(app.interview_date).toLocaleDateString('de-DE')}
+            <Calendar size={12} strokeWidth={1.7} style={{ display: 'inline', verticalAlign: 'middle' }} /> {new Date(app.interview_date).toLocaleDateString('de-DE')}
           </div>
         )}
         {app.status === 'interview' && (
@@ -280,7 +281,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
             style={{ fontSize: 11, padding: '4px 10px', marginTop: 6, width: '100%' }}
             disabled={briefingLoading}
           >
-            {briefingLoading ? '⏳ Lädt...' : '📋 Briefing'}
+            {briefingLoading ? <><Clock size={12} strokeWidth={1.7} /> Lädt...</> : <><ClipboardList size={12} strokeWidth={1.7} /> Briefing</>}
           </button>
         )}
       </div>
@@ -306,7 +307,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
             style={{ fontSize: 13, padding: '8px 18px', whiteSpace: 'nowrap', flexShrink: 0 }}
             onClick={() => setActivePageTab(t.key)}
           >
-            {t.label}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>{t.Icon && <t.Icon size={16} strokeWidth={1.7} />}{t.label}</span>
           </button>
         ))}
       </div>
@@ -381,7 +382,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
                 disabled={genLoading || !genInput.company || !genInput.position}
                 style={{ width: '100%' }}
               >
-                {genLoading ? '⏳ Generiere...' : '✨ KI generieren'}
+                {genLoading ? <><Clock size={14} strokeWidth={1.7} /> Generiere...</> : <><Sparkles size={14} strokeWidth={1.7} /> KI generieren</>}
               </button>
               {genResult && (
                 <>
@@ -398,7 +399,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
                     onClick={handleCopyGen}
                     style={{ width: '100%' }}
                   >
-                    {genCopied ? '✅ Kopiert!' : '📋 Kopieren'}
+                    {genCopied ? <><CheckCircle2 size={14} strokeWidth={1.7} /> Kopiert!</> : <><ClipboardList size={14} strokeWidth={1.7} /> Kopieren</>}
                   </button>
                 </>
               )}
@@ -413,7 +414,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
           <div key={col.key} onDragOver={onDragOver} onDrop={(e) => onDrop(e, col.key)}
             style={{ minWidth: 220, flex: 1, background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-lg)', padding: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, padding: '0 4px' }}>
-              <span style={{ fontSize: 14 }}>{col.label}</span>
+              <span style={{ fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>{col.icon && <col.icon size={16} strokeWidth={1.7} />}{col.label}</span>
               <span style={{ marginLeft: 'auto', fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', background: 'var(--ki-card)', padding: '2px 8px', borderRadius: 'var(--r-pill)' }}>
                 {grouped[col.key]?.length || 0}
               </span>
@@ -448,11 +449,11 @@ export default function ApplicationsClient({ applications: initial, documents: i
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 12 }}>Timeline</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0, paddingLeft: 12 }}>
                 {[
-                  { key: 'research', label: 'Erstellt', icon: '🔍' },
-                  { key: 'applied', label: 'Gesendet', icon: '✉️' },
-                  { key: 'interview', label: 'Interview', icon: '📅' },
-                  { key: 'assessment', label: 'AC / Finale', icon: '🏆' },
-                  { key: 'offer', label: 'Angebot / Absage', icon: '🤝' },
+                  { key: 'research', label: 'Erstellt', Icon: Search },
+                  { key: 'applied', label: 'Gesendet', Icon: Mail },
+                  { key: 'interview', label: 'Interview', Icon: Calendar },
+                  { key: 'assessment', label: 'AC / Finale', Icon: Trophy },
+                  { key: 'offer', label: 'Angebot / Absage', Icon: Handshake },
                 ].map((step, i, arr) => {
                   const statusOrder = ['research', 'applied', 'interview', 'assessment', 'offer'];
                   const currentIdx = statusOrder.indexOf(selectedApp.status);
@@ -472,7 +473,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
                       </div>
                       <div style={{ paddingBottom: 8 }}>
                         <div style={{ fontSize: 13, fontWeight: isActive ? 600 : 400, color: isActive ? 'var(--ki-text)' : 'var(--ki-text-tertiary)' }}>
-                          {step.icon} {step.label}
+                          {step.Icon && <step.Icon size={14} strokeWidth={1.7} />} {step.label}
                         </div>
                         {step.key === 'research' && selectedApp.created_at && (
                           <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)' }}>{new Date(selectedApp.created_at).toLocaleDateString('de-DE')}</div>
@@ -522,7 +523,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
 
       {apps.length === 0 && (
         <div className="card" style={{ padding: 48, textAlign: 'center', marginTop: 24 }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>✉</div>
+          <div style={{ fontSize: 48, marginBottom: 12 }}><Mail size={48} strokeWidth={1.5} /></div>
           <h3 style={{ fontWeight: 700, marginBottom: 8 }}>Noch keine Bewerbungen</h3>
           <p style={{ color: 'var(--ki-text-secondary)', marginBottom: 16 }}>Füge deine erste Opportunity hinzu und tracke deinen Fortschritt.</p>
           <button className="btn btn-primary" onClick={() => setShowAdd(true)}>Erste Bewerbung hinzufügen</button>
@@ -535,7 +536,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
           onClick={() => setBriefing(null)}>
           <div className="card" style={{ width: 560, maxWidth: '90vw', maxHeight: '80vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h3 style={{ fontSize: 18, fontWeight: 700 }}>📋 Interview-Briefing</h3>
+              <h3 style={{ fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}><ClipboardList size={20} strokeWidth={1.7} /> Interview-Briefing</h3>
               <button onClick={() => setBriefing(null)} className="btn btn-ghost" style={{ padding: '4px 8px', fontSize: 18 }}>×</button>
             </div>
             {briefing.error ? (
@@ -621,7 +622,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
               if (target) docDropZoneRef.current?.querySelector('input[type="file"]')?.click();
             }}
           >
-            <div style={{ fontSize: 32 }}>📂</div>
+            <div style={{ fontSize: 32 }}><FolderOpen size={32} strokeWidth={1.5} /></div>
             <div style={{ fontWeight: 600, fontSize: 15 }}>Datei hier ablegen oder klicken</div>
             <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>PDF, JPG, PNG, DOC/DOCX</div>
             <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style={{ display: 'none' }}
@@ -648,7 +649,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
                   fontSize: 13, cursor: 'pointer', transition: 'all var(--t-fast)',
                 }}
               >
-                <span>{ft.icon}</span><span>{ft.label}</span>
+                <span>{ft.Icon && <ft.Icon size={16} strokeWidth={1.7} />}</span><span>{ft.label}</span>
               </button>
             ))}
           </div>
@@ -705,7 +706,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
                         cursor: 'pointer', fontSize: 14, color: 'var(--ki-text-secondary)',
                         transition: 'all var(--t-fast)',
                       }}>
-                        {docUploading === doc.id ? '⏳ Wird hochgeladen...' : '📎 Datei auswählen oder hierher ziehen'}
+                        {docUploading === doc.id ? <><Clock size={14} strokeWidth={1.7} /> Wird hochgeladen...</> : <><Paperclip size={14} strokeWidth={1.7} /> Datei auswählen oder hierher ziehen</>}
                         <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style={{ display: 'none' }}
                           onChange={(e) => handleDocUpload(doc, e.target.files?.[0])} disabled={docUploading === doc.id} />
                       </label>
@@ -824,7 +825,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
             {/* Anschreiben Tipps */}
             <div className="card animate-in" style={{ padding: 24, borderLeft: '3px solid #5856D6', animationDelay: '0.05s' }}>
               <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 32 }}>📝</span>
+                <span style={{ fontSize: 32 }}><FileText size={32} strokeWidth={1.5} /></span>
                 <div>
                   <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Anschreiben</h3>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -840,7 +841,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
             {/* Interview Tipps */}
             <div className="card animate-in" style={{ padding: 24, borderLeft: '3px solid var(--ki-warning)', animationDelay: '0.1s' }}>
               <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 32 }}>🎤</span>
+                <span style={{ fontSize: 32 }}><Mic size={32} strokeWidth={1.5} /></span>
                 <div>
                   <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Interview-Vorbereitung</h3>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -856,7 +857,7 @@ export default function ApplicationsClient({ applications: initial, documents: i
             {/* Networking Tipps */}
             <div className="card animate-in" style={{ padding: 24, borderLeft: '3px solid var(--ki-success)', animationDelay: '0.15s' }}>
               <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 32 }}>🤝</span>
+                <span style={{ fontSize: 32 }}><Handshake size={32} strokeWidth={1.5} /></span>
                 <div>
                   <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Networking & Empfehlungen</h3>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>

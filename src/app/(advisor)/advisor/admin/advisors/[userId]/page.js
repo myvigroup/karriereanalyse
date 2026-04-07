@@ -29,7 +29,7 @@ export default async function AdvisorDetailPage({ params }) {
     admin.from('profiles').select('id, email, name, role').eq('id', userId).maybeSingle(),
     admin.from('advisors').select('id, display_name').eq('user_id', userId).maybeSingle(),
     admin.from('fair_advisors').select('fair_id').eq('advisor_user_id', userId),
-    admin.from('fairs').select('id, name, city, start_date, status').order('start_date', { ascending: false }),
+    admin.from('fairs').select('id, name, city, date_start, status').order('date_start', { ascending: false }),
   ]);
 
   if (!advisor) redirect('/advisor/admin');
@@ -88,7 +88,7 @@ export default async function AdvisorDetailPage({ params }) {
           }}>
             <div>
               <div style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A' }}>{fair.name}</div>
-              <div style={{ fontSize: 12, color: '#86868b', marginTop: 2 }}>{fair.city && `${fair.city} · `}{formatDate(fair.start_date)}</div>
+              <div style={{ fontSize: 12, color: '#86868b', marginTop: 2 }}>{fair.city && `${fair.city} · `}{formatDate(fair.date_start)}</div>
             </div>
             <form action={removeAdvisorFromFair} style={{ margin: 0 }}>
               <input type="hidden" name="fair_id" value={fair.id} />

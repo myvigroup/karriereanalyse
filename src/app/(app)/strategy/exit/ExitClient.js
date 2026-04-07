@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { awardPoints } from '@/lib/gamification';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import { Trophy, DollarSign, Lightbulb, Scale, CheckCircle2 } from 'lucide-react';
 
 /* ─────────────────────────── Static Data ─────────────────────────── */
 
@@ -218,7 +219,7 @@ export default function ExitClient({ userId, existingPlan, profile }) {
         border: '1px solid var(--ki-border)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 28 }}>🏆</span>
+          <span><Trophy size={28} strokeWidth={1.5} /></span>
           <div>
             <div style={{ fontWeight: 700, fontSize: 15 }}>+200 XP fuer deinen Exit-Plan</div>
             <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>
@@ -233,7 +234,7 @@ export default function ExitClient({ userId, existingPlan, profile }) {
           1. FINANZ-RUNWAY-RECHNER
       ════════════════════════════════════════════════════════════ */}
       <div className="card animate-in" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>💰 Finanz-Runway-Rechner</h3>
+        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}><DollarSign size={20} strokeWidth={1.7} /> Finanz-Runway-Rechner</h3>
         <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 20 }}>
           Wie lange kannst du ohne Einkommen ueberbruecken?
         </p>
@@ -300,7 +301,7 @@ export default function ExitClient({ userId, existingPlan, profile }) {
         <div style={{ marginBottom: 20, padding: '14px 16px', background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-md)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
             <label style={{ fontSize: 13, color: 'var(--ki-text-secondary)', fontWeight: 600 }}>
-              💡 Szenario: Was wenn ich zusaetzlich spare?
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Lightbulb size={14} strokeWidth={1.7} /> Szenario: Was wenn ich zusaetzlich spare?</span>
             </label>
             <span style={{ fontSize: 14, fontWeight: 700 }}>
               +{monthlySavingsExtra.toLocaleString('de-DE')} EUR/Monat
@@ -493,7 +494,7 @@ export default function ExitClient({ userId, existingPlan, profile }) {
           3. KUENDIGUNGS-CHECKLISTE (Accordion)
       ════════════════════════════════════════════════════════════ */}
       <div className="card animate-in delay-2" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>⚖️ Kuendigungs-Checkliste</h3>
+        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}><Scale size={20} strokeWidth={1.7} /> Kuendigungs-Checkliste</h3>
         <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
           Rechtliche und praktische Schritte rund um deine Kuendigung.
         </p>
@@ -635,7 +636,7 @@ export default function ExitClient({ userId, existingPlan, profile }) {
       ════════════════════════════════════════════════════════════ */}
       <div className="card animate-in delay-2" style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <h3 style={{ fontSize: 18, fontWeight: 700 }}>✅ Exit-Checkliste</h3>
+          <h3 style={{ fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}><CheckCircle2 size={20} strokeWidth={1.7} /> Exit-Checkliste</h3>
           <span className={checkDone === checkTotal ? 'pill pill-green' : 'pill pill-grey'}>
             {checkDone} / {checkTotal}
           </span>

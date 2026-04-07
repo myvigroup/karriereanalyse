@@ -11,6 +11,7 @@ const STATUS_BADGE = {
 };
 
 export default async function AdminPage() {
+  try {
   const supabase = createClient();
   const admin = createAdminClient();
 
@@ -27,17 +28,23 @@ export default async function AdminPage() {
     fairIds = (myAssignments || []).map(a => a.fair_id);
   }
 
-  // Alle Daten laden
+  // Messen laden (ohne .then() + korrekter Spaltenname date_start)
+  let fairs = [];
+  if (fairIds === null) {
+    const { data } = await admin.from('fairs').select('*').order('date_start', { ascending: false });
+    fairs = data || [];
+  } else if (fairIds.length > 0) {
+    const { data } = await admin.from('fairs').select('*').in('id', fairIds).order('date_start', { ascending: false });
+    fairs = data || [];
+  }
+
+  // Leads, Berater, Profile, Zuweisungen parallel laden
   const [
-    { data: fairs },
     { data: leads },
     { data: advisors },
     { data: allProfiles },
     { data: assignments },
   ] = await Promise.all([
-    fairIds !== null && fairIds.length === 0
-      ? Promise.resolve({ data: [] })
-      : (fairIds ? admin.from('fairs').select('*').in('id', fairIds) : admin.from('fairs').select('*')).then(r => ({ data: (r.data || []).sort((a, b) => new Date(b.start_date) - new Date(a.start_date)) })),
     (fairIds !== null && fairIds.length === 0)
       ? Promise.resolve({ data: [] })
       : (fairIds ? admin.from('fair_leads').select('id, status, fair_id, advisor_user_id, created_at').in('fair_id', fairIds) : admin.from('fair_leads').select('id, status, fair_id, advisor_user_id, created_at')),
@@ -152,7 +159,7 @@ export default async function AdminPage() {
                   {badge.label}
                 </span>
               </div>
-              <div style={{ fontSize: 13, color: '#6B7280' }}>{formatDate(fair.start_date)}</div>
+              <div style={{ fontSize: 13, color: '#6B7280' }}>{formatDate(fair.date_start)}</div>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>{kpi.total}</div>
               <div style={{ fontSize: 15, fontWeight: 700, color: kpi.open > 0 ? '#D97706' : '#6B7280' }}>{kpi.open}</div>
               <div style={{ fontSize: 14, color: '#6B7280' }}>{advisorsByFair[fair.id] || 0}</div>
@@ -240,4 +247,16 @@ export default async function AdminPage() {
       <style>{`.advisor-row:hover { background: #FAFAF8; }`}</style>
     </div>
   );
+  } catch (err) {
+    if (err?.digest?.startsWith?.('NEXT_REDIRECT') || err?.message === 'NEXT_REDIRECT') throw err;
+    return (
+      <div style={{ padding: 40, background: '#FEF2F2', borderRadius: 16, border: '1px solid #FECACA', maxWidth: 700, margin: '40px auto', fontFamily: 'system-ui, sans-serif' }}>
+        <h2 style={{ color: '#DC2626', marginBottom: 16 }}>Admin-Fehler (Debug)</h2>
+        <p style={{ fontWeight: 600, marginBottom: 8 }}>{err?.message || 'Kein Fehlertext'}</p>
+        <pre style={{ fontSize: 12, whiteSpace: 'pre-wrap', color: '#6B7280', background: '#FFF', padding: 16, borderRadius: 8 }}>
+          {err?.stack?.slice(0, 1000) || 'Kein Stack'}
+        </pre>
+      </div>
+    );
+  }
 }

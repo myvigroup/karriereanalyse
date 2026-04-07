@@ -3,28 +3,29 @@ import { useState, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { awardPoints } from '@/lib/gamification';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import { Bird, Shield, Sprout, Users as UsersIcon, Trophy, Palette, Compass, Rocket, Handshake, DollarSign, Megaphone, Dumbbell, BookOpen, Anchor, Globe, Heart, Lightbulb, Scale, Crown, Target, CheckCircle2, Star, PartyPopper } from 'lucide-react';
 
 const VALUES = [
-  { id: 'freiheit',    label: 'Freiheit',           emoji: '🕊️', desc: 'Unabhängigkeit & selbstbestimmtes Handeln' },
-  { id: 'sicherheit', label: 'Sicherheit',           emoji: '🛡️', desc: 'Stabilität, festes Einkommen, Verlässlichkeit' },
-  { id: 'wachstum',   label: 'Wachstum',             emoji: '🌱', desc: 'Persönliche & berufliche Weiterentwicklung' },
-  { id: 'familie',    label: 'Familie',               emoji: '👨‍👩‍👧‍👦', desc: 'Zeit & Energie für die Menschen, die zählen' },
-  { id: 'anerkennung',label: 'Anerkennung',           emoji: '🏆', desc: 'Respekt, Lob und sichtbare Wertschätzung' },
-  { id: 'kreativitaet',label: 'Kreativität',          emoji: '🎨', desc: 'Freiheit zu gestalten und Neues zu erschaffen' },
-  { id: 'fuehrung',   label: 'Führung',               emoji: '🧭', desc: 'Andere leiten, inspirieren und Verantwortung tragen' },
-  { id: 'autonomie',  label: 'Autonomie',             emoji: '🚀', desc: 'Eigene Entscheidungen treffen ohne Fremdkontrolle' },
-  { id: 'teamwork',   label: 'Teamwork',              emoji: '🤝', desc: 'Gemeinsam Ziele erreichen und voneinander lernen' },
-  { id: 'geld',       label: 'Geld',                  emoji: '💰', desc: 'Finanzieller Erfolg und Wohlstand' },
-  { id: 'einfluss',   label: 'Einfluss',              emoji: '📢', desc: 'Dinge bewegen und Entscheidungen prägen' },
-  { id: 'gesundheit', label: 'Gesundheit',            emoji: '💪', desc: 'Körperliches und mentales Wohlbefinden' },
-  { id: 'lernen',     label: 'Lernen',                emoji: '📚', desc: 'Neues Wissen aufbauen und Fähigkeiten erweitern' },
-  { id: 'stabilitaet',label: 'Stabilität',            emoji: '⚓', desc: 'Beständigkeit, Routine und klare Strukturen' },
-  { id: 'abenteuer',  label: 'Abenteuer',             emoji: '🌍', desc: 'Neue Orte, Herausforderungen und Erfahrungen' },
-  { id: 'integritaet',label: 'Integrität',            emoji: '🤲', desc: 'Ehrlichkeit, Aufrichtigkeit und Wertetreue' },
-  { id: 'innovation', label: 'Innovation',            emoji: '💡', desc: 'Zukunftsweisende Ideen und disruptives Denken' },
-  { id: 'worklife',   label: 'Work-Life-Balance',     emoji: '⚖️', desc: 'Harmonie zwischen Beruf und Privatleben' },
-  { id: 'macht',      label: 'Macht',                 emoji: '👑', desc: 'Kontrolle über Ressourcen und Ergebnisse' },
-  { id: 'sinnhaftigkeit', label: 'Sinnhaftigkeit',   emoji: '🎯', desc: 'Arbeit, die einen echten Unterschied macht' },
+  { id: 'freiheit',    label: 'Freiheit',           Icon: Bird, desc: 'Unabhängigkeit & selbstbestimmtes Handeln' },
+  { id: 'sicherheit', label: 'Sicherheit',           Icon: Shield, desc: 'Stabilität, festes Einkommen, Verlässlichkeit' },
+  { id: 'wachstum',   label: 'Wachstum',             Icon: Sprout, desc: 'Persönliche & berufliche Weiterentwicklung' },
+  { id: 'familie',    label: 'Familie',               Icon: UsersIcon, desc: 'Zeit & Energie für die Menschen, die zählen' },
+  { id: 'anerkennung',label: 'Anerkennung',           Icon: Trophy, desc: 'Respekt, Lob und sichtbare Wertschätzung' },
+  { id: 'kreativitaet',label: 'Kreativität',          Icon: Palette, desc: 'Freiheit zu gestalten und Neues zu erschaffen' },
+  { id: 'fuehrung',   label: 'Führung',               Icon: Compass, desc: 'Andere leiten, inspirieren und Verantwortung tragen' },
+  { id: 'autonomie',  label: 'Autonomie',             Icon: Rocket, desc: 'Eigene Entscheidungen treffen ohne Fremdkontrolle' },
+  { id: 'teamwork',   label: 'Teamwork',              Icon: Handshake, desc: 'Gemeinsam Ziele erreichen und voneinander lernen' },
+  { id: 'geld',       label: 'Geld',                  Icon: DollarSign, desc: 'Finanzieller Erfolg und Wohlstand' },
+  { id: 'einfluss',   label: 'Einfluss',              Icon: Megaphone, desc: 'Dinge bewegen und Entscheidungen prägen' },
+  { id: 'gesundheit', label: 'Gesundheit',            Icon: Dumbbell, desc: 'Körperliches und mentales Wohlbefinden' },
+  { id: 'lernen',     label: 'Lernen',                Icon: BookOpen, desc: 'Neues Wissen aufbauen und Fähigkeiten erweitern' },
+  { id: 'stabilitaet',label: 'Stabilität',            Icon: Anchor, desc: 'Beständigkeit, Routine und klare Strukturen' },
+  { id: 'abenteuer',  label: 'Abenteuer',             Icon: Globe, desc: 'Neue Orte, Herausforderungen und Erfahrungen' },
+  { id: 'integritaet',label: 'Integrität',            Icon: Heart, desc: 'Ehrlichkeit, Aufrichtigkeit und Wertetreue' },
+  { id: 'innovation', label: 'Innovation',            Icon: Lightbulb, desc: 'Zukunftsweisende Ideen und disruptives Denken' },
+  { id: 'worklife',   label: 'Work-Life-Balance',     Icon: Scale, desc: 'Harmonie zwischen Beruf und Privatleben' },
+  { id: 'macht',      label: 'Macht',                 Icon: Crown, desc: 'Kontrolle über Ressourcen und Ergebnisse' },
+  { id: 'sinnhaftigkeit', label: 'Sinnhaftigkeit',   Icon: Target, desc: 'Arbeit, die einen echten Unterschied macht' },
 ];
 
 const PHASE_LABELS = ['Werte wählen', 'Ranking', 'Entscheidungs-Matrix', 'Reflexion'];
@@ -273,7 +274,7 @@ export default function DecisionClient({ userId, existingSession }) {
           fontSize: 14, fontWeight: 700, transition: 'all 0.25s ease',
           border: selectedValues.length === 5 ? 'none' : '1.5px solid var(--ki-border)',
         }}>
-          {selectedValues.length}/5 gewählt {selectedValues.length === 5 ? '✅' : ''}
+          {selectedValues.length}/5 gewählt {selectedValues.length === 5 ? <CheckCircle2 size={16} strokeWidth={1.7} style={{ display: 'inline', verticalAlign: 'middle' }} /> : ''}
         </div>
       </div>
 
@@ -312,7 +313,7 @@ export default function DecisionClient({ userId, existingSession }) {
                   ✓
                 </div>
               )}
-              <div style={{ fontSize: 28, marginBottom: 8 }}>{val.emoji}</div>
+              <div style={{ marginBottom: 8 }}>{val.Icon && <val.Icon size={28} strokeWidth={1.5} />}</div>
               <div style={{
                 fontSize: 12, fontWeight: 700,
                 color: isSelected ? 'var(--ki-red)' : 'var(--ki-text)',
@@ -331,7 +332,7 @@ export default function DecisionClient({ userId, existingSession }) {
                   marginTop: 8, fontSize: 10, fontWeight: 700,
                   color: 'var(--ki-red)',
                 }}>
-                  Wichtig ✅
+                  Wichtig <CheckCircle2 size={12} strokeWidth={1.7} style={{ display: 'inline', verticalAlign: 'middle' }} />
                 </div>
               )}
             </div>
@@ -398,7 +399,7 @@ export default function DecisionClient({ userId, existingSession }) {
               </div>
 
               {/* emoji + name */}
-              <span style={{ fontSize: 24, flexShrink: 0 }}>{val.emoji}</span>
+              <span style={{ flexShrink: 0 }}>{val.Icon && <val.Icon size={24} strokeWidth={1.5} />}</span>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 14, color: isTop ? 'var(--ki-red)' : 'var(--ki-text)' }}>
                   {val.label}
@@ -521,7 +522,7 @@ export default function DecisionClient({ userId, existingSession }) {
             return (
               <div key={val.id} className="card" style={{ padding: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                  <span style={{ fontSize: 22 }}>{val.emoji}</span>
+                  <span>{val.Icon && <val.Icon size={22} strokeWidth={1.5} />}</span>
                   <span style={{ fontWeight: 700, fontSize: 14, flex: 1 }}>{val.label}</span>
                   <span className="pill" style={{
                     fontSize: 10, background: i === 0 ? 'var(--ki-red)' : 'var(--ki-bg-alt)',
@@ -629,7 +630,7 @@ export default function DecisionClient({ userId, existingSession }) {
               color: res.winner === 'tie' ? 'var(--ki-warning)' : 'var(--ki-text)',
             }}>
               {res.winner === 'tie'
-                ? '⚖️ Gleichstand — beide Optionen passen gleich gut zu deinen Werten.'
+                ? <><Scale size={16} strokeWidth={1.7} style={{ display: 'inline', verticalAlign: 'middle' }} /> Gleichstand — beide Optionen passen gleich gut zu deinen Werten.</>
                 : res.winner === 'A'
                   ? `Deine Werte sprechen für "${optionAName}" — um ${res.pctA - res.pctB} Prozentpunkte vorne.`
                   : `Deine Werte sprechen für "${optionBName}" — um ${res.pctB - res.pctA} Prozentpunkte vorne.`}
@@ -674,7 +675,7 @@ export default function DecisionClient({ userId, existingSession }) {
           borderTop: `4px solid ${winnerColor}`,
         }}>
           <div style={{ fontSize: 44, marginBottom: 12 }}>
-            {res.winner === 'tie' ? '⚖️' : '🏆'}
+            {res.winner === 'tie' ? <Scale size={44} strokeWidth={1.5} /> : <Trophy size={44} strokeWidth={1.5} />}
           </div>
           <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
             Deine werte-basierte Empfehlung
@@ -756,7 +757,7 @@ export default function DecisionClient({ userId, existingSession }) {
               const w    = d.weight;
               return (
                 <div key={val.id || i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ fontSize: 20, flexShrink: 0 }}>{val.emoji}</span>
+                  <span style={{ flexShrink: 0 }}>{val.Icon && <val.Icon size={20} strokeWidth={1.5} />}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
                       <span style={{ fontSize: 12, fontWeight: 700 }}>{val.label}</span>
@@ -851,7 +852,7 @@ export default function DecisionClient({ userId, existingSession }) {
               padding: '10px 20px', borderRadius: 'var(--r-pill)',
               background: 'rgba(255,204,0,0.1)', border: '1.5px solid var(--ki-warning)',
             }}>
-              <span style={{ fontSize: 20 }}>⭐</span>
+              <span><Star size={20} strokeWidth={1.5} color="var(--ki-warning)" /></span>
               <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ki-warning)' }}>
                 +150 XP für das Abschließen dieses Assessments
               </span>
@@ -879,7 +880,7 @@ export default function DecisionClient({ userId, existingSession }) {
             border: '2px solid var(--ki-success)',
             background: 'rgba(52,199,89,0.05)',
           }}>
-            <div style={{ fontSize: 36, marginBottom: 10 }}>🎉</div>
+            <div style={{ marginBottom: 10 }}><PartyPopper size={36} strokeWidth={1.5} /></div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ki-success)', marginBottom: 6 }}>
               Assessment gespeichert!
             </div>
