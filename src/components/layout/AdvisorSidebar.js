@@ -22,6 +22,8 @@ export default function AdvisorSidebar({ profile, advisor }) {
 
   const displayName = advisor?.display_name || profile?.name || profile?.email || 'Berater';
   const isAdmin = profile?.role === 'admin';
+  const isMesseleiter = profile?.role === 'messeleiter';
+  const roleLabel = profile?.role === 'admin' ? 'Admin' : profile?.role === 'messeleiter' ? 'Messeleiter' : 'Karriere-Berater';
 
   return (
     <div style={{
@@ -67,7 +69,7 @@ export default function AdvisorSidebar({ profile, advisor }) {
           {displayName}
         </div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
-          Karriere-Berater
+          {roleLabel}
         </div>
       </div>
 
@@ -101,7 +103,7 @@ export default function AdvisorSidebar({ profile, advisor }) {
         })}
 
         {/* Admin-Bereich */}
-        {isAdmin && (
+        {(isAdmin || isMesseleiter) && (
           <div style={{ marginTop: 16 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '1.5px', padding: '0 12px', marginBottom: 6 }}>
               Administration

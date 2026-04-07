@@ -10,7 +10,7 @@ async function requireAdmin() {
   if (!user) redirect('/auth/login');
   const admin = createAdminClient();
   const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).maybeSingle();
-  if (profile?.role !== 'admin') redirect('/advisor');
+  if (!['admin', 'messeleiter'].includes(profile?.role)) redirect('/advisor');
   return admin;
 }
 

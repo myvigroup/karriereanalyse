@@ -15,7 +15,16 @@ export default async function AdminPage() {
 
   const { data: { user } } = await supabase.auth.getUser();
   const { data: profile } = await admin.from('profiles').select('role, name').eq('id', user.id).maybeSingle();
-  if (profile?.role !== 'admin') redirect('/advisor');
+  if (!['admin', 'messeleiter'].includes(profile?.role)) redirect('/advisor');
+
+  const isAdmin = profile?.role === 'admin';
+
+  // Messeleiter: nur zugewiesene Messen; Admin: alle
+  let fairIds = null;
+  if (!isAdmin) {
+    const { data: myAssignments } = await admin.from('fair_advisors').select('fair_id').eq('advisor_user_id', user.id);
+    fairIds = (myAssignments || []).map(a => a.fair_id);
+  }
 
   // Alle Daten laden
   const [
@@ -25,8 +34,12 @@ export default async function AdminPage() {
     { data: allProfiles },
     { data: assignments },
   ] = await Promise.all([
-    admin.from('fairs').select('*').order('start_date', { ascending: false }),
-    admin.from('fair_leads').select('id, status, fair_id, advisor_user_id, created_at'),
+    fairIds !== null && fairIds.length === 0
+      ? Promise.resolve({ data: [] })
+      : (fairIds ? admin.from('fairs').select('*').in('id', fairIds) : admin.from('fairs').select('*')).then(r => ({ data: (r.data || []).sort((a, b) => new Date(b.start_date) - new Date(a.start_date)) })),
+    (fairIds !== null && fairIds.length === 0)
+      ? Promise.resolve({ data: [] })
+      : (fairIds ? admin.from('fair_leads').select('id, status, fair_id, advisor_user_id, created_at').in('fair_id', fairIds) : admin.from('fair_leads').select('id, status, fair_id, advisor_user_id, created_at')),
     admin.from('advisors').select('id, user_id, display_name'),
     admin.from('profiles').select('id, email, name').in('role', ['advisor', 'admin']),
     admin.from('fair_advisors').select('fair_id, advisor_user_id'),
@@ -90,13 +103,15 @@ export default async function AdminPage() {
 
       {/* ── Messen ──────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Messen</h2>
-        <Link
-          href="/advisor/admin/fairs/new"
-          style={{ padding: '9px 18px', background: '#CC1426', color: '#fff', borderRadius: 980, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}
-        >
-          + Neue Messe
-        </Link>
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{isAdmin ? 'Alle Messen' : 'Meine Messen'}</h2>
+        {isAdmin && (
+          <Link
+            href="/advisor/admin/fairs/new"
+            style={{ padding: '9px 18px', background: '#CC1426', color: '#fff', borderRadius: 980, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}
+          >
+            + Neue Messe
+          </Link>
+        )}
       </div>
 
       <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden', marginBottom: 48 }}>

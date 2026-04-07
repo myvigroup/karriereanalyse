@@ -63,8 +63,9 @@ export default async function NewAdvisorPage({ searchParams }) {
           <div>
             <label style={labelStyle}>Rolle</label>
             <select name="role" style={{ ...inputStyle, cursor: 'pointer' }}>
-              <option value="advisor">Berater — Zugriff auf Berater-Portal</option>
-              <option value="admin">Admin — Vollzugriff inkl. Verwaltung</option>
+              <option value="advisor">Berater — eigene Gespräche verwalten</option>
+              <option value="messeleiter">Messeleiter — Berater anlegen & alle Leads der Messe sehen</option>
+              <option value="admin">Admin — Vollzugriff inkl. alle Messen verwalten</option>
             </select>
           </div>
 
