@@ -108,15 +108,17 @@ export default function CVReview() {
         .eq('fair_lead_id', leadId)
         .maybeSingle();
 
-      if (!existingFeedback && doc && advisor) {
+      if (!existingFeedback && doc) {
+        const insertData = {
+          cv_document_id: doc.id,
+          fair_lead_id: leadId,
+          status: 'draft',
+        };
+        if (advisor?.id) insertData.advisor_id = advisor.id;
+
         const { data: newFeedback } = await supabase
           .from('cv_feedback')
-          .insert({
-            cv_document_id: doc.id,
-            fair_lead_id: leadId,
-            advisor_id: advisor.id,
-            status: 'draft',
-          })
+          .insert(insertData)
           .select()
           .single();
         existingFeedback = newFeedback;
