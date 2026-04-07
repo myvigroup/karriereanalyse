@@ -596,7 +596,7 @@ export default function CVReview() {
                 cursor: 'pointer',
               }}
             >
-              Kontaktdaten aufnehmen →
+              Feedback-Bericht erstellen →
             </button>
           </div>
         </div>
