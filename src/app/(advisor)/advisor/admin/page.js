@@ -205,19 +205,13 @@ export default async function AdminPage() {
           const prof = profileById[adv.user_id];
           const fairCount = fairCountByAdvisor[adv.user_id] || 0;
           return (
-            <Link key={adv.id} href={`/advisor/admin/advisors/${adv.user_id}`} style={{
+            <div key={adv.id} className="advisor-row" style={{
               display: 'grid',
               gridTemplateColumns: isAdmin ? '2fr 2fr 100px 100px 80px' : '2fr 2fr 120px 100px',
               padding: '14px 20px',
               alignItems: 'center',
               borderBottom: i < advisors.length - 1 ? '1px solid #F0EEE9' : 'none',
-              textDecoration: 'none',
-              color: 'inherit',
-              cursor: 'pointer',
-              transition: 'background 0.15s',
-            }}
-            className="advisor-row"
-            >
+            }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#CC1426', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
                   {adv.display_name?.charAt(0).toUpperCase() || '?'}
@@ -228,18 +222,18 @@ export default async function AdminPage() {
               <div style={{ fontSize: 13, color: '#6B7280' }}>
                 {fairCount} {fairCount === 1 ? 'Messe' : 'Messen'}
               </div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#CC1426' }}>
+              <Link href={`/advisor/admin/advisors/${adv.user_id}`} style={{ fontSize: 13, fontWeight: 600, color: '#CC1426', textDecoration: 'none' }}>
                 Öffnen →
-              </div>
+              </Link>
               {isAdmin && adv.user_id !== user.id && (
-                <form action={deleteAdvisor} style={{ margin: 0 }} onClick={e => e.stopPropagation()}>
+                <form action={deleteAdvisor} style={{ margin: 0 }}>
                   <input type="hidden" name="user_id" value={adv.user_id} />
                   <button type="submit" style={{ background: 'none', border: 'none', color: '#DC2626', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0 }}>
                     Löschen
                   </button>
                 </form>
               )}
-            </Link>
+            </div>
           );
         })}
       </div>
