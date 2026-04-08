@@ -203,32 +203,37 @@ export default async function LeadsPage({ searchParams }) {
             const isOpen = ['new', 'analyzing', 'feedback_pending'].includes(lead.status);
 
             return (
-              <Link
+              <div
                 key={lead.id}
-                href={`/advisor/leads/${lead.id}`}
                 className="lead-row"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '1.4fr 1fr 140px 160px 80px',
-                  padding: '14px 20px',
                   alignItems: 'center',
                   borderBottom: i < leads.length - 1 ? '1px solid #F0EEE9' : 'none',
-                  textDecoration: 'none',
-                  color: 'inherit',
+                  position: 'relative',
                 }}
               >
+                {/* Klickbare Fläche über die ganze Zeile (außer Aktion-Spalte) */}
+                <Link
+                  href={`/advisor/leads/${lead.id}`}
+                  style={{
+                    position: 'absolute', inset: 0,
+                    right: 100, // Aktion-Spalte freilassen
+                    zIndex: 0,
+                  }}
+                  aria-label={`${lead.first_name} ${lead.last_name || ''} öffnen`}
+                />
+
                 {/* Name + Kontakt */}
-                <div>
+                <div style={{ padding: '14px 0 14px 20px', position: 'relative', zIndex: 1 }}>
                   <div style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A', marginBottom: 2 }}>
                     {`${lead.first_name} ${lead.last_name || ''}`.trim()}
                   </div>
                   {lead.phone && (
-                    <a
-                      href={`tel:${lead.phone}`}
-                      style={{ fontSize: 12, color: '#CC1426', textDecoration: 'none', fontWeight: 600, display: 'block' }}
-                    >
+                    <span style={{ fontSize: 12, color: '#CC1426', fontWeight: 600, display: 'block' }}>
                       📞 {lead.phone}
-                    </a>
+                    </span>
                   )}
                   {lead.email && (
                     <div style={{ fontSize: 12, color: '#86868b' }}>{lead.email}</div>
@@ -239,47 +244,37 @@ export default async function LeadsPage({ searchParams }) {
                 </div>
 
                 {/* Messe */}
-                <div>
+                <div style={{ padding: '14px 0', position: 'relative', zIndex: 1 }}>
                   <div style={{ fontSize: 13, color: '#6B7280' }}>{fair?.name || '–'}</div>
-                  <div>
-                    <span style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      padding: '2px 8px',
-                      borderRadius: 980,
-                      background: statusInfo.bg,
-                      color: statusInfo.color,
-                      whiteSpace: 'nowrap',
-                    }}>
-                      {statusInfo.label}
-                    </span>
-                  </div>
+                  <span style={{
+                    fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 980,
+                    background: statusInfo.bg, color: statusInfo.color, whiteSpace: 'nowrap',
+                  }}>
+                    {statusInfo.label}
+                  </span>
                 </div>
 
                 {/* Datum */}
-                <div style={{ fontSize: 13, color: '#6B7280' }}>
+                <div style={{ fontSize: 13, color: '#6B7280', padding: '14px 0', position: 'relative', zIndex: 1 }}>
                   {formatDate(lead.created_at)}<br />
                   <span style={{ fontSize: 12 }}>{formatTime(lead.created_at)}</span>
                 </div>
 
                 {/* Follow-up Status */}
-                <div>
+                <div style={{ padding: '14px 0', position: 'relative', zIndex: 1 }}>
                   <FollowUpSelect leadId={lead.id} initialValue={lead.follow_up_status} />
                 </div>
 
                 {/* Aktion */}
-                <div>
-                  {isOpen ? (
-                    <Link href={getNextStep(lead)} style={{ fontSize: 13, fontWeight: 600, color: '#CC1426', textDecoration: 'none' }}>
-                      Weiter →
-                    </Link>
-                  ) : (
-                    <Link href={`/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`} style={{ fontSize: 13, color: '#86868b', textDecoration: 'none' }}>
-                      Ansehen
-                    </Link>
-                  )}
+                <div style={{ padding: '14px 20px 14px 0', position: 'relative', zIndex: 1 }}>
+                  <Link
+                    href={isOpen ? getNextStep(lead) : `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`}
+                    style={{ fontSize: 13, fontWeight: 600, color: isOpen ? '#CC1426' : '#86868b', textDecoration: 'none' }}
+                  >
+                    {isOpen ? 'Weiter →' : 'Ansehen'}
+                  </Link>
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>
