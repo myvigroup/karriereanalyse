@@ -47,27 +47,49 @@ export default function NewLead() {
       </p>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 24 }}>
-          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
-            Vorname *
-          </label>
-          <input
-            type="text"
-            name="name"
-            required
-            autoFocus
-            placeholder="z.B. Max"
-            style={{
-              width: '100%',
-              padding: '16px 18px',
-              fontSize: 18,
-              border: '1px solid #E8E6E1',
-              borderRadius: 12,
-              outline: 'none',
-              background: '#fff',
-              boxSizing: 'border-box',
-            }}
-          />
+        <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
+              Vorname *
+            </label>
+            <input
+              type="text"
+              name="name"
+              required
+              autoFocus
+              placeholder="z.B. Max"
+              style={{
+                width: '100%',
+                padding: '16px 18px',
+                fontSize: 18,
+                border: '1px solid #E8E6E1',
+                borderRadius: 12,
+                outline: 'none',
+                background: '#fff',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
+              Nachname
+            </label>
+            <input
+              type="text"
+              name="last_name"
+              placeholder="z.B. Mustermann"
+              style={{
+                width: '100%',
+                padding: '16px 18px',
+                fontSize: 18,
+                border: '1px solid #E8E6E1',
+                borderRadius: 12,
+                outline: 'none',
+                background: '#fff',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
         </div>
 
         {error && (
