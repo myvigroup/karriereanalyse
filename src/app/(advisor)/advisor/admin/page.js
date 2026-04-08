@@ -31,11 +31,11 @@ export default async function AdminPage() {
   // Messen laden (ohne .then() + korrekter Spaltenname date_start)
   let fairs = [];
   if (fairIds === null) {
-    const { data } = await admin.from('fairs').select('*').order('date_start', { ascending: false });
-    fairs = data || [];
+    const { data } = await admin.from('fairs').select('*').order('date_start');
+    fairs = (data || []).reverse();
   } else if (fairIds.length > 0) {
-    const { data } = await admin.from('fairs').select('*').in('id', fairIds).order('date_start', { ascending: false });
-    fairs = data || [];
+    const { data } = await admin.from('fairs').select('*').in('id', fairIds).order('date_start');
+    fairs = (data || []).reverse();
   }
 
   // Leads, Berater, Profile, Zuweisungen parallel laden
