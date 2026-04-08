@@ -17,14 +17,30 @@ export default function SetPasswordPage() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
 
-  // Hash-Token aus dem Invite-Link automatisch einlösen
+  // Hash-Token aus dem Magic-Link einlösen (Supabase Implicit Flow)
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (session) setSessionReady(true);
-    });
-    // Bereits aktive Session prüfen (z.B. bei Reload)
+    const hash = window.location.hash;
+    if (hash) {
+      const params = new URLSearchParams(hash.substring(1));
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      if (access_token && refresh_token) {
+        supabase.auth.setSession({ access_token, refresh_token }).then(({ data, error }) => {
+          if (data?.session) {
+            // Hash aus URL entfernen
+            window.history.replaceState(null, '', window.location.pathname);
+            setSessionReady(true);
+          } else {
+            setError(error?.message || 'Link ungültig oder abgelaufen.');
+          }
+        });
+        return;
+      }
+    }
+    // Bereits aktive Session (z.B. nach Reload)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setSessionReady(true);
+      else setError('Kein gültiger Einladungslink gefunden.');
     });
   }, []);
 
