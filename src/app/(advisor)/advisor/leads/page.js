@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
+import FollowUpSelect from './FollowUpSelect';
 
 const STATUS_LABELS = {
   new: { label: 'Neu', bg: '#F3F4F6', color: '#6B7280' },
@@ -56,7 +57,7 @@ export default async function LeadsPage({ searchParams }) {
   // Leads laden — Messeleiter sieht alle Leads seiner Messen, Berater nur eigene
   let query = admin
     .from('fair_leads')
-    .select('id, first_name, last_name, email, phone, status, fair_id, advisor_user_id, created_at, updated_at')
+    .select('id, first_name, last_name, email, phone, status, follow_up_status, fair_id, advisor_user_id, created_at, updated_at')
     .order('created_at', { ascending: false });
 
   // Sichtbarkeit: Messeleiter sieht alle Leads seiner Messen, Berater nur eigene
@@ -184,12 +185,12 @@ export default async function LeadsPage({ searchParams }) {
           {/* Tabellen-Header */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr 160px 140px 100px',
+            gridTemplateColumns: '1.4fr 1fr 140px 160px 80px',
             padding: '12px 20px',
             borderBottom: '1px solid #F0EEE9',
             background: '#FAFAF8',
           }}>
-            {['Name', 'Messe', 'Datum', 'Status', 'Aktion'].map(h => (
+            {['Name & Kontakt', 'Messe', 'Datum', 'Nachfassen', 'Aktion'].map(h => (
               <div key={h} style={{ fontSize: 12, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {h}
               </div>
@@ -206,59 +207,71 @@ export default async function LeadsPage({ searchParams }) {
                 key={lead.id}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 160px 140px 100px',
+                  gridTemplateColumns: '1.4fr 1fr 140px 160px 80px',
                   padding: '14px 20px',
                   alignItems: 'center',
                   borderBottom: i < leads.length - 1 ? '1px solid #F0EEE9' : 'none',
                   background: '#fff',
                 }}
               >
+                {/* Name + Kontakt */}
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A' }}>{`${lead.first_name} ${lead.last_name || ''}`.trim()}</div>
-                  <div style={{ fontSize: 12, color: '#86868b' }}>{lead.email || '–'}</div>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A', marginBottom: 2 }}>
+                    {`${lead.first_name} ${lead.last_name || ''}`.trim()}
+                  </div>
+                  {lead.phone && (
+                    <a
+                      href={`tel:${lead.phone}`}
+                      style={{ fontSize: 12, color: '#CC1426', textDecoration: 'none', fontWeight: 600, display: 'block' }}
+                    >
+                      📞 {lead.phone}
+                    </a>
+                  )}
+                  {lead.email && (
+                    <div style={{ fontSize: 12, color: '#86868b' }}>{lead.email}</div>
+                  )}
+                  {!lead.phone && !lead.email && (
+                    <div style={{ fontSize: 12, color: '#C5C5C7' }}>Keine Kontaktdaten</div>
+                  )}
                 </div>
-                <div style={{ fontSize: 13, color: '#6B7280' }}>
-                  {fair?.name || '–'}
+
+                {/* Messe */}
+                <div>
+                  <div style={{ fontSize: 13, color: '#6B7280' }}>{fair?.name || '–'}</div>
+                  <div>
+                    <span style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      padding: '2px 8px',
+                      borderRadius: 980,
+                      background: statusInfo.bg,
+                      color: statusInfo.color,
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {statusInfo.label}
+                    </span>
+                  </div>
                 </div>
+
+                {/* Datum */}
                 <div style={{ fontSize: 13, color: '#6B7280' }}>
                   {formatDate(lead.created_at)}<br />
                   <span style={{ fontSize: 12 }}>{formatTime(lead.created_at)}</span>
                 </div>
+
+                {/* Follow-up Status */}
                 <div>
-                  <span style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    padding: '3px 10px',
-                    borderRadius: 980,
-                    background: statusInfo.bg,
-                    color: statusInfo.color,
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {statusInfo.label}
-                  </span>
+                  <FollowUpSelect leadId={lead.id} initialValue={lead.follow_up_status} />
                 </div>
+
+                {/* Aktion */}
                 <div>
                   {isOpen ? (
-                    <Link
-                      href={getNextStep(lead)}
-                      style={{
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: '#CC1426',
-                        textDecoration: 'none',
-                      }}
-                    >
+                    <Link href={getNextStep(lead)} style={{ fontSize: 13, fontWeight: 600, color: '#CC1426', textDecoration: 'none' }}>
                       Weiter →
                     </Link>
                   ) : (
-                    <Link
-                      href={`/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`}
-                      style={{
-                        fontSize: 13,
-                        color: '#86868b',
-                        textDecoration: 'none',
-                      }}
-                    >
+                    <Link href={`/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`} style={{ fontSize: 13, color: '#86868b', textDecoration: 'none' }}>
                       Ansehen
                     </Link>
                   )}
