@@ -203,8 +203,9 @@ export default async function LeadsPage({ searchParams }) {
             const isOpen = ['new', 'analyzing', 'feedback_pending'].includes(lead.status);
 
             return (
-              <div
+              <Link
                 key={lead.id}
+                href={`/advisor/leads/${lead.id}`}
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '1.4fr 1fr 140px 160px 80px',
@@ -212,7 +213,13 @@ export default async function LeadsPage({ searchParams }) {
                   alignItems: 'center',
                   borderBottom: i < leads.length - 1 ? '1px solid #F0EEE9' : 'none',
                   background: '#fff',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  cursor: 'pointer',
+                  transition: 'background 0.1s',
                 }}
+                onMouseEnter={e => e.currentTarget.style.background = '#FAFAF8'}
+                onMouseLeave={e => e.currentTarget.style.background = '#fff'}
               >
                 {/* Name + Kontakt */}
                 <div>
@@ -276,7 +283,7 @@ export default async function LeadsPage({ searchParams }) {
                     </Link>
                   )}
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
