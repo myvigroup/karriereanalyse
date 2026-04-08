@@ -40,6 +40,7 @@ export default async function LeadsPage({ searchParams }) {
   // Filter aus URL-Params
   const statusFilter = searchParams?.status || 'all';
   const fairFilter = searchParams?.fair || null;
+  const followUpFilter = searchParams?.followUp || null;
 
   // Alle zugewiesenen Messen + Messeleiter-Status
   const { data: assignments } = await admin
@@ -80,6 +81,12 @@ export default async function LeadsPage({ searchParams }) {
     query = query.in('status', ['completed', 'contacted', 'converted', 'lost']);
   }
 
+  if (followUpFilter === 'none') {
+    query = query.is('follow_up_status', null);
+  } else if (followUpFilter) {
+    query = query.eq('follow_up_status', followUpFilter);
+  }
+
   const { data: leads } = await query;
 
   const fairById = (fairs || []).reduce((acc, f) => { acc[f.id] = f; return acc; }, {});
@@ -88,7 +95,15 @@ export default async function LeadsPage({ searchParams }) {
   const formatTime = (d) => new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
   const filterHref = (params) => {
-    const p = new URLSearchParams({ status: statusFilter, ...(fairFilter ? { fair: fairFilter } : {}), ...params });
+    const base = {
+      status: statusFilter,
+      ...(fairFilter ? { fair: fairFilter } : {}),
+      ...(followUpFilter ? { followUp: followUpFilter } : {}),
+    };
+    const merged = { ...base, ...params };
+    // undefined-Werte entfernen
+    Object.keys(merged).forEach(k => merged[k] === undefined && delete merged[k]);
+    const p = new URLSearchParams(merged);
     return `/advisor/leads?${p.toString()}`;
   };
 
@@ -127,6 +142,40 @@ export default async function LeadsPage({ searchParams }) {
             {f.label}
           </Link>
         ))}
+
+        {/* Follow-up Filter */}
+        <div style={{ width: '100%', height: 0 }} />
+        {[
+          { key: null, label: 'Alle Nachfass-Status' },
+          { key: 'none', label: 'Kein Status' },
+          { key: 'not_reached', label: 'Nicht erreicht' },
+          { key: 'appointment_set', label: 'Termin vereinbart' },
+          { key: 'interested', label: 'Interessiert' },
+          { key: 'no_interest', label: 'Kein Interesse' },
+          { key: 'purchased', label: 'Gekauft ✓' },
+        ].map(f => {
+          const isActive = f.key === null ? !followUpFilter : followUpFilter === f.key;
+          return (
+            <Link
+              key={String(f.key)}
+              href={filterHref({ followUp: f.key === null ? undefined : f.key })}
+              style={{
+                padding: '5px 14px',
+                borderRadius: 980,
+                fontSize: 12,
+                fontWeight: isActive ? 600 : 400,
+                textDecoration: 'none',
+                background: isActive ? '#1A1A1A' : '#fff',
+                color: isActive ? '#fff' : '#6B7280',
+                border: '1px solid',
+                borderColor: isActive ? '#1A1A1A' : '#E8E6E1',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {f.label}
+            </Link>
+          );
+        })}
 
         {/* Messe-Filter */}
         {(fairs || []).length > 1 && (
