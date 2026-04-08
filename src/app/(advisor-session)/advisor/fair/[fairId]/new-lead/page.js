@@ -72,11 +72,12 @@ export default function NewLead() {
           </div>
           <div style={{ flex: 1 }}>
             <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
-              Nachname
+              Nachname *
             </label>
             <input
               type="text"
               name="last_name"
+              required
               placeholder="z.B. Mustermann"
               style={{
                 width: '100%',

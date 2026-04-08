@@ -30,7 +30,7 @@ export async function createLead(fairId, formData) {
   const admin = createAdminClient();
   const name = formData.get('name');
   const last_name = formData.get('last_name')?.trim() || '';
-  if (!name) return { error: 'Name ist ein Pflichtfeld' };
+  if (!name || !last_name) return { error: 'Vor- und Nachname sind Pflichtfelder' };
 
   // Fair-Lead erstellen (ohne email, ohne user_id)
   const { data: lead, error: leadError } = await admin.from('fair_leads').insert({
