@@ -70,7 +70,7 @@ export default function SetPasswordPage() {
       return;
     }
 
-    router.push('/advisor');
+    window.location.href = '/advisor';
   }
 
   return (
