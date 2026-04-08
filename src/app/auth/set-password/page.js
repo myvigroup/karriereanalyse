@@ -92,10 +92,10 @@ export default function SetPasswordPage() {
 
         <div style={{ background: '#fff', borderRadius: 20, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
-            Passwort festlegen
+            Neues Passwort setzen
           </h1>
           <p style={{ color: '#86868b', fontSize: 14, margin: '0 0 28px', lineHeight: 1.5 }}>
-            Willkommen! Lege jetzt dein persönliches Passwort fest, um dich zukünftig direkt einzuloggen.
+            Gib dein neues Passwort ein. Danach wirst du direkt ins Berater-Portal weitergeleitet.
           </p>
 
           {!sessionReady ? (
