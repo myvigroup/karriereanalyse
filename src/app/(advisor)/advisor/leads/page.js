@@ -59,20 +59,18 @@ export default async function LeadsPage({ searchParams }) {
     .select('id, first_name, last_name, email, phone, status, fair_id, advisor_user_id, created_at, updated_at')
     .order('created_at', { ascending: false });
 
-  // Für Manager-Messen: alle Leads; für normale: nur eigene
+  // Sichtbarkeit: Messeleiter sieht alle Leads seiner Messen, Berater nur eigene
   if (fairFilter) {
     const isManagerForFair = managerFairIds.includes(fairFilter);
     query = query.eq('fair_id', fairFilter);
     if (!isManagerForFair) query = query.eq('advisor_user_id', user.id);
-  } else if (fairIds.length > 0) {
-    // Komplexere Logik: verschiedene Sichtbarkeiten je Messe
-    // Vereinfacht: wenn mind. eine Manager-Messe → zeige alle Leads aller Messen
-    // Sonst nur eigene
-    if (managerFairIds.length > 0) {
-      query = query.in('fair_id', fairIds);
-    } else {
-      query = query.eq('advisor_user_id', user.id).in('fair_id', fairIds);
-    }
+  } else if (fairIds.length > 0 && managerFairIds.length > 0) {
+    // Hat mind. eine Manager-Messe: alle Leads dieser Messen sichtbar
+    query = query.in('fair_id', fairIds);
+  } else {
+    // Normaler Berater (oder keine Messe-Zuweisung): nur eigene Leads
+    query = query.eq('advisor_user_id', user.id);
+    if (fairIds.length > 0) query = query.in('fair_id', fairIds);
   }
 
   if (statusFilter === 'open') {
