@@ -71,7 +71,7 @@ export async function createAdvisorAccount(formData) {
   const { data: authData, error: authError } = await admin.auth.admin.createUser({
     email,
     email_confirm: true,
-    user_metadata: { name },
+    user_metadata: { name, needs_password_setup: true },
   });
 
   if (authError) return { error: authError.message };

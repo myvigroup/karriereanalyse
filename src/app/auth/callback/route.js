@@ -20,7 +20,11 @@ export async function GET(request) {
         .eq('id', user.id)
         .maybeSingle();
 
-      if (profile?.role === 'advisor' || profile?.role === 'admin') {
+      if (['advisor', 'messeleiter', 'admin'].includes(profile?.role)) {
+        // Neu eingeladene Berater müssen zuerst ihr Passwort setzen
+        if (user.user_metadata?.needs_password_setup) {
+          return NextResponse.redirect(new URL('/auth/set-password', request.url));
+        }
         return NextResponse.redirect(new URL('/advisor', request.url));
       }
     }
