@@ -18,17 +18,17 @@ export default function LoginPage() {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { setError(error.message); setLoading(false); return; }
 
-    // Rolle prüfen → Advisor/Admin direkt zum Berater-Dashboard
+    // Rolle prüfen → Advisor/Messeleiter/Admin direkt zum Berater-Dashboard
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', data.user.id)
       .maybeSingle();
 
-    if (profile?.role === 'advisor' || profile?.role === 'admin') {
-      router.push('/advisor');
+    if (['advisor', 'messeleiter', 'admin'].includes(profile?.role)) {
+      window.location.href = '/advisor';
     } else {
-      router.push('/dashboard');
+      window.location.href = '/dashboard';
     }
   }
 
