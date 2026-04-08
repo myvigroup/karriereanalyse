@@ -68,20 +68,29 @@ export async function createAdvisorAccount(formData) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de';
 
-  // User erstellen (ohne Supabase-Standard-Mail)
+  // User anlegen — falls bereits vorhanden, bestehenden User verwenden
+  let userId;
   const { data: authData, error: authError } = await admin.auth.admin.createUser({
     email,
     email_confirm: true,
     user_metadata: { name, needs_password_setup: true },
   });
 
-  if (authError) return { error: authError.message };
+  if (authError) {
+    if (!authError.message.includes('already been registered')) return { error: authError.message };
+    // Bestehenden User per E-Mail suchen
+    const { data: { users } } = await admin.auth.admin.listUsers({ perPage: 1000 });
+    const existing = users.find(u => u.email === email);
+    if (!existing) return { error: 'Benutzer konnte nicht gefunden werden.' };
+    userId = existing.id;
+    await admin.auth.admin.updateUserById(userId, { user_metadata: { name, needs_password_setup: true } });
+  } else {
+    userId = authData.user.id;
+  }
 
-  const userId = authData.user.id;
-
-  // Profil + Advisor-Eintrag anlegen
+  // Profil + Advisor-Eintrag anlegen/aktualisieren
   await admin.from('profiles').upsert({ id: userId, email, name, role });
-  await admin.from('advisors').insert({ user_id: userId, display_name: name, email }).select('id').single();
+  await admin.from('advisors').upsert({ user_id: userId, display_name: name, email });
 
   // Einladungslink generieren (Passwort setzen)
   const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
