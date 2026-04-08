@@ -112,7 +112,7 @@ export default async function AdvisorDetailPage({ params }) {
               <input type="hidden" name="redirectTo" value={`/advisor/admin/advisors/${userId}`} />
               <select name="fair_id" style={inputStyle}>
                 {unassignedFairs.map(f => (
-                  <option key={f.id} value={f.id}>{f.name} — {formatDate(f.start_date)}</option>
+                  <option key={f.id} value={f.id}>{f.name} — {formatDate(f.date_start)}</option>
                 ))}
               </select>
               <button type="submit" style={{ padding: '9px 20px', background: '#1A1A1A', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 14, whiteSpace: 'nowrap' }}>

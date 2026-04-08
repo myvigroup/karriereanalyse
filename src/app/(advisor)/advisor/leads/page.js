@@ -24,6 +24,7 @@ function getNextStep(lead) {
 }
 
 export default async function LeadsPage({ searchParams }) {
+  try {
   const supabase = createClient();
   const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -50,7 +51,7 @@ export default async function LeadsPage({ searchParams }) {
   const managerFairIds = (assignments || []).filter(a => a.is_manager).map(a => a.fair_id);
 
   const { data: fairs } = fairIds.length > 0
-    ? await admin.from('fairs').select('id, name').in('id', fairIds).order('start_date', { ascending: false })
+    ? await admin.from('fairs').select('id, name').in('id', fairIds).order('date_start', { ascending: false })
     : { data: [] };
 
   // Leads laden — Messeleiter sieht alle Leads seiner Messen, Berater nur eigene
@@ -272,4 +273,16 @@ export default async function LeadsPage({ searchParams }) {
       )}
     </div>
   );
+  } catch (err) {
+    if (err?.digest?.startsWith?.('NEXT_REDIRECT') || err?.message === 'NEXT_REDIRECT') throw err;
+    return (
+      <div style={{ padding: 40, background: '#FEF2F2', borderRadius: 16, border: '1px solid #FECACA', maxWidth: 700, margin: '40px auto', fontFamily: 'system-ui, sans-serif' }}>
+        <h2 style={{ color: '#DC2626', marginBottom: 16 }}>Leads-Fehler (Debug)</h2>
+        <p style={{ fontWeight: 600, marginBottom: 8 }}>{err?.message || 'Kein Fehlertext'}</p>
+        <pre style={{ fontSize: 12, whiteSpace: 'pre-wrap', color: '#6B7280', background: '#FFF', padding: 16, borderRadius: 8 }}>
+          {err?.stack?.slice(0, 1000) || 'Kein Stack'}
+        </pre>
+      </div>
+    );
+  }
 }
