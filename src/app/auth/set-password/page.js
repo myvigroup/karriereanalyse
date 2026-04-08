@@ -26,6 +26,15 @@ export default function SetPasswordPage() {
     if (hash) {
       // Implicit Flow (Magic-Link): #access_token=...&refresh_token=...
       const hashParams = new URLSearchParams(hash.substring(1));
+
+      // Fehler im Hash abfangen (z.B. abgelaufener Link)
+      if (hashParams.get('error')) {
+        const desc = hashParams.get('error_description')?.replace(/\+/g, ' ') || 'Link ungültig oder abgelaufen.';
+        window.history.replaceState(null, '', window.location.pathname);
+        setError(desc);
+        return;
+      }
+
       const access_token = hashParams.get('access_token');
       const refresh_token = hashParams.get('refresh_token');
       if (access_token && refresh_token) {
