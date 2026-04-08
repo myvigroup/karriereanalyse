@@ -21,15 +21,15 @@ export async function createFair(formData) {
   const admin = await requireAdmin();
   const name = formData.get('name')?.trim();
   const city = formData.get('city')?.trim();
-  const date_start = formData.get('start_date');
-  const date_end = formData.get('end_date') || date_start;
+  const start_date = formData.get('start_date');
+  const end_date = formData.get('end_date') || start_date;
   const status = formData.get('status') || 'upcoming';
 
-  if (!name || !date_start) return { error: 'Name und Startdatum sind erforderlich.' };
+  if (!name || !start_date) return { error: 'Name und Startdatum sind erforderlich.' };
 
   const { data, error } = await admin
     .from('fairs')
-    .insert({ name, city, date_start, date_end, status })
+    .insert({ name, city, start_date, end_date, status })
     .select('id')
     .single();
 
@@ -42,13 +42,13 @@ export async function updateFair(formData) {
   const id = formData.get('id');
   const name = formData.get('name')?.trim();
   const city = formData.get('city')?.trim();
-  const date_start = formData.get('start_date');
-  const date_end = formData.get('end_date') || date_start;
+  const start_date = formData.get('start_date');
+  const end_date = formData.get('end_date') || start_date;
   const status = formData.get('status');
 
   const { error } = await admin
     .from('fairs')
-    .update({ name, city, date_start, date_end, status })
+    .update({ name, city, start_date, end_date, status })
     .eq('id', id);
 
   if (error) return { error: error.message };

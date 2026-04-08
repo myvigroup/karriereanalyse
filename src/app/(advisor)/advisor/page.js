@@ -31,7 +31,7 @@ export default async function AdvisorDashboard() {
 
   if (profile?.role === 'admin') {
     // Admin sieht alle Messen
-    const { data: allFairs } = await admin.from('fairs').select('*').order('date_start');
+    const { data: allFairs } = await admin.from('fairs').select('*').order('start_date');
     fairs = allFairs || [];
     fairIds = fairs.map(f => f.id);
   } else {
@@ -42,7 +42,7 @@ export default async function AdvisorDashboard() {
       .eq('advisor_user_id', user.id);
     fairIds = (assignments || []).map(a => a.fair_id);
     if (fairIds.length > 0) {
-      const { data: assignedFairs } = await admin.from('fairs').select('*').in('id', fairIds).order('date_start');
+      const { data: assignedFairs } = await admin.from('fairs').select('*').in('id', fairIds).order('start_date');
       fairs = assignedFairs || [];
     } else {
       fairs = [];
@@ -167,8 +167,8 @@ export default async function AdvisorDashboard() {
                   <p style={{ color: '#86868b', fontSize: 13, margin: '2px 0' }}>{fair.city}</p>
                 )}
                 <p style={{ color: '#86868b', fontSize: 13, margin: '2px 0 12px' }}>
-                  {formatDate(fair.date_start)}
-                  {fair.date_end && fair.date_end !== fair.date_start ? ` – ${formatDate(fair.date_end)}` : ''}
+                  {formatDate(fair.start_date)}
+                  {fair.end_date && fair.end_date !== fair.start_date ? ` – ${formatDate(fair.end_date)}` : ''}
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 13, color: '#86868b' }}>
@@ -203,7 +203,7 @@ export default async function AdvisorDashboard() {
               }}>
                 <div>
                   <span style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A' }}>{fair.name}</span>
-                  <span style={{ color: '#86868b', fontSize: 13, marginLeft: 12 }}>{formatDate(fair.date_start)}</span>
+                  <span style={{ color: '#86868b', fontSize: 13, marginLeft: 12 }}>{formatDate(fair.start_date)}</span>
                 </div>
                 <span style={{ fontSize: 13, color: '#86868b' }}>
                   {countByFair[fair.id] || 0} Gespräche

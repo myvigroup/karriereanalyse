@@ -57,7 +57,7 @@ export default async function CVCheckPage() {
   // Messe-Kontext
   const { data: lead } = await admin
     .from('fair_leads')
-    .select('*, fairs(name, date_start), advisors(display_name)')
+    .select('*, fairs(name, start_date), advisors(display_name)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -138,7 +138,7 @@ export default async function CVCheckPage() {
       </h1>
       <p style={{ color: '#86868b', marginBottom: 24 }}>
         {lead?.fairs?.name && `${lead.fairs.name}`}
-        {lead?.fairs?.date_start && ` · ${formatDate(lead.fairs.date_start)}`}
+        {lead?.fairs?.start_date && ` · ${formatDate(lead.fairs.start_date)}`}
         {lead?.advisors?.display_name && ` · Coach: ${lead.advisors.display_name}`}
       </p>
 

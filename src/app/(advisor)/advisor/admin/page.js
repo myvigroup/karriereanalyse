@@ -28,13 +28,13 @@ export default async function AdminPage() {
     fairIds = (myAssignments || []).map(a => a.fair_id);
   }
 
-  // Messen laden (ohne .then() + korrekter Spaltenname date_start)
+  // Messen laden (ohne .then() + korrekter Spaltenname start_date)
   let fairs = [];
   if (fairIds === null) {
-    const { data } = await admin.from('fairs').select('*').order('date_start');
+    const { data } = await admin.from('fairs').select('*').order('start_date');
     fairs = (data || []).reverse();
   } else if (fairIds.length > 0) {
-    const { data } = await admin.from('fairs').select('*').in('id', fairIds).order('date_start');
+    const { data } = await admin.from('fairs').select('*').in('id', fairIds).order('start_date');
     fairs = (data || []).reverse();
   }
 
@@ -159,7 +159,7 @@ export default async function AdminPage() {
                   {badge.label}
                 </span>
               </div>
-              <div style={{ fontSize: 13, color: '#6B7280' }}>{formatDate(fair.date_start)}</div>
+              <div style={{ fontSize: 13, color: '#6B7280' }}>{formatDate(fair.start_date)}</div>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>{kpi.total}</div>
               <div style={{ fontSize: 15, fontWeight: 700, color: kpi.open > 0 ? '#D97706' : '#6B7280' }}>{kpi.open}</div>
               <div style={{ fontSize: 14, color: '#6B7280' }}>{advisorsByFair[fair.id] || 0}</div>

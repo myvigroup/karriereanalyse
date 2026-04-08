@@ -51,7 +51,7 @@ export default async function LeadsPage({ searchParams }) {
   const managerFairIds = (assignments || []).filter(a => a.is_manager).map(a => a.fair_id);
 
   const { data: fairs } = fairIds.length > 0
-    ? await admin.from('fairs').select('id, name').in('id', fairIds).order('date_start', { ascending: false })
+    ? await admin.from('fairs').select('id, name').in('id', fairIds).order('start_date', { ascending: false })
     : { data: [] };
 
   // Leads laden — Messeleiter sieht alle Leads seiner Messen, Berater nur eigene

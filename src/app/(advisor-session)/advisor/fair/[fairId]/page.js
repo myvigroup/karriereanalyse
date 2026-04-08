@@ -96,7 +96,7 @@ export default async function FairDashboard({ params }) {
           {fair.name}
         </h1>
         <p style={{ color: '#86868b', margin: 0 }}>
-          {fair.city && `${fair.city} · `}{formatDate(fair.date_start)}
+          {fair.city && `${fair.city} · `}{formatDate(fair.start_date)}
         </p>
       </div>
 

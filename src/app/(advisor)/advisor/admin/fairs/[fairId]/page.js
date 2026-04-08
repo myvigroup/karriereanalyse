@@ -73,7 +73,7 @@ export default async function FairManagePage({ params }) {
     <div>
       <Link href="/advisor/admin" style={{ fontSize: 13, color: '#86868b', textDecoration: 'none' }}>← Zurück zur Übersicht</Link>
       <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '12px 0 4px' }}>{fair.name}</h1>
-      <p style={{ color: '#86868b', marginBottom: 32, fontSize: 14 }}>{fair.city && `${fair.city} · `}{formatDate(fair.date_start)}</p>
+      <p style={{ color: '#86868b', marginBottom: 32, fontSize: 14 }}>{fair.city && `${fair.city} · `}{formatDate(fair.start_date)}</p>
 
       {/* KPI-Zeile */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 36 }}>
@@ -109,11 +109,11 @@ export default async function FairManagePage({ params }) {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={labelStyle}>Startdatum</label>
-                  <input name="start_date" type="date" defaultValue={fair.date_start?.split('T')[0]} style={inputStyle} />
+                  <input name="start_date" type="date" defaultValue={fair.start_date?.split('T')[0]} style={inputStyle} />
                 </div>
                 <div>
                   <label style={labelStyle}>Enddatum</label>
-                  <input name="end_date" type="date" defaultValue={fair.date_end?.split('T')[0]} style={inputStyle} />
+                  <input name="end_date" type="date" defaultValue={fair.end_date?.split('T')[0]} style={inputStyle} />
                 </div>
               </div>
               <div>
