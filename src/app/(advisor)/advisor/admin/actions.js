@@ -81,7 +81,7 @@ export async function createAdvisorAccount(formData) {
 
   // Profil + Advisor-Eintrag anlegen
   await admin.from('profiles').upsert({ id: userId, email, name, role });
-  await admin.from('advisors').insert({ user_id: userId, display_name: name }).select('id').single();
+  await admin.from('advisors').insert({ user_id: userId, display_name: name, email }).select('id').single();
 
   // Einladungslink generieren (Passwort setzen)
   const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
