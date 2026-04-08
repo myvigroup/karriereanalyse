@@ -38,7 +38,7 @@ export default async function LeadsPage({ searchParams }) {
   if (!advisor) return null;
 
   // Filter aus URL-Params
-  const statusFilter = searchParams?.status || 'open';
+  const statusFilter = searchParams?.status || 'all';
   const fairFilter = searchParams?.fair || null;
 
   // Alle zugewiesenen Messen + Messeleiter-Status
