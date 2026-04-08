@@ -206,20 +206,16 @@ export default async function LeadsPage({ searchParams }) {
               <Link
                 key={lead.id}
                 href={`/advisor/leads/${lead.id}`}
+                className="lead-row"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '1.4fr 1fr 140px 160px 80px',
                   padding: '14px 20px',
                   alignItems: 'center',
                   borderBottom: i < leads.length - 1 ? '1px solid #F0EEE9' : 'none',
-                  background: '#fff',
                   textDecoration: 'none',
                   color: 'inherit',
-                  cursor: 'pointer',
-                  transition: 'background 0.1s',
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = '#FAFAF8'}
-                onMouseLeave={e => e.currentTarget.style.background = '#fff'}
               >
                 {/* Name + Kontakt */}
                 <div>
@@ -289,5 +285,6 @@ export default async function LeadsPage({ searchParams }) {
         </div>
       )}
     </div>
+    <style>{`.lead-row { background: #fff; } .lead-row:hover { background: #FAFAF8; }`}</style>
   );
 }
