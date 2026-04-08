@@ -64,7 +64,9 @@ export default function SetPasswordPage() {
     }
 
     // Bereits aktive Session (z.B. nach Reload)
+    const timeout = setTimeout(() => setError('Link ungültig oder abgelaufen. Bitte eine neue Einladung anfordern.'), 5000);
     supabase.auth.getSession().then(({ data: { session } }) => {
+      clearTimeout(timeout);
       if (session) setSessionReady(true);
       else setError('Kein gültiger Einladungslink gefunden.');
     });
