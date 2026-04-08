@@ -268,7 +268,7 @@ export default async function LeadsPage({ searchParams }) {
                 {/* Aktion */}
                 <div style={{ padding: '14px 20px 14px 0', position: 'relative', zIndex: 1 }}>
                   <Link
-                    href={isOpen ? getNextStep(lead) : `/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`}
+                    href={isOpen ? getNextStep(lead) : `/advisor/leads/${lead.id}`}
                     style={{ fontSize: 13, fontWeight: 600, color: isOpen ? '#CC1426' : '#86868b', textDecoration: 'none' }}
                   >
                     {isOpen ? 'Weiter →' : 'Ansehen'}
