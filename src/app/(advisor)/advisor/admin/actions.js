@@ -152,6 +152,15 @@ function buildAdvisorInviteEmail(name, inviteUrl, appUrl) {
 </html>`;
 }
 
+export async function changeAdvisorRole(formData) {
+  const admin = await requireAdmin();
+  const userId = formData.get('user_id');
+  const role = formData.get('role');
+
+  await admin.from('profiles').update({ role }).eq('id', userId);
+  redirect(`/advisor/admin/advisors/${userId}`);
+}
+
 export async function deleteAdvisor(formData) {
   const admin = await requireAdmin();
   const userId = formData.get('user_id');

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { deleteAdvisor, assignAdvisorToFair, removeAdvisorFromFair } from '../../actions';
+import { deleteAdvisor, assignAdvisorToFair, removeAdvisorFromFair, changeAdvisorRole } from '../../actions';
 
 const ROLE_LABELS = {
   advisor: 'Berater',
@@ -121,6 +121,24 @@ export default async function AdvisorDetailPage({ params }) {
             </form>
           </div>
         </>
+      )}
+
+      {/* ── Rolle ändern ── */}
+      {isAdmin && (
+        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', padding: 24, marginBottom: 20 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>Rolle ändern</h2>
+          <form action={changeAdvisorRole} style={{ display: 'flex', gap: 10 }}>
+            <input type="hidden" name="user_id" value={userId} />
+            <select name="role" defaultValue={advisorProfile?.role} style={{ ...inputStyle, flex: 1 }}>
+              <option value="advisor">Berater — eigene Gespräche verwalten</option>
+              <option value="messeleiter">Messeleiter — Berater anlegen & alle Leads der Messe sehen</option>
+              <option value="admin">Admin — Vollzugriff inkl. alle Messen verwalten</option>
+            </select>
+            <button type="submit" style={{ padding: '9px 20px', background: '#1A1A1A', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 14, whiteSpace: 'nowrap' }}>
+              Speichern
+            </button>
+          </form>
+        </div>
       )}
 
       {/* ── Berater löschen ── */}
