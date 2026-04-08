@@ -87,7 +87,7 @@ export async function createAdvisorAccount(formData) {
   const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
     type: 'magiclink',
     email,
-    options: { redirectTo: `${appUrl}/auth/callback` },
+    options: { redirectTo: `${appUrl}/auth/set-password` },
   });
 
   if (linkError) return { error: `Einladungslink konnte nicht erstellt werden: ${linkError.message}` };
