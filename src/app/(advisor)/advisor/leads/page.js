@@ -280,6 +280,5 @@ export default async function LeadsPage({ searchParams }) {
         </div>
       )}
     </div>
-    <style>{`.lead-row { background: #fff; } .lead-row:hover { background: #FAFAF8; }`}</style>
   );
 }

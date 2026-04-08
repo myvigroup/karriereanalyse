@@ -236,3 +236,5 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--grey-4); border-radius: 3px; }
+
+.lead-row { background: #fff; transition: background 0.1s; } .lead-row:hover { background: #FAFAF8; }
