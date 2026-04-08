@@ -65,37 +65,81 @@ export async function createAdvisorAccount(formData) {
 
   if (!email || !name) return { error: 'Name und E-Mail sind erforderlich.' };
 
-  // Einladungs-E-Mail schicken — Berater setzt eigenes Passwort
-  const { data: authData, error: authError } = await admin.auth.admin.inviteUserByEmail(email, {
-    data: { name },
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de'}/advisor`,
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de';
+
+  // User erstellen (ohne Supabase-Standard-Mail)
+  const { data: authData, error: authError } = await admin.auth.admin.createUser({
+    email,
+    email_confirm: true,
+    user_metadata: { name },
   });
 
   if (authError) return { error: authError.message };
 
   const userId = authData.user.id;
 
-  // Profil setzen
-  await admin.from('profiles').upsert({
-    id: userId,
+  // Profil + Advisor-Eintrag anlegen
+  await admin.from('profiles').upsert({ id: userId, email, name, role });
+  await admin.from('advisors').insert({ user_id: userId, display_name: name }).select('id').single();
+
+  // Einladungslink generieren (Passwort setzen)
+  const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+    type: 'invite',
     email,
-    name,
-    role,
+    options: { redirectTo: `${appUrl}/advisor` },
   });
 
-  // Advisor-Eintrag
-  const { data: newAdvisor } = await admin.from('advisors').insert({
-    user_id: userId,
-    display_name: name,
-  }).select('id').single();
+  if (linkError) return { error: `Einladungslink konnte nicht erstellt werden: ${linkError.message}` };
 
-  // Wenn von einer Messe aus aufgerufen: direkt zuweisen und zurück
+  const inviteUrl = linkData?.properties?.action_link;
+
+  // Eigene Einladungsmail senden
+  await sendEmail({
+    to: email,
+    subject: 'Deine Einladung zum Karriere-Institut Berater-Portal',
+    html: buildAdvisorInviteEmail(name, inviteUrl, appUrl),
+  });
+
+  // Wenn von einer Messe aus aufgerufen: direkt zuweisen
   if (returnFair) {
     await admin.from('fair_advisors').upsert({ fair_id: returnFair, advisor_user_id: userId, is_manager: false });
     redirect(`/advisor/admin/fairs/${returnFair}`);
   }
 
   redirect('/advisor/admin');
+}
+
+function buildAdvisorInviteEmail(name, inviteUrl, appUrl) {
+  const firstName = name?.split(' ')[0] || name;
+  return `<!DOCTYPE html>
+<html lang="de">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;font-family:'Helvetica Neue',Arial,sans-serif;background:#f5f5f7;color:#1d1d1f">
+  <div style="max-width:560px;margin:0 auto;padding:32px 24px">
+    <div style="text-align:center;margin-bottom:32px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:2px;color:#CC1426;text-transform:uppercase">KARRIERE-INSTITUT</span>
+    </div>
+    <div style="background:white;border-radius:16px;padding:32px;box-shadow:0 2px 8px rgba(0,0,0,0.04)">
+      <h2 style="font-size:22px;font-weight:700;margin:0 0 16px">Willkommen im Berater-Portal</h2>
+      <p style="color:#86868b;line-height:1.6;margin:0 0 12px">Hallo ${firstName},</p>
+      <p style="color:#86868b;line-height:1.6;margin:0 0 12px">du wurdest als Berater zum Karriere-Institut Messe-Portal eingeladen. Klicke auf den Button unten, um dein Passwort zu setzen und loszulegen.</p>
+      <p style="color:#86868b;line-height:1.6;margin:0 0 24px">Im Portal kannst du Messegespräche erfassen, Lebensläufe analysieren und Feedback an Besucher senden.</p>
+      <div style="text-align:center;margin:24px 0">
+        <a href="${inviteUrl}" style="display:inline-block;padding:14px 32px;background:#CC1426;color:white;border-radius:980px;text-decoration:none;font-weight:600;font-size:15px">Passwort setzen & Portal öffnen</a>
+      </div>
+      <p style="color:#86868b;line-height:1.6;font-size:13px;margin:0">Der Link ist 24 Stunden gültig. Falls du diese E-Mail nicht erwartet hast, kannst du sie ignorieren.</p>
+    </div>
+    <div style="text-align:center;margin-top:24px;font-size:12px;color:#86868b">
+      <p>&copy; 2026 - Das Karriere-Institut | +49 511 5468 4547</p>
+      <p>info@daskarriereinstitut.de</p>
+      <p style="margin-top:12px">
+        <a href="${appUrl}/datenschutz" style="color:#86868b;text-decoration:underline">Datenschutz</a> &middot;
+        <a href="${appUrl}/impressum" style="color:#86868b;text-decoration:underline">Impressum</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
 }
 
 export async function deleteAdvisor(formData) {
