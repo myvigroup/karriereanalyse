@@ -19,7 +19,7 @@ export async function middleware(request) {
   const isAuthPage = pathname.startsWith('/auth');
   const isBeraterAuthPage = pathname.startsWith('/berater/login') || pathname.startsWith('/berater/forgot-password');
   const isPublicUpload = pathname.startsWith('/upload');
-  const isPublicPage = pathname.startsWith('/agb') || pathname.startsWith('/datenschutz') || pathname.startsWith('/impressum') || pathname.startsWith('/widerruf') || pathname.startsWith('/angebote');
+  const isPublicPage = pathname.startsWith('/agb') || pathname.startsWith('/datenschutz') || pathname.startsWith('/impressum') || pathname.startsWith('/widerruf') || pathname.startsWith('/angebote') || pathname.startsWith('/gehaltsverhandlung') || pathname.startsWith('/seminare');
   if (!user && !isAuthPage && !isBeraterAuthPage && !isPublicUpload && !isPublicPage) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
