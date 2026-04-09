@@ -92,7 +92,33 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
         </div>
       </div>
 
-      {/* ── CV-Check Banner ── */}
+      {/* ── CV-Check Upload CTA (kein CV vorhanden) ── */}
+      {!hasCvDoc && (
+        <a href="/cv-check/upload" style={{ display: 'block', textDecoration: 'none', marginBottom: 24 }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #CC1426 0%, #a01020 100%)',
+            borderRadius: 'var(--r-lg)', padding: '20px 24px',
+            display: 'flex', alignItems: 'center', gap: 20,
+          }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: 'var(--r-md)', flexShrink: 0,
+              background: 'rgba(255,255,255,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+            }}>📋</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 2 }}>
+                Lebenslauf-Check starten
+              </div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
+                KI analysiert deinen CV sofort — kostenlos & in 30 Sekunden
+              </div>
+            </div>
+            <span style={{ fontSize: 20, color: 'rgba(255,255,255,0.8)', flexShrink: 0 }}>→</span>
+          </div>
+        </a>
+      )}
+
+      {/* ── CV-Check Banner (CV vorhanden) ── */}
       {hasCvDoc && (
         <a href="/cv-check" style={{ display: 'block', textDecoration: 'none', marginBottom: 24 }}>
           <div style={{
