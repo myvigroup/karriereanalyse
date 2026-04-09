@@ -1,812 +1,749 @@
 // ============================================================
-// KARRIERE-ANALYSE MATRIX v2
+// KARRIERE-ANALYSE MATRIX
 // 12 Kompetenzfelder × 4 Fragen (2 Szenario + 2 Selbsteinschätzung)
-// Jedes Feld mapped auf eine Masterclass + konkreten Outcome
+// Max Score pro Feld: 30 Punkte (2×10 + 2×5)
 // ============================================================
 
 export const KOMPETENZFELDER = [
+  {
+    id: 'selbstwert',
+    name: 'Selbstwert',
+    icon: '🛡️',
+    color: '#CC1426',
+    masterclass: 'selbstwert',
+    outcome: {
+      headline: 'Verdiene bis zu 20% mehr — durch souveränes Auftreten',
+      text: 'Wer seinen Wert kennt, verhandelt besser. Studien zeigen: Selbstsicherheit in Gehaltsverhandlungen ist der #1-Faktor für höhere Einstiegsgehälter.',
+    },
+    intro: {
+      was: 'Selbstwert ist dein inneres Fundament — die Überzeugung, dass du gut genug bist, Chancen verdienst und Rückschläge überstehst.',
+      warum: 'Bei Studierenden ist der Selbstwert oft der größte unsichtbare Karriereblocker. Du schlägst eine Stelle nicht an, weil du dich "noch nicht bereit" fühlst — und verpasst genau diese Chance.',
+      schwaechen: [
+        'Stellen nicht bewerben, weil du nur 70% der Anforderungen erfüllst',
+        'In Gehaltsverhandlungen zu schnell nachgeben',
+        'Erfolge auf Glück statt auf Fähigkeit zurückführen',
+      ],
+    },
+    fragen: [
+      {
+        type: 'scenario',
+        text: 'Du siehst eine Traumstelle — aber erfüllst nur 7 von 10 genannten Anforderungen. Was tust du?',
+        options: [
+          { text: 'Bewerben — ich bringe das Fehlende schnell bei', score: 10, emoji: '🚀' },
+          { text: 'Bewerben, aber mit einem etwas unsicheren Gefühl', score: 7, emoji: '🤔' },
+          { text: 'Ich warte auf eine passendere Stelle', score: 4, emoji: '⏳' },
+          { text: 'Ich bewerbe mich nicht — zu viel fehlt mir noch', score: 1, emoji: '😶' },
+        ],
+      },
+      {
+        type: 'scenario',
+        text: 'Im Vorstellungsgespräch fragt man dich nach deiner Gehaltsvorstellung. Deine Reaktion:',
+        options: [
+          { text: 'Ich nenne selbstbewusst eine konkrete Zahl', score: 10, emoji: '💪' },
+          { text: 'Ich nenne eine Spanne und begründe sie kurz', score: 7, emoji: '📊' },
+          { text: 'Ich nenne etwas, bin aber innerlich unsicher', score: 4, emoji: '😬' },
+          { text: 'Ich sage, ich bin flexibel — sie sollen mir was nennen', score: 1, emoji: '🙈' },
+        ],
+      },
+      {
+        type: 'scale',
+        text: 'Wie sehr glaubst du, dass deine Fähigkeiten für den Arbeitsmarkt wertvoll sind?',
+        low: 'Kaum — ich bin noch nicht weit genug',
+        high: 'Absolut — ich habe echten Mehrwert zu bieten',
+      },
+      {
+        type: 'scale',
+        text: 'Wenn du einen Erfolg hast — wie sehr schreibst du ihn dir selbst zu (vs. Glück/andere)?',
+        low: 'Meistens war es Glück oder die Umstände',
+        high: 'Ich weiß, dass meine Leistung den Unterschied gemacht hat',
+      },
+    ],
+  },
 
-  // ──────────────────────────────────────────────
-  // 1. PRIORITÄTENMANAGEMENT
-  // ──────────────────────────────────────────────
   {
     id: 'prioritaeten',
     name: 'Prioritätenmanagement',
     icon: '🎯',
-    color: '#CC1426',
-    masterclass: 'sem-prioritaeten',
-
-    outcome: {
-      headline: 'Wer Prioritäten setzt, verdient mehr.',
-      text: 'Menschen mit starkem Prioritätenmanagement werden schneller befördert — weil sie Ergebnisse liefern, nicht nur beschäftigt sind. Studien zeigen: effiziente Selbstorganisation ist der stärkste Prediktor für Gehaltserhöhungen im ersten Job.',
-    },
-
-    intro: {
-      was: 'Prioritätenmanagement ist die Fähigkeit, in einer Welt voller Ablenkungen das Wesentliche vom Unwichtigen zu trennen — und die eigene Zeit bewusst einzusetzen.',
-      warum: 'In der heutigen Arbeitswelt ist nicht derjenige erfolgreich, der am meisten macht — sondern derjenige, der das Richtige macht. Gute Prioritätensetzung schützt vor Überlastung und sorgt dafür, dass du für das stehst, was wirklich zählt.',
-      schwaechen: [
-        'Alle Aufgaben fühlen sich gleich dringend an',
-        'Die Aufgabenliste wächst, statt kürzer zu werden',
-        'Du sagst selten Nein — und verlierst dich in Kleinigkeiten',
-      ],
-    },
-
-    fragen: [
-      {
-        type: 'scenario',
-        frage: 'Montag, 9 Uhr: Du hast 12 ungelesene E-Mails, 2 Meeting-Anfragen und ein dringendes Projekt mit Deadline heute. Was tust du zuerst?',
-        optionen: [
-          { text: 'Projekt zuerst — Wichtiges schlägt Dringendes', score: 10, emoji: '🎯' },
-          { text: 'Ich scanne kurz die E-Mails, dann das Projekt', score: 7, emoji: '📋' },
-          { text: 'Ich beantworte erst alle E-Mails, dann das Projekt', score: 4, emoji: '📧' },
-          { text: 'Ich weiß nicht wo anfangen und verliere Zeit', score: 1, emoji: '😵' },
-        ],
-      },
-      {
-        type: 'scenario',
-        frage: 'Dein Chef gibt dir eine neue Aufgabe, obwohl du bereits am Limit bist. Was passiert?',
-        optionen: [
-          { text: 'Ich kommuniziere klar was realistisch ist und schlage Prioritäten vor', score: 10, emoji: '💬' },
-          { text: 'Ich nehme es an und reorganisiere meinen Plan', score: 7, emoji: '🔄' },
-          { text: 'Ich nehme es an — auch wenn es Überstunden bedeutet', score: 4, emoji: '😓' },
-          { text: 'Ich sage ja und hoffe, dass es irgendwie klappt', score: 1, emoji: '🤞' },
-        ],
-      },
-      {
-        type: 'scale',
-        frage: 'Wie oft beendest du den Tag mit dem Gefühl, wirklich das Wichtigste geschafft zu haben?',
-        low: 'Fast nie',
-        high: 'Fast immer',
-      },
-      {
-        type: 'scale',
-        frage: 'Wie leicht fällt es dir, Aufgaben abzulehnen oder zu delegieren, die nicht deine Priorität sind?',
-        low: 'Sehr schwer',
-        high: 'Sehr leicht',
-      },
-    ],
-  },
-
-  // ──────────────────────────────────────────────
-  // 2. SELBSTWERTGEFÜHL
-  // ──────────────────────────────────────────────
-  {
-    id: 'selbstwert',
-    name: 'Selbstwertgefühl',
-    icon: '🛡️',
     color: '#E63946',
-    masterclass: 'sem-motivation',
-
+    masterclass: 'produktivitaet',
     outcome: {
-      headline: 'Wer seinen Wert kennt, verhandelt besser.',
-      text: 'Menschen mit hohem Selbstwertgefühl verhandeln ihr Einstiegsgehalt im Schnitt 12% höher — und werden seltener in Jobs gefangen, die nicht zu ihnen passen. Dein Selbstwert ist die Grundlage jeder Karriereentscheidung.',
+      headline: 'Doppelt so produktiv — in der gleichen Zeit',
+      text: 'Wer Wichtiges von Dringendem trennt, erledigt in 6 Stunden, wofür andere 10 brauchen — und fällt im Job sofort positiv auf.',
     },
-
     intro: {
-      was: 'Selbstwertgefühl ist die innere Überzeugung, dass du wertvoll bist — unabhängig von äußerer Bestätigung. Es beeinflusst, wie du auftrittst, wie du kommunizierst und welche Chancen du dir zutraust.',
-      warum: 'Im Berufsleben zeigt sich Selbstwert in jeder Gehaltsverhandlung, jedem Vorstellungsgespräch und jeder Situation, in der du für dich einstehen musst. Wer sich nicht selbst als wertvoll wahrnimmt, wird es anderen schwer machen, ihn so zu behandeln.',
+      was: 'Prioritätenmanagement ist die Fähigkeit, das Richtige zum richtigen Zeitpunkt zu tun — nicht einfach alles, was auf dich einprasselt.',
+      warum: 'Besonders im Studium und Berufseinstieg wird man mit Aufgaben überflutet. Wer keine Prioritäten setzt, rennt ständig hinterher und liefert mittelmäßige Ergebnisse überall statt Exzellenz bei den wichtigen Dingen.',
       schwaechen: [
-        'Kritik trifft dich tief und beschäftigt dich lange',
-        'Du tust dich schwer damit, deine Stärken klar zu benennen',
-        'Du bleibst lieber unter dem Radar als Aufmerksamkeit zu riskieren',
+        'E-Mails zuerst beantworten statt am Kernprojekt zu arbeiten',
+        'Deadlines verpassen, weil "alles irgendwie dringend war"',
+        'Erschöpft sein, obwohl man das Gefühl hat, nichts geschafft zu haben',
       ],
     },
-
     fragen: [
       {
         type: 'scenario',
-        frage: 'Du sollst in einem Bewerbungsgespräch deine drei größten Stärken nennen. Wie reagierst du?',
-        optionen: [
-          { text: 'Ich habe eine klare Antwort — ich kenne meine Stärken genau', score: 10, emoji: '💪' },
-          { text: 'Ich brauche einen Moment, finde aber überzeugende Punkte', score: 7, emoji: '📝' },
-          { text: 'Ich bin unsicher was wirklich meine Stärken sind', score: 4, emoji: '🤷' },
-          { text: 'Mir fiele es leichter, Schwächen aufzuzählen', score: 1, emoji: '😕' },
+        text: 'Du hast morgen eine wichtige Präsentation. Gleichzeitig kommen 5 neue E-Mails rein, eine davon von deinem Chef. Was tust du zuerst?',
+        options: [
+          { text: 'Präsentation fertigstellen — dann E-Mails', score: 10, emoji: '🎯' },
+          { text: 'Chefs E-Mail kurz checken, dann weiter mit Präsentation', score: 7, emoji: '📋' },
+          { text: 'Erst alle E-Mails beantworten, dann weiter', score: 4, emoji: '📧' },
+          { text: 'Zwischen beiden hin und her springen', score: 1, emoji: '😵' },
         ],
       },
       {
         type: 'scenario',
-        frage: 'Ein Kollege kritisiert deine Arbeit vor dem gesamten Team. Was passiert in dir?',
-        optionen: [
-          { text: 'Ich nehme es sachlich auf und antworte souverän', score: 10, emoji: '😌' },
-          { text: 'Es trifft mich kurz, aber ich fange mich schnell', score: 7, emoji: '🤔' },
-          { text: 'Ich grüble den Rest des Tages darüber', score: 4, emoji: '😔' },
-          { text: 'Ich zweifle danach an meiner gesamten Kompetenz', score: 1, emoji: '😢' },
+        text: 'Dein Praktikumsbetreuer gibt dir 3 neue Aufgaben, obwohl du schon ausgelastet bist. Du:',
+        options: [
+          { text: 'Kommuniziere klar, was realistisch ist, und schlage Prioritäten vor', score: 10, emoji: '💬' },
+          { text: 'Nehme alles an und reorganisiere meinen Plan', score: 7, emoji: '🔄' },
+          { text: 'Sage ja und mache Überstunden, um es zu schaffen', score: 4, emoji: '😓' },
+          { text: 'Sage ja und hoffe, dass irgendwie alles klappt', score: 1, emoji: '🙏' },
         ],
       },
       {
         type: 'scale',
-        frage: 'Wie sicher bist du dir, in einem Vorstellungsgespräch deinen Wert klar und überzeugend zu kommunizieren?',
-        low: 'Sehr unsicher',
-        high: 'Sehr sicher',
+        text: 'Wie gut gelingt es dir, deinen Tag nach Wichtigkeit statt nach Dringlichkeit zu strukturieren?',
+        low: 'Kaum — ich reagiere meist auf das, was gerade reinkommt',
+        high: 'Sehr gut — ich arbeite gezielt an meinen Hauptprioritäten',
       },
       {
         type: 'scale',
-        frage: 'Wie oft nimmst du dir, was dir zusteht — zum Beispiel bei Gehaltsverhandlungen oder Beförderungen?',
-        low: 'Fast nie',
-        high: 'Fast immer',
+        text: 'Wie oft schaffst du es, deinen Feierabend ohne schlechtes Gewissen zu genießen?',
+        low: 'Fast nie — es ist immer irgendetwas offen',
+        high: 'Regelmäßig — ich arbeite effizient und habe klare Grenzen',
       },
     ],
   },
 
-  // ──────────────────────────────────────────────
-  // 3. KOMPETENZBEWUSSTSEIN
-  // ──────────────────────────────────────────────
   {
     id: 'kompetenzbewusstsein',
     name: 'Kompetenzbewusstsein',
     icon: '💎',
     color: '#7C3AED',
-    masterclass: 'sem-knigge',
-
+    masterclass: 'karriereplanung',
     outcome: {
-      headline: 'Wer seine Stärken kennt, bekommt bessere Angebote.',
-      text: 'Bewerber die ihre Soft Skills konkret benennen und belegen können, erhalten in Auswahlprozessen doppelt so häufig ein Angebot. Unternehmen stellen heute primär nach Persönlichkeit ein — und erst dann nach Fachkompetenz.',
+      headline: 'Kenne deinen Marktwert — und verhandle ihn durch',
+      text: 'Wer seine Kompetenzen klar benennen kann, überzeugt in Bewerbungen, verhandelt besser und positioniert sich für die richtigen Rollen.',
     },
-
     intro: {
-      was: 'Kompetenzbewusstsein bedeutet, ein klares Bild der eigenen Fähigkeiten, Stärken und Entwicklungsfelder zu haben — und diese nach außen kommunizieren zu können.',
-      warum: 'Der Arbeitsmarkt verändert sich rasant. Fachkenntnisse veralten, aber wer seine übertragbaren Kompetenzen kennt, bleibt dauerhaft attraktiv. Wer sich selbst nicht vermarkten kann, überlässt anderen die Deutungshoheit über seinen Wert.',
+      was: 'Kompetenzbewusstsein bedeutet: Du weißt, was du kannst — nicht nur gefühlt, sondern konkret und belastbar. Du kannst deine Stärken in Sprache übersetzen.',
+      warum: 'Viele Studierende unterschätzen sich massiv. Ein Nebenjob, ein Auslandssemester, ein Hochschulprojekt — das sind echte Kompetenzen. Wer sie nicht benennt, verschenkt Chancen.',
       schwaechen: [
-        'Du weißt nicht genau, was dich von anderen unterscheidet',
-        'Im Gespräch fällt es dir schwer, Beispiele für deine Stärken zu nennen',
-        'Du unterschätzt dich häufig im Vergleich zu anderen',
+        'Im Vorstellungsgespräch auf "Was sind Ihre Stärken?" ins Stocken geraten',
+        'Erfahrungen im Lebenslauf zu vage formulieren',
+        'Sich für Rollen nicht bewerben, weil man "noch nicht gut genug" ist',
       ],
     },
-
     fragen: [
       {
         type: 'scenario',
-        frage: 'Bei einem Networking-Event fragt dich jemand: "Was machst du besonders gut?" Deine Reaktion:',
-        optionen: [
-          { text: 'Ich habe einen klaren Elevator Pitch parat', score: 10, emoji: '🎯' },
-          { text: 'Ich erzähle frei — es kommen gute Punkte', score: 7, emoji: '🗣️' },
-          { text: 'Ich werde verlegen und halte mich bedeckt', score: 4, emoji: '😳' },
-          { text: 'Ich wechsle schnell das Thema', score: 1, emoji: '😅' },
+        text: 'Jemand fragt dich auf einer Karrieremesse: "Was macht dich als Kandidaten aus?" Du:',
+        options: [
+          { text: 'Beantworte es klar und mit konkreten Beispielen', score: 10, emoji: '🎤' },
+          { text: 'Erzähle allgemein über deine Erfahrungen', score: 7, emoji: '🗣️' },
+          { text: 'Bin verlegen und halte mich vage', score: 4, emoji: '😳' },
+          { text: 'Wechsle schnell das Thema', score: 1, emoji: '🏃' },
         ],
       },
       {
         type: 'scenario',
-        frage: 'Du bewirbst dich auf eine Stelle, für die du 80% der Anforderungen erfüllst. Was denkst du?',
-        optionen: [
-          { text: 'Die 20% lerne ich schnell — ich bewerbe mich', score: 10, emoji: '🚀' },
-          { text: 'Ich bewerbe mich, aber mit gemischten Gefühlen', score: 7, emoji: '🤞' },
-          { text: 'Ich warte auf eine Stelle wo ich 100% erfülle', score: 4, emoji: '⏳' },
-          { text: 'Ich bin sicher, dass sie jemand Besseres finden', score: 1, emoji: '😞' },
+        text: 'Du sollst deinen Lebenslauf in 30 Minuten auf eine Stelle zuschneiden. Du:',
+        options: [
+          { text: 'Weiß genau, welche meiner Kompetenzen passen — fertig in 20 Min.', score: 10, emoji: '⚡' },
+          { text: 'Brauche etwas, finde aber die richtigen Punkte', score: 7, emoji: '📝' },
+          { text: 'Bin unsicher, was wirklich relevant ist', score: 4, emoji: '🤷' },
+          { text: 'Schicke meist den Standard-Lebenslauf', score: 1, emoji: '📄' },
         ],
       },
       {
         type: 'scale',
-        frage: 'Wie klar ist dir, welche deiner Fähigkeiten auf dem Arbeitsmarkt besonders gefragt sind?',
-        low: 'Sehr unklar',
-        high: 'Sehr klar',
+        text: 'Wie klar kannst du deine Top 3 Stärken sofort nennen — mit konkreten Beispielen?',
+        low: 'Gar nicht — ich müsste lange nachdenken',
+        high: 'Sofort — ich kenne sie auswendig mit Belegen',
       },
       {
         type: 'scale',
-        frage: 'Wie gut kannst du konkrete Beispiele aus der Vergangenheit nennen, die deine Stärken belegen?',
-        low: 'Kaum möglich',
-        high: 'Sehr gut',
+        text: 'Wie gut weißt du, was du auf dem Arbeitsmarkt wert bist (Gehaltsspanne, Nachfrage deiner Skills)?',
+        low: 'Kaum — kein Überblick über meinen Marktwert',
+        high: 'Sehr gut — ich kenne Gehaltsdaten und weiß, wo ich stehe',
       },
     ],
   },
 
-  // ──────────────────────────────────────────────
-  // 4. SOZIALKOMPETENZ
-  // ──────────────────────────────────────────────
+  {
+    id: 'kommunikation',
+    name: 'Kommunikation',
+    icon: '💬',
+    color: '#2563EB',
+    masterclass: 'kommunikation',
+    outcome: {
+      headline: 'Überzeuge jeden — in Meetings, Interviews und Konflikten',
+      text: 'Klare Kommunikation ist die #1-Soft-Skill, die Arbeitgeber suchen. Wer sich durchsetzen kann, steigt schneller auf.',
+    },
+    intro: {
+      was: 'Kommunikation ist mehr als reden. Es geht darum, die richtige Botschaft zur richtigen Zeit an die richtige Person zu bringen — klar, empathisch und überzeugend.',
+      warum: 'Im Job scheitern die meisten Probleme an Kommunikation: unklare Erwartungen, vermiedene Konflikte, Ideen die nicht gehört werden. Wer kommunizieren kann, setzt sich durch.',
+      schwaechen: [
+        'In Meetings schweigen, obwohl du eine gute Idee hast',
+        'Konflikte vermeiden und Probleme runterschlucken',
+        'Feedback geben, das verletzt statt hilft',
+      ],
+    },
+    fragen: [
+      {
+        type: 'scenario',
+        text: 'In einem Gruppenmeeting siehst du einen klaren Fehler im Vorschlag deines Teamkollegen. Du:',
+        options: [
+          { text: 'Sprichst es direkt aber konstruktiv an', score: 10, emoji: '✋' },
+          { text: 'Schreibst es kurz in den Chat', score: 7, emoji: '💬' },
+          { text: 'Sagst nichts im Meeting, sprichst ihn danach an', score: 4, emoji: '🤫' },
+          { text: 'Schweigst — du willst keine Unruhe stiften', score: 1, emoji: '😶' },
+        ],
+      },
+      {
+        type: 'scenario',
+        text: 'Dein Chef gibt dir Feedback, das du für falsch hältst. Du:',
+        options: [
+          { text: 'Höre zu, erkläre sachlich deinen Standpunkt mit Argumenten', score: 10, emoji: '💪' },
+          { text: 'Nicke, aber suche danach das Gespräch', score: 7, emoji: '🤝' },
+          { text: 'Schlucke es runter und machst, was er sagt', score: 4, emoji: '😑' },
+          { text: 'Bin frustriert und beschwere mich bei Kollegen', score: 1, emoji: '😤' },
+        ],
+      },
+      {
+        type: 'scale',
+        text: 'Wie souverän fühlst du dich, wenn du in einer Gruppe sprechen oder präsentieren musst?',
+        low: 'Sehr unwohl — ich vermeide es wenn möglich',
+        high: 'Sehr sicher — ich kommuniziere klar und überzeugend',
+      },
+      {
+        type: 'scale',
+        text: 'Wie gut gelingt es dir, Konflikte direkt und konstruktiv anzusprechen?',
+        low: 'Kaum — ich weiche Konflikten meist aus',
+        high: 'Sehr gut — ich löse Konflikte aktiv und konstruktiv',
+      },
+    ],
+  },
+
   {
     id: 'sozialkompetenz',
     name: 'Sozialkompetenz',
     icon: '🤝',
-    color: '#2563EB',
-    masterclass: 'sem-networking',
-
+    color: '#3B82F6',
+    masterclass: 'sozialkompetenz',
     outcome: {
-      headline: '70% aller Jobs werden über Netzwerk besetzt.',
-      text: 'Nicht über Jobportale — über persönliche Empfehlungen. Sozialkompetenz entscheidet, ob du Teil dieser Netzwerke wirst. Wer Menschen für sich gewinnen kann, öffnet Türen die auf dem Papier verschlossen scheinen.',
+      headline: 'Baue das Netzwerk, das deine Karriere macht',
+      text: '85% aller Jobs werden über Kontakte vergeben. Sozialkompetenz ist keine "nice to have" — sie ist dein Karrierenetzwerk.',
     },
-
     intro: {
-      was: 'Sozialkompetenz umfasst die Fähigkeit, echte Verbindungen zu anderen Menschen aufzubauen — mit Empathie, Interesse und dem Gespür für das, was andere brauchen.',
-      warum: 'In einer digitalisierten Welt wird menschliche Verbindung zum Wettbewerbsvorteil. Menschen kaufen von, arbeiten mit und fördern Menschen, denen sie vertrauen. Sozialkompetenz ist das Fundament von Karrierenetzwerken.',
+      was: 'Sozialkompetenz ist die Fähigkeit, authentische Beziehungen aufzubauen, Vertrauen zu gewinnen und in Teams effektiv zusammenzuarbeiten.',
+      warum: 'Im Studium beginnt das Netzwerk, das später Jobangebote, Empfehlungen und Kooperationen bringt. Wer in sozialen Situationen unsicher ist, verpasst diese frühen Verbindungen.',
       schwaechen: [
-        'Smalltalk fällt dir schwer und fühlt sich unecht an',
-        'Du erinnerst dich schlecht an Details aus Gesprächen',
-        'Kontakte zu halten liegt dir nicht — du meldest dich selten',
+        'Networking-Events meiden, weil es sich "aufgesetzt" anfühlt',
+        'Schwierige Kollegen oder Gruppenarbeiten als reine Last erleben',
+        'Hilfe nicht anbieten und nicht annehmen können',
       ],
     },
-
     fragen: [
       {
         type: 'scenario',
-        frage: 'Du kommst neu in ein Team. In der ersten Woche gibt es einen Konflikt zwischen zwei Kollegen. Was tust du?',
-        optionen: [
-          { text: 'Ich höre beiden Seiten zu und versuche zu vermitteln', score: 10, emoji: '🤝' },
-          { text: 'Ich beobachte erstmal und halte mich raus', score: 7, emoji: '👀' },
-          { text: 'Ich schlage mich auf die Seite, die mir sympathischer ist', score: 4, emoji: '⚖️' },
-          { text: 'Konflikte machen mich nervös — ich vermeide jede Berührung', score: 1, emoji: '😰' },
+        text: 'Bei einem Karriere-Event stehst du allein und kennst niemanden. Du:',
+        options: [
+          { text: 'Gehe aktiv auf andere zu und starte Gespräche', score: 10, emoji: '🤗' },
+          { text: 'Warte, bis jemand mich anspricht', score: 7, emoji: '🙂' },
+          { text: 'Bleibe in der Nähe einer bekannten Person', score: 4, emoji: '😬' },
+          { text: 'Verlasse das Event früher als geplant', score: 1, emoji: '🏃' },
         ],
       },
       {
         type: 'scenario',
-        frage: 'Nach einem Branchenevent hast du 5 interessante Visitenkarten. Was passiert in den nächsten 48h?',
-        optionen: [
-          { text: 'Ich schreibe jedem eine persönliche Nachricht mit einem konkreten Anknüpfungspunkt', score: 10, emoji: '✉️' },
-          { text: 'Ich vernetze mich auf LinkedIn mit ihnen', score: 7, emoji: '💼' },
-          { text: 'Die Karten liegen auf meinem Schreibtisch — ich melde mich irgendwann', score: 4, emoji: '📌' },
-          { text: 'Ich melde mich nicht — ich weiß nicht was ich schreiben soll', score: 1, emoji: '😶' },
+        text: 'In deiner Lerngruppe gibt es einen Konflikt zwischen zwei Mitgliedern, der die Gruppe lähmt. Du:',
+        options: [
+          { text: 'Vermittle aktiv und bringt beide zu einer Lösung', score: 10, emoji: '🕊️' },
+          { text: 'Spreche beide getrennt an und versuche zu helfen', score: 7, emoji: '💬' },
+          { text: 'Halte mich raus — das ist nicht mein Problem', score: 4, emoji: '🙈' },
+          { text: 'Bin genervt und denke über Wechsel der Gruppe nach', score: 1, emoji: '😤' },
         ],
       },
       {
         type: 'scale',
-        frage: 'Wie leicht fällt es dir, auf fremde Menschen zuzugehen und ein echtes Gespräch zu starten?',
-        low: 'Sehr schwer',
-        high: 'Sehr leicht',
+        text: 'Wie wohl fühlst du dich, auf fremde Menschen zuzugehen und ein Gespräch zu starten?',
+        low: 'Sehr unwohl — ich warte lieber, bis jemand auf mich zukommt',
+        high: 'Sehr wohl — ich knüpfe gerne und leicht neue Kontakte',
       },
       {
         type: 'scale',
-        frage: 'Wie aktiv pflegst du dein berufliches Netzwerk — auch wenn du gerade nichts brauchst?',
-        low: 'Gar nicht',
-        high: 'Sehr aktiv',
+        text: 'Wie gut gelingt es dir, auch mit schwierigen Persönlichkeiten konstruktiv zusammenzuarbeiten?',
+        low: 'Schwer — es kostet mich viel Energie',
+        high: 'Gut — ich finde meist einen Weg, auch mit schwierigen Menschen',
       },
     ],
   },
 
-  // ──────────────────────────────────────────────
-  // 5. PRÄSENTATIONSKOMPETENZ
-  // ──────────────────────────────────────────────
   {
     id: 'praesentation',
     name: 'Präsentationskompetenz',
     icon: '🎤',
     color: '#1D4ED8',
-    masterclass: 'sem-rhetorik',
-
+    masterclass: 'kommunikation',
     outcome: {
-      headline: 'Wer überzeugend präsentiert, steigt schneller auf.',
-      text: 'Menschen die klar und wirkungsvoll präsentieren, werden 3x häufiger für Führungspositionen vorgeschlagen — selbst wenn ihre fachliche Leistung vergleichbar ist. Sichtbarkeit schlägt stille Exzellenz.',
+      headline: 'Sei die Person im Raum, die man sich merkt',
+      text: 'Sichtbarkeit entscheidet über Karriereaufstieg. Wer präsentieren kann, wird für wichtige Projekte und Führungsrollen in Betracht gezogen.',
     },
-
     intro: {
-      was: 'Präsentationskompetenz ist mehr als Vorträge halten — es ist die Fähigkeit, Ideen so zu vermitteln, dass andere ihnen folgen wollen. Das umfasst Sprache, Körpersprache und die Struktur des Gesagten.',
-      warum: 'Wer nicht gesehen wird, wird nicht gefördert. In Meetings, Präsentationen und Vorstellungsgesprächen entscheiden oft die ersten 90 Sekunden, wie jemand wahrgenommen wird. Präsentationskompetenz ist deine direkteste Verbindung zu Karrierechancen.',
+      was: 'Präsentationskompetenz ist die Fähigkeit, Ideen so zu vermitteln, dass andere verstehen, überzeugt werden und sich erinnern.',
+      warum: 'Im Berufseinstieg entscheidet oft eine gute Präsentation darüber, ob ein Projekt genehmigt wird, ob du für eine Aufgabe berücksichtigt wirst oder ob dein Chef auf dich aufmerksam wird.',
       schwaechen: [
-        'Du wirst nervös wenn alle Augen auf dich gerichtet sind',
-        'Deine Hauptpunkte gehen in zu vielen Details unter',
-        'Du vermeidest es, im Meeting das Wort zu ergreifen',
+        'Präsentationen wirken langweilig und generisch',
+        'Nervosität bei Zwischenfragen oder Kritik',
+        'Zu viel Text auf Folien, zu wenig eigene Worte',
       ],
     },
-
     fragen: [
       {
         type: 'scenario',
-        frage: 'Dein Chef bittet dich spontan, in 10 Minuten ein Update vor dem gesamten Team zu geben. Deine Reaktion:',
-        optionen: [
-          { text: 'Ich bin vorbereitet — kein Problem', score: 10, emoji: '😎' },
-          { text: 'Nervös, aber ich zieh\'s durch', score: 7, emoji: '💪' },
-          { text: 'Ich bitte um mehr Zeit zur Vorbereitung', score: 4, emoji: '⏰' },
-          { text: 'Ich versuche jemand anderen vorzuschicken', score: 1, emoji: '😬' },
+        text: 'Dein Chef bittet dich spontan, in 10 Minuten dein aktuelles Projekt im Teammeeting vorzustellen. Du:',
+        options: [
+          { text: 'Kein Problem — ich strukturiere es schnell im Kopf', score: 10, emoji: '😎' },
+          { text: 'Bin nervös, ziehe es aber durch', score: 7, emoji: '💪' },
+          { text: 'Bitte darum, es nächstes Mal machen zu dürfen', score: 4, emoji: '🙏' },
+          { text: 'Schlage einen Kollegen vor, der besser präsentieren kann', score: 1, emoji: '🙈' },
         ],
       },
       {
         type: 'scenario',
-        frage: 'Mitten in deiner Präsentation stellt jemand eine kritische Frage, auf die du keine Antwort weißt. Was tust du?',
-        optionen: [
-          { text: 'Ich gebe es offen zu und sage, dass ich nachfasse', score: 10, emoji: '🎯' },
-          { text: 'Ich umschreibe die Frage und antworte was ich kann', score: 7, emoji: '🗣️' },
-          { text: 'Ich werde unsicher und verliere den Faden', score: 4, emoji: '😳' },
-          { text: 'Ich verheddere mich in einer Antwort, die niemanden überzeugt', score: 1, emoji: '😰' },
+        text: 'Während deiner Präsentation stellt jemand eine schwierige Frage, auf die du keine Antwort hast. Du:',
+        options: [
+          { text: 'Sage es offen und biete an, es nachzuliefern', score: 10, emoji: '✅' },
+          { text: 'Umschreibe die Frage und antworte so gut ich kann', score: 7, emoji: '🤔' },
+          { text: 'Werde nervös und verliere den Faden', score: 4, emoji: '😰' },
+          { text: 'Versuche etwas zu antworten, auch wenn ich es erfinde', score: 1, emoji: '🎭' },
         ],
       },
       {
         type: 'scale',
-        frage: 'Wie wohl fühlst du dich, wenn du vor einer Gruppe sprechen musst?',
-        low: 'Sehr unwohl',
-        high: 'Sehr wohl',
+        text: 'Wie sicher fühlst du dich, vor einer Gruppe von 10+ Personen frei zu sprechen?',
+        low: 'Sehr unsicher — ich bekomme Lampenfieber und Blackout',
+        high: 'Sehr sicher — ich rede gerne vor Gruppen',
       },
       {
         type: 'scale',
-        frage: 'Wie oft ergreifst du in Meetings aktiv das Wort, um deine Perspektive einzubringen?',
-        low: 'Fast nie',
-        high: 'Fast immer',
+        text: 'Wie gut gelingt es dir, komplizierte Inhalte einfach und spannend zu erklären?',
+        low: 'Schwer — meine Erklärungen sind oft unklar oder zu komplex',
+        high: 'Gut — ich kann komplexe Dinge einfach und fesselnd rüberbringen',
       },
     ],
   },
 
-  // ──────────────────────────────────────────────
-  // 6. SELBSTFÜRSORGE
-  // ──────────────────────────────────────────────
   {
     id: 'selbstfuersorge',
     name: 'Selbstfürsorge',
     icon: '🧘',
     color: '#A78BFA',
-    masterclass: 'sem-achtsamkeit',
-
+    masterclass: 'resilienz',
     outcome: {
-      headline: 'Burnout kostet durchschnittlich 6 Monate Karrierezeit.',
-      text: 'Selbstfürsorge ist keine Schwäche — sie ist deine Versicherung gegen Erschöpfung. Wer langfristig Höchstleistung bringen will, muss lernen, sich selbst als Ressource zu behandeln die Pflege braucht.',
+      headline: 'Nachhaltige Leistung statt Burnout im ersten Job',
+      text: 'Wer auf sich achtet, leistet langfristig mehr. Selbstfürsorge ist kein Luxus — sie ist die Basis für jede Hochleistung.',
     },
-
     intro: {
-      was: 'Selbstfürsorge bedeutet, die eigenen körperlichen und mentalen Bedürfnisse ernst zu nehmen — und aktiv dafür zu sorgen, dass man dauerhaft leistungsfähig bleibt.',
-      warum: 'Der erste Job, das Studium, der Berufseinstieg — diese Phasen sind intensiv. Wer nicht lernt, sich zu regenerieren, läuft auf Reserve. Und wer dauerhaft auf Reserve läuft, trifft schlechtere Entscheidungen, kommuniziert schlechter und wird schlechter wahrgenommen.',
+      was: 'Selbstfürsorge bedeutet, aktiv auf die eigenen Bedürfnisse zu achten — körperlich, emotional und mental — ohne dabei schlechtes Gewissen zu haben.',
+      warum: 'Viele Studierende und Berufseinsteiger laufen auf Dauervollgas, bis sie ausbrennen. Der erste Karriere-Burnout ist häufig im 2.-3. Berufsjahr. Das lässt sich verhindern.',
       schwaechen: [
-        'Du vernachlässigst Erholung wenn viel zu tun ist',
-        'Du weißt kaum mehr, wann du das letzte Mal wirklich abgeschaltet hast',
-        'Pausen fühlen sich wie Zeitverschwendung an',
+        'Keine klaren Grenzen zwischen Studium/Arbeit und Erholung',
+        'Sport, Schlaf und Pausen als erstes streichen bei Stress',
+        'Hilfe nicht annehmen können, weil es sich "schwach" anfühlt',
       ],
     },
-
     fragen: [
       {
         type: 'scenario',
-        frage: 'Es ist 22 Uhr, du arbeitest seit 12 Stunden und bist erschöpft. Morgen früh ist ein wichtiges Meeting. Was tust du?',
-        optionen: [
-          { text: 'Ich höre auf — ausgeruht bin ich morgen besser', score: 10, emoji: '😴' },
-          { text: 'Ich mache noch 30 Minuten, dann Schluss', score: 7, emoji: '⏰' },
-          { text: 'Ich mache weiter bis alles erledigt ist', score: 4, emoji: '😓' },
-          { text: 'Ich arbeite die ganze Nacht durch', score: 1, emoji: '🥱' },
+        text: 'Du arbeitest gerade an einer wichtigen Hausarbeit. Es ist 23 Uhr und du bist erschöpft. Du:',
+        options: [
+          { text: 'Höre auf — ausgeruht morgen bin ich produktiver', score: 10, emoji: '😴' },
+          { text: 'Mache noch 30 Minuten, dann Schluss', score: 7, emoji: '⏰' },
+          { text: 'Mache weiter bis es fertig ist, egal wie spät', score: 4, emoji: '😤' },
+          { text: 'Mache weiter und schlafe, wenn alles erledigt ist', score: 1, emoji: '🤯' },
         ],
       },
       {
         type: 'scenario',
-        frage: 'Du merkst, dass du seit Wochen kaum Zeit für Dinge hattest, die dir Kraft geben (Sport, Freunde, Hobbys). Was passiert?',
-        optionen: [
-          { text: 'Ich schütze diese Zeit bewusst — sie ist nicht verhandelbar', score: 10, emoji: '🛡️' },
-          { text: 'Ich versuche es, aber es rutscht manchmal hinten runter', score: 7, emoji: '🔄' },
-          { text: 'Arbeit geht vor — private Zeit ist Luxus', score: 4, emoji: '💼' },
-          { text: 'Ich merke es kaum noch — ich bin im Überlebensmodus', score: 1, emoji: '😵' },
+        text: 'Du bemerkst, dass du seit Wochen gestresst, gereizt und unkonzentriert bist. Du:',
+        options: [
+          { text: 'Analysiere, was mich auslaugt, und ändere aktiv etwas', score: 10, emoji: '🔍' },
+          { text: 'Gönn mir ein verlängertes Wochenende zur Erholung', score: 7, emoji: '🏖️' },
+          { text: 'Hoffe, dass es nach der nächsten Deadline besser wird', score: 4, emoji: '🙏' },
+          { text: 'Mache einfach weiter — irgendwann wird es besser', score: 1, emoji: '😶' },
         ],
       },
       {
         type: 'scale',
-        frage: 'Wie gut gelingt es dir, nach der Arbeit wirklich abzuschalten und dich zu erholen?',
-        low: 'Gar nicht',
-        high: 'Sehr gut',
+        text: 'Wie gut gelingt es dir, klar zwischen Arbeitszeit und Erholungszeit zu trennen?',
+        low: 'Kaum — ich bin gedanklich immer beim Studium/der Arbeit',
+        high: 'Sehr gut — ich habe klare Grenzen und halte sie ein',
       },
       {
         type: 'scale',
-        frage: 'Wie bewusst achtest du auf deine körperliche und mentale Gesundheit im Alltag?',
-        low: 'Kaum',
-        high: 'Sehr bewusst',
+        text: 'Wie konsequent pflegst du Gewohnheiten, die dir Energie geben (Sport, Schlaf, Hobbys)?',
+        low: 'Kaum — das fällt als erstes weg, wenn es stressig wird',
+        high: 'Sehr konsequent — das ist nicht verhandelbar für mich',
       },
     ],
   },
 
-  // ──────────────────────────────────────────────
-  // 7. SELBSTREFLEXION
-  // ──────────────────────────────────────────────
   {
     id: 'selbstreflexion',
     name: 'Selbstreflexion',
     icon: '🪞',
     color: '#8B5CF6',
-    masterclass: 'insights-mdi',
-
+    masterclass: 'karriereplanung',
     outcome: {
-      headline: 'Wer sich selbst kennt, trifft bessere Karriereentscheidungen.',
-      text: 'Selbstreflexion ist der stärkste Schutz gegen falsche Karrierewege. Menschen die regelmäßig reflektieren, wechseln seltener den Job aus falschen Gründen — und bereuen ihre Entscheidungen deutlich weniger.',
+      headline: 'Triff die richtigen Karriereentscheidungen — jedes Mal',
+      text: 'Selbstreflexion ist das Werkzeug, mit dem du blinde Flecken siehst, aus Fehlern lernst und Karrieremoves machst, die wirklich zu dir passen.',
     },
-
     intro: {
-      was: 'Selbstreflexion ist die Fähigkeit, das eigene Denken, Handeln und Fühlen zu beobachten und daraus zu lernen. Es geht darum, ehrlich mit sich selbst zu sein — auch wenn es unbequem ist.',
-      warum: 'Wer sich nicht reflektiert, wiederholt seine Fehler. Im Berufsleben bedeutet das: immer wieder in die gleichen Fallen tappen, die gleichen Konflikte haben, die gleichen Chancen verpassen. Selbstreflexion ist die Abkürzung zur persönlichen Weiterentwicklung.',
+      was: 'Selbstreflexion ist die Fähigkeit, das eigene Handeln, Denken und Fühlen bewusst zu beobachten — ohne sich selbst zu verurteilen, aber mit dem Ziel zu wachsen.',
+      warum: 'Wer nie reflektiert, wiederholt die gleichen Fehler. Wer regelmäßig reflektiert, lernt 3x schneller und trifft bessere Entscheidungen über Jobs, Beziehungen und Ziele.',
       schwaechen: [
-        'Du analysierst Situationen kaum, sondern machst einfach weiter',
-        'Feedback nimmst du an, aber du weißt selten was du damit machst',
-        'Du bist oft überrascht, wie andere dich wahrnehmen',
+        'Aus Misserfolgen nicht systematisch lernen',
+        'Dasselbe Muster immer wieder erleben (gleicher Chef-Konflikt, gleiche Teamdynamik)',
+        'Keine klare Antwort auf "Wohin soll meine Karriere gehen?"',
       ],
     },
-
     fragen: [
       {
         type: 'scenario',
-        frage: 'Ein Projekt ist gescheitert. Dein Anteil daran war nicht klein. Was tust du danach?',
-        optionen: [
-          { text: 'Ich analysiere konkret was ich anders machen würde und notiere es', score: 10, emoji: '📊' },
-          { text: 'Ich denke kurz darüber nach und ziehe Schlüsse', score: 7, emoji: '🤔' },
-          { text: 'Ich ärgere mich und mache dann weiter wie bisher', score: 4, emoji: '😤' },
-          { text: 'Ich schiebe die Verantwortung auf andere Faktoren', score: 1, emoji: '👉' },
+        text: 'Du hast eine Klausur schlechter bestanden als erwartet. Was machst du danach?',
+        options: [
+          { text: 'Analysiere konkret, was ich anders machen würde', score: 10, emoji: '🔬' },
+          { text: 'Denke kurz drüber nach und lerne für die nächste', score: 7, emoji: '📚' },
+          { text: 'Bin frustriert, aber mache weiter wie bisher', score: 4, emoji: '😔' },
+          { text: 'Verdränge es — was vorbei ist, ist vorbei', score: 1, emoji: '🙈' },
         ],
       },
       {
         type: 'scenario',
-        frage: 'Du bekommst Feedback, das dich überrascht — andere nehmen dich anders wahr als du dich selbst. Deine Reaktion:',
-        optionen: [
-          { text: 'Ich nehme es als wertvolle Information und hinterfrage mein Bild', score: 10, emoji: '🪞' },
-          { text: 'Ich bin kurz überrascht, aber ich nehme es mit', score: 7, emoji: '🤷' },
-          { text: 'Ich finde Gründe warum das Feedback nicht stimmt', score: 4, emoji: '🙅' },
-          { text: 'Ich nehme es persönlich und bin lange beschäftigt damit', score: 1, emoji: '😔' },
+        text: 'Jemand gibt dir kritisches Feedback. Deine erste Reaktion:',
+        options: [
+          { text: 'Ich höre aufmerksam zu und überlege, was daran stimmt', score: 10, emoji: '🎧' },
+          { text: 'Es trifft mich kurz, ich nehme es aber an', score: 7, emoji: '🤔' },
+          { text: 'Ich verteidige mich instinktiv', score: 4, emoji: '🛡️' },
+          { text: 'Ich denke, die Person versteht mich nicht', score: 1, emoji: '😤' },
         ],
       },
       {
         type: 'scale',
-        frage: 'Wie regelmäßig nimmst du dir Zeit, dein eigenes Verhalten und deine Entscheidungen zu reflektieren?',
-        low: 'Fast nie',
-        high: 'Regelmäßig',
+        text: 'Wie regelmäßig nimmst du dir Zeit, dein Handeln und deine Entscheidungen zu reflektieren?',
+        low: 'Kaum — ich lebe mehr im Autopilot',
+        high: 'Regelmäßig — Reflexion ist fester Teil meiner Routine',
       },
       {
         type: 'scale',
-        frage: 'Wie klar ist dir, warum du in bestimmten Situationen so reagierst wie du reagierst?',
-        low: 'Kaum klar',
-        high: 'Sehr klar',
+        text: 'Wie klar ist dir, was du in 5 Jahren karrieremäßig erreicht haben willst?',
+        low: 'Gar nicht klar — ich lasse das auf mich zukommen',
+        high: 'Sehr klar — ich habe eine konkrete Vorstellung und arbeite darauf hin',
       },
     ],
   },
 
-  // ──────────────────────────────────────────────
-  // 8. SICHERHEITSBEDÜRFNIS
-  // ──────────────────────────────────────────────
   {
     id: 'sicherheit',
-    name: 'Sicherheitsbedürfnis',
-    icon: '🔓',
-    color: '#059669',
-    masterclass: 'sem-motivation',
-
+    name: 'Auftreten & Sicherheit',
+    icon: '⚡',
+    color: '#F59E0B',
+    masterclass: 'selbstwert',
     outcome: {
-      headline: 'Wer seine Komfortzone verlässt, erschließt mehr Chancen.',
-      text: 'Die meisten großen Karrierechancen liegen außerhalb der Komfortzone. Ein zu hohes Sicherheitsbedürfnis kostet im Durchschnitt 2-3 relevante Karriereschritte — weil man Chancen nicht ergreift, die ein Risiko bedeuten.',
+      headline: 'Der erste Eindruck entscheidet — und du bestimmst ihn',
+      text: 'In den ersten 7 Sekunden entscheiden Menschen, ob sie dir vertrauen. Souveränes Auftreten öffnet Türen, die Fachkompetenz allein nicht öffnen kann.',
     },
-
     intro: {
-      was: 'Sicherheitsbedürfnis beschreibt, wie stark das Verlangen nach Stabilität und Kontrolle das eigene Handeln beeinflusst. Ein gewisses Maß ist gesund — zu viel wird zur Bremse.',
-      warum: 'Karriere bedeutet Veränderung. Neue Jobs, neue Teams, neue Herausforderungen — wer bei jeder Unsicherheit bremst, gibt anderen den Vortritt. Das Sicherheitsbedürfnis ist oft der unsichtbarste, aber wirkungsvollste Karrierebremse.',
+      was: 'Auftreten und Sicherheit beschreibt, wie du dich in der Welt zeigst — deine Körpersprache, deine Stimme, wie du Räume betrittst und wie du unter Druck wirkst.',
+      warum: 'Recruiter entscheiden oft innerhalb von Minuten, ob jemand "die Stelle hat". Nicht immer wegen der Qualifikation — oft wegen des Auftretens. Das ist trainierbar.',
       schwaechen: [
-        'Du zögerst bei Entscheidungen sehr lange, um ja keinen Fehler zu machen',
-        'Veränderungen — auch positive — lösen bei dir Unruhe aus',
-        'Du nimmst lieber das Bekannte als das Bessere',
+        'In Vorstellungsgesprächen nervös wirken, obwohl man qualifiziert ist',
+        'Die eigene Stimme unsicher klingen lassen durch Aufwärtsintonation',
+        'Körpersprache, die Unsicherheit signalisiert (Blickkontakt meiden, Haltung)',
       ],
     },
-
     fragen: [
       {
         type: 'scenario',
-        frage: 'Du bekommst ein Jobangebot mit 25% mehr Gehalt — aber in einem neuen Unternehmen und einer neuen Stadt. Was denkst du zuerst?',
-        optionen: [
-          { text: 'Spannend — ich prüfe es ernsthaft', score: 10, emoji: '🚀' },
-          { text: 'Interessant, aber ich denke lange darüber nach', score: 7, emoji: '⚖️' },
-          { text: 'Zu viel Unbekanntes — ich bleibe lieber', score: 4, emoji: '🏠' },
-          { text: 'Ich sage sofort ab — das ist mir zu riskant', score: 1, emoji: '❌' },
+        text: 'Du betrittst ein Vorstellungsgespräch. Wie ist dein Auftreten in den ersten 30 Sekunden?',
+        options: [
+          { text: 'Aufrecht, Blickkontakt, fester Händedruck, klare Vorstellung', score: 10, emoji: '💼' },
+          { text: 'Freundlich und höflich, aber etwas verhalten', score: 7, emoji: '🙂' },
+          { text: 'Nervös — ich spüre, dass es sich auf meine Haltung auswirkt', score: 4, emoji: '😬' },
+          { text: 'Sehr angespannt und unsicher', score: 1, emoji: '😰' },
         ],
       },
       {
         type: 'scenario',
-        frage: 'Im Meeting könntest du eine unkonventionelle Idee einbringen, die vielleicht auf Widerstand stößt. Was tust du?',
-        optionen: [
-          { text: 'Ich bringe sie ein — gute Ideen brauchen Raum', score: 10, emoji: '💡' },
-          { text: 'Ich bringe sie ein, aber mit vielen Einschränkungen', score: 7, emoji: '🗣️' },
-          { text: 'Ich warte ob jemand anderes etwas Ähnliches sagt', score: 4, emoji: '👀' },
-          { text: 'Ich behalte sie für mich — zu riskant', score: 1, emoji: '🤐' },
+        text: 'Du bist in einem Meeting mit wichtigen Entscheidungsträgern. Wirst du wahrgenommen?',
+        options: [
+          { text: 'Ja — ich bringe mich aktiv ein und werde ernst genommen', score: 10, emoji: '✋' },
+          { text: 'Manchmal — wenn ich etwas sage, wird es gehört', score: 7, emoji: '🗣️' },
+          { text: 'Eher nicht — ich sage selten etwas', score: 4, emoji: '🤐' },
+          { text: 'Nein — ich wirke in solchen Situationen unsichtbar', score: 1, emoji: '👻' },
         ],
       },
       {
         type: 'scale',
-        frage: 'Wie wohl fühlst du dich in unsicheren Situationen, in denen der Ausgang unklar ist?',
-        low: 'Sehr unwohl',
-        high: 'Sehr wohl',
+        text: 'Wie sicher wirkst du in neuen oder formalen Situationen (Meetings, Präsentationen, Gespräche mit Autoritäten)?',
+        low: 'Sehr unsicher — meine Nervosität ist für andere sichtbar',
+        high: 'Sehr sicher — ich wirke ruhig und kompetent, auch wenn ich nervös bin',
       },
       {
         type: 'scale',
-        frage: 'Wie oft hast du in letzter Zeit etwas getan, das außerhalb deiner Komfortzone lag?',
-        low: 'Fast nie',
-        high: 'Regelmäßig',
+        text: 'Wie gut gelingt es dir, auch unter Druck ruhig und souverän zu bleiben?',
+        low: 'Kaum — Druck macht mich blockiert oder hektisch',
+        high: 'Sehr gut — Druck aktiviert mich, ich bleibe klar',
       },
     ],
   },
 
-  // ──────────────────────────────────────────────
-  // 9. CHARISMA
-  // ──────────────────────────────────────────────
   {
     id: 'charisma',
     name: 'Charisma',
     icon: '✨',
-    color: '#D97706',
-    masterclass: 'sem-rhetorik',
-
+    color: '#10B981',
+    masterclass: 'fuehrung',
     outcome: {
-      headline: 'Führungskräfte mit hohem Charisma verdienen Ø 35% mehr.',
-      text: 'Charisma ist keine Charaktereigenschaft — es ist eine Fähigkeit. Menschen die andere begeistern und mitreißen können, werden schneller in Führung gebracht. Charisma ist das, was Kompetenz sichtbar macht.',
+      headline: 'Werde die Person, der man gerne folgt',
+      text: 'Charisma ist erlernbar — und der stärkste Karrierebeschleuniger. Wer andere begeistert, bekommt Projekte, Verantwortung und Führungsrollen angeboten.',
     },
-
     intro: {
-      was: 'Charisma ist die Fähigkeit, andere Menschen anzuziehen, zu inspirieren und zu bewegen — durch Authentizität, Energie und die Art wie man präsent ist.',
-      warum: 'In einer Welt in der viele Menschen ähnlich qualifiziert sind, ist Charisma der entscheidende Unterschied. Charismatische Menschen werden bevorzugt eingestellt, schneller befördert und von anderen eher unterstützt.',
+      was: 'Charisma ist die Fähigkeit, andere zu begeistern, zu inspirieren und eine echte Verbindung herzustellen — durch Authentizität, Präsenz und Überzeugungskraft.',
+      warum: 'Charismatische Menschen werden für Führungsrollen in Betracht gezogen, bekommen bessere Netzwerke und schaffen es, ihre Ideen durchzusetzen — auch ohne formale Macht.',
       schwaechen: [
-        'Du wirkst in Gruppen eher zurückhaltend und unsichtbar',
-        'Es fällt dir schwer, Begeisterung zu wecken — auch wenn du selbst begeistert bist',
-        'In 1:1-Gesprächen fühlst du dich wohler als vor Gruppen',
+        'In Gruppen wenig Wirkung erzeugen',
+        'Geschichten erzählen, die nicht fesseln',
+        'Keine klare "Energie" ausstrahlen — neutral statt magnetisch',
       ],
     },
-
     fragen: [
       {
         type: 'scenario',
-        frage: 'Du betrittst einen Raum mit 20 dir unbekannten Menschen. Was passiert in den nächsten 5 Minuten?',
-        optionen: [
-          { text: 'Ich gehe auf Menschen zu, stelle mich vor und starte Gespräche', score: 10, emoji: '😄' },
-          { text: 'Ich halte Ausschau nach jemandem der alleine steht', score: 7, emoji: '👋' },
-          { text: 'Ich warte bis jemand auf mich zukommt', score: 4, emoji: '🧍' },
-          { text: 'Ich halte mich am Rand und mache mich möglichst unsichtbar', score: 1, emoji: '🫥' },
+        text: 'Du willst deine Kommilitonen für deine Projektidee begeistern. Was tust du?',
+        options: [
+          { text: 'Erzähle eine Geschichte, die zeigt, warum es mich fasziniert', score: 10, emoji: '🔥' },
+          { text: 'Erkläre klar die Vorteile mit Daten und Fakten', score: 7, emoji: '📊' },
+          { text: 'Präsentiere die Idee sachlich und hoffe auf Zustimmung', score: 4, emoji: '📋' },
+          { text: 'Schicke eine E-Mail mit den Infos', score: 1, emoji: '📧' },
         ],
       },
       {
         type: 'scenario',
-        frage: 'Du willst dein Team für eine neue Idee begeistern, die mit extra Arbeit verbunden ist. Wie gehst du vor?',
-        optionen: [
-          { text: 'Ich präsentiere die Vision so, dass alle das Warum verstehen und spüren', score: 10, emoji: '🔥' },
-          { text: 'Ich erkläre die Vorteile sachlich und hoffe auf Zustimmung', score: 7, emoji: '📊' },
-          { text: 'Ich bitte darum und betone wie wichtig es ist', score: 4, emoji: '🙏' },
-          { text: 'Ich sage einfach was getan werden muss', score: 1, emoji: '📋' },
+        text: 'Wie reagieren Menschen normalerweise, wenn du neu in eine Gruppe kommst?',
+        options: [
+          { text: 'Sie kommen auf mich zu und merken sich mich', score: 10, emoji: '🌟' },
+          { text: 'Ich werde wahrgenommen und angesprochen', score: 7, emoji: '🙂' },
+          { text: 'Es dauert eine Weile, bis ich eine Rolle finde', score: 4, emoji: '⏳' },
+          { text: 'Ich gehe oft unter oder wirke unsichtbar', score: 1, emoji: '👻' },
         ],
       },
       {
         type: 'scale',
-        frage: 'Wie oft haben dir Menschen gesagt, dass du inspirierend oder motivierend wirkst?',
-        low: 'Fast nie',
-        high: 'Sehr oft',
+        text: 'Wie sehr können andere sich von deiner Energie und Begeisterung anstecken lassen?',
+        low: 'Kaum — ich wirke eher ruhig und unauffällig',
+        high: 'Stark — meine Begeisterung überträgt sich auf andere',
       },
       {
         type: 'scale',
-        frage: 'Wie stark bist du in der Lage, andere für deine Ideen zu begeistern?',
-        low: 'Kaum',
-        high: 'Sehr stark',
+        text: 'Wie gut erinnerst du dich an Menschen — und erinnern sie sich an dich?',
+        low: 'Eher schlecht — Gesichter und Namen vergesse ich schnell',
+        high: 'Sehr gut — ich merke mir Details und werde auch erinnert',
       },
     ],
   },
 
-  // ──────────────────────────────────────────────
-  // 10. EMOTIONALE INTELLIGENZ
-  // ──────────────────────────────────────────────
   {
     id: 'emotionale_intelligenz',
     name: 'Emotionale Intelligenz',
     icon: '❤️',
-    color: '#DC2626',
-    masterclass: 'insights-mdi',
-
+    color: '#059669',
+    masterclass: 'fuehrung',
     outcome: {
-      headline: 'EQ schlägt IQ beim beruflichen Aufstieg.',
-      text: 'Laut Harvard-Studien ist emotionale Intelligenz für 85% des beruflichen Erfolgs verantwortlich — und nur 15% für IQ und Fachwissen. Wer Emotionen — eigene und fremde — versteht, führt besser, verhandelt besser und baut stärkere Teams.',
+      headline: 'Der stärkste Prädiktor für Karriereerfolg — messbar',
+      text: 'EQ schlägt IQ in fast allen Führungs- und Teamkontexten. 90% aller Topperformer haben hohe emotionale Intelligenz.',
     },
-
     intro: {
-      was: 'Emotionale Intelligenz ist die Fähigkeit, eigene Emotionen wahrzunehmen, zu verstehen und zu steuern — und die Emotionen anderer zu erkennen und darauf einzugehen.',
-      warum: 'Konflikte, Führung, Teamarbeit — fast jede berufliche Herausforderung hat eine emotionale Dimension. Wer emotional intelligent ist, navigiert diese Situationen souverän. Wer es nicht ist, eskaliert, verletzt oder wird verletzt — ohne es zu verstehen.',
+      was: 'Emotionale Intelligenz (EQ) ist die Fähigkeit, eigene Emotionen zu erkennen und zu steuern — und die Emotionen anderer zu verstehen und empathisch darauf zu reagieren.',
+      warum: 'In Teams und Führungsrollen ist EQ das entscheidende Differenzierungsmerkmal. Fachkompetenz bringt dich rein — EQ bringt dich nach oben.',
       schwaechen: [
-        'Du reagierst in stressigen Situationen schnell emotional oder impulsiv',
-        'Es fällt dir schwer zu erkennen, wie es anderen gerade geht',
-        'Konflikte löst du eher durch Rückzug als durch Aussprache',
+        'Reaktiv statt reflektiert reagieren (in Stress, Konflikt)',
+        'Nicht merken, wie deine Stimmung andere beeinflusst',
+        'Nicht in der Lage sein, andere zu "lesen"',
       ],
     },
-
     fragen: [
       {
         type: 'scenario',
-        frage: 'Ein Kollege ist seit Tagen merklich gereizt und kurz angebunden. Was tust du?',
-        optionen: [
-          { text: 'Ich spreche ihn behutsam an und frage ob alles okay ist', score: 10, emoji: '❤️' },
-          { text: 'Ich gebe ihm Raum und bin besonders rücksichtsvoll', score: 7, emoji: '🤲' },
-          { text: 'Ich halte Abstand und warte bis es sich legt', score: 4, emoji: '🚶' },
-          { text: 'Ich nehme es persönlich und reagiere ebenfalls gereizt', score: 1, emoji: '😤' },
+        text: 'Du merkst, dass dein Teamkollege heute angespannt und zurückgezogen ist. Du:',
+        options: [
+          { text: 'Frage kurz und aufrichtig, ob alles ok ist', score: 10, emoji: '🫂' },
+          { text: 'Gebe ihm Raum und beobachte die Situation', score: 7, emoji: '👁️' },
+          { text: 'Mache meine Arbeit und lasse ihn in Ruhe', score: 4, emoji: '🤐' },
+          { text: 'Bemerke es kaum — ich bin auf meine Aufgaben fokussiert', score: 1, emoji: '😐' },
         ],
       },
       {
         type: 'scenario',
-        frage: 'Mitten in einer wichtigen Verhandlung merkst du, dass du aufsteigend frustriert wirst. Was passiert?',
-        optionen: [
-          { text: 'Ich erkenne es und nehme mir innerlich kurz Abstand', score: 10, emoji: '🧘' },
-          { text: 'Ich merke es, aber es beeinflusst mich trotzdem', score: 7, emoji: '😐' },
-          { text: 'Meine Frustration wird sichtbar ohne dass ich es will', score: 4, emoji: '😠' },
-          { text: 'Ich verliere die Kontrolle über meinen Ton', score: 1, emoji: '😡' },
+        text: 'Du bist in einem Konfliktgespräch und merkst, dass du wütend wirst. Du:',
+        options: [
+          { text: 'Erkenne die Wut, atme kurz durch, antworte dann ruhig', score: 10, emoji: '🧘' },
+          { text: 'Versuche ruhig zu bleiben, auch wenn es schwerfällt', score: 7, emoji: '😤' },
+          { text: 'Merke, dass ich lauter oder schärfer werde', score: 4, emoji: '😠' },
+          { text: 'Verliere die Kontrolle oder ziehe mich komplett zurück', score: 1, emoji: '💥' },
         ],
       },
       {
         type: 'scale',
-        frage: 'Wie gut kannst du deine eigenen Emotionen in stressigen Situationen regulieren?',
-        low: 'Kaum',
-        high: 'Sehr gut',
+        text: 'Wie gut erkennst du deine eigenen Emotionen — und weißt, was sie auslöst?',
+        low: 'Kaum — ich merke oft erst im Nachhinein, was mich getriggert hat',
+        high: 'Sehr gut — ich erkenne meine Emotionen in Echtzeit',
       },
       {
         type: 'scale',
-        frage: 'Wie gut erkennst du, wie es anderen Menschen in einem Gespräch wirklich geht?',
-        low: 'Kaum',
-        high: 'Sehr gut',
+        text: 'Wie gut kannst du dich in andere hineinversetzen, auch wenn du anderer Meinung bist?',
+        low: 'Schwer — ich sehe Situationen oft primär aus meiner Perspektive',
+        high: 'Sehr gut — ich verstehe andere Perspektiven, auch wenn ich nicht zustimme',
       },
     ],
   },
 
-  // ──────────────────────────────────────────────
-  // 11. KOMMUNIKATIONSKOMPETENZ
-  // ──────────────────────────────────────────────
-  {
-    id: 'kommunikation',
-    name: 'Kommunikationskompetenz',
-    icon: '💬',
-    color: '#0891B2',
-    masterclass: 'sem-kommunikation',
-
-    outcome: {
-      headline: 'Klare Kommunikation = schnellere Beförderung.',
-      text: 'In 84% aller Führungsentscheidungen ist Kommunikationsfähigkeit das Zünglein an der Waage. Wer klar, direkt und empfängerorientiert kommuniziert, spart Zeit, vermeidet Konflikte — und wird als kompetenter wahrgenommen.',
-    },
-
-    intro: {
-      was: 'Kommunikationskompetenz ist die Fähigkeit, Informationen, Ideen und Erwartungen so zu vermitteln, dass sie beim Gegenüber ankommen — verständlich, respektvoll und wirkungsvoll.',
-      warum: 'Missverständnisse kosten Unternehmen Milliarden und Karrieren kosten sie noch mehr. Wer kommuniziert, dass er weiß was er will und sagen kann was er meint, wird als kompetent und führungsfähig eingestuft — unabhängig vom Titel.',
-      schwaechen: [
-        'Du schweifst aus oder verlierst den roten Faden',
-        'Du vermeidest unangenehme Gespräche so lange wie möglich',
-        'Andere verstehen dich oft anders als du es gemeint hast',
-      ],
-    },
-
-    fragen: [
-      {
-        type: 'scenario',
-        frage: 'Du merkst, dass ein Kollege seit Wochen Aufgaben nicht erledigt die er dir versprochen hat. Das belastet dein Projekt. Was tust du?',
-        optionen: [
-          { text: 'Ich spreche es direkt und sachlich an — mit klaren Erwartungen', score: 10, emoji: '💬' },
-          { text: 'Ich weise nochmal freundlich darauf hin', score: 7, emoji: '📧' },
-          { text: 'Ich erledige es selbst um Konflikt zu vermeiden', score: 4, emoji: '😮‍💨' },
-          { text: 'Ich sage nichts und ärgere mich innerlich', score: 1, emoji: '😶' },
-        ],
-      },
-      {
-        type: 'scenario',
-        frage: 'Du sollst deinem Chef in 2 Minuten erklären warum dein Projekt Verzögerungen hat. Was tust du?',
-        optionen: [
-          { text: 'Ich erkläre klar: Ursache, Auswirkung, nächster Schritt', score: 10, emoji: '📊' },
-          { text: 'Ich erkläre es so gut ich kann — mit einigen Details', score: 7, emoji: '🗣️' },
-          { text: 'Ich verliere mich in Erklärungen und Rechtfertigungen', score: 4, emoji: '🌀' },
-          { text: 'Ich bin nervös und komme nicht auf den Punkt', score: 1, emoji: '😰' },
-        ],
-      },
-      {
-        type: 'scale',
-        frage: 'Wie leicht fällt es dir, unangenehme Dinge direkt anzusprechen?',
-        low: 'Sehr schwer',
-        high: 'Sehr leicht',
-      },
-      {
-        type: 'scale',
-        frage: 'Wie klar und strukturiert kommunizierst du, wenn es unter Druck darauf ankommt?',
-        low: 'Eher chaotisch',
-        high: 'Sehr klar',
-      },
-    ],
-  },
-
-  // ──────────────────────────────────────────────
-  // 12. RESILIENZ
-  // ──────────────────────────────────────────────
   {
     id: 'resilienz',
     name: 'Resilienz',
     icon: '🔥',
     color: '#34D399',
-    masterclass: 'sem-achtsamkeit',
-
+    masterclass: 'resilienz',
     outcome: {
-      headline: 'Resiliente Menschen steigen nach Krisen höher auf.',
-      text: 'Rückschläge sind unvermeidlich — wie du damit umgehst, entscheidet über deine Karriere. Resiliente Menschen erholen sich schneller, lernen mehr aus Misserfolgen und werden von Führungskräften als belastbarer und vertrauenswürdiger eingeschätzt.',
+      headline: 'Komm nach jedem Rückschlag stärker zurück',
+      text: 'Resilienz ist das, was Karrieren langfristig macht oder bricht. Wer nach Niederlagen schnell zurückkommt, gewinnt am Ende.',
     },
-
     intro: {
-      was: 'Resilienz ist die Fähigkeit, nach Rückschlägen, Stress und Veränderungen zurückzufinden — nicht unberührt, aber handlungsfähig. Es ist die mentale Widerstandskraft die entscheidet, ob du wächst oder stagnierst.',
-      warum: 'Kein Karriereweg verläuft ohne Rückschläge. Projekte scheitern, Jobs gehen verloren, Pläne ändern sich. Wer resilient ist, nutzt diese Momente als Sprungbrett. Wer es nicht ist, verliert wertvolle Zeit in der Verarbeitung.',
+      was: 'Resilienz ist die Fähigkeit, Rückschläge, Misserfolge und Stress zu überstehen — und gestärkt daraus hervorzugehen, statt dauerhaft zu leiden.',
+      warum: 'Eine Karriere ohne Absagen, Niederlagen und schwierige Phasen gibt es nicht. Wer resilient ist, macht aus Misserfolgen Sprungbretter statt Endstationen.',
       schwaechen: [
-        'Rückschläge beschäftigen dich lange und rauben dir Energie',
-        'Unter anhaltendem Stress verlierst du schnell den Überblick',
-        'Veränderungen die du nicht kontrollieren kannst, machen dir Angst',
+        'Eine Absage als Beweis nehmen, dass man nicht gut genug ist',
+        'Lange Erholungszeiten nach Stress oder Konflikten',
+        'Aufgeben bei ersten Hürden statt Strategie anzupassen',
       ],
     },
-
     fragen: [
       {
         type: 'scenario',
-        frage: 'Du hast dich monatelang auf eine Stelle vorbereitet — und wirst trotzdem abgelehnt. Was passiert in dir?',
-        optionen: [
-          { text: 'Enttäuscht, aber ich analysiere was ich beim nächsten Mal besser mache', score: 10, emoji: '💪' },
-          { text: 'Es trifft mich hart, aber nach ein paar Tagen mache ich weiter', score: 7, emoji: '🔄' },
-          { text: 'Ich zweifle länger an mir und meinen Chancen', score: 4, emoji: '😔' },
-          { text: 'Ich verliere den Glauben daran, dass es noch klappt', score: 1, emoji: '😞' },
+        text: 'Du bekommst eine Absage für deinen Traumjob, auf den du dich monatelang vorbereitet hast. Du:',
+        options: [
+          { text: 'Bitte um Feedback, analysiere und bewerbe mich sofort weiter', score: 10, emoji: '💪' },
+          { text: 'Bin enttäuscht, fange mich aber nach ein paar Tagen', score: 7, emoji: '📈' },
+          { text: 'Zweifle wochenlang an meiner Eignung', score: 4, emoji: '😔' },
+          { text: 'Verliere die Motivation mich weiter zu bewerben', score: 1, emoji: '💔' },
         ],
       },
       {
         type: 'scenario',
-        frage: 'Dein Projekt wird nach 3 Monaten Arbeit kurzfristig gestoppt — aus Gründen die nichts mit dir zu tun haben. Deine Reaktion:',
-        optionen: [
-          { text: 'Schade, aber ich fokussiere mich sofort auf das Nächste', score: 10, emoji: '🎯' },
-          { text: 'Ich brauche kurz um mich zu sortieren, dann weiter', score: 7, emoji: '🤔' },
-          { text: 'Ich bin länger demotiviert und kann schwer loslassen', score: 4, emoji: '😤' },
-          { text: 'Ich ziehe mich zurück und verliere die Energie', score: 1, emoji: '🪫' },
+        text: 'Ein wichtiges Projekt schlägt fehl. Deine Reaktion 2 Wochen später:',
+        options: [
+          { text: 'Ich habe die Learnings dokumentiert und arbeite am nächsten', score: 10, emoji: '📚' },
+          { text: 'Es wurmt mich noch, aber ich mache weiter', score: 7, emoji: '⚡' },
+          { text: 'Ich grübele noch oft darüber nach', score: 4, emoji: '💭' },
+          { text: 'Es blockiert mich noch immer deutlich', score: 1, emoji: '⚓' },
         ],
       },
       {
         type: 'scale',
-        frage: 'Wie schnell findest du nach einem Rückschlag zurück in deine Energie und Handlungsfähigkeit?',
-        low: 'Sehr langsam',
-        high: 'Sehr schnell',
+        text: 'Wie schnell erholt sich deine Energie und Motivation nach größeren Rückschlägen?',
+        low: 'Sehr langsam — Rückschläge hängen lange an mir',
+        high: 'Schnell — ich sehe Rückschläge als Teil des Weges',
       },
       {
         type: 'scale',
-        frage: 'Wie gut bleibst du unter anhaltendem Druck und Stress handlungsfähig?',
-        low: 'Kaum',
-        high: 'Sehr gut',
+        text: 'Wie gut kannst du auch in stressigen Phasen (Prüfungen, Deadlines, Konflikte) innerlich ruhig bleiben?',
+        low: 'Kaum — Stress überfordert mich oft',
+        high: 'Sehr gut — ich bleibe unter Druck handlungsfähig',
       },
     ],
   },
 ];
 
-// ──────────────────────────────────────────────
-// MASTERCLASS-MAPPING
-// ──────────────────────────────────────────────
+// ============================================================
+// MASTERCLASS INFO
+// ============================================================
 export const MASTERCLASS_INFO = {
-  'sem-prioritaeten': {
-    id: 'sem-prioritaeten',
-    title: 'Prioritätenmanagement',
-    subtitle: 'Nicht alles gleichzeitig, sondern das Richtige zuerst',
+  selbstwert: {
+    name: 'Selbstwert & souveränes Auftreten',
+    icon: '🛡️',
+    fields: ['selbstwert', 'sicherheit'],
+    pitch: 'Lerne, deinen Wert zu kennen, zu kommunizieren und durchzusetzen — in Gehaltsverhandlungen, Interviews und Führungssituationen.',
+  },
+  produktivitaet: {
+    name: 'Prioritäten & Produktivität',
     icon: '🎯',
-    pitch: 'Lerne in 4 Stunden, wie du deinen Tag so strukturierst, dass du abends weißt: heute hat es sich gelohnt.',
+    fields: ['prioritaeten'],
+    pitch: 'Verdopple deine Produktivität durch die richtigen Methoden. Fokus auf das, was wirklich zählt — in Studium und Beruf.',
   },
-  'sem-motivation': {
-    id: 'sem-motivation',
-    title: 'Selbstmotivation',
-    subtitle: 'Dein Warum, dein Motor',
-    icon: '🔥',
-    pitch: 'Verstehe, was dich wirklich antreibt — und wie du diese Energie auch dann abrufst, wenn es zählt.',
+  karriereplanung: {
+    name: 'Karriereplanung & Positionierung',
+    icon: '🗺️',
+    fields: ['kompetenzbewusstsein', 'selbstreflexion'],
+    pitch: 'Entwickle eine klare Karrierestrategie, kenne deinen Marktwert und positioniere dich für die Rollen, die du wirklich willst.',
   },
-  'sem-knigge': {
-    id: 'sem-knigge',
-    title: 'Business Knigge',
-    subtitle: 'Der erste Eindruck zählt, der zweite bleibt',
-    icon: '🎩',
-    pitch: 'Lerne wie du in jedem beruflichen Kontext professionell und selbstsicher auftrittst.',
-  },
-  'sem-networking': {
-    id: 'sem-networking',
-    title: 'Networking',
-    subtitle: 'Kontakte knüpfen, Vertrauen aufbauen',
-    icon: '🤝',
-    pitch: 'Baue ein Netzwerk auf, das dir Türen öffnet — authentisch, nachhaltig und ohne Gefälligkeit.',
-  },
-  'sem-rhetorik': {
-    id: 'sem-rhetorik',
-    title: 'Rhetorik, Dialektik, Kinesik',
-    subtitle: 'Überzeugen mit Worten und Wirkung',
-    icon: '🎤',
-    pitch: 'Sprich so, dass Menschen zuhören und folgen — in Meetings, Präsentationen und Verhandlungen.',
-  },
-  'sem-achtsamkeit': {
-    id: 'sem-achtsamkeit',
-    title: 'Achtsamkeit',
-    subtitle: 'Gelassenheit ist trainierbar',
-    icon: '🧘',
-    pitch: 'Lerne mentale Stärke aufzubauen — damit du auch unter Druck klar denkst und gut entscheidest.',
-  },
-  'insights-mdi': {
-    id: 'insights-mdi',
-    title: 'INSIGHTS MDI® EQ',
-    subtitle: 'Emotionale Intelligenz verstehen',
-    icon: '❤️',
-    pitch: 'Erkenne dein emotionales Profil — und lerne wie du Beziehungen, Konflikte und dich selbst besser steuerst.',
-  },
-  'sem-kommunikation': {
-    id: 'sem-kommunikation',
-    title: 'Kommunikation',
-    subtitle: 'Verständigung als Schlüssel zum Erfolg',
+  kommunikation: {
+    name: 'Kommunikation & Präsentation',
     icon: '💬',
-    pitch: 'Kommuniziere so klar und direkt, dass Missverständnisse gar nicht erst entstehen.',
+    fields: ['kommunikation', 'praesentation'],
+    pitch: 'Überzeuge in jeder Situation — im Vorstellungsgespräch, im Meeting, auf der Bühne. Kommunikation ist dein stärkstes Karriere-Werkzeug.',
+  },
+  sozialkompetenz: {
+    name: 'Sozialkompetenz & Netzwerk',
+    icon: '🤝',
+    fields: ['sozialkompetenz'],
+    pitch: 'Baue echte Beziehungen auf, die deine Karriere voranbringen. 85% aller Jobs kommen über Netzwerke — lerne, wie das geht.',
+  },
+  resilienz: {
+    name: 'Resilienz & Selbstfürsorge',
+    icon: '🔥',
+    fields: ['resilienz', 'selbstfuersorge'],
+    pitch: 'Werde unschlagbar. Lerne, nach Rückschlägen schneller zurückzukommen und langfristig auf Höchstleistung zu bleiben.',
+  },
+  fuehrung: {
+    name: 'Führung & Emotionale Intelligenz',
+    icon: '✨',
+    fields: ['charisma', 'emotionale_intelligenz'],
+    pitch: 'Werde zur Führungspersönlichkeit. Emotionale Intelligenz und Charisma sind die Unterschiede zwischen Leistungsträgern und Führungskräften.',
   },
 };
 
-// Score → Prozent-Konversion
-// Szenario: 1/4/7/10 Punkte → normalisiert auf 0–100
-// Skala: 1–5 → normalisiert auf 0–100
-export function scoreToPercent(scores) {
-  // Pro Feld: 2 Szenario-Fragen (max 10 Punkte) + 2 Skala-Fragen (max 5 Punkte)
-  // Max gesamt: 2×10 + 2×5 = 30 Punkte
-  const total = scores.reduce((a, b) => a + b, 0);
-  return Math.round((total / 30) * 100);
+// ============================================================
+// SCORE UTILITIES
+// Max score per field: 30 (2 scenarios × 10 + 2 scale × 5)
+// ============================================================
+export function scoreToPercent(rawScore) {
+  return Math.round(Math.min(100, Math.max(0, (rawScore / 30) * 100)));
+}
+
+export function getScoreLevel(percent) {
+  if (percent >= 85) return { label: 'Exzellent', color: '#059669', badge: '🏆' };
+  if (percent >= 65) return { label: 'Stark', color: '#10B981', badge: '💪' };
+  if (percent >= 45) return { label: 'Gut aufgestellt', color: '#F59E0B', badge: '👍' };
+  if (percent >= 25) return { label: 'Ausbaufähig', color: '#F97316', badge: '📈' };
+  return { label: 'Großes Potenzial', color: '#EF4444', badge: '🌱' };
+}
+
+// Returns the recommended masterclass based on lowest-scoring fields
+export function getRecommendedMasterclass(fieldScores) {
+  const FIELD_TO_MC = {};
+  KOMPETENZFELDER.forEach(f => { FIELD_TO_MC[f.id] = f.masterclass; });
+
+  const sorted = Object.entries(fieldScores)
+    .sort(([, a], [, b]) => a - b);
+
+  const mcCounts = {};
+  sorted.slice(0, 4).forEach(([fieldId]) => {
+    const mc = FIELD_TO_MC[fieldId];
+    if (mc) mcCounts[mc] = (mcCounts[mc] || 0) + 1;
+  });
+
+  const topMc = Object.entries(mcCounts).sort(([, a], [, b]) => b - a)[0]?.[0];
+  return topMc || 'selbstwert';
 }
