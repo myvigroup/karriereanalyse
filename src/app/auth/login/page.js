@@ -81,7 +81,7 @@ export default function LoginPage() {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <a href="/advisor/login" style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', textDecoration: 'none' }}>
+            <a href="/berater/login" style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', textDecoration: 'none' }}>
               Du bist Berater? → Berater-Portal
             </a>
           </div>
