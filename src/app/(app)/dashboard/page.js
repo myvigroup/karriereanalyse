@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import DashboardClient from './DashboardClient';
 
@@ -22,15 +23,26 @@ export default async function DashboardPage() {
   // Admin + Berater → Messe-Dashboard
   if (profile.role === 'advisor' || profile.role === 'admin') redirect('/advisor');
 
-  // Messe-Besucher mit CV-Check → direkt zum Lebenslauf-Check
-  if (profile.membership_type === 'basis') {
-    const { data: cvDoc } = await supabase
-      .from('cv_documents')
-      .select('id')
-      .eq('user_id', user.id)
-      .limit(1)
+  // CV-Check aus Messe laden (für Dashboard-Banner)
+  const admin = createAdminClient();
+  const { data: cvDoc } = await admin
+    .from('cv_documents')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('is_current', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let cvFeedback = null;
+  if (cvDoc) {
+    const { data: fb } = await admin
+      .from('cv_feedback')
+      .select('overall_rating, summary')
+      .eq('cv_document_id', cvDoc.id)
+      .eq('status', 'completed')
       .maybeSingle();
-    if (cvDoc) redirect('/cv-check');
+    cvFeedback = fb || null;
   }
 
   const { data: analysisSession } = await supabase
@@ -64,6 +76,8 @@ export default async function DashboardPage() {
       documents={documents || []}
       applications={applications || []}
       marketValue={marketValue}
+      cvFeedback={cvFeedback}
+      hasCvDoc={!!cvDoc}
     />
   );
 }
