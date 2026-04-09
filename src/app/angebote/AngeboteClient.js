@@ -162,16 +162,19 @@ export default function AngeboteClient() {
             <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 20 }}>7 Tage kostenlos testen</div>
           )}
 
-          <ul style={{ listStyle: 'none', marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <ul style={{ listStyle: 'none', marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
-              '1x Premium-Seminar pro Monat (Wert 99 €)',
-              'Alle E-Learning Masterclasses',
-              'Gehaltsverhandlung Mastery inklusive',
-              'Karriere-Analyse vollständig',
-              'Neue Inhalte jeden Monat',
-            ].map((f, i) => (
-              <li key={i} style={{ fontSize: 14, color: 'var(--ki-text-secondary)', display: 'flex', gap: 8 }}>
-                <span style={{ color: 'var(--ki-success)', fontWeight: 700 }}>✓</span> {f}
+              ['📅', '1x Seminar/Monat', 'Jeden Monat ein neuer Skill, der dich im Job weiterbringt'],
+              ['💰', 'Gehaltsverhandlung Mastery', '7–12 % mehr Gehalt — mit System und Skripten'],
+              ['📚', 'Alle E-Learning Kurse', 'Rhetorik, Leadership, Achtsamkeit & mehr'],
+              ['◎', 'Karriere-Analyse', 'Verstehe, wo du stehst — und wo du hinwillst'],
+            ].map(([icon, title, desc], i) => (
+              <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}>{icon}</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ki-text)' }}>{title}</div>
+                  <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', lineHeight: 1.4, marginTop: 1 }}>{desc}</div>
+                </div>
               </li>
             ))}
           </ul>

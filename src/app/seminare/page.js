@@ -4,19 +4,19 @@ export const metadata = {
 };
 
 const SEMINARE = [
-  { icon: '🧠', title: 'Typgerechtes Lernen', sub: 'Finde deinen Weg zum Wissen', next_date: '2026-04-18' },
-  { icon: '⚖️', title: 'Work-Life-Balance', sub: 'Gesundheit trifft Leistung', next_date: '2026-05-09' },
-  { icon: '👑', title: 'Personal Leadership', sub: 'Authentisch führen, wirksam bleiben', next_date: '2026-06-13' },
-  { icon: '📖', title: 'Speedreading', sub: 'Geschwindigkeit trifft Verständnis', next_date: '2026-07-11' },
-  { icon: '🧘', title: 'Achtsamkeit', sub: 'Gelassenheit ist trainierbar', next_date: '2026-08-08' },
-  { icon: '🎤', title: 'Rhetorik, Dialektik, Kinesik', sub: 'Überzeugen mit Worten und Wirkung', next_date: '2026-09-12' },
-  { icon: '🔥', title: 'Selbstmotivation', sub: 'Dein Warum, dein Motor', next_date: '2026-10-10' },
-  { icon: '💬', title: 'Kommunikation', sub: 'Verständigung als Schlüssel zum Erfolg', next_date: '2026-11-14' },
-  { icon: '🤜', title: 'Konfliktmanagement', sub: 'Aus Krisen Chancen machen', next_date: '2026-12-12' },
-  { icon: '🏠', title: 'Arbeiten aus dem Home Office', sub: 'Effizient arbeiten, flexibel leben', next_date: null },
-  { icon: '👔', title: 'Business Knigge', sub: 'Der erste Eindruck zählt, der zweite bleibt', next_date: null },
-  { icon: '🤝', title: 'Networking', sub: 'Kontakte knüpfen, Vertrauen aufbauen', next_date: null },
-  { icon: '🎯', title: 'Prioritätenmanagement', sub: 'Das Richtige zuerst', next_date: null },
+  { icon: '🧠', title: 'Typgerechtes Lernen', sub: 'Finde deinen Weg zum Wissen', impact: 'Lern halb so lang — versteh doppelt so viel. Schluss mit Lernfrust.', next_date: '2026-04-18' },
+  { icon: '⚖️', title: 'Work-Life-Balance', sub: 'Gesundheit trifft Leistung', impact: 'Hör auf, Freizeit mit schlechtem Gewissen zu verbringen — und trotzdem leistungsfähig zu bleiben.', next_date: '2026-05-09' },
+  { icon: '👑', title: 'Personal Leadership', sub: 'Authentisch führen, wirksam bleiben', impact: 'Führ dich selbst — bevor andere es tun. Setze Ziele, die du wirklich erreichst.', next_date: '2026-06-13' },
+  { icon: '📖', title: 'Speedreading', sub: 'Geschwindigkeit trifft Verständnis', impact: 'Lies einen Bericht in 10 Minuten statt 40 — ohne das Wichtige zu verpassen.', next_date: '2026-07-11' },
+  { icon: '🧘', title: 'Achtsamkeit', sub: 'Gelassenheit ist trainierbar', impact: 'Nach einem harten Tag wirklich abschalten — statt den Stress mit nach Hause zu nehmen.', next_date: '2026-08-08' },
+  { icon: '🎤', title: 'Rhetorik, Dialektik, Kinesik', sub: 'Überzeugen mit Worten und Wirkung', impact: 'Dein Chef nickt statt wegzuschauen, wenn du sprichst. Präsentiere ohne Lampenfieber.', next_date: '2026-09-12' },
+  { icon: '🔥', title: 'Selbstmotivation', sub: 'Dein Warum, dein Motor', impact: 'Starte Projekte — und bring sie auch zu Ende. Kein Aufschieben mehr.', next_date: '2026-10-10' },
+  { icon: '💬', title: 'Kommunikation', sub: 'Verständigung als Schlüssel zum Erfolg', impact: 'Werde endlich richtig verstanden — von Kollegen, Vorgesetzten und Kunden.', next_date: '2026-11-14' },
+  { icon: '🤜', title: 'Konfliktmanagement', sub: 'Aus Krisen Chancen machen', impact: 'Sag, was du denkst — ohne den Kollegen oder den Job zu riskieren.', next_date: '2026-12-12' },
+  { icon: '🏠', title: 'Arbeiten aus dem Home Office', sub: 'Effizient arbeiten, flexibel leben', impact: 'Produktiv im Homeoffice — ohne dass Privat- und Arbeitsleben verschwimmen.', next_date: null },
+  { icon: '👔', title: 'Business Knigge', sub: 'Der erste Eindruck zählt, der zweite bleibt', impact: 'Betritt jeden Raum mit Sicherheit — ob Vorstellungsgespräch oder Kundentermin.', next_date: null },
+  { icon: '🤝', title: 'Networking', sub: 'Kontakte knüpfen, Vertrauen aufbauen', impact: 'Nicht mehr allein auf Veranstaltungen stehen — und echte berufliche Kontakte aufbauen.', next_date: null },
+  { icon: '🎯', title: 'Prioritätenmanagement', sub: 'Das Richtige zuerst', impact: 'Mach Feierabend ohne Schuldgefühl — weil du weißt, was heute wirklich zählt.', next_date: null },
 ];
 
 function formatDate(dateStr) {
@@ -144,26 +144,27 @@ export default function SeminarePage() {
             <div key={s.title} style={{
               background: 'white', borderRadius: 14, padding: '20px 24px',
               border: '1px solid #E8E6E1',
-              display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+              display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap',
             }}>
-              <span style={{ fontSize: 26, flexShrink: 0 }}>{s.icon}</span>
+              <span style={{ fontSize: 26, flexShrink: 0, marginTop: 2 }}>{s.icon}</span>
               <div style={{ flex: 1, minWidth: 200 }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A', marginBottom: 2 }}>{s.title}</div>
-                <div style={{ fontSize: 13, color: '#9A9A9A' }}>{s.sub}</div>
+                <div style={{ fontSize: 13, color: '#CC1426', fontWeight: 600, marginBottom: 6 }}>{s.impact}</div>
+                <div style={{ fontSize: 12, color: '#9A9A9A' }}>{s.sub}</div>
               </div>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A', marginBottom: 2 }}>
-                  {formatDate(s.next_date)}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A' }}>{formatDate(s.next_date)}</div>
+                  <div style={{ fontSize: 12, color: '#9A9A9A' }}>09:30–12:00 Uhr</div>
                 </div>
-                <div style={{ fontSize: 12, color: '#9A9A9A' }}>09:30–12:00 Uhr</div>
+                <a href="/angebote" style={{
+                  fontSize: 13, fontWeight: 600, padding: '8px 18px', borderRadius: 999,
+                  background: '#CC1426', color: 'white', textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}>
+                  Buchen · 99 €
+                </a>
               </div>
-              <a href="/angebote" style={{
-                fontSize: 13, fontWeight: 600, padding: '8px 18px', borderRadius: 999, flexShrink: 0,
-                background: '#CC1426', color: 'white', textDecoration: 'none',
-                whiteSpace: 'nowrap',
-              }}>
-                Buchen · 99 €
-              </a>
             </div>
           ))}
         </div>
@@ -186,7 +187,8 @@ export default function SeminarePage() {
             }}>
               <span style={{ fontSize: 22, flexShrink: 0, marginTop: 1 }}>{s.icon}</span>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', marginBottom: 2 }}>{s.title}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>{s.title}</div>
+                <div style={{ fontSize: 12, color: '#CC1426', fontWeight: 600, marginBottom: 6, lineHeight: 1.4 }}>{s.impact}</div>
                 <div style={{ fontSize: 12, color: '#9A9A9A', marginBottom: 8 }}>{s.sub}</div>
                 <span style={{
                   fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 999,
