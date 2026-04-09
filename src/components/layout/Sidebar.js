@@ -2,9 +2,6 @@
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { AUDIO_INTROS, AUDIO_TTS_FALLBACKS } from '@/lib/audio-config';
-import { getPersonalization } from '@/lib/personalization';
-import { getLevel, getLevelProgress } from '@/lib/gamification';
 
 // ══════════════════════════════════════════════════
 // SIDEBAR NAVIGATION — MYVI-Mapping
@@ -27,27 +24,9 @@ const NAV_GROUPS = [
     label: null,
     items: [
       { label: 'Dashboard',         path: '/dashboard',    icon: '◻' },
-      { label: 'Masterclass',       path: '/masterclass',  icon: '▶' },
-      { label: 'Premium',           path: '/marketplace',  icon: '⭐' },
-      { label: 'Badges & XP',       path: '/community/achievements', icon: '🏅' },
-      { label: 'Karrierepfad',      path: '/career',       icon: '↗' },
       { label: 'Karriere-Analyse',  path: '/analyse',      icon: '◎' },
-      { label: 'Mein Fortschritt',  path: '/marktwert',    icon: '📊' },
-      { label: 'KI-Coach',          path: '/coach',        icon: '🤖' },
-      { label: 'Rangliste',         path: '/community/peers', icon: '🏆' },
-      { label: 'Lebenslauf-Check',  path: '/cv-check',       icon: '📋' },
-    ],
-  },
-  {
-    label: 'Karriere-Tools',
-    items: [
-      { label: 'Gehaltsdatenbank',  path: '/gehalt',             icon: '💰' },
-      { label: 'Bewerbungen',       path: '/applications',       icon: '✉' },
-      { label: 'Netzwerk',          path: '/network',            icon: '🤝' },
-      { label: 'Jobportale',        path: '/branding',           icon: '🔗' },
-      { label: 'Kompass',           path: '/strategy/decision',  icon: '🧭' },
-      { label: 'Exit-Strategie',    path: '/strategy/exit',      icon: '🚪' },
-      { label: 'Community',         path: '/community',          icon: '👥' },
+      { label: 'Masterclass',       path: '/masterclass',  icon: '▶' },
+      { label: 'Lebenslauf-Check',  path: '/cv-check',     icon: '📋' },
     ],
   },
 ];
@@ -71,12 +50,8 @@ export default function Sidebar({ profile, analysisResults }) {
   const isAdmin = profile?.role === 'admin' || profile?.role === 'coach';
   const navGroups = NAV_GROUPS;
 
-  const { visibleModules, recommendations } = getPersonalization(analysisResults, profile?.phase);
-  const recommendedCourseIds = recommendations.map(r => r.courseId);
-
   const [notifications, setNotifications] = useState([]);
   const [showNotifs, setShowNotifs] = useState(false);
-  const [playingAudio, setPlayingAudio] = useState(null);
   const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
@@ -105,57 +80,6 @@ export default function Sidebar({ profile, analysisResults }) {
     await supabase.auth.signOut();
     window.location.href = '/auth/login';
   }
-
-  const playIntro = (path, e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (playingAudio) {
-      playingAudio.pause();
-      setPlayingAudio(null);
-      return;
-    }
-    const audioUrl = AUDIO_INTROS[path];
-    if (audioUrl) {
-      const audio = new Audio(audioUrl);
-      audio.onended = () => setPlayingAudio(null);
-      audio.onerror = () => {
-        // Fallback to TTS
-        const text = AUDIO_TTS_FALLBACKS[path];
-        if (text && window.speechSynthesis) {
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = 'de-DE';
-          utterance.rate = 0.95;
-          utterance.onend = () => setPlayingAudio(null);
-          window.speechSynthesis.speak(utterance);
-          setPlayingAudio({ pause: () => window.speechSynthesis.cancel() });
-        } else {
-          setPlayingAudio(null);
-        }
-      };
-      audio.play().catch(() => {
-        const text = AUDIO_TTS_FALLBACKS[path];
-        if (text && window.speechSynthesis) {
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = 'de-DE';
-          utterance.rate = 0.95;
-          utterance.onend = () => setPlayingAudio(null);
-          window.speechSynthesis.speak(utterance);
-          setPlayingAudio({ pause: () => window.speechSynthesis.cancel() });
-        }
-      });
-      setPlayingAudio(audio);
-    } else {
-      const text = AUDIO_TTS_FALLBACKS[path];
-      if (text && window.speechSynthesis) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'de-DE';
-        utterance.rate = 0.95;
-        utterance.onend = () => setPlayingAudio(null);
-        window.speechSynthesis.speak(utterance);
-        setPlayingAudio({ pause: () => window.speechSynthesis.cancel() });
-      }
-    }
-  };
 
   const linkStyle = (path) => ({
     display: 'flex', alignItems: 'center', gap: 12,
@@ -242,44 +166,10 @@ export default function Sidebar({ profile, analysisResults }) {
         <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginTop: 2 }}>{profile?.name || 'Lädt...'}</div>
       </div>
 
-      {/* Level Badge (MYVI-Style) */}
-      {profile && (() => {
-        const xp = profile.total_points || profile.xp || 0;
-        const { current, next, progress: lvlPct } = getLevelProgress(xp);
-        return (
-          <a href="/career" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div style={{ padding: '12px 16px', marginBottom: 16, background: 'var(--ki-bg-alt)', borderRadius: 'var(--r-md)', cursor: 'pointer', transition: 'background var(--t-fast)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Level {current.level}
-                </div>
-                <span style={{ fontSize: 14 }}>{current.icon}</span>
-              </div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ki-text)', marginBottom: 2 }}>{current.name}</div>
-              <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginBottom: 8 }}>{xp} KI-Points</div>
-              <div className="progress-bar" style={{ height: 4 }}>
-                <div className="progress-bar-fill" style={{ width: `${lvlPct}%` }} />
-              </div>
-              {next && (
-                <div style={{ fontSize: 10, color: 'var(--ki-text-tertiary)', marginTop: 4 }}>
-                  {next.minXP - xp} XP bis {next.name}
-                </div>
-              )}
-            </div>
-          </a>
-        );
-      })()}
 
       {/* Navigation — Gruppiert (MYVI-Style) */}
       <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
-        {navGroups.map((group, gi) => {
-          const visibleItems = group.items.filter(item => {
-            if (!visibleModules) return true;
-            const pathKey = item.path.replace(/^\//, '');
-            return visibleModules.some(m => pathKey === m || pathKey.startsWith(m + '/'));
-          });
-          if (visibleItems.length === 0) return null;
-          return (
+        {navGroups.map((group, gi) => (
             <div key={gi}>
               {group.label && (
                 <div style={{
@@ -290,11 +180,9 @@ export default function Sidebar({ profile, analysisResults }) {
                   {group.label}
                 </div>
               )}
-              {visibleItems.map(item => {
+              {group.items.map(item => {
                 const tourAttr = item.path === '/dashboard' ? { 'data-tour-dashboard': '' }
-                  : item.path === '/coach' ? { 'data-tour-coach': '' }
                   : item.path === '/analyse' ? { 'data-tour-analyse': '' }
-                  : item.path === '/profile' ? { 'data-tour-profile': '' }
                   : {};
                 return (
                   <a key={item.path} href={item.path} style={linkStyle(item.path)} {...tourAttr}>
@@ -304,8 +192,7 @@ export default function Sidebar({ profile, analysisResults }) {
                 );
               })}
             </div>
-          );
-        })}
+        ))}
 
         {isAdmin && (
           <>
