@@ -58,26 +58,27 @@ export async function POST(request) {
   }
 
   try {
-    // Alte cv_documents auf is_current=false setzen
+    // Alte cv_documents auf is_current=false setzen (nur wenn Spalte existiert)
     await admin.from('cv_documents')
       .update({ is_current: false })
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .then(() => {}).catch(() => {});
 
     // File uploaden
     const docId = crypto.randomUUID();
-    const filePath = `users/${user.id}/${docId}/${file.name}`;
+    const storagePath = `users/${user.id}/${docId}/${file.name}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
     const { error: uploadError } = await admin.storage
       .from('cv-documents')
-      .upload(filePath, buffer, { contentType: file.type });
+      .upload(storagePath, buffer, { contentType: file.type });
 
     if (uploadError) throw new Error('Upload fehlgeschlagen: ' + uploadError.message);
 
-    // cv_documents Eintrag
+    // cv_documents Eintrag (storage_path = Live-Spaltenname)
     const { data: doc, error: docError } = await admin.from('cv_documents').insert({
       user_id: user.id,
-      file_path: filePath,
+      storage_path: storagePath,
       file_name: file.name,
       file_type: fileType,
       file_size_bytes: file.size,

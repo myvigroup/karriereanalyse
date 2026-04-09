@@ -25,14 +25,36 @@ export default async function DashboardPage() {
 
   // CV-Check aus Messe laden (für Dashboard-Banner)
   const admin = createAdminClient();
-  const { data: cvDoc } = await admin
+  // Erst per user_id, dann Fallback über fair_leads
+  let cvDoc = null;
+  const { data: cvDocByUser } = await admin
     .from('cv_documents')
     .select('id')
     .eq('user_id', user.id)
-    .eq('is_current', true)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
+
+  if (cvDocByUser) {
+    cvDoc = cvDocByUser;
+  } else {
+    const { data: userLead } = await admin
+      .from('fair_leads')
+      .select('id')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle();
+    if (userLead) {
+      const { data: cvDocByLead } = await admin
+        .from('cv_documents')
+        .select('id')
+        .eq('lead_id', userLead.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      cvDoc = cvDocByLead || null;
+    }
+  }
 
   let cvFeedback = null;
   if (cvDoc) {

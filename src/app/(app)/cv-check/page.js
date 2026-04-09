@@ -25,17 +25,39 @@ export default async function CVCheckPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
-  // CV-Dokument laden
-  const { data: doc } = await admin
+  // CV-Dokument laden — erst per user_id, dann Fallback über fair_leads
+  let doc = null;
+  const { data: docByUser } = await admin
     .from('cv_documents')
     .select('*')
     .eq('user_id', user.id)
-    .eq('is_current', true)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  if (!doc) redirect('/dashboard');
+  if (docByUser) {
+    doc = docByUser;
+  } else {
+    const { data: lead } = await admin
+      .from('fair_leads')
+      .select('id')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (lead) {
+      const { data: docByLead } = await admin
+        .from('cv_documents')
+        .select('*')
+        .eq('lead_id', lead.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      doc = docByLead || null;
+    }
+  }
+
+  if (!doc) redirect('/cv-check/upload');
 
   // Feedback laden
   const { data: feedback } = await admin
@@ -68,7 +90,7 @@ export default async function CVCheckPage() {
   if (doc) {
     const { data: urlData } = await admin.storage
       .from('cv-documents')
-      .createSignedUrl(doc.file_path, 3600);
+      .createSignedUrl(doc.storage_path || doc.file_path, 3600);
     previewUrl = urlData?.signedUrl;
   }
 
