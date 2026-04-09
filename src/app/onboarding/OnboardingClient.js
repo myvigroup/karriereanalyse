@@ -21,9 +21,9 @@ const OBSTACLES = [
 ];
 
 const QUICK_QUESTIONS = [
-  'Ich kann meine St\u00E4rken klar benennen und kommunizieren.',
-  'Ich f\u00FChle mich in Verhandlungssituationen sicher.',
-  'Ich habe einen klaren Plan f\u00FCr meine n\u00E4chsten Karriereschritte.',
+  'Ich kann meine Stärken klar benennen und kommunizieren.',
+  'Ich fühle mich in Verhandlungssituationen sicher.',
+  'Ich habe einen klaren Plan für meine nächsten Karriereschritte.',
 ];
 
 const FIELD_LABELS = ['Selbstkenntnis', 'Verhandlung', 'Strategie'];
@@ -198,14 +198,14 @@ export default function OnboardingClient({ profile, userId }) {
               <span style={{ display: 'inline-block', width: 80, height: 80, borderRadius: '50%', background: 'rgba(204,20,38,0.08)', lineHeight: '80px', fontSize: 40 }}>K</span>
             </div>
             <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.04em', marginBottom: 8 }}>Willkommen beim Karriere-Institut</h1>
-            <p style={{ fontSize: 16, color: 'var(--ki-text-secondary)', marginBottom: 32 }}>In 2 Minuten richten wir alles f\u00FCr dich ein</p>
+            <p style={{ fontSize: 16, color: 'var(--ki-text-secondary)', marginBottom: 32 }}>In 2 Minuten richten wir alles für dich ein</p>
             <div style={{ fontSize: 24, marginBottom: 24, animation: 'bounce 2s infinite' }}>{'\u2193'}</div>
             <style>{`@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }`}</style>
 
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, textAlign: 'left', marginBottom: 20, cursor: 'pointer', fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.5 }}>
               <input type="checkbox" checked={dsgvoConsent} onChange={e => setDsgvoConsent(e.target.checked)} style={{ marginTop: 3, accentColor: 'var(--ki-red)', width: 16, height: 16, flexShrink: 0 }} />
-              <span>Ich stimme der Verarbeitung meiner Daten gem\u00E4\u00DF der{' '}
-                <a href="/datenschutz" target="_blank" rel="noopener" style={{ color: 'var(--ki-red)', textDecoration: 'underline' }}>Datenschutzerkl\u00E4rung</a> zu.
+              <span>Ich stimme der Verarbeitung meiner Daten gemäß der{' '}
+                <a href="/datenschutz" target="_blank" rel="noopener" style={{ color: 'var(--ki-red)', textDecoration: 'underline' }}>Datenschutzerklärung</a> zu.
               </span>
             </label>
 
@@ -215,11 +215,11 @@ export default function OnboardingClient({ profile, userId }) {
           </div>
         )}
 
-        {/* Step 2: Pers\u00F6nliche Daten */}
+        {/* Step 2: Persönliche Daten */}
         {step === 2 && (
           <div>
-            <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>Pers\u00F6nliche Daten</h2>
-            <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24 }}>Wie d\u00FCrfen wir dich ansprechen?</p>
+            <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>Persönliche Daten</h2>
+            <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24 }}>Wie dürfen wir dich ansprechen?</p>
 
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
               <div style={{ width: 72, height: 72, borderRadius: '50%', background: initials ? 'var(--ki-red)' : 'var(--grey-5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 24, fontWeight: 700, transition: 'all var(--t-med)' }}>
@@ -233,14 +233,14 @@ export default function OnboardingClient({ profile, userId }) {
             </div>
 
             <select className="input" value={birthYear} onChange={e => setBirthYear(e.target.value)} style={{ marginBottom: 24, color: birthYear ? 'var(--ki-text)' : 'var(--ki-text-tertiary)' }}>
-              <option value="">Geburtsjahr w\u00E4hlen</option>
+              <option value="">Geburtsjahr wählen</option>
               {Array.from({ length: 26 }, (_, i) => 2005 - i).map(y => (
                 <option key={y} value={y}>{y}</option>
               ))}
             </select>
 
             <div style={{ display: 'flex', gap: 12 }}>
-              <button className="btn btn-secondary" onClick={prev} style={{ flex: 1 }}>Zur\u00FCck</button>
+              <button className="btn btn-secondary" onClick={prev} style={{ flex: 1 }}>Zurück</button>
               <button className="btn btn-primary" onClick={next} disabled={!canNext()} style={{ flex: 2, opacity: canNext() ? 1 : 0.5 }}>Weiter</button>
             </div>
           </div>
@@ -275,7 +275,7 @@ export default function OnboardingClient({ profile, userId }) {
             <input className="input" placeholder="Aktuelle Position (z.B. Senior Consultant)" value={position} onChange={e => setPosition(e.target.value)} style={{ marginBottom: 24 }} />
 
             <div style={{ display: 'flex', gap: 12 }}>
-              <button className="btn btn-secondary" onClick={prev} style={{ flex: 1 }}>Zur\u00FCck</button>
+              <button className="btn btn-secondary" onClick={prev} style={{ flex: 1 }}>Zurück</button>
               <button className="btn btn-primary" onClick={next} disabled={!canNext()} style={{ flex: 2, opacity: canNext() ? 1 : 0.5 }}>Weiter</button>
             </div>
           </div>
@@ -289,7 +289,7 @@ export default function OnboardingClient({ profile, userId }) {
 
             <div style={{ marginBottom: 20 }}>
               <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--ki-text-secondary)', display: 'block', marginBottom: 8 }}>
-                Aktuelles Jahresgehalt (brutto): <strong style={{ color: 'var(--ki-text)', fontSize: 16 }}>{currentSalary.toLocaleString('de-DE')}\u20AC</strong>
+                Aktuelles Jahresgehalt (brutto): <strong style={{ color: 'var(--ki-text)', fontSize: 16 }}>{currentSalary.toLocaleString('de-DE')}€</strong>
               </label>
               <input type="range" min="25000" max="200000" step="5000" value={currentSalary} onChange={e => setCurrentSalary(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--ki-red)' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ki-text-tertiary)' }}>
@@ -299,7 +299,7 @@ export default function OnboardingClient({ profile, userId }) {
 
             <div style={{ marginBottom: 24 }}>
               <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--ki-text-secondary)', display: 'block', marginBottom: 8 }}>
-                Ziel-Gehalt in 2 Jahren: <strong style={{ color: 'var(--ki-success)', fontSize: 16 }}>{targetSalary.toLocaleString('de-DE')}\u20AC</strong>
+                Ziel-Gehalt in 2 Jahren: <strong style={{ color: 'var(--ki-success)', fontSize: 16 }}>{targetSalary.toLocaleString('de-DE')}€</strong>
               </label>
               <input type="range" min="30000" max="300000" step="5000" value={targetSalary} onChange={e => setTargetSalary(Number(e.target.value))} style={{ width: '100%', accentColor: 'var(--ki-success)' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ki-text-tertiary)' }}>
@@ -307,7 +307,7 @@ export default function OnboardingClient({ profile, userId }) {
               </div>
             </div>
 
-            <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Was ist dein gr\u00F6\u00DFtes Karriere-Hindernis?</p>
+            <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Was ist dein größtes Karriere-Hindernis?</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
               {OBSTACLES.map(ob => (
                 <button key={ob.id} onClick={() => setObstacle(ob.id)} style={{
@@ -322,7 +322,7 @@ export default function OnboardingClient({ profile, userId }) {
             </div>
 
             <div style={{ display: 'flex', gap: 12 }}>
-              <button className="btn btn-secondary" onClick={prev} style={{ flex: 1 }}>Zur\u00FCck</button>
+              <button className="btn btn-secondary" onClick={prev} style={{ flex: 1 }}>Zurück</button>
               <button className="btn btn-primary" onClick={next} disabled={!canNext()} style={{ flex: 2, opacity: canNext() ? 1 : 0.5 }}>Weiter</button>
             </div>
           </div>
@@ -332,7 +332,7 @@ export default function OnboardingClient({ profile, userId }) {
         {step === 5 && (
           <div>
             <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>Quick-Analyse</h2>
-            <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24 }}>Wie sch\u00E4tzt du dich ein? (1 = gar nicht, 5 = voll und ganz)</p>
+            <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24 }}>Wie schätzt du dich ein? (1 = gar nicht, 5 = voll und ganz)</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginBottom: 32 }}>
               {QUICK_QUESTIONS.map((q, i) => (
@@ -355,12 +355,12 @@ export default function OnboardingClient({ profile, userId }) {
               <RadarChart values={answers} labels={FIELD_LABELS} size={220} />
             </div>
             <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 24 }}>
-              Dein erster Karriere-Snapshot \u2014 die vollst\u00E4ndige Analyse wartet im Dashboard.
+              Dein erster Karriere-Snapshot — die vollständige Analyse wartet im Dashboard.
             </p>
 
             <div style={{ display: 'flex', gap: 12 }}>
-              <button className="btn btn-secondary" onClick={prev} style={{ flex: 1 }}>Zur\u00FCck</button>
-              <button className="btn btn-primary" onClick={next} style={{ flex: 2 }}>Analyse abschlie\u00DFen</button>
+              <button className="btn btn-secondary" onClick={prev} style={{ flex: 1 }}>Zurück</button>
+              <button className="btn btn-primary" onClick={next} style={{ flex: 2 }}>Analyse abschließen</button>
             </div>
           </div>
         )}
@@ -379,7 +379,7 @@ export default function OnboardingClient({ profile, userId }) {
                 <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--ki-red)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 20, fontWeight: 700 }}>{initials}</div>
                 <div style={{ textAlign: 'left' }}>
                   <div style={{ fontSize: 16, fontWeight: 600 }}>{firstName} {lastName}</div>
-                  <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>{INDUSTRIES.find(i => i.id === industry)?.label || ''} \u00B7 {experience} Jahre Erfahrung</div>
+                  <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>{INDUSTRIES.find(i => i.id === industry)?.label || ''} · {experience} Jahre Erfahrung</div>
                 </div>
                 <span className="pill pill-green" style={{ marginLeft: 'auto' }}>+50 XP</span>
               </div>
