@@ -8,7 +8,7 @@ const TOUR_STEPS = [
   { target: 'data-tour-dashboard', title: 'Dashboard', description: 'Starte jeden Tag hier. Streak und Aufgaben auf einen Blick.', position: 'bottom' },
   { target: 'data-tour-streak', title: 'Streak-Counter', description: 'Jeden Tag einloggen h\u00E4lt deinen Streak am Leben. \u{1F525}', position: 'bottom' },
   { target: 'data-tour-coach', title: 'KI-Coach', description: 'Dein pers\u00F6nlicher Mentor. Frag ihn wenn du nicht weiterwei\u00DFt.', position: 'right' },
-  { target: 'data-tour-analyse', title: 'Karriereanalyse', description: 'Starte hier \u2014 das ist die Basis f\u00FCr alles. 15 Minuten.', position: 'right' },
+  { target: 'data-tour-analyse', title: 'Karriereanalyse', description: 'Starte hier \u2014 das ist die Basis f\u00FCr alles. ~10 Minuten.', position: 'right' },
   { target: 'data-tour-notifications', title: 'Benachrichtigungen', description: 'Erinnerungen und Updates findest du hier.', position: 'bottom' },
   { target: 'data-tour-profile', title: 'Profil', description: 'Halte es aktuell f\u00FCr bessere Empfehlungen.', position: 'right' },
   { target: 'data-tour-tooltip', title: 'Hilfe-Icons', description: 'Diese Fragezeichen erkl\u00E4ren jedes Modul. Klicke sie jederzeit an.', position: 'bottom' },

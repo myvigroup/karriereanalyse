@@ -10,7 +10,7 @@ const TOOLTIPS = {
     executive: { title: 'Strategischer Sparringspartner', description: 'KI-gest\u00FCtztes Sparring f\u00FCr komplexe Karriereentscheidungen.', cta_text: 'Erste Frage stellen', cta_link: '/coach' },
   },
   analyse: {
-    standard: { title: 'Karriereanalyse', description: '65 Fragen, 13 Kompetenzfelder, ca. 15 Minuten. Die Basis f\u00FCr alles.', cta_text: 'Analyse starten', cta_link: '/analyse' },
+    standard: { title: 'Karriereanalyse', description: '48 Fragen, 12 Kompetenzfelder, ca. 10 Minuten. Die Basis f\u00FCr alles.', cta_text: 'Analyse starten', cta_link: '/analyse' },
     executive: { title: 'Strategische Standortbestimmung', description: 'Umfassende Kompetenzanalyse f\u00FCr F\u00FChrungskr\u00E4fte und Executives.', cta_text: 'Analyse starten', cta_link: '/analyse' },
   },
   masterclass: {

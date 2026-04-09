@@ -258,7 +258,7 @@ export default async function CVCheckPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, marginBottom: 32 }}>
           {[
-            { icon: '🎯', title: 'Karriereanalyse', desc: '13 Kompetenzfelder analysieren und deinen persönlichen Karriere-Score entdecken.', link: '/analyse', cta: 'Analyse starten' },
+            { icon: '🎯', title: 'Karriereanalyse', desc: '12 Kompetenzfelder analysieren und deinen persönlichen Karriere-Score entdecken.', link: '/analyse', cta: 'Analyse starten' },
             { icon: '🎓', title: 'Masterclass', desc: 'Karriere-Grundlagen und Expertenwissen in kompakten E-Learning-Modulen.', link: '/masterclass', cta: 'Module entdecken' },
             { icon: '🤖', title: 'KI-Coach', desc: 'Dein persönlicher Karriere-Assistent — stelle jede Frage zu Bewerbung, Gehalt und Karriere.', link: '/coach', cta: 'Coach starten' },
             { icon: '📊', title: 'Karrierepfad', desc: 'Verfolge deinen Fortschritt und sehe wo du im Vergleich stehst.', link: '/career', cta: 'Pfad ansehen' },

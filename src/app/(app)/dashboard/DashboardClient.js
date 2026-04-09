@@ -116,7 +116,7 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
                 <span style={{ fontSize: 18 }}>◎</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>Karriere-Analyse starten</div>
-                  <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>13 Kompetenzfelder in 5 Min.</div>
+                  <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>12 Felder · ~10 Min.</div>
                 </div>
                 <span style={{ color: 'var(--ki-red)', fontWeight: 600 }}>→</span>
               </a>
@@ -181,7 +181,7 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
           ) : (
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
               <div style={{ fontSize: 40, marginBottom: 8 }}>◎</div>
-              <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 12 }}>13 Kompetenzfelder analysieren</p>
+              <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 12 }}>12 Kompetenzfelder analysieren</p>
               <a href="/analyse" className="btn btn-primary" style={{ fontSize: 13 }}>Analyse starten</a>
             </div>
           )}

@@ -644,7 +644,7 @@ function DynamicRoadmap({ analysisSession, analysisResults, courses, progress, p
       title: 'Karriere-Analyse',
       sub: hasAnalysis
         ? `Abgeschlossen — Gesamtscore: ${Math.round(analysisSession.overall_score)}%`
-        : '13 Kompetenzfelder in 10 Min. analysieren',
+        : '12 Felder in ~10 Min. analysieren',
       href: '/analyse',
       cta: hasAnalysis ? 'Ergebnis ansehen →' : 'Jetzt starten →',
     },
@@ -941,7 +941,7 @@ export default function CareerClient({ profile, progress, analysisSession, analy
             <CheckItem
               done={hasAnalysis}
               label="Karriereanalyse abschließen"
-              sub={hasAnalysis ? `Score: ${Math.round(analysisSession.overall_score)}%` : '13 Kompetenzfelder bewerten'}
+              sub={hasAnalysis ? `Score: ${Math.round(analysisSession.overall_score)}%` : '12 Kompetenzfelder bewerten'}
               href="/analyse"
             />
             <CheckItem

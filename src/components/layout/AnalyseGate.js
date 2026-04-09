@@ -24,7 +24,7 @@ export default function AnalyseGate({ hasAnalysis, children }) {
               Karriere-Analyse noch nicht abgeschlossen
             </div>
             <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>
-              5 Minuten — danach passt sich die gesamte App an dich an.
+              ~10 Minuten — danach passt sich die gesamte App an dich an.
             </div>
           </div>
           <button
