@@ -10,7 +10,7 @@ export const LESSON_CONTENT = {
   // ─────────────────────────────────────────────
 
   '1.1': {
-    id: 'l7010000-0000-0000-0000-000000000101',
+    id: 'b7010000-0000-0000-0000-000000000101',
     type: 'video_with_input',
     title: 'Warum du aktuell unterbezahlt bist',
     duration: '3 Min.',
@@ -29,7 +29,7 @@ export const LESSON_CONTENT = {
   },
 
   '1.2': {
-    id: 'l7010000-0000-0000-0000-000000000102',
+    id: 'b7010000-0000-0000-0000-000000000102',
     type: 'video_with_choice',
     title: 'Warum die meisten Angst vor Gehaltsgesprächen haben',
     duration: '3 Min.',
@@ -65,7 +65,7 @@ export const LESSON_CONTENT = {
   },
 
   '1.3': {
-    id: 'l7010000-0000-0000-0000-000000000103',
+    id: 'b7010000-0000-0000-0000-000000000103',
     type: 'video_with_slider',
     title: 'Wie Gewinner in Gehaltsverhandlungen denken',
     duration: '3 Min.',
@@ -95,7 +95,7 @@ export const LESSON_CONTENT = {
   // ─────────────────────────────────────────────
 
   '2.1': {
-    id: 'l7010000-0000-0000-0000-000000000201',
+    id: 'b7010000-0000-0000-0000-000000000201',
     type: 'video_with_three_numbers',
     title: 'Was du wirklich wert bist',
     duration: '3 Min.',
@@ -114,7 +114,7 @@ export const LESSON_CONTENT = {
   },
 
   '2.2': {
-    id: 'l7010000-0000-0000-0000-000000000202',
+    id: 'b7010000-0000-0000-0000-000000000202',
     type: 'video',
     title: 'Wie Arbeitgeber dein Gehalt wirklich bestimmen',
     duration: '3 Min.',
@@ -132,7 +132,7 @@ export const LESSON_CONTENT = {
   },
 
   '2.3': {
-    id: 'l7010000-0000-0000-0000-000000000203',
+    id: 'b7010000-0000-0000-0000-000000000203',
     type: 'video_with_impact',
     title: 'Dein Marktwert in 3 Faktoren',
     duration: '4 Min.',
@@ -170,7 +170,7 @@ export const LESSON_CONTENT = {
   // ─────────────────────────────────────────────
 
   '3.1': {
-    id: 'l7010000-0000-0000-0000-000000000301',
+    id: 'b7010000-0000-0000-0000-000000000301',
     type: 'video',
     title: 'Warum du ohne Vorbereitung verlierst',
     duration: '3 Min.',
@@ -188,7 +188,7 @@ export const LESSON_CONTENT = {
   },
 
   '3.2': {
-    id: 'l7010000-0000-0000-0000-000000000302',
+    id: 'b7010000-0000-0000-0000-000000000302',
     type: 'video_with_pitch',
     title: 'Dein persönlicher Gehalts-Pitch',
     duration: '4 Min.',
@@ -216,7 +216,7 @@ export const LESSON_CONTENT = {
   },
 
   '3.3': {
-    id: 'l7010000-0000-0000-0000-000000000303',
+    id: 'b7010000-0000-0000-0000-000000000303',
     type: 'video_with_arguments',
     title: 'Deine stärksten Argumente',
     duration: '4 Min.',
@@ -247,7 +247,7 @@ export const LESSON_CONTENT = {
   },
 
   '3.4': {
-    id: 'l7010000-0000-0000-0000-000000000304',
+    id: 'b7010000-0000-0000-0000-000000000304',
     type: 'video_with_strategy',
     title: 'Deine Strategie festlegen',
     duration: '4 Min.',
@@ -286,7 +286,7 @@ export const LESSON_CONTENT = {
   // ─────────────────────────────────────────────
 
   '4.1': {
-    id: 'l7010000-0000-0000-0000-000000000401',
+    id: 'b7010000-0000-0000-0000-000000000401',
     type: 'video',
     title: 'So startest du das Gespräch richtig',
     duration: '3 Min.',
@@ -307,7 +307,7 @@ export const LESSON_CONTENT = {
   },
 
   '4.2': {
-    id: 'l7010000-0000-0000-0000-000000000402',
+    id: 'b7010000-0000-0000-0000-000000000402',
     type: 'video',
     title: 'Die häufigsten Arbeitgeber-Reaktionen',
     duration: '4 Min.',
@@ -347,7 +347,7 @@ export const LESSON_CONTENT = {
   },
 
   '4.3': {
-    id: 'l7010000-0000-0000-0000-000000000403',
+    id: 'b7010000-0000-0000-0000-000000000403',
     type: 'simulation',
     simulationKey: 'nicht_drin',
     title: 'Simulation: "Das ist aktuell nicht drin"',
@@ -358,7 +358,7 @@ export const LESSON_CONTENT = {
   },
 
   '4.4': {
-    id: 'l7010000-0000-0000-0000-000000000404',
+    id: 'b7010000-0000-0000-0000-000000000404',
     type: 'simulation',
     simulationKey: 'fuenf_prozent',
     title: 'Simulation: "Wir können dir 5 % anbieten"',
@@ -369,7 +369,7 @@ export const LESSON_CONTENT = {
   },
 
   '4.5': {
-    id: 'l7010000-0000-0000-0000-000000000405',
+    id: 'b7010000-0000-0000-0000-000000000405',
     type: 'simulation',
     simulationKey: 'warum_mehr',
     title: 'Simulation: "Warum denkst du, dass du mehr wert bist?"',
@@ -384,7 +384,7 @@ export const LESSON_CONTENT = {
   // ─────────────────────────────────────────────
 
   '5.1': {
-    id: 'l7010000-0000-0000-0000-000000000501',
+    id: 'b7010000-0000-0000-0000-000000000501',
     type: 'video_with_template',
     title: 'So schließt du die Verhandlung ab',
     duration: '3 Min.',
@@ -414,7 +414,7 @@ Mit freundlichen Grüßen
   },
 
   '5.2': {
-    id: 'l7010000-0000-0000-0000-000000000502',
+    id: 'b7010000-0000-0000-0000-000000000502',
     type: 'video_with_final',
     title: 'Wenn sie Nein sagen — Dein Plan B',
     duration: '3 Min.',
