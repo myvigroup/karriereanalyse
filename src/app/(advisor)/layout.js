@@ -7,7 +7,7 @@ export default async function AdvisorLayout({ children }) {
   const supabase = createClient();
   const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/auth/login');
+  if (!user) redirect('/advisor/login');
 
   const { data: profile } = await admin
     .from('profiles')

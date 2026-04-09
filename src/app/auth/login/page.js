@@ -79,6 +79,12 @@ export default function LoginPage() {
             <span style={{ fontSize: 14, color: 'var(--ki-text-secondary)' }}>Noch kein Konto? </span>
             <a href="/auth/register" style={{ fontSize: 14, fontWeight: 600 }}>Jetzt registrieren</a>
           </div>
+
+          <div style={{ textAlign: 'center', marginTop: 16 }}>
+            <a href="/advisor/login" style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', textDecoration: 'none' }}>
+              Du bist Berater? → Berater-Portal
+            </a>
+          </div>
         </div>
       </div>
     </div>
