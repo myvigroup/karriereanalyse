@@ -39,13 +39,23 @@ export default function AngeboteClient() {
       </nav>
 
       {/* Hero */}
-      <section style={{ textAlign: 'center', padding: '60px 24px 40px', maxWidth: 600, margin: '0 auto' }}>
-        <h1 style={{ fontSize: 36, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 12 }}>
+      <section style={{ textAlign: 'center', padding: '60px 24px 40px', maxWidth: 640, margin: '0 auto' }}>
+        <h1 style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 12 }}>
           Seminar buchen
         </h1>
-        <p style={{ fontSize: 16, color: 'var(--ki-text-secondary)', lineHeight: 1.6 }}>
-          Wähle zwischen einer Einzelbuchung oder der KI-Mitgliedschaft mit Zugang zu allen Seminaren.
+        <p style={{ fontSize: 16, color: 'var(--ki-text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
+          Einzel ab 99 € — oder mit der Premium-Mitgliedschaft jeden Monat inklusive.
         </p>
+        {/* Value Hook Banner */}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 10, padding: '10px 20px',
+          borderRadius: 12, background: 'rgba(204,20,38,0.06)', border: '1px solid rgba(204,20,38,0.15)',
+        }}>
+          <span style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>1 Seminar-Platz kostet einzeln</span>
+          <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--ki-text)', textDecoration: 'line-through', opacity: 0.45 }}>99 €</span>
+          <span style={{ fontSize: 13, color: 'var(--ki-text-tertiary)' }}>— mit Premium-Abo</span>
+          <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--ki-red)' }}>15 €/Monat</span>
+        </div>
       </section>
 
       {/* Interval Toggle */}
@@ -115,10 +125,28 @@ export default function AngeboteClient() {
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ki-red)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
             {interval === 'yearly' ? 'Jährliches Abo' : 'Monatliches Abo'}
           </div>
-          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8 }}>Premium-Mitgliedschaft</h2>
-          <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 16, lineHeight: 1.55 }}>
-            1 Seminar pro Monat inklusive — der Seminar-Platz allein kostet 99 €.
-          </p>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 16 }}>Premium-Mitgliedschaft</h2>
+
+          {/* Value Callout — prominenter Kern */}
+          <div style={{
+            background: 'rgba(204,20,38,0.05)', border: '1px solid rgba(204,20,38,0.15)',
+            borderRadius: 10, padding: '14px 16px', marginBottom: 20,
+          }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
+              Was du bekommst
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ki-text)' }}>1 Seminar pro Monat</div>
+                <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 2 }}>+ alle E-Learnings & Masterclasses</div>
+              </div>
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', textDecoration: 'line-through' }}>99 €/Monat</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--ki-red)', letterSpacing: '-0.03em' }}>15 €/Monat</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#2D6A4F' }}>Du sparst 84 €</div>
+              </div>
+            </div>
+          </div>
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
             <span style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.03em' }}>
@@ -127,15 +155,12 @@ export default function AngeboteClient() {
             <span style={{ fontSize: 15, color: 'var(--ki-text-secondary)' }}>/Monat</span>
           </div>
           {interval === 'yearly' ? (
-            <div style={{ fontSize: 13, color: 'var(--ki-success)', fontWeight: 600, marginBottom: 4 }}>
+            <div style={{ fontSize: 13, color: 'var(--ki-success)', fontWeight: 600, marginBottom: 20 }}>
               = {yearlyTotal} €/Jahr · Du sparst {yearlySavings} €
             </div>
           ) : (
-            <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 4 }}>7 Tage kostenlos testen</div>
+            <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 20 }}>7 Tage kostenlos testen</div>
           )}
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-red)', marginBottom: 20 }}>
-            Seminar-Wert allein: 99 €/Monat
-          </div>
 
           <ul style={{ listStyle: 'none', marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[

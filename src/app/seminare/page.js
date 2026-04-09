@@ -60,10 +60,30 @@ export default function SeminarePage() {
         <h1 style={{ fontSize: 42, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 20, color: '#1A1A1A' }}>
           13 Online-Seminare für deine Karriere
         </h1>
-        <p style={{ fontSize: 17, color: '#6B6B6B', maxWidth: 500, margin: '0 auto 32px', lineHeight: 1.65 }}>
+        <p style={{ fontSize: 17, color: '#6B6B6B', maxWidth: 500, margin: '0 auto 28px', lineHeight: 1.65 }}>
           Live-Workshops zu Leadership, Kommunikation, Persönlichkeit und mehr —
           jeden Samstag von 09:30 bis 12:00 Uhr.
         </p>
+
+        {/* Value Hook — prominent */}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 0,
+          borderRadius: 14, overflow: 'hidden', border: '1px solid #E8E6E1',
+          marginBottom: 28, background: 'white',
+        }}>
+          <div style={{ padding: '14px 20px', background: '#F8F7F4', borderRight: '1px solid #E8E6E1' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#9A9A9A', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>Einzelticket</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#1A1A1A', textDecoration: 'line-through', opacity: 0.4 }}>99 €</div>
+          </div>
+          <div style={{ padding: '14px 20px', background: 'white', borderRight: '1px solid #E8E6E1' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#9A9A9A', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>Mit Premium-Abo</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#CC1426' }}>15 €<span style={{ fontSize: 13, fontWeight: 500, color: '#9A9A9A' }}>/Monat</span></div>
+          </div>
+          <div style={{ padding: '14px 20px', background: 'rgba(45,106,79,0.05)' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#2D6A4F', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>Du sparst</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#2D6A4F' }}>84 €</div>
+          </div>
+        </div>
 
         {/* Format */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 24, flexWrap: 'wrap', fontSize: 13 }}>

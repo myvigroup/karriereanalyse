@@ -168,10 +168,28 @@ export default function MasterclassAngebotClient() {
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ki-red)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
             {interval === 'yearly' ? 'Jährliches Abo' : 'Monatliches Abo'}
           </div>
-          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8 }}>Premium-Mitgliedschaft</h2>
-          <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 16, lineHeight: 1.55 }}>
-            Masterclass + 1 Seminar/Monat + alle Kurse — für weniger als ein Lunch.
-          </p>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 16 }}>Premium-Mitgliedschaft</h2>
+
+          {/* Value Callout */}
+          <div style={{
+            background: 'rgba(204,20,38,0.05)', border: '1px solid rgba(204,20,38,0.15)',
+            borderRadius: 10, padding: '14px 16px', marginBottom: 20,
+          }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
+              Was du bekommst
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ki-text)' }}>Masterclass + 1 Seminar/Monat</div>
+                <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 2 }}>+ alle weiteren E-Learning Kurse</div>
+              </div>
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', textDecoration: 'line-through' }}>148 €/Monat</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--ki-red)', letterSpacing: '-0.03em' }}>15 €/Monat</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#2D6A4F' }}>Du sparst 133 €</div>
+              </div>
+            </div>
+          </div>
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
             <span style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.03em' }}>
@@ -180,15 +198,12 @@ export default function MasterclassAngebotClient() {
             <span style={{ fontSize: 15, color: 'var(--ki-text-secondary)' }}>/Monat</span>
           </div>
           {interval === 'yearly' ? (
-            <div style={{ fontSize: 13, color: 'var(--ki-success)', fontWeight: 600, marginBottom: 4 }}>
+            <div style={{ fontSize: 13, color: 'var(--ki-success)', fontWeight: 600, marginBottom: 20 }}>
               = {yearlyTotal} €/Jahr · Du sparst {yearlySavings} €
             </div>
           ) : (
-            <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 4 }}>7 Tage kostenlos testen</div>
+            <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 20 }}>7 Tage kostenlos testen</div>
           )}
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-red)', marginBottom: 20 }}>
-            Seminar-Wert allein: 99 €/Monat
-          </div>
 
           <ul style={{ listStyle: 'none', marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[
