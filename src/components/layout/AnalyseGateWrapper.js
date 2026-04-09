@@ -3,7 +3,7 @@ import { usePathname } from 'next/navigation';
 import AnalyseGate from './AnalyseGate';
 
 // Seiten die NIE den Analyse-Banner zeigen (User ist dort schon richtig)
-const HIDE_BANNER_PATHS = ['/analyse', '/profile', '/onboarding', '/dashboard', '/cv-check'];
+const HIDE_BANNER_PATHS = ['/analyse', '/profile', '/onboarding', '/dashboard', '/cv-check', '/masterclass'];
 
 export default function AnalyseGateWrapper({ hasAnalysis, children }) {
   const pathname = usePathname();
