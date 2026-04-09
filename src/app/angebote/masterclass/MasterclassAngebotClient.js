@@ -1,14 +1,22 @@
 'use client';
 import { useState } from 'react';
 
-export default function AngeboteClient() {
+const MODULES = [
+  { icon: '🧠', title: 'Modul 1: Mindset', sub: 'Die innere Blockade lösen' },
+  { icon: '📊', title: 'Modul 2: Marktwert', sub: 'Deine Zahlen kennen' },
+  { icon: '📋', title: 'Modul 3: Vorbereitung', sub: 'Der Fahrplan' },
+  { icon: '🎭', title: 'Modul 4: Verhandlung', sub: 'Die Taktik im Gespräch' },
+  { icon: '🏆', title: 'Modul 5: Abschluss', sub: 'Nach dem Ja' },
+];
+
+export default function MasterclassAngebotClient() {
   const [interval, setInterval] = useState('monthly');
   const [loading, setLoading] = useState(null);
 
   const monthlyPrice = 15;
-  const yearlyMonthly = Math.round(monthlyPrice * 0.8); // 12
-  const yearlyTotal = yearlyMonthly * 12; // 144
-  const yearlySavings = monthlyPrice * 12 - yearlyTotal; // 36
+  const yearlyMonthly = Math.round(monthlyPrice * 0.8);
+  const yearlyTotal = yearlyMonthly * 12;
+  const yearlySavings = monthlyPrice * 12 - yearlyTotal;
 
   const handleCheckout = async (productKey) => {
     setLoading(productKey);
@@ -39,17 +47,44 @@ export default function AngeboteClient() {
       </nav>
 
       {/* Hero */}
-      <section style={{ textAlign: 'center', padding: '60px 24px 40px', maxWidth: 600, margin: '0 auto' }}>
-        <h1 style={{ fontSize: 36, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 12 }}>
-          Seminar buchen
+      <section style={{ textAlign: 'center', padding: '60px 24px 16px', maxWidth: 640, margin: '0 auto' }}>
+        <div style={{ fontSize: 48, marginBottom: 12 }}>💰</div>
+        <h1 style={{ fontSize: 34, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.15, marginBottom: 12 }}>
+          Gehaltsverhandlung Mastery
         </h1>
-        <p style={{ fontSize: 16, color: 'var(--ki-text-secondary)', lineHeight: 1.6 }}>
-          Wähle zwischen einer Einzelbuchung oder der KI-Mitgliedschaft mit Zugang zu allen Seminaren.
+        <p style={{ fontSize: 16, color: 'var(--ki-text-secondary)', lineHeight: 1.65, marginBottom: 8 }}>
+          Von Angst zu Strategie: Lerne wie du dein Gehalt systematisch um 7–12 % steigerst —
+          mit konkreten Skripten, Simulations-Training und marktbasierter Argumentation.
         </p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, fontSize: 13, color: 'var(--ki-text-tertiary)', marginTop: 12 }}>
+          <span>5 Module</span>
+          <span>·</span>
+          <span>17 Lektionen</span>
+          <span>·</span>
+          <span>~55 Minuten</span>
+        </div>
+      </section>
+
+      {/* Module Preview */}
+      <section style={{ maxWidth: 560, margin: '28px auto 0', padding: '0 24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {MODULES.map((m, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px',
+              borderRadius: 'var(--r-md)', background: 'var(--ki-card)', border: '1px solid var(--ki-border)',
+            }}>
+              <span style={{ fontSize: 18 }}>{m.icon}</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>{m.title}</div>
+                <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)' }}>{m.sub}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Interval Toggle */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 40 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 4, margin: '40px 0 32px' }}>
         <button
           onClick={() => setInterval('monthly')}
           className={`btn ${interval === 'monthly' ? 'btn-primary' : 'btn-secondary'}`}
@@ -67,23 +102,41 @@ export default function AngeboteClient() {
       </div>
 
       {/* 2-Column Pricing */}
-      <section style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px 60px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <section style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px 80px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
 
-        {/* Einzelbuchung */}
+        {/* Einzelkauf */}
         <div className="card" style={{ padding: 32, display: 'flex', flexDirection: 'column' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
-            Einzelbuchung
+            Einzelkauf · Lebenslanger Zugang
           </div>
-          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8 }}>Seminar</h2>
-          <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24, lineHeight: 1.55 }}>
-            Ein Seminar deiner Wahl — online, samstags, 09:30–12:00 Uhr.
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8 }}>
+            Gehaltsverhandlung Mastery
+          </h2>
+          <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 20, lineHeight: 1.55 }}>
+            Einmaliger Kauf — für immer zugänglich.
           </p>
 
-          <div style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 4 }}>99 €</div>
-          <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 28 }}>einmalig pro Seminar</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 4 }}>
+            <span style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--ki-red)' }}>49 €</span>
+            <span style={{ fontSize: 15, color: 'var(--ki-text-tertiary)', textDecoration: 'line-through' }}>99 €</span>
+          </div>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: 'rgba(204,20,38,0.08)', border: '1px solid rgba(204,20,38,0.2)',
+            borderRadius: 980, padding: '4px 12px', fontSize: 12, fontWeight: 700, color: 'var(--ki-red)',
+            marginBottom: 28, alignSelf: 'flex-start',
+          }}>
+            🎪 Messe-Aktionspreis
+          </div>
 
           <ul style={{ listStyle: 'none', marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {['1 Seminar deiner Wahl', 'Online via Microsoft Teams', 'Arbeitsmaterialien inklusive', 'Teilnahme-Zertifikat'].map((f, i) => (
+            {[
+              '5 Module · 17 Lektionen',
+              'Interaktive Gehalts-Simulationen',
+              'Konkrete Skripte & Pitches',
+              'Lebenslanger Zugang',
+              'Kurs-Zertifikat',
+            ].map((f, i) => (
               <li key={i} style={{ fontSize: 14, color: 'var(--ki-text-secondary)', display: 'flex', gap: 8 }}>
                 <span style={{ color: 'var(--ki-success)', fontWeight: 700 }}>✓</span> {f}
               </li>
@@ -92,11 +145,11 @@ export default function AngeboteClient() {
 
           <button
             className="btn btn-secondary"
-            onClick={() => handleCheckout('SEMINAR')}
-            disabled={loading === 'SEMINAR'}
+            onClick={() => handleCheckout('MASTERCLASS_SINGLE')}
+            disabled={loading === 'MASTERCLASS_SINGLE'}
             style={{ width: '100%', marginTop: 'auto' }}
           >
-            {loading === 'SEMINAR' ? 'Wird geladen...' : 'Jetzt buchen'}
+            {loading === 'MASTERCLASS_SINGLE' ? 'Wird geladen...' : 'Jetzt für 49 € kaufen'}
           </button>
         </div>
 
@@ -110,14 +163,14 @@ export default function AngeboteClient() {
             background: 'var(--ki-red)', color: '#fff', fontSize: 11, fontWeight: 700,
             padding: '4px 14px', borderRadius: 980, whiteSpace: 'nowrap',
           }}>
-            ⭐ Empfohlen
+            ⭐ Mehr Wert
           </div>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ki-red)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
             {interval === 'yearly' ? 'Jährliches Abo' : 'Monatliches Abo'}
           </div>
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8 }}>KI-Mitgliedschaft</h2>
-          <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24, lineHeight: 1.55 }}>
-            Alle Seminare, alle Masterclasses — unbegrenzter Zugang.
+          <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 20, lineHeight: 1.55 }}>
+            Alle Masterclasses + alle Seminare — unbegrenzter Zugang.
           </p>
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
@@ -136,8 +189,8 @@ export default function AngeboteClient() {
 
           <ul style={{ listStyle: 'none', marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[
+              'Gehaltsverhandlung Mastery inklusive',
               'Alle 13 Seminare inklusive',
-              'Gehaltsverhandlung Masterclass',
               'Alle weiteren E-Learning Kurse',
               'Neue Inhalte jeden Monat',
               'Zertifikate für alle Kurse',
@@ -156,28 +209,6 @@ export default function AngeboteClient() {
           >
             {loading === 'MASTERCLASS' ? 'Wird geladen...' : interval === 'yearly' ? 'Jetzt jährlich starten' : '7 Tage kostenlos testen'}
           </button>
-        </div>
-      </section>
-
-      {/* Masterclass CTA */}
-      <section style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px 80px' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-          borderRadius: 'var(--r-lg)', padding: '24px 32px',
-          display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
-        }}>
-          <div style={{ fontSize: 36 }}>💰</div>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 4 }}>
-              Nur die Gehaltsverhandlung Mastery?
-            </div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>
-              Einmalig ab 49 € — oder mit der Mitgliedschaft inklusive.
-            </div>
-          </div>
-          <a href="/angebote/masterclass" className="btn btn-primary" style={{ fontSize: 13, padding: '10px 22px', flexShrink: 0 }}>
-            Masterclass kaufen →
-          </a>
         </div>
       </section>
 
