@@ -90,7 +90,7 @@ export async function POST(request) {
     // cv_feedback Eintrag (ohne advisor_id — KI-generiert)
     const { data: feedback, error: feedbackError } = await admin.from('cv_feedback').insert({
       cv_document_id: doc.id,
-      status: 'processing',
+      status: 'draft',
       overall_rating: null,
       summary: null,
     }).select('id').single();
