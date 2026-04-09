@@ -16,8 +16,8 @@ const PRODUCTS = [
   {
     key: 'ANALYSE_PRO',
     name: 'Karriere-Analyse',
-    audience: 'F\u00FCr Berufst\u00E4tige & Selbstst\u00E4ndige',
-    description: 'Dein Karriere-Blutbild: Fundierter \u00DCberblick \u00FCber deinen Ist-Zustand.',
+    audience: 'Für Berufstätige & Selbstständige',
+    description: 'Dein Karriere-Blutbild: Fundierter Überblick über deinen Ist-Zustand.',
     features: ['65 Fragen Assessment', '50+ Seiten Report', 'Coach-Auswertung', 'Karriere-Roadmap'],
     fallbackPrice: 'Preis auf Anfrage',
     badge: null,
@@ -30,7 +30,7 @@ const PRODUCTS = [
     audience: 'Monatliches Abo',
     description: 'Kurse zu Gehaltsverhandlung, Rhetorik, Leadership und mehr.',
     features: ['Alle Kurs-Module', 'Quiz & Praxis-Aufgaben', 'Zertifikate', 'Community-Zugang'],
-    fallbackPrice: 'ab 15\u20AC/Monat',
+    fallbackPrice: 'ab 15 €/Monat',
     badge: '7 Tage kostenlos',
     cta: 'Kostenlos testen',
     type: 'subscription',
@@ -39,9 +39,9 @@ const PRODUCTS = [
     key: 'SEMINAR',
     name: 'Seminare',
     audience: 'Intensiv-Seminar',
-    description: 'Ganzt\u00E4gige Workshops mit erfahrenen Coaches.',
-    features: ['Ganzt\u00E4giges Intensiv-Seminar', 'Arbeitsmaterialien', 'Teilnahme-Zertifikat'],
-    fallbackPrice: 'ab 99\u20AC',
+    description: 'Ganztägige Workshops mit erfahrenen Coaches.',
+    features: ['Ganztägiges Intensiv-Seminar', 'Arbeitsmaterialien', 'Teilnahme-Zertifikat'],
+    fallbackPrice: 'ab 99 €',
     badge: null,
     cta: 'Seminar buchen',
     type: 'one_time',
@@ -50,9 +50,9 @@ const PRODUCTS = [
     key: 'COACHING',
     name: 'Privat-Coaching',
     audience: '1:1 Coaching',
-    description: 'Pers\u00F6nliches Coaching mit zertifiziertem Karriere-Coach.',
-    features: ['60 Min. 1:1 Session', 'Pers\u00F6nlicher Aktionsplan', 'Follow-up Email'],
-    fallbackPrice: 'ab 199\u20AC',
+    description: 'Persönliches Coaching mit zertifiziertem Karriere-Coach.',
+    features: ['60 Min. 1:1 Session', 'Persönlicher Aktionsplan', 'Follow-up Email'],
+    fallbackPrice: 'ab 199 €',
     badge: 'Premium',
     cta: 'Coaching buchen',
     type: 'one_time',
@@ -97,7 +97,7 @@ export default function AngeboteClient() {
           Unsere Angebote
         </h1>
         <p style={{ fontSize: 17, color: 'var(--ki-text-secondary)', lineHeight: 1.6 }}>
-          Die Blaupause f\u00FCr deinen beruflichen Erfolg. Finde das passende Angebot f\u00FCr deine Karrieresituation.
+          Die Blaupause für deinen beruflichen Erfolg. Finde das passende Angebot für deine Karrieresituation.
         </p>
       </section>
 
@@ -115,13 +115,13 @@ export default function AngeboteClient() {
           className={`btn ${interval === 'yearly' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ fontSize: 13, padding: '8px 20px', borderRadius: '0 8px 8px 0' }}
         >
-          J\u00E4hrlich <span style={{ fontSize: 11, opacity: 0.7 }}>(-20%)</span>
+          Jährlich <span style={{ fontSize: 11, opacity: 0.7 }}>(-20%)</span>
         </button>
       </div>
 
       {/* Products */}
       <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 80px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
           {PRODUCTS.map((p) => {
             const isPremium = p.key === 'COACHING';
             return (
@@ -143,7 +143,7 @@ export default function AngeboteClient() {
                 <ul style={{ listStyle: 'none', marginBottom: 24 }}>
                   {p.features.map((f, i) => (
                     <li key={i} style={{ fontSize: 13, padding: '4px 0', color: 'var(--ki-text-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ color: 'var(--ki-success)' }}>{'\u2713'}</span> {f}
+                      <span style={{ color: 'var(--ki-success)' }}>✓</span> {f}
                     </li>
                   ))}
                 </ul>
@@ -165,7 +165,7 @@ export default function AngeboteClient() {
       {/* Footer */}
       <footer style={{ borderTop: '1px solid var(--ki-border)', padding: '32px 24px', textAlign: 'center' }}>
         <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginBottom: 8 }}>
-          {'\u00A9'} 2026 - Das Karriere-Institut | +49 511 5468 4547 | info@daskarriereinstitut.de
+          © 2026 - Das Karriere-Institut | +49 511 5468 4547 | info@daskarriereinstitut.de
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 16, fontSize: 12, color: 'var(--ki-text-secondary)' }}>
           <a href="/impressum" style={{ color: 'var(--ki-text-secondary)' }}>Impressum</a>
