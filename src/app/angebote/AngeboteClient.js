@@ -8,6 +8,7 @@ const PRODUCTS = [
     audience: 'Für alle',
     description: 'Lege den Grundstein für deine Karriere. Erhalte dein Karriere-Blutbild.',
     features: ['65 Fragen Assessment', '50+ Seiten Report', 'Radar-Chart', 'Handlungsempfehlungen', '1 Monat Premium gratis'],
+    monthlyPrice: null, // einmalig
     fallbackPrice: 'KOSTENLOS',
     badge: '🎁 Gratis',
     cta: 'Kostenlose Analyse starten',
@@ -19,6 +20,7 @@ const PRODUCTS = [
     audience: 'Für Berufstätige & Selbstständige',
     description: 'Dein Karriere-Blutbild: Fundierter Überblick über deinen Ist-Zustand.',
     features: ['65 Fragen Assessment', '50+ Seiten Report', 'Coach-Auswertung', 'Karriere-Roadmap'],
+    monthlyPrice: null, // einmalig
     fallbackPrice: 'Preis auf Anfrage',
     badge: null,
     cta: 'Karriere-Blutbild sichern',
@@ -30,6 +32,7 @@ const PRODUCTS = [
     audience: 'Monatliches Abo',
     description: 'Kurse zu Gehaltsverhandlung, Rhetorik, Leadership und mehr.',
     features: ['Alle Kurs-Module', 'Quiz & Praxis-Aufgaben', 'Zertifikate', 'Community-Zugang'],
+    monthlyPrice: 15, // € pro Monat
     fallbackPrice: 'ab 15 €/Monat',
     badge: '7 Tage kostenlos',
     cta: 'Kostenlos testen',
@@ -41,6 +44,7 @@ const PRODUCTS = [
     audience: 'Intensiv-Seminar',
     description: 'Ganztägige Workshops mit erfahrenen Coaches.',
     features: ['Ganztägiges Intensiv-Seminar', 'Arbeitsmaterialien', 'Teilnahme-Zertifikat'],
+    monthlyPrice: null, // einmalig
     fallbackPrice: 'ab 99 €',
     badge: null,
     cta: 'Seminar buchen',
@@ -52,12 +56,22 @@ const PRODUCTS = [
     audience: '1:1 Coaching',
     description: 'Persönliches Coaching mit zertifiziertem Karriere-Coach.',
     features: ['60 Min. 1:1 Session', 'Persönlicher Aktionsplan', 'Follow-up Email'],
+    monthlyPrice: null, // einmalig
     fallbackPrice: 'ab 199 €',
     badge: 'Premium',
     cta: 'Coaching buchen',
     type: 'one_time',
   },
 ];
+
+function getDisplayPrice(product, interval) {
+  if (!product.monthlyPrice) return product.fallbackPrice;
+  if (interval === 'yearly') {
+    const monthly = Math.round(product.monthlyPrice * 0.8);
+    return `ab ${monthly} €/Monat`;
+  }
+  return `ab ${product.monthlyPrice} €/Monat`;
+}
 
 export default function AngeboteClient() {
   const [interval, setInterval] = useState('monthly');
@@ -131,14 +145,23 @@ export default function AngeboteClient() {
               }}>
                 {/* Badges */}
                 <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-                  <span className="pill pill-grey" style={{ fontSize: 11 }}>{p.audience}</span>
+                  <span className="pill pill-grey" style={{ fontSize: 11 }}>
+                    {p.type === 'subscription' && interval === 'yearly' ? 'Jährliches Abo' : p.audience}
+                  </span>
                   {p.badge && <span className="pill pill-red" style={{ fontSize: 11 }}>{p.badge}</span>}
                 </div>
 
                 <h3 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 6 }}>{p.name}</h3>
                 <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 16, flex: 1 }}>{p.description}</p>
 
-                <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 16 }}>{p.fallbackPrice}</div>
+                <div style={{ fontSize: 28, fontWeight: 700, marginBottom: interval === 'yearly' && p.monthlyPrice ? 4 : 16 }}>
+                  {getDisplayPrice(p, interval)}
+                </div>
+                {interval === 'yearly' && p.monthlyPrice && (
+                  <div style={{ fontSize: 12, color: 'var(--ki-success)', fontWeight: 600, marginBottom: 16 }}>
+                    = {Math.round(p.monthlyPrice * 0.8 * 12)} €/Jahr · Du sparst {Math.round(p.monthlyPrice * 12 * 0.2)} €
+                  </div>
+                )}
 
                 <ul style={{ listStyle: 'none', marginBottom: 24 }}>
                   {p.features.map((f, i) => (
