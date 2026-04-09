@@ -114,12 +114,25 @@ import {
   MODUL_QUIZ_NETZ, JOURNAL_FRAGEN_NETZ, ABSCHLUSSTEST_NETZ,
 } from '@/lib/elearning/networking-content';
 
+// Gehaltsverhandlung widgets
+import GehaltSimulationWidget from '@/components/elearning/GehaltSimulationWidget';
+import {
+  SalaryGapWidget, FearSelectorWidget, SelfAssessmentWidget,
+  ThreeNumbersWidget, ImpactSentencesWidget, PitchBuilderWidget,
+  ArgumentsBuilderWidget, StrategyPickerWidget, EmailTemplateWidget,
+  FinalAssessmentWidget,
+} from '@/components/elearning/GehaltInteraktivWidget';
+
+// Gehaltsverhandlung content
+import { LESSON_CONTENT as GEHALT_CONTENT, QUIZ_GEHALT } from '@/lib/elearning/gehaltsverhandlung-content';
+
 const PRIO_COURSE_ID = 'c1000000-0000-0000-0000-000000000006';
 const KOMM_COURSE_ID = 'c1000000-0000-0000-0000-000000000001';
 const SPEED_COURSE_ID = 'c1000000-0000-0000-0000-000000000004';
 const LERNEN_COURSE_ID = 'c1000000-0000-0000-0000-000000000005';
 const BALANCE_COURSE_ID = 'c1000000-0000-0000-0000-000000000002';
 const NETZ_COURSE_ID = 'c1000000-0000-0000-0000-000000000003';
+const GEHALT_COURSE_ID = 'c1000000-0000-0000-0000-000000000007';
 
 // --- Quiz data per course slug/title keyword ---
 const QUIZ_DATA = {
@@ -1393,6 +1406,512 @@ function LernenLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, s
 // =====================
 // SPEEDREADING WIDGET ROUTER
 // =====================
+// GEHALTSVERHANDLUNG LESSON ROUTER
+// =====================
+function GehaltLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, saving }) {
+  const lessonId = lesson.id;
+
+  // Map lesson IDs to content keys
+  const ID_TO_KEY = {
+    'l7010000-0000-0000-0000-000000000101': '1.1',
+    'l7010000-0000-0000-0000-000000000102': '1.2',
+    'l7010000-0000-0000-0000-000000000103': '1.3',
+    'l7010000-0000-0000-0000-000000000201': '2.1',
+    'l7010000-0000-0000-0000-000000000202': '2.2',
+    'l7010000-0000-0000-0000-000000000203': '2.3',
+    'l7010000-0000-0000-0000-000000000301': '3.1',
+    'l7010000-0000-0000-0000-000000000302': '3.2',
+    'l7010000-0000-0000-0000-000000000303': '3.3',
+    'l7010000-0000-0000-0000-000000000304': '3.4',
+    'l7010000-0000-0000-0000-000000000401': '4.1',
+    'l7010000-0000-0000-0000-000000000402': '4.2',
+    'l7010000-0000-0000-0000-000000000403': '4.3',
+    'l7010000-0000-0000-0000-000000000404': '4.4',
+    'l7010000-0000-0000-0000-000000000405': '4.5',
+    'l7010000-0000-0000-0000-000000000501': '5.1',
+    'l7010000-0000-0000-0000-000000000502': '5.2',
+  };
+
+  const key = ID_TO_KEY[lessonId];
+  const content = GEHALT_CONTENT[key];
+
+  if (!content) {
+    return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+  }
+
+  // ── Simulations (4.3, 4.4, 4.5) ───────────────────────────────────
+  if (content.type === 'simulation') {
+    return (
+      <div>
+        <GehaltSimulationWidget
+          simulationKey={content.simulationKey}
+          maxScore={content.maxScore}
+          ratingLabels={content.ratingLabels}
+          endMessage={content.endMessage}
+          isCompleted={isCompleted}
+          onMarkComplete={onMarkComplete}
+          saving={saving}
+        />
+      </div>
+    );
+  }
+
+  // ── Video lessons with interactive widget below ────────────────────
+  const takeaways = content.takeaways || [];
+
+  function VideoBlock() {
+    return (
+      <>
+        {/* Video placeholder */}
+        <div style={{
+          borderRadius: 'var(--r-lg)', overflow: 'hidden',
+          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)',
+          aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexDirection: 'column', gap: 16, marginBottom: 24,
+        }}>
+          <div style={{
+            width: 72, height: 72, borderRadius: '50%',
+            background: 'rgba(204,20,38,0.2)', border: '2px solid rgba(204,20,38,0.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
+          }}>▶</div>
+          <div style={{ color: 'white', fontSize: 16, fontWeight: 600 }}>{lesson.title}</div>
+          <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>
+            Video · {content.duration || lesson.duration_minutes + ' Min.'}
+          </div>
+        </div>
+
+        {/* Takeaways */}
+        {takeaways.length > 0 && (
+          <div className="card" style={{ marginBottom: 24, background: 'var(--ki-bg-alt)', border: 'none' }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>
+              Key Takeaways
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {takeaways.map((t, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6 }}>
+                  <span style={{ color: 'var(--ki-red)', fontWeight: 700, flexShrink: 0, marginTop: 1 }}>✓</span>
+                  <span style={{ color: 'var(--ki-text-secondary)' }}>{t}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  // 1.1 — Salary gap
+  if (key === '1.1') {
+    return (
+      <div>
+        <VideoBlock />
+        <SalaryGapWidget onSave={() => {}} />
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 1.2 — Fear selector
+  if (key === '1.2') {
+    return (
+      <div>
+        <VideoBlock />
+        <FearSelectorWidget fearOptions={content.fearOptions} onSave={() => {}} />
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 1.3 — Self assessment
+  if (key === '1.3') {
+    return (
+      <div>
+        <VideoBlock />
+        <SelfAssessmentWidget sliderLabels={content.sliderLabels} sliderFeedback={content.sliderFeedback} onSave={() => {}} />
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 2.1 — Three numbers
+  if (key === '2.1') {
+    return (
+      <div>
+        <VideoBlock />
+        {/* Research sources */}
+        {content.researchSources && (
+          <div className="card" style={{ background: 'var(--ki-bg-alt)', border: 'none', marginBottom: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
+              Deine 3 Recherche-Quellen (5 Min.)
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {content.researchSources.map((s, i) => (
+                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  <div style={{ fontSize: 20, flexShrink: 0 }}>{s.icon}</div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ki-text)' }}>{s.name}</div>
+                    <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>{s.tip}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <ThreeNumbersWidget onSave={() => {}} />
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 2.2 — Chef decoder (video + info card)
+  if (key === '2.2') {
+    return (
+      <div>
+        <VideoBlock />
+        {content.chefDecoder && (
+          <div className="card" style={{ background: 'var(--ki-bg-alt)', border: 'none', marginBottom: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>
+              Chef-Decoder: Was bedeutet was?
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {content.chefDecoder.map((d, i) => (
+                <div key={i} style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--ki-card)', border: '1px solid var(--ki-border)' }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ki-text)', marginBottom: 4 }}>{d.reaction}</div>
+                  <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.5 }}>→ {d.meaning}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 2.3 — Impact sentences
+  if (key === '2.3') {
+    return (
+      <div>
+        <VideoBlock />
+        {/* Factor pyramid */}
+        {content.factorLevels && (
+          <div className="card" style={{ background: 'var(--ki-bg-alt)', border: 'none', marginBottom: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
+              Argument-Hierarchie (stärkstes zuerst)
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {content.factorLevels.map((f, i) => (
+                <div key={i} style={{
+                  padding: '12px 14px', borderRadius: 10, background: 'var(--ki-card)', border: '1px solid var(--ki-border)',
+                  borderLeft: `4px solid ${i === 0 ? '#16a34a' : i === 1 ? '#2563EB' : '#d97706'}`,
+                }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ki-text)', marginBottom: 4 }}>
+                    Level {f.level}: {f.title}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', fontStyle: 'italic' }}>{f.example}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <ImpactSentencesWidget factorLevels={content.factorLevels} onSave={() => {}} />
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 3.1 — Comparison video
+  if (key === '3.1') {
+    return (
+      <div>
+        <VideoBlock />
+        {content.comparisonData && (
+          <div className="card" style={{ background: 'var(--ki-bg-alt)', border: 'none', marginBottom: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {[content.comparisonData.unprepared, content.comparisonData.prepared].map((d, i) => (
+                <div key={i} style={{
+                  padding: '14px 16px', borderRadius: 10, textAlign: 'center',
+                  background: i === 1 ? 'rgba(34,197,94,0.06)' : 'var(--ki-card)',
+                  border: `2px solid ${i === 1 ? 'rgba(34,197,94,0.25)' : 'var(--ki-border)'}`,
+                }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', marginBottom: 6 }}>{d.label}</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: i === 1 ? '#16a34a' : 'var(--ki-text)' }}>{d.pct}</div>
+                  <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 4 }}>{d.euro}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', textAlign: 'center', marginTop: 10 }}>
+              {content.comparisonData.note}
+            </div>
+          </div>
+        )}
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 3.2 — Pitch builder
+  if (key === '3.2') {
+    return (
+      <div>
+        <VideoBlock />
+        <PitchBuilderWidget examplePitches={content.examplePitches} onSave={() => {}} />
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 3.3 — Arguments builder
+  if (key === '3.3') {
+    return (
+      <div>
+        <VideoBlock />
+        <ArgumentsBuilderWidget weakArguments={content.weakArguments} soWhatExamples={content.soWhatExamples} onSave={() => {}} />
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 3.4 — Strategy picker
+  if (key === '3.4') {
+    return (
+      <div>
+        <VideoBlock />
+        <StrategyPickerWidget strategies={content.strategies} batnaOptions={content.batnaOptions} onSave={() => {}} />
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 4.1 — Opening (video + opening script)
+  if (key === '4.1') {
+    return (
+      <div>
+        <VideoBlock />
+        {content.openingScript && (
+          <div className="card" style={{ background: 'var(--ki-bg-alt)', border: 'none', marginBottom: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>
+              Eröffnungssatz — Gut vs. Schlecht
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ padding: '12px 14px', borderRadius: 10, background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.15)' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#dc2626', textTransform: 'uppercase', marginBottom: 6 }}>✗ So nicht</div>
+                <div style={{ fontSize: 13, color: 'var(--ki-text)', fontStyle: 'italic' }}>{content.openingScript.bad}</div>
+              </div>
+              <div style={{ padding: '12px 14px', borderRadius: 10, background: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.2)' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', textTransform: 'uppercase', marginBottom: 6 }}>✓ So geht's</div>
+                <div style={{ fontSize: 13, color: 'var(--ki-text)', fontWeight: 600 }}>{content.openingScript.good}</div>
+              </div>
+            </div>
+          </div>
+        )}
+        {content.timing && (
+          <div className="card" style={{ background: 'var(--ki-bg-alt)', border: 'none', marginBottom: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
+              Bestes Timing
+            </div>
+            {content.timing.map((t, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 6 }}>
+                <span>{t.icon}</span> <span>{t.text}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 4.2 — Reactions (video + reactions list)
+  if (key === '4.2') {
+    return (
+      <div>
+        <VideoBlock />
+        {content.reactions && (
+          <div className="card" style={{ background: 'var(--ki-bg-alt)', border: 'none', marginBottom: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>
+              5 Reaktionen & deine beste Antwort
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {content.reactions.map((r, i) => (
+                <div key={i} style={{ borderBottom: i < content.reactions.length - 1 ? '1px solid var(--ki-border)' : 'none', paddingBottom: 14 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ki-text)', marginBottom: 6 }}>{r.trigger}</div>
+                  <div style={{ fontSize: 12, color: '#dc2626', marginBottom: 6 }}>
+                    <strong>Falle:</strong> {r.trap}
+                  </div>
+                  <div style={{ fontSize: 13, color: '#16a34a', fontWeight: 600 }}>
+                    ✓ {r.answer}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 5.1 — Closing + email template
+  if (key === '5.1') {
+    return (
+      <div>
+        <VideoBlock />
+        {content.closingMistakes && (
+          <div className="card" style={{ background: 'var(--ki-bg-alt)', border: 'none', marginBottom: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>
+              3 Fehler beim Abschluss (und wie du sie vermeidest)
+            </div>
+            {content.closingMistakes.map((m, i) => (
+              <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#dc2626', flexShrink: 0 }}>
+                  {i + 1}
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ki-text)', marginBottom: 2 }}>{m.mistake}</div>
+                  <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', lineHeight: 1.5 }}>Risiko: {m.risk}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {content.emailTemplate && <EmailTemplateWidget template={content.emailTemplate} />}
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%' }}>
+            {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // 5.2 — Final (no variants, three questions, market fact + final assessment)
+  if (key === '5.2') {
+    return (
+      <div>
+        <VideoBlock />
+        {content.noVariants && (
+          <div className="card" style={{ background: 'var(--ki-bg-alt)', border: 'none', marginBottom: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
+              3 Varianten eines "Nein"
+            </div>
+            {content.noVariants.map((v, i) => (
+              <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ki-text)', minWidth: 120 }}>{v.type}</div>
+                <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>→ {v.action}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {content.threeQuestions && (
+          <div className="card" style={{ background: 'var(--ki-bg-alt)', border: 'none', marginBottom: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
+              3 Fragen nach jedem Nein
+            </div>
+            {content.threeQuestions.map((q, i) => (
+              <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8, fontSize: 14, color: 'var(--ki-text)', lineHeight: 1.6 }}>
+                <span style={{ color: 'var(--ki-red)', fontWeight: 700, flexShrink: 0 }}>{i + 1}.</span>
+                <span>{q}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {content.marketSwitchFact && (
+          <div style={{
+            padding: '12px 16px', borderRadius: 10, marginBottom: 24,
+            background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.15)',
+            fontSize: 13, color: '#92400e', lineHeight: 1.6,
+          }}>
+            💡 {content.marketSwitchFact}
+          </div>
+        )}
+        <FinalAssessmentWidget onSave={onMarkComplete} />
+        {isCompleted && (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px', display: 'inline-block' }}>✅ Kurs abgeschlossen +30 XP</span>
+        )}
+      </div>
+    );
+  }
+
+  // Fallback
+  return <VideoLesson lesson={lesson} isCompleted={isCompleted} onMarkComplete={onMarkComplete} saving={saving} />;
+}
+
+// =====================
 function SpeedLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, saving, userId, courseTitle }) {
   const title = (lesson.title || '').toLowerCase();
   const modOrder = lesson._moduleSortOrder ?? -1;
@@ -2158,7 +2677,8 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
   const isLernenCourse = course.id === LERNEN_COURSE_ID;
   const isBalanceCourse = course.id === BALANCE_COURSE_ID;
   const isNetzCourse = course.id === NETZ_COURSE_ID;
-  const isEnhancedCourse = isPrioCourse || isKommCourse || isSpeedCourse || isLernenCourse || isBalanceCourse || isNetzCourse;
+  const isGehaltCourse = course.id === GEHALT_COURSE_ID;
+  const isEnhancedCourse = isPrioCourse || isKommCourse || isSpeedCourse || isLernenCourse || isBalanceCourse || isNetzCourse || isGehaltCourse;
 
   // --- User Phase (Zielgruppen-Personalisierung) ---
   const [userPhase, setUserPhase] = useState(profile?.phase || 'berufseinsteiger');
@@ -2365,6 +2885,15 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                     userId={userId}
                     courseTitle={course.title}
                     userPhase={userPhase}
+                  />
+                ) : isGehaltCourse ? (
+                  <GehaltLessonRouter
+                    lesson={currentLesson}
+                    lessonType={lessonType}
+                    isCompleted={isCompleted}
+                    onMarkComplete={() => markComplete(getXpForType(lessonType))}
+                    saving={saving}
+                    userId={userId}
                   />
                 ) : isNetzCourse ? (
                   <NetworkingLessonRouter
