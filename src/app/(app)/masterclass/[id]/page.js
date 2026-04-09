@@ -1,6 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import CoursePlayerClient from './CoursePlayerClient';
+import PaywallGate from '@/components/PaywallGate';
+import { hasAccess } from '@/lib/access-control';
+
+const GEHALT_COURSE_ID = 'c1000000-0000-0000-0000-000000000007';
 
 export default async function CoursePlayerPage({ params }) {
   const supabase = createClient();
@@ -23,16 +27,21 @@ export default async function CoursePlayerPage({ params }) {
     });
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*, subscription_plan, purchased_products')
+    .eq('id', user.id)
+    .single();
+
+  // Paywall: Gehaltsverhandlung Masterclass nur mit Abo
+  if (params.id === GEHALT_COURSE_ID && !hasAccess(profile, 'masterclass_all')) {
+    return <PaywallGate feature="masterclass" />;
+  }
+
   const { data: progress } = await supabase
     .from('lesson_progress')
     .select('lesson_id, completed, quiz_score, practice_completed')
     .eq('user_id', user.id);
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('total_points, phase')
-    .eq('id', user.id)
-    .single();
 
   // Analyse-Ergebnisse laden (Kompetenz-Scores)
   const { data: analysisResults } = await supabase
