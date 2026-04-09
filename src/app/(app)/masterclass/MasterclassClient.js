@@ -41,110 +41,123 @@ const ANALYSE_TOOLS = [
 // ─── Hardcoded Seminare ───────────────────────────────────────────────────────
 const SEMINARE = [
   {
-    id: 'sem-achtsamkeit', icon: '\u{1F9D8}',
+    id: 'sem-achtsamkeit', icon: '🧘',
     title: 'Achtsamkeit',
     subtitle: 'Gelassenheit ist trainierbar',
-    description: 'Nur selten nimmt man sich neben dem Beruf und reiz\u00FCberfluteten Alltag Zeit f\u00FCr sich und die eigenen Bed\u00FCrfnisse.',
+    description: 'Nur selten nimmt man sich neben dem Beruf und reizüberfluteten Alltag Zeit für sich und die eigenen Bedürfnisse.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-04-12',
   },
   {
-    id: 'sem-homeoffice', icon: '\u{1F3E0}',
+    id: 'sem-homeoffice', icon: '🏠',
     title: 'Arbeiten aus dem Home Office',
     subtitle: 'Effizient arbeiten, flexibel leben',
     description: 'Strategien und Impulse, um auch von zu Hause aus ausgeglichen und effektiv deiner Arbeit nachzugehen.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-04-19',
   },
   {
-    id: 'sem-knigge', icon: '\u{1F454}',
+    id: 'sem-knigge', icon: '👔',
     title: 'Business Knigge',
-    subtitle: 'Der erste Eindruck z\u00E4hlt, der zweite bleibt',
-    description: 'Die richtigen Formen und Kommunikationsf\u00E4higkeiten im Berufs- und Gesch\u00E4ftsumfeld.',
+    subtitle: 'Der erste Eindruck zählt, der zweite bleibt',
+    description: 'Die richtigen Formen und Kommunikationsfähigkeiten im Berufs- und Geschäftsumfeld.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-04-26',
   },
   {
-    id: 'sem-kommunikation', icon: '\u{1F4AC}',
+    id: 'sem-kommunikation', icon: '💬',
     title: 'Kommunikation',
-    subtitle: 'Verst\u00E4ndigung als Schl\u00FCssel zum Erfolg',
-    description: 'Effektive Kommunikation mit Kollegen und Gesch\u00E4ftspartnern.',
+    subtitle: 'Verständigung als Schlüssel zum Erfolg',
+    description: 'Effektive Kommunikation mit Kollegen und Geschäftspartnern.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-05-03',
   },
   {
-    id: 'sem-konflikt', icon: '\u{1F91C}',
+    id: 'sem-konflikt', icon: '🤜',
     title: 'Konfliktmanagement',
     subtitle: 'Aus Krisen Chancen machen',
-    description: 'Strategien und Techniken zur erfolgreichen Konfliktbew\u00E4ltigung.',
+    description: 'Strategien und Techniken zur erfolgreichen Konfliktbewältigung.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-05-10',
   },
   {
-    id: 'sem-motivation', icon: '\u{1F525}',
+    id: 'sem-motivation', icon: '🔥',
     title: 'Selbstmotivation',
     subtitle: 'Dein Warum, dein Motor',
     description: 'Wie du dich effektiv motivierst, langfristig und diszipliniert an eigenen Zielen arbeitest.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-05-17',
   },
   {
-    id: 'sem-networking', icon: '\u{1F91D}',
+    id: 'sem-networking', icon: '🤝',
     title: 'Networking',
-    subtitle: 'Kontakte kn\u00FCpfen, Vertrauen aufbauen',
-    description: 'F\u00E4higkeiten im Aufbau und der Pflege von beruflichen Beziehungen verbessern.',
+    subtitle: 'Kontakte knüpfen, Vertrauen aufbauen',
+    description: 'Fähigkeiten im Aufbau und der Pflege von beruflichen Beziehungen verbessern.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-05-24',
   },
   {
-    id: 'sem-leadership', icon: '\u{1F451}',
+    id: 'sem-leadership', icon: '👑',
     title: 'Personal Leadership',
-    subtitle: 'Authentisch f\u00FChren, wirksam bleiben',
-    description: 'Wie du aus W\u00FCnschen echte Ziele machst und diese erreichen kannst.',
+    subtitle: 'Authentisch führen, wirksam bleiben',
+    description: 'Wie du aus Wünschen echte Ziele machst und diese erreichen kannst.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-05-31',
   },
   {
-    id: 'sem-prioritaeten', icon: '\u{1F3AF}',
-    title: 'Priorit\u00E4tenmanagement',
+    id: 'sem-prioritaeten', icon: '🎯',
+    title: 'Prioritätenmanagement',
     subtitle: 'Nicht alles gleichzeitig, sondern das Richtige zuerst',
-    description: 'Bewusster Umgang mit unserer Zeit als Schl\u00FCssel zum beruflichen Erfolg.',
+    description: 'Bewusster Umgang mit unserer Zeit als Schlüssel zum beruflichen Erfolg.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-06-07',
   },
   {
-    id: 'sem-rhetorik', icon: '\u{1F3A4}',
+    id: 'sem-rhetorik', icon: '🎤',
     title: 'Rhetorik, Dialektik, Kinesik',
-    subtitle: '\u00DCberzeugen mit Worten und Wirkung',
+    subtitle: 'Überzeugen mit Worten und Wirkung',
     description: 'Wirkungsvoll, passend und adressatengerecht kommunizieren in jeder Situation.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-06-14',
   },
   {
-    id: 'sem-speedreading', icon: '\u{1F4D6}',
+    id: 'sem-speedreading', icon: '📖',
     title: 'Speedreading',
-    subtitle: 'Geschwindigkeit trifft Verst\u00E4ndnis',
-    description: 'Grundlagen des \u00FCberdurchschnittlich schnellen Lesens mit hohem Textverst\u00E4ndnis.',
+    subtitle: 'Geschwindigkeit trifft Verständnis',
+    description: 'Grundlagen des überdurchschnittlich schnellen Lesens mit hohem Textverständnis.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-06-21',
   },
   {
-    id: 'sem-typgerecht', icon: '\u{1F9E0}',
+    id: 'sem-typgerecht', icon: '🧠',
     title: 'Typgerechtes Lernen',
     subtitle: 'Finde deinen Weg zum Wissen',
     description: 'Warum lernen, denken und vergessen wir unterschiedlich? Was motiviert uns zum Lernen?',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-06-28',
   },
   {
-    id: 'sem-worklife', icon: '\u2696\uFE0F',
+    id: 'sem-worklife', icon: '⚖️',
     title: 'Work-Life-Balance',
     subtitle: 'Gesundheit trifft Leistung',
     description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.',
     teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    next_date: '2026-07-05',
   },
 ];
+
+// ─── Seminar Kalender Helper ──────────────────────────────────────────────────
+function groupByMonth(seminare) {
+  const groups = {};
+  seminare.forEach(s => {
+    if (!s.next_date) return;
+    const d = new Date(s.next_date);
+    const key = d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(s);
+  });
+  return groups;
+}
 
 // ─── MS Teams Live helper ─────────────────────────────────────────────────────
 function isSeminarLive(nextDate) {
@@ -506,106 +519,135 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
       {/* ── Seminare Section ── */}
       {showSeminare && (
         <section style={{ marginBottom: 48 }}>
-          <h2
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              letterSpacing: '-0.03em',
-              marginBottom: 16,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
             🎓 Seminare
-            <span className="pill pill-green" style={{ fontSize: 12 }}>
-              Live
-            </span>
+            <span className="pill pill-green" style={{ fontSize: 12 }}>Live</span>
           </h2>
-          <div className="grid-2">
-            {SEMINARE.map((seminar, i) => (
-              <div
-                key={seminar.id}
-                className="card animate-in"
-                style={{
-                  animationDelay: `${i * 0.06}s`,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 12,
-                }}
-              >
-                {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <span style={{ fontSize: 32 }}>{seminar.icon}</span>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em', lineHeight: 1.3 }}>{seminar.title}</div>
-                      <div style={{ fontSize: 13, color: 'var(--ki-red)', fontWeight: 500 }}>{seminar.subtitle}</div>
+
+          {/* ── Mitgliedschaft CTA ── */}
+          <div style={{
+            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+            borderRadius: 'var(--r-lg)', padding: '20px 24px', marginBottom: 24,
+            display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
+          }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 4 }}>
+                Alle 13 Seminare — mit Mitgliedschaft
+              </div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>
+                Einzeln ab 99 € · Oder: Unbegrenzter Zugang mit dem Masterclass-Abo
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
+              <a href="/angebote" className="btn btn-primary" style={{ fontSize: 13, padding: '10px 20px', background: '#CC1426' }}>
+                Mitgliedschaft starten →
+              </a>
+              <a href="/angebote" style={{ fontSize: 13, padding: '10px 20px', borderRadius: 'var(--r-md)', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                Einzeln buchen
+              </a>
+            </div>
+          </div>
+
+          {/* ── Kalenderansicht ── */}
+          <div className="card" style={{ marginBottom: 24, padding: '0', overflow: 'hidden' }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--ki-border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 16 }}>📅</span>
+              <span style={{ fontSize: 14, fontWeight: 700 }}>Termine 2026</span>
+              <span style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginLeft: 4 }}>Samstags · 09:30 – 12:00 Uhr · Online via Teams</span>
+            </div>
+            {Object.entries(groupByMonth(SEMINARE)).map(([month, sems]) => (
+              <div key={month}>
+                <div style={{ padding: '10px 20px 6px', fontSize: 11, fontWeight: 700, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', background: 'var(--ki-bg-alt)', borderBottom: '1px solid var(--ki-border)' }}>
+                  {month}
+                </div>
+                {sems.map((s, i) => {
+                  const d = new Date(s.next_date);
+                  const isLive = isSeminarLive(s.next_date);
+                  return (
+                    <div key={s.id} style={{
+                      display: 'flex', alignItems: 'center', gap: 16, padding: '12px 20px',
+                      borderBottom: '1px solid var(--ki-border)',
+                      background: isLive ? 'rgba(34,197,94,0.04)' : 'transparent',
+                    }}>
+                      <div style={{ width: 44, textAlign: 'center', flexShrink: 0 }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase' }}>
+                          {d.toLocaleDateString('de-DE', { weekday: 'short' })}
+                        </div>
+                        <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--ki-text)', lineHeight: 1.2 }}>
+                          {d.getDate().toString().padStart(2, '0')}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 18, flexShrink: 0 }}>{s.icon}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text)' }}>{s.title}</div>
+                        <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)' }}>{s.subtitle}</div>
+                      </div>
+                      {isLive ? (
+                        <a href={s.teams_link} target="_blank" rel="noopener noreferrer"
+                          style={{ fontSize: 12, fontWeight: 700, color: '#16a34a', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          🔴 Live →
+                        </a>
+                      ) : (
+                        <a href="/angebote" style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-red)', textDecoration: 'none', flexShrink: 0 }}>
+                          Buchen →
+                        </a>
+                      )}
                     </div>
-                  </div>
-                  <span className="pill pill-green" style={{ fontSize: 11, flexShrink: 0 }}>Live</span>
-                </div>
-
-                {/* Description */}
-                <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.5 }}>{seminar.description}</p>
-
-                {/* Meta */}
-                <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <span>{'\u{1F4C5}'} Samstags</span>
-                  <span>|</span>
-                  <span>{'\u23F0'} 09:30 \u2013 12:00</span>
-                  <span>|</span>
-                  <span style={{ fontWeight: 600, color: 'var(--ki-text)' }}>Ab 99\u20AC</span>
-                </div>
-
-                {/* Includes */}
-                <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)' }}>
-                  Inkl. Arbeitsmaterialien + Teilnahme-Zertifikat
-                </div>
-
-                {/* CTA + Teams Button */}
-                <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
-                  <a
-                    href="/angebote"
-                    className="btn btn-secondary"
-                    style={{ fontSize: 13, padding: '9px 18px' }}
-                  >
-                    Buchen →
-                  </a>
-                  {isSeminarLive(seminar.next_date) ? (
-                    <a
-                      href={seminar.teams_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-primary"
-                      style={{
-                        fontSize: 13, padding: '9px 18px',
-                        background: '#CC1426',
-                        animation: 'pulse 1.5s ease-in-out infinite',
-                        display: 'inline-flex', alignItems: 'center', gap: 6,
-                      }}
-                    >
-                      {'\uD83D\uDD34'} JETZT LIVE — Teilnehmen
-                    </a>
-                  ) : (
-                    <span
-                      style={{
-                        fontSize: 12, padding: '9px 14px',
-                        borderRadius: 'var(--r-md)',
-                        background: 'var(--ki-bg-alt)',
-                        color: 'var(--ki-text-tertiary)',
-                        display: 'inline-flex', alignItems: 'center', gap: 6,
-                        border: '1px solid var(--ki-border)',
-                      }}
-                    >
-                      {'\u{1F4BB}'} {seminar.next_date
-                        ? `N\u00E4chster Termin: ${new Date(seminar.next_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`
-                        : 'Termin folgt'}
-                    </span>
-                  )}
-                </div>
+                  );
+                })}
               </div>
             ))}
+          </div>
+
+          {/* ── Seminar Cards ── */}
+          <div className="grid-2">
+            {SEMINARE.map((seminar, i) => {
+              const isLive = isSeminarLive(seminar.next_date);
+              const dateStr = seminar.next_date
+                ? new Date(seminar.next_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                : 'Termin folgt';
+              return (
+                <div key={seminar.id} className="card animate-in" style={{ animationDelay: `${i * 0.04}s`, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                      <span style={{ fontSize: 28 }}>{seminar.icon}</span>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.02em', lineHeight: 1.3 }}>{seminar.title}</div>
+                        <div style={{ fontSize: 12, color: 'var(--ki-red)', fontWeight: 500 }}>{seminar.subtitle}</div>
+                      </div>
+                    </div>
+                    {isLive && <span className="pill pill-green" style={{ fontSize: 11, flexShrink: 0 }}>🔴 Live</span>}
+                  </div>
+
+                  <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.5, margin: 0 }}>{seminar.description}</p>
+
+                  <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <span>📅 {dateStr}</span>
+                    <span>· ⏰ 09:30 – 12:00</span>
+                    <span>· Inkl. Zertifikat</span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                    {isLive ? (
+                      <a href={seminar.teams_link} target="_blank" rel="noopener noreferrer"
+                        className="btn btn-primary"
+                        style={{ fontSize: 13, padding: '9px 18px', background: '#CC1426', animation: 'pulse 1.5s ease-in-out infinite' }}>
+                        🔴 JETZT LIVE — Teilnehmen
+                      </a>
+                    ) : (
+                      <>
+                        <a href="/angebote" className="btn btn-primary" style={{ fontSize: 13, padding: '9px 18px' }}>
+                          Einzeln buchen · 99 €
+                        </a>
+                        <a href="/angebote" className="btn btn-secondary" style={{ fontSize: 13, padding: '9px 18px' }}>
+                          Mit Abo →
+                        </a>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       )}
