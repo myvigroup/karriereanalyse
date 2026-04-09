@@ -1,6 +1,6 @@
 export const metadata = {
   title: 'Online-Seminare — Karriere-Institut',
-  description: '13 Online-Seminare zu Karriere, Leadership und Persönlichkeit. Jeden Samstag live via Microsoft Teams. Einzeln buchbar ab 99 € oder mit der KI-Mitgliedschaft.',
+  description: '13 Online-Seminare zu Karriere, Leadership und Persönlichkeit. Jeden Samstag live via Microsoft Teams. Einzeln buchbar ab 99 € oder mit der Premium-Mitgliedschaft für 15 €/Monat.',
 };
 
 const SEMINARE = [
@@ -89,7 +89,7 @@ export default function SeminarePage() {
               Seminar einzeln buchen — 99 € pro Termin
             </div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
-              Oder mit der KI-Mitgliedschaft: alle Seminare + Masterclasses für 15 €/Monat
+              Oder Premium-Mitgliedschaft: 1x Seminar/Monat + CV-Check + Coaching für 15 €/Monat
             </div>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
@@ -104,7 +104,7 @@ export default function SeminarePage() {
               background: 'rgba(255,255,255,0.08)', color: 'white', textDecoration: 'none',
               border: '1px solid rgba(255,255,255,0.15)',
             }}>
-              KI-Mitgliedschaft
+              Premium-Mitgliedschaft
             </a>
           </div>
         </div>
@@ -155,7 +155,7 @@ export default function SeminarePage() {
           Weitere Seminare
         </h2>
         <p style={{ fontSize: 13, color: '#9A9A9A', marginBottom: 28 }}>
-          Termine werden in Kürze bekanntgegeben — mit der KI-Mitgliedschaft automatisch inklusive
+          Termine werden in Kürze bekanntgegeben — mit der Premium-Mitgliedschaft automatisch inklusive
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
@@ -183,32 +183,68 @@ export default function SeminarePage() {
       {/* Mitgliedschaft CTA */}
       <section style={{ maxWidth: 860, margin: '0 auto', padding: '0 24px 96px' }}>
         <div style={{
-          background: 'linear-gradient(135deg, #CC1426 0%, #a01020 100%)',
-          borderRadius: 20, padding: '48px 40px', color: 'white', textAlign: 'center',
+          background: 'linear-gradient(135deg, #1A1A1A 0%, #2C2C2E 100%)',
+          borderRadius: 20, padding: '48px 40px', color: 'white',
         }}>
-          <div style={{ fontSize: 36, marginBottom: 16 }}>⭐</div>
-          <h2 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 10 }}>
-            Alle 13 Seminare für 15 €/Monat
-          </h2>
-          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.7)', maxWidth: 460, margin: '0 auto 28px', lineHeight: 1.6 }}>
-            Mit der KI-Mitgliedschaft erhältst du unbegrenzten Zugang zu allen Seminaren, Masterclasses und E-Learning-Kursen.
-          </p>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="/angebote" style={{
-              fontSize: 15, fontWeight: 600, padding: '14px 32px', borderRadius: 999,
-              background: 'white', color: '#CC1426', textDecoration: 'none',
+          {/* Haupt-Hook */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 40, flexWrap: 'wrap', marginBottom: 36 }}>
+            <div style={{ flex: 1, minWidth: 260 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 12 }}>
+                Premium-Mitgliedschaft
+              </div>
+              <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 12, lineHeight: 1.15 }}>
+                1 Seminar pro Monat.<br />
+                <span style={{ color: '#CC1426' }}>Für 15 €.</span>
+              </h2>
+              <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: 0 }}>
+                Ein Seminar-Platz kostet einzeln 99 €. Mit der Premium-Mitgliedschaft
+                ist er jeden Monat inklusive — plus alle E-Learnings obendrauf.
+              </p>
+            </div>
+
+            {/* Value-Rechnung */}
+            <div style={{
+              background: 'rgba(204,20,38,0.12)', border: '1px solid rgba(204,20,38,0.25)',
+              borderRadius: 14, padding: '20px 24px', minWidth: 220, flexShrink: 0,
             }}>
-              KI-Mitgliedschaft starten →
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
+                Dein monatlicher Wert
+              </div>
+              {[
+                ['1x Seminar', '99 €'],
+                ['E-Learning Kurse', '49 €'],
+                ['Karriere-Analyse', 'inkl.'],
+              ].map(([label, val]) => (
+                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 13, marginBottom: 8 }}>
+                  <span style={{ color: 'rgba(255,255,255,0.65)' }}>{label}</span>
+                  <span style={{ fontWeight: 700, color: val === 'inkl.' ? 'rgba(255,255,255,0.35)' : 'white' }}>{val}</span>
+                </div>
+              ))}
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 8, paddingTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', textDecoration: 'line-through' }}>148 €/Monat</span>
+                <span style={{ fontSize: 18, fontWeight: 800, color: '#CC1426' }}>15 €/Monat</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <a href="/angebote" style={{
+              fontSize: 14, fontWeight: 700, padding: '14px 28px', borderRadius: 999,
+              background: '#CC1426', color: 'white', textDecoration: 'none',
+            }}>
+              7 Tage kostenlos testen →
             </a>
             <a href="/angebote" style={{
-              fontSize: 14, fontWeight: 500, padding: '14px 24px', borderRadius: 999,
-              background: 'rgba(255,255,255,0.12)', color: 'white', textDecoration: 'none',
-              border: '1px solid rgba(255,255,255,0.2)',
+              fontSize: 13, fontWeight: 500, padding: '14px 22px', borderRadius: 999,
+              background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.75)', textDecoration: 'none',
+              border: '1px solid rgba(255,255,255,0.12)',
             }}>
-              Seminar einzeln buchen
+              Seminar einzeln · 99 €
             </a>
           </div>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 14 }}>7 Tage kostenlos testen · Monatlich kündbar</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 14 }}>
+            Monatlich kündbar · Kein Risiko
+          </p>
         </div>
       </section>
 

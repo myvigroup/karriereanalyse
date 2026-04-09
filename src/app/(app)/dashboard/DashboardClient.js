@@ -2,52 +2,13 @@
 import { useMemo } from 'react';
 import { berechnePersonalisierung } from '@/lib/personalization';
 
-// ─── Messe-Angebot Upsell ────────────────────────────────────────────────────
-const MESSE_OFFERS = [
-  {
-    key: 'analyse',
-    icon: '◎',
-    color: '#CC1426',
-    title: 'Karriere-Analyse',
-    sub: 'Dein persönliches Karriere-Blutbild',
-    bullets: ['12 Kompetenzfelder', 'Stärken & Schwächen', 'Kursempfehlungen'],
-    badge: 'Messe-Angebot',
-    cta: 'Jetzt starten →',
-    href: '/analyse',
-  },
-  {
-    key: 'masterclass',
-    icon: '💰',
-    color: '#d97706',
-    title: 'Gehaltsverhandlung Mastery',
-    sub: '7–12 % mehr Gehalt — mit System',
-    bullets: ['5 Module · 55 Min.', 'Interaktive Simulationen', 'Konkrete Skripte'],
-    badge: '7 Tage gratis',
-    cta: 'Kostenlos testen →',
-    href: '/angebote',
-  },
-  {
-    key: 'coaching',
-    icon: '🎯',
-    color: '#2563EB',
-    title: 'Persönliches Coaching',
-    sub: 'Vorbereitung auf deinen Einstellungsprozess',
-    bullets: ['60 Min. 1:1 Session', 'Persönlicher Aktionsplan', 'Konkrete nächste Schritte'],
-    badge: null,
-    cta: 'Termin buchen →',
-    href: '/angebote',
-  },
-];
-
 function MesseAngebotBlock({ fairLead, profile }) {
   const purchased = profile?.purchased_products || [];
   const plan = profile?.subscription_plan || 'FREE';
-  const hasAnalyse = purchased.includes('ANALYSE_STUDENT') || purchased.includes('ANALYSE_PRO') || plan !== 'FREE';
-  const hasMasterclass = plan === 'MASTERCLASS' || plan === 'TEAM';
-  const hasCoaching = purchased.includes('COACHING');
+  const isPremium = plan !== 'FREE';
 
-  // Block ausblenden wenn alles gekauft
-  if (hasAnalyse && hasMasterclass && hasCoaching) return null;
+  // Block ausblenden wenn bereits Premium
+  if (isPremium) return null;
 
   const fairName = fairLead?.fairs?.name;
 
@@ -55,99 +16,89 @@ function MesseAngebotBlock({ fairLead, profile }) {
     <div style={{
       marginBottom: 28,
       borderRadius: 'var(--r-lg)',
-      border: '1px solid rgba(204,20,38,0.15)',
       overflow: 'hidden',
+      border: '1px solid rgba(204,20,38,0.2)',
     }}>
       {/* Header */}
       <div style={{
         background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
         padding: '16px 20px',
-        display: 'flex', alignItems: 'center', gap: 12,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
       }}>
-        <div style={{ fontSize: 20 }}>🎪</div>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
-            {fairName ? `Exklusiv nach der ${fairName}` : 'Exklusiv für Messe-Besucher'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ fontSize: 20 }}>🎪</div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
+              {fairName ? `Dein Messe-Angebot nach der ${fairName}` : 'Dein exklusives Messe-Angebot'}
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
+              CV-Check erledigt — jetzt den nächsten Schritt machen
+            </div>
           </div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
-            Dein nächster Schritt nach dem Lebenslauf-Check
-          </div>
+        </div>
+        <div style={{
+          fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 980,
+          background: 'rgba(204,20,38,0.2)', color: '#ff6b7a', border: '1px solid rgba(204,20,38,0.3)',
+          flexShrink: 0,
+        }}>
+          7 Tage gratis
         </div>
       </div>
 
-      {/* Progress Steps */}
-      <div style={{
-        background: 'rgba(204,20,38,0.03)', padding: '12px 20px',
-        borderBottom: '1px solid var(--ki-border)',
-        display: 'flex', alignItems: 'center', gap: 8, fontSize: 12,
-        color: 'var(--ki-text-tertiary)', flexWrap: 'wrap',
-      }}>
-        <span style={{ color: 'var(--ki-success)', fontWeight: 700 }}>✓ CV eingereicht</span>
-        <span>→</span>
-        <span style={{ color: hasAnalyse ? 'var(--ki-success)' : 'var(--ki-text)', fontWeight: hasAnalyse ? 700 : 400 }}>
-          {hasAnalyse ? '✓' : '○'} Analyse
-        </span>
-        <span>→</span>
-        <span style={{ color: hasMasterclass ? 'var(--ki-success)' : 'var(--ki-text)', fontWeight: hasMasterclass ? 700 : 400 }}>
-          {hasMasterclass ? '✓' : '○'} Masterclass
-        </span>
-        <span>→</span>
-        <span style={{ color: hasCoaching ? 'var(--ki-success)' : 'var(--ki-text)', fontWeight: hasCoaching ? 700 : 400 }}>
-          {hasCoaching ? '✓' : '○'} Coaching
-        </span>
-        <span>→</span>
-        <span>🏆 Bewerbung</span>
-      </div>
+      {/* Premium-Mitgliedschaft Pitch */}
+      <div style={{ padding: '20px', background: 'var(--ki-card)' }}>
+        {/* Value Hook */}
+        <div style={{
+          display: 'flex', alignItems: 'flex-start', gap: 16,
+          padding: '16px 18px', borderRadius: 'var(--r-md)',
+          background: 'rgba(204,20,38,0.04)', border: '1px solid rgba(204,20,38,0.1)',
+          marginBottom: 14,
+        }}>
+          <div style={{ fontSize: 28, flexShrink: 0 }}>💎</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ki-text)', marginBottom: 3 }}>
+              Premium-Mitgliedschaft — 15 €/Monat
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.5 }}>
+              Jeden Monat ein Seminar-Platz im Wert von <strong>99 €</strong> inklusive — plus alle E-Learning Kurse und die Gehaltsverhandlungs-Masterclass.
+            </div>
+          </div>
+        </div>
 
-      {/* Offer Cards */}
-      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {MESSE_OFFERS.map((offer) => {
-          const done = (offer.key === 'analyse' && hasAnalyse) ||
-                       (offer.key === 'masterclass' && hasMasterclass) ||
-                       (offer.key === 'coaching' && hasCoaching);
-          if (done) return null;
-
-          return (
-            <a key={offer.key} href={offer.href} style={{ textDecoration: 'none' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px',
-                borderRadius: 'var(--r-md)', background: 'var(--ki-card)',
-                border: `1px solid var(--ki-border)`,
-                transition: 'border-color 0.15s',
-              }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: 'var(--r-md)', flexShrink: 0,
-                  background: `color-mix(in srgb, ${offer.color} 10%, transparent)`,
-                  border: `1px solid color-mix(in srgb, ${offer.color} 25%, transparent)`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
-                }}>
-                  {offer.icon}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ki-text)' }}>{offer.title}</span>
-                    {offer.badge && (
-                      <span style={{
-                        fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 980,
-                        background: `color-mix(in srgb, ${offer.color} 12%, transparent)`,
-                        color: offer.color, border: `1px solid color-mix(in srgb, ${offer.color} 25%, transparent)`,
-                      }}>{offer.badge}</span>
-                    )}
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginBottom: 6 }}>{offer.sub}</div>
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    {offer.bullets.map((b, i) => (
-                      <span key={i} style={{ fontSize: 11, color: 'var(--ki-text-tertiary)' }}>· {b}</span>
-                    ))}
-                  </div>
-                </div>
-                <span style={{ fontSize: 12, fontWeight: 700, color: offer.color, flexShrink: 0, whiteSpace: 'nowrap' }}>
-                  {offer.cta}
-                </span>
+        {/* Mini Feature Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+          {[
+            ['📅', '1x Seminar/Monat', '(Wert 99 €)'],
+            ['💰', 'Gehaltsverhandlung Mastery', 'inklusive'],
+            ['◎', 'Karriere-Analyse', 'vollständig'],
+            ['📚', 'Alle E-Learning Kurse', 'inklusive'],
+          ].map(([icon, title, sub]) => (
+            <div key={title} style={{
+              display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 12px',
+              borderRadius: 'var(--r-sm)', background: 'var(--ki-bg-alt)',
+              border: '1px solid var(--ki-border)',
+            }}>
+              <span style={{ fontSize: 15, flexShrink: 0 }}>{icon}</span>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text)', lineHeight: 1.3 }}>{title}</div>
+                <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)' }}>{sub}</div>
               </div>
-            </a>
-          );
-        })}
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <a href="/angebote" className="btn btn-primary" style={{ flex: 1, textAlign: 'center', fontSize: 13 }}>
+            7 Tage kostenlos testen →
+          </a>
+          <a href="/angebote" style={{
+            fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)',
+            textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
+          }}>
+            oder Seminar einzeln buchen
+          </a>
+        </div>
       </div>
     </div>
   );

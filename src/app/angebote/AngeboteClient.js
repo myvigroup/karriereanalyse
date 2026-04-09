@@ -115,9 +115,9 @@ export default function AngeboteClient() {
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ki-red)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
             {interval === 'yearly' ? 'Jährliches Abo' : 'Monatliches Abo'}
           </div>
-          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8 }}>KI-Mitgliedschaft</h2>
-          <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 24, lineHeight: 1.55 }}>
-            Alle Seminare, alle Masterclasses — unbegrenzter Zugang.
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8 }}>Premium-Mitgliedschaft</h2>
+          <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 16, lineHeight: 1.55 }}>
+            1 Seminar pro Monat inklusive — der Seminar-Platz allein kostet 99 €.
           </p>
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
@@ -127,20 +127,23 @@ export default function AngeboteClient() {
             <span style={{ fontSize: 15, color: 'var(--ki-text-secondary)' }}>/Monat</span>
           </div>
           {interval === 'yearly' ? (
-            <div style={{ fontSize: 13, color: 'var(--ki-success)', fontWeight: 600, marginBottom: 28 }}>
+            <div style={{ fontSize: 13, color: 'var(--ki-success)', fontWeight: 600, marginBottom: 4 }}>
               = {yearlyTotal} €/Jahr · Du sparst {yearlySavings} €
             </div>
           ) : (
-            <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 28 }}>7 Tage kostenlos testen</div>
+            <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 4 }}>7 Tage kostenlos testen</div>
           )}
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-red)', marginBottom: 20 }}>
+            Seminar-Wert allein: 99 €/Monat
+          </div>
 
           <ul style={{ listStyle: 'none', marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[
-              'Alle 13 Seminare inklusive',
-              'Gehaltsverhandlung Masterclass',
-              'Alle weiteren E-Learning Kurse',
+              '1x Premium-Seminar pro Monat (Wert 99 €)',
+              'Alle E-Learning Masterclasses',
+              'Gehaltsverhandlung Mastery inklusive',
+              'Karriere-Analyse vollständig',
               'Neue Inhalte jeden Monat',
-              'Zertifikate für alle Kurse',
             ].map((f, i) => (
               <li key={i} style={{ fontSize: 14, color: 'var(--ki-text-secondary)', display: 'flex', gap: 8 }}>
                 <span style={{ color: 'var(--ki-success)', fontWeight: 700 }}>✓</span> {f}
@@ -154,7 +157,7 @@ export default function AngeboteClient() {
             disabled={loading === 'MASTERCLASS'}
             style={{ width: '100%', marginTop: 'auto' }}
           >
-            {loading === 'MASTERCLASS' ? 'Wird geladen...' : interval === 'yearly' ? 'Jetzt jährlich starten' : '7 Tage kostenlos testen'}
+            {loading === 'MASTERCLASS' ? 'Wird geladen...' : interval === 'yearly' ? 'Premium-Mitgliedschaft starten' : '7 Tage kostenlos testen'}
           </button>
         </div>
       </section>

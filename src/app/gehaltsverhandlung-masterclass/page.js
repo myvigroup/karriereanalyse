@@ -222,26 +222,68 @@ export default function GehaltsverhandlungMasterclassPage() {
       </section>
 
       {/* Pricing CTA */}
-      <section style={{ maxWidth: 600, margin: '0 auto', padding: '0 24px 96px', textAlign: 'center' }}>
-        <h2 style={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.15, marginBottom: 12 }}>
-          Starte jetzt — einmalig 49 €
-        </h2>
-        <p style={{ fontSize: 15, color: '#6B6B6B', marginBottom: 8, lineHeight: 1.6 }}>
-          Oder hol dir die KI-Mitgliedschaft und erhalte Zugang zu allen Kursen & Seminaren für 15 €/Monat.
-        </p>
-        <p style={{ fontSize: 13, color: '#CC1426', fontWeight: 600, marginBottom: 32 }}>
-          🎪 Messe-Aktionspreis: 49 € statt 99 €
-        </p>
-        <a href="/angebote/masterclass" style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          fontSize: 16, fontWeight: 600, padding: '16px 36px', borderRadius: 14,
-          background: '#CC1426', color: 'white', textDecoration: 'none',
-          boxShadow: '0 2px 12px rgba(204,20,38,0.25)',
-        }}>
-          Jetzt für 49 € kaufen →
-        </a>
-        <p style={{ fontSize: 12, color: '#9A9A9A', marginTop: 12 }}>
-          Sicher & verschlüsselt über Stripe
+      <section style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px 96px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          {/* Einzelkauf */}
+          <div style={{ background: 'white', borderRadius: 16, padding: '32px 28px', border: '1px solid #E8E6E1', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#9A9A9A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Einzelkauf</div>
+            <div style={{ fontSize: 32, fontWeight: 800, letterSpacing: '-0.03em', color: '#CC1426', marginBottom: 4 }}>49 €</div>
+            <div style={{ fontSize: 13, color: '#9A9A9A', textDecoration: 'line-through', marginBottom: 6 }}>99 €</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#CC1426', marginBottom: 20 }}>🎪 Messe-Aktionspreis</div>
+            <ul style={{ listStyle: 'none', margin: '0 0 24px', padding: 0, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+              {['5 Module · 17 Lektionen', 'Interaktive Simulationen', 'Gesprächsskripte', 'Lebenslanger Zugang', 'Kurs-Zertifikat'].map((f) => (
+                <li key={f} style={{ fontSize: 13, color: '#6B6B6B', display: 'flex', gap: 8 }}>
+                  <span style={{ color: '#2D6A4F', fontWeight: 700 }}>✓</span> {f}
+                </li>
+              ))}
+            </ul>
+            <a href="/angebote/masterclass" style={{
+              display: 'block', textAlign: 'center', fontSize: 14, fontWeight: 600, padding: '12px', borderRadius: 10,
+              background: '#F0EFE9', color: '#1A1A1A', textDecoration: 'none', border: '1px solid #E8E6E1',
+            }}>
+              Jetzt für 49 € kaufen →
+            </a>
+          </div>
+
+          {/* Premium-Mitgliedschaft */}
+          <div style={{ background: '#1A1A1A', borderRadius: 16, padding: '32px 28px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+            <div style={{
+              position: 'absolute', top: -11, left: '50%', transform: 'translateX(-50%)',
+              background: '#CC1426', color: 'white', fontSize: 11, fontWeight: 700,
+              padding: '4px 14px', borderRadius: 999, whiteSpace: 'nowrap',
+            }}>⭐ Empfohlen</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Premium-Mitgliedschaft</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
+              <span style={{ fontSize: 32, fontWeight: 800, color: 'white', letterSpacing: '-0.03em' }}>15 €</span>
+              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)' }}>/Monat</span>
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#CC1426', marginBottom: 4 }}>
+              + 1 Seminar/Monat (Wert 99 €) inklusive
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginBottom: 20 }}>7 Tage kostenlos testen · monatlich kündbar</div>
+            <ul style={{ listStyle: 'none', margin: '0 0 24px', padding: 0, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+              {[
+                'Gehaltsverhandlung Mastery inklusive',
+                '1x Premium-Seminar pro Monat (99 €)',
+                'Alle weiteren E-Learning Kurse',
+                'Karriere-Analyse vollständig',
+                'Neue Inhalte jeden Monat',
+              ].map((f) => (
+                <li key={f} style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', display: 'flex', gap: 8 }}>
+                  <span style={{ color: '#CC1426', fontWeight: 700 }}>✓</span> {f}
+                </li>
+              ))}
+            </ul>
+            <a href="/angebote/masterclass" style={{
+              display: 'block', textAlign: 'center', fontSize: 14, fontWeight: 700, padding: '12px', borderRadius: 10,
+              background: '#CC1426', color: 'white', textDecoration: 'none',
+            }}>
+              7 Tage kostenlos testen →
+            </a>
+          </div>
+        </div>
+        <p style={{ fontSize: 12, color: '#9A9A9A', marginTop: 16, textAlign: 'center' }}>
+          Sicher & verschlüsselt über Stripe · Monatlich kündbar
         </p>
       </section>
 
