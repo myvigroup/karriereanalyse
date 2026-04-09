@@ -15,21 +15,9 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { setError(error.message); setLoading(false); return; }
-
-    // Rolle prüfen → Advisor/Messeleiter/Admin direkt zum Berater-Dashboard
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', data.user.id)
-      .maybeSingle();
-
-    if (['advisor', 'messeleiter', 'admin'].includes(profile?.role)) {
-      window.location.href = '/advisor';
-    } else {
-      window.location.href = '/dashboard';
-    }
+    router.push('/dashboard');
   }
 
   return (
@@ -90,6 +78,12 @@ export default function LoginPage() {
           <div style={{ textAlign: 'center', marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--ki-border)' }}>
             <span style={{ fontSize: 14, color: 'var(--ki-text-secondary)' }}>Noch kein Konto? </span>
             <a href="/auth/register" style={{ fontSize: 14, fontWeight: 600 }}>Jetzt registrieren</a>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: 16 }}>
+            <a href="/advisor/login" style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', textDecoration: 'none' }}>
+              Du bist Berater? → Berater-Portal
+            </a>
           </div>
         </div>
       </div>
