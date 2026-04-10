@@ -14,6 +14,7 @@ export const LESSON_CONTENT = {
     type: 'video_with_input',
     title: 'Warum du aktuell unterbezahlt bist',
     duration: '3 Min.',
+    vimeo_id: '1181945346',
     takeaways: [
       'Jede Stelle hat ein Gehaltsband — wer nicht verhandelt, landet unten',
       'HR plant 1.000–5.000 € Spielraum ein, der auf dich wartet',
