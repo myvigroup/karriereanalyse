@@ -4,19 +4,19 @@ export const metadata = {
 };
 
 const SEMINARE = [
-  { icon: '🧠', title: 'Typgerechtes Lernen', impact: 'Lern halb so lang — versteh doppelt so viel', next_date: '2026-04-18' },
-  { icon: '⚖️', title: 'Work-Life-Balance', impact: 'Hör auf, Freizeit mit schlechtem Gewissen zu verbringen', next_date: '2026-05-09' },
-  { icon: '👑', title: 'Personal Leadership', impact: 'Führ dich selbst — bevor andere es tun', next_date: '2026-06-13' },
-  { icon: '📖', title: 'Speedreading', impact: 'Lies einen Bericht in 10 Minuten statt 40', next_date: '2026-07-11' },
-  { icon: '🧘', title: 'Achtsamkeit', impact: 'Nach einem harten Tag wirklich abschalten', next_date: '2026-08-08' },
-  { icon: '🎤', title: 'Rhetorik & Überzeugen', impact: 'Dein Chef nickt statt wegzuschauen, wenn du sprichst', next_date: '2026-09-12' },
-  { icon: '🔥', title: 'Selbstmotivation', impact: 'Starte Projekte — und bring sie auch zu Ende', next_date: '2026-10-10' },
-  { icon: '💬', title: 'Kommunikation', impact: 'Werde endlich richtig verstanden — von allen', next_date: '2026-11-14' },
-  { icon: '🤜', title: 'Konfliktmanagement', impact: 'Sag, was du denkst — ohne den Job zu riskieren', next_date: '2026-12-12' },
-  { icon: '🏠', title: 'Home Office', impact: 'Produktiv zuhause — ohne dass alles verschwimmt', next_date: null },
-  { icon: '👔', title: 'Business Knigge', impact: 'Betritt jeden Raum mit Sicherheit', next_date: null },
-  { icon: '🤝', title: 'Networking', impact: 'Nie mehr allein auf Veranstaltungen stehen', next_date: null },
-  { icon: '🎯', title: 'Prioritätenmanagement', impact: 'Mach Feierabend ohne Schuldgefühl', next_date: null },
+  { title: 'Typgerechtes Lernen', impact: 'Lern halb so lang — versteh doppelt so viel', next_date: '2026-04-18' },
+  { title: 'Work-Life-Balance', impact: 'Hör auf, Freizeit mit schlechtem Gewissen zu verbringen', next_date: '2026-05-09' },
+  { title: 'Personal Leadership', impact: 'Führ dich selbst — bevor andere es tun', next_date: '2026-06-13' },
+  { title: 'Speedreading', impact: 'Lies einen Bericht in 10 Minuten statt 40', next_date: '2026-07-11' },
+  { title: 'Achtsamkeit', impact: 'Nach einem harten Tag wirklich abschalten', next_date: '2026-08-08' },
+  { title: 'Rhetorik & Überzeugen', impact: 'Dein Chef nickt statt wegzuschauen, wenn du sprichst', next_date: '2026-09-12' },
+  { title: 'Selbstmotivation', impact: 'Starte Projekte — und bring sie auch zu Ende', next_date: '2026-10-10' },
+  { title: 'Kommunikation', impact: 'Werde endlich richtig verstanden — von allen', next_date: '2026-11-14' },
+  { title: 'Konfliktmanagement', impact: 'Sag, was du denkst — ohne den Job zu riskieren', next_date: '2026-12-12' },
+  { title: 'Home Office', impact: 'Produktiv zuhause — ohne dass alles verschwimmt', next_date: null },
+  { title: 'Business Knigge', impact: 'Betritt jeden Raum mit Sicherheit', next_date: null },
+  { title: 'Networking', impact: 'Nie mehr allein auf Veranstaltungen stehen', next_date: null },
+  { title: 'Prioritätenmanagement', impact: 'Mach Feierabend ohne Schuldgefühl', next_date: null },
 ];
 
 const MONTH_NAMES = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -64,7 +64,7 @@ export default function SeminarePage() {
             borderRadius: 999, background: 'rgba(204,20,38,0.2)', border: '1px solid rgba(204,20,38,0.35)',
             fontSize: 12, fontWeight: 600, color: '#ff7a7a', marginBottom: 24,
           }}>
-            📅 Live via Microsoft Teams · Samstags 09:30–12:00 Uhr
+            Live via Microsoft Teams · Samstags 09:30–12:00 Uhr
           </div>
           <h1 style={{ fontSize: 44, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, color: 'white', marginBottom: 16 }}>
             13 Seminare, die dich im<br />
@@ -106,13 +106,13 @@ export default function SeminarePage() {
       <div style={{ background: 'white', borderBottom: '1px solid #E8E6E1' }}>
         <div style={{ maxWidth: 860, margin: '0 auto', padding: '20px 24px', display: 'flex', justifyContent: 'center', gap: 40, flexWrap: 'wrap' }}>
           {[
-            ['🎥', 'Live', 'Interaktiv, nicht nur Zuschauen'],
-            ['🗓', 'Samstags', '09:30 – 12:00 Uhr'],
-            ['💻', 'Microsoft Teams', 'Von überall teilnehmen'],
-            ['🎓', 'Zertifikat', 'Nach erfolgreicher Teilnahme'],
-          ].map(([icon, label, sub]) => (
+            ['Live', 'Interaktiv, nicht nur Zuschauen'],
+            ['Samstags', '09:30 – 12:00 Uhr'],
+            ['Microsoft Teams', 'Von überall teilnehmen'],
+            ['Zertifikat', 'Nach erfolgreicher Teilnahme'],
+          ].map(([label, sub]) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 20 }}>{icon}</span>
+              <div style={{ width: 4, height: 24, background: '#CC1426', borderRadius: 2, flexShrink: 0 }} />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{label}</div>
                 <div style={{ fontSize: 12, color: '#9A9A9A' }}>{sub}</div>
@@ -141,7 +141,6 @@ export default function SeminarePage() {
                 display: 'flex', alignItems: 'center', gap: 18,
                 borderLeft: '3px solid #CC1426',
               }}>
-                <span style={{ fontSize: 24, flexShrink: 0 }}>{s.icon}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', marginBottom: 3 }}>{s.title}</div>
                   <div style={{ fontSize: 13, color: '#CC1426', fontWeight: 500 }}>{s.impact}</div>
@@ -177,7 +176,6 @@ export default function SeminarePage() {
               display: 'flex', gap: 14, alignItems: 'flex-start',
               borderLeft: '3px solid #E8E6E1',
             }}>
-              <span style={{ fontSize: 20, flexShrink: 0, marginTop: 1 }}>{s.icon}</span>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>{s.title}</div>
                 <div style={{ fontSize: 12, color: '#6B6B6B', lineHeight: 1.4, marginBottom: 8 }}>{s.impact}</div>

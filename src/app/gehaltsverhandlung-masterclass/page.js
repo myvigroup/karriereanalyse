@@ -5,27 +5,27 @@ export const metadata = {
 
 const MODULES = [
   {
-    num: '01', icon: '🧠', title: 'Mindset',
+    num: '01', title: 'Mindset',
     impact: 'Löse die innere Blockade — hör auf, dich für Geld zu schämen',
     points: ['Warum Angst vor Verhandlungen normal ist', 'Selbstwert und Gehalt: der direkte Zusammenhang', 'Das Schuld-Gefühl beim Fordern überwinden'],
   },
   {
-    num: '02', icon: '📊', title: 'Marktwert',
+    num: '02', title: 'Marktwert',
     impact: 'Weißt endlich, was du wirklich wert bist — mit echten Zahlen',
     points: ['Fairen Marktwert ermitteln — mit verlässlichen Quellen', 'Was deine Region, Branche und Erfahrung wirklich bedeuten', 'Deinen persönlichen Gehalts-Anker richtig setzen'],
   },
   {
-    num: '03', icon: '📋', title: 'Vorbereitung',
+    num: '03', title: 'Vorbereitung',
     impact: 'Gehst vorbereitet rein — statt zu improvisieren und zu verlieren',
     points: ['Den richtigen Zeitpunkt wählen', 'Argumente strukturieren mit der 3-Punkte-Formel', 'Einwände antizipieren und entwaffnen'],
   },
   {
-    num: '04', icon: '🎭', title: 'Verhandlung',
+    num: '04', title: 'Verhandlung',
     impact: 'Führst das Gespräch — statt es über dich ergehen zu lassen',
     points: ['Eröffnung: Wer nennt zuerst eine Zahl?', 'Anker-Technik und Gegenargumente meistern', 'Schweigen als stärkstes Verhandlungswerkzeug'],
   },
   {
-    num: '05', icon: '🏆', title: 'Abschluss',
+    num: '05', title: 'Abschluss',
     impact: 'Auch ein Nein wird zum Ja — oder zumindest zu mehr',
     points: ['Was tun, wenn das Unternehmen ablehnt?', 'Bonus, Urlaub, Homeoffice als Alternativen', 'Den neuen Standard fürs nächste Jahr sichern'],
   },
@@ -59,7 +59,7 @@ export default function GehaltsverhandlungMasterclassPage() {
             borderRadius: 999, background: 'rgba(204,20,38,0.2)', border: '1px solid rgba(204,20,38,0.35)',
             fontSize: 12, fontWeight: 600, color: '#ff7a7a', marginBottom: 24,
           }}>
-            💰 E-Learning Kurs · 5 Module · 17 Lektionen
+            E-Learning Kurs · 5 Module · 17 Lektionen
           </div>
 
           <h1 style={{ fontSize: 46, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, color: 'white', marginBottom: 16 }}>
@@ -161,9 +161,9 @@ export default function GehaltsverhandlungMasterclassPage() {
               borderLeft: '3px solid #CC1426',
               display: 'flex', gap: 20, alignItems: 'flex-start',
             }}>
-              <div style={{ flexShrink: 0, textAlign: 'center', width: 44 }}>
-                <div style={{ fontSize: 24, marginBottom: 4 }}>{m.icon}</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#9A9A9A', letterSpacing: '0.06em' }}>MODUL {m.num}</div>
+              <div style={{ flexShrink: 0, textAlign: 'center', minWidth: 36 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#9A9A9A', letterSpacing: '0.06em' }}>MODUL</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: '#CC1426', letterSpacing: '-0.03em', lineHeight: 1 }}>{m.num}</div>
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A', marginBottom: 3 }}>{m.title}</div>
@@ -188,15 +188,15 @@ export default function GehaltsverhandlungMasterclassPage() {
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 28 }}>Alles was du für das nächste Gehaltsgespräch brauchst</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
             {[
-              ['🎬', '17 Video-Lektionen', 'Auf Abruf, jederzeit verfügbar'],
-              ['📝', 'Wortgenaue Skripte', 'Für jede Situation und jeden Einwand'],
-              ['🎭', 'Simulations-Training', 'Übe das Gespräch ohne echtes Risiko'],
-              ['📊', 'Marktwert-Workbook', 'Berechne deinen fairen Lohn'],
-              ['🏆', 'Kurs-Zertifikat', 'Offiziell nach Abschluss'],
-              ['∞', 'Lebenslanger Zugang', 'Einmal kaufen, für immer nutzen'],
-            ].map(([icon, title, desc]) => (
-              <div key={title} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 18, flexShrink: 0 }}>{icon}</span>
+              ['17 Video-Lektionen', 'Auf Abruf, jederzeit verfügbar'],
+              ['Wortgenaue Skripte', 'Für jede Situation und jeden Einwand'],
+              ['Simulations-Training', 'Übe das Gespräch ohne echtes Risiko'],
+              ['Marktwert-Workbook', 'Berechne deinen fairen Lohn'],
+              ['Kurs-Zertifikat', 'Offiziell nach Abschluss'],
+              ['Lebenslanger Zugang', 'Einmal kaufen, für immer nutzen'],
+            ].map(([title, desc]) => (
+              <div key={title} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ fontSize: 13, color: '#CC1426', fontWeight: 700, flexShrink: 0, marginTop: 1 }}>✓</span>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'white', marginBottom: 2 }}>{title}</div>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>{desc}</div>
@@ -222,7 +222,7 @@ export default function GehaltsverhandlungMasterclassPage() {
               <span style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.03em', color: '#1A1A1A' }}>49 €</span>
               <span style={{ fontSize: 14, color: '#9A9A9A', textDecoration: 'line-through', paddingBottom: 5 }}>99 €</span>
             </div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#CC1426', marginBottom: 20 }}>🎪 Messe-Aktionspreis</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#CC1426', marginBottom: 20 }}>Messe-Aktionspreis</div>
             <ul style={{ listStyle: 'none', margin: '0 0 24px', padding: 0, flex: 1, display: 'flex', flexDirection: 'column', gap: 7 }}>
               {['5 Module · 17 Lektionen', 'Skripte & Simulations-Training', 'Marktwert-Workbook', 'Lebenslanger Zugang', 'Kurs-Zertifikat'].map(f => (
                 <li key={f} style={{ fontSize: 13, color: '#6B6B6B', display: 'flex', gap: 8 }}>
@@ -245,7 +245,7 @@ export default function GehaltsverhandlungMasterclassPage() {
               position: 'absolute', top: -11, left: '50%', transform: 'translateX(-50%)',
               background: '#CC1426', color: 'white', fontSize: 11, fontWeight: 700,
               padding: '4px 14px', borderRadius: 999, whiteSpace: 'nowrap',
-            }}>⭐ Empfohlen</div>
+            }}>Empfohlen</div>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Premium-Mitgliedschaft</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
               <span style={{ fontSize: 36, fontWeight: 800, color: 'white', letterSpacing: '-0.03em' }}>15 €</span>
