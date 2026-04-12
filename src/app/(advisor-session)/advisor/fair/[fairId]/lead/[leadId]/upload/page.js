@@ -140,7 +140,7 @@ export default function CVUpload() {
       </h1>
       {lead && (
         <p style={{ color: '#86868b', marginBottom: 32 }}>
-          für <strong>{`${lead.first_name} ${lead.last_name || ''}`.trim()}</strong> ({lead.email})
+          für <strong>{`${lead.first_name} ${lead.last_name || ''}`.trim()}</strong>
         </p>
       )}
 

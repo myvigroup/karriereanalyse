@@ -107,10 +107,10 @@ export default function SummaryPage() {
   return (
     <div style={{ maxWidth: 640, margin: '0 auto' }}>
       <Link
-        href={`/advisor/fair/${fairId}/lead/${leadId}/review`}
+        href={`/advisor/fair/${fairId}/lead/${leadId}/contact`}
         style={{ fontSize: 13, color: '#86868b', textDecoration: 'none', display: 'inline-block', marginBottom: 16 }}
       >
-        &larr; Zurück zum Review
+        &larr; Zurück zu Kontaktdaten
       </Link>
 
       <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 24 }}>

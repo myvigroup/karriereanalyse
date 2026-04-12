@@ -34,8 +34,11 @@ export default async function DonePage({ params }) {
 
       <p style={{ color: '#86868b', fontSize: 16, lineHeight: 1.6, marginBottom: 32 }}>
         Magic Link wurde an<br />
-        <strong style={{ color: '#1A1A1A' }}>{lead?.email}</strong><br />
-        gesendet.
+        <strong style={{ color: '#1A1A1A' }}>{lead?.email || '–'}</strong><br />
+        gesendet.{' '}
+        <span style={{ fontSize: 14 }}>
+          {lead?.first_name} {lead?.last_name} kann sich jetzt einloggen.
+        </span>
       </p>
 
       {/* Statistik */}

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { saveFeedback, toggleFeedbackItem, saveFeedbackFreetext, saveCategoryRating } from '@/app/(advisor-session)/advisor/actions';
+import { saveFeedback, toggleFeedbackItem, saveFeedbackFreetext, saveCategoryRating, markFeedbackPending } from '@/app/(advisor-session)/advisor/actions';
 
 const CATEGORIES = [
   { key: 'struktur', label: 'Struktur', icon: '📐' },
@@ -583,7 +583,10 @@ export default function CVReview() {
               }}
             />
             <button
-              onClick={() => router.push(`/advisor/fair/${fairId}/lead/${leadId}/contact`)}
+              onClick={async () => {
+                await markFeedbackPending(leadId);
+                router.push(`/advisor/fair/${fairId}/lead/${leadId}/contact`);
+              }}
               style={{
                 width: '100%',
                 padding: '14px',

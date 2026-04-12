@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karriere-Institut — Prozess-Map</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #F8F8FB;
+    color: #1a1a2e;
+    padding: 40px 20px 80px;
+    min-height: 100vh;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .header p {
+    font-size: 15px;
+    color: #6b7280;
+    font-weight: 400;
+  }
+
+  /* Main funnel flow */
+  .funnel {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  .phase-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 320px;
+    gap: 0;
+    align-items: stretch;
+    min-height: 160px;
+  }
+
+  /* Phase number column */
+  .phase-number {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 28px;
+    position: relative;
+  }
+  .phase-number .num {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .phase-number .line {
+    width: 3px;
+    flex: 1;
+    margin-top: -2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Main content card */
+  .phase-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin: 8px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    border-left: 4px solid;
+    position: relative;
+  }
+  .phase-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .phase-card .subtitle {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 14px;
+    font-weight: 400;
+  }
+  .phase-card .steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .step-pill {
+    background: #f3f4f6;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .step-pill .icon { font-size: 13px; }
+
+  /* Arrow between phases */
+  .phase-card::after {
+    content: '';
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid;
+    z-index: 3;
+    display: none;
+  }
+
+  /* Upsell / Conversion column */
+  .upsell-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin: 8px 0 8px 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    border: 2px dashed;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .upsell-card .label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .upsell-card .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .upsell-action {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #1a1a2e;
+    padding: 7px 12px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .upsell-action .arrow { font-size: 11px; opacity: 0.5; }
+
+  /* Connector arrow from card to upsell */
+  .upsell-card::before {
+    content: '→';
+    position: absolute;
+    left: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    font-weight: 700;
+    opacity: 0.3;
+  }
+
+  /* Color themes per phase */
+  .phase-0 .num, .phase-0 .phase-card { border-color: #6366f1; }
+  .phase-0 .num { background: #6366f1; }
+  .phase-0 .line { background: linear-gradient(#6366f1, #8b5cf6); }
+  .phase-0 .upsell-card { border-color: #6366f1; }
+  .phase-0 .label { color: #6366f1; }
+  .phase-0 .upsell-action { background: #eef2ff; }
+
+  .phase-1 .num, .phase-1 .phase-card { border-color: #8b5cf6; }
+  .phase-1 .num { background: #8b5cf6; }
+  .phase-1 .line { background: linear-gradient(#8b5cf6, #a855f7); }
+  .phase-1 .upsell-card { border-color: #8b5cf6; }
+  .phase-1 .label { color: #8b5cf6; }
+  .phase-1 .upsell-action { background: #f5f3ff; }
+
+  .phase-2 .num, .phase-2 .phase-card { border-color: #a855f7; }
+  .phase-2 .num { background: #a855f7; }
+  .phase-2 .line { background: linear-gradient(#a855f7, #CC1426); }
+  .phase-2 .upsell-card { border-color: #a855f7; }
+  .phase-2 .label { color: #a855f7; }
+  .phase-2 .upsell-action { background: #faf5ff; }
+
+  .phase-3 .num, .phase-3 .phase-card { border-color: #CC1426; }
+  .phase-3 .num { background: #CC1426; }
+  .phase-3 .line { background: linear-gradient(#CC1426, #e11d48); }
+  .phase-3 .upsell-card { border-color: #CC1426; }
+  .phase-3 .label { color: #CC1426; }
+  .phase-3 .upsell-action { background: #fff1f2; }
+
+  .phase-4 .num, .phase-4 .phase-card { border-color: #e11d48; }
+  .phase-4 .num { background: #e11d48; }
+  .phase-4 .line { background: linear-gradient(#e11d48, #f59e0b); }
+  .phase-4 .upsell-card { border-color: #e11d48; }
+  .phase-4 .label { color: #e11d48; }
+  .phase-4 .upsell-action { background: #fff1f3; }
+
+  .phase-5 .num, .phase-5 .phase-card { border-color: #f59e0b; }
+  .phase-5 .num { background: #f59e0b; }
+  .phase-5 .line { background: linear-gradient(#f59e0b, #10b981); }
+  .phase-5 .upsell-card { border-color: #f59e0b; }
+  .phase-5 .label { color: #f59e0b; }
+  .phase-5 .upsell-action { background: #fffbeb; }
+
+  .phase-6 .num, .phase-6 .phase-card { border-color: #10b981; }
+  .phase-6 .num { background: #10b981; }
+  .phase-6 .line { background: #10b981; display: none; }
+  .phase-6 .upsell-card { border-color: #10b981; }
+  .phase-6 .label { color: #10b981; }
+  .phase-6 .upsell-action { background: #ecfdf5; }
+
+  /* Conversion metric badges */
+  .conversion-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 10px;
+  }
+  .phase-0 .conversion-badge { background: #eef2ff; color: #6366f1; }
+  .phase-1 .conversion-badge { background: #f5f3ff; color: #8b5cf6; }
+  .phase-2 .conversion-badge { background: #faf5ff; color: #a855f7; }
+  .phase-3 .conversion-badge { background: #fff1f2; color: #CC1426; }
+  .phase-4 .conversion-badge { background: #fff1f3; color: #e11d48; }
+  .phase-5 .conversion-badge { background: #fffbeb; color: #d97706; }
+  .phase-6 .conversion-badge { background: #ecfdf5; color: #10b981; }
+
+  /* Branching paths */
+  .branch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .branch {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    text-align: center;
+  }
+  .branch .branch-title {
+    font-weight: 600;
+    font-size: 11px;
+    margin-bottom: 4px;
+    color: #374151;
+  }
+  .branch .branch-desc {
+    font-size: 11px;
+    color: #6b7280;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #6b7280;
+    font-weight: 500;
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+  .legend-box {
+    width: 24px;
+    height: 16px;
+    border-radius: 4px;
+    border: 2px dashed;
+  }
+
+  /* KPI bar at bottom */
+  .kpi-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 40px;
+  }
+  .kpi-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .kpi-card .kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #9ca3af;
+    margin-bottom: 6px;
+  }
+  .kpi-card .kpi-value {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .kpi-card .kpi-desc {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 2px;
+  }
+
+  @media (max-width: 900px) {
+    .phase-row { grid-template-columns: 60px 1fr; }
+    .upsell-card { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h1>Karriere-Institut — Prozess-Map</h1>
+    <p>Vom Erstkontakt auf der Karrieremesse bis zum zahlenden Kunden — 7 Phasen, 7 Absatz-Punkte</p>
+  </div>
+
+  <div class="funnel">
+
+    <!-- Phase 0 -->
+    <div class="phase-row phase-0">
+      <div class="phase-number">
+        <div class="num">0</div>
+        <div class="line"></div>
+      </div>
+      <div class="phase-card">
+        <h3>Karrieremesse — Erstkontakt</h3>
+        <div class="subtitle">Touchpoint: Stand, Vortrag, Workshop</div>
+        <div class="steps">
+          <span class="step-pill"><span class="icon">🎤</span> Vortrag / Workshop</span>
+          <span class="step-pill"><span class="icon">💬</span> Standgespräch</span>
+          <span class="step-pill"><span class="icon">🔍</span> Pain-Point identifizieren</span>
+          <span class="step-pill"><span class="icon">📱</span> QR-Code scannen</span>
+        </div>
+        <div class="conversion-badge">📊 Ziel: QR-Scan → Landing Page</div>
+      </div>
+      <div class="upsell-card">
+        <div class="label">💎 Lead-Capture</div>
+        <div class="actions">
+          <div class="upsell-action"><span class="arrow">→</span> "Kostenloser KI-Lebenslauf-Check"</div>
+          <div class="upsell-action"><span class="arrow">→</span> QR-Code → Landing Page</div>
+          <div class="upsell-action"><span class="arrow">→</span> E-Mail + Name erfassen</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 1 -->
+    <div class="phase-row phase-1">
+      <div class="phase-number">
+        <div class="num">1</div>
+        <div class="line"></div>
+      </div>
+      <div class="phase-card">
+        <h3>Lebenslauf-Check — Lead-Magnet</h3>
+        <div class="subtitle">KI-Analyse des CVs mit konkretem Feedback</div>
+        <div class="steps">
+          <span class="step-pill"><span class="icon">📄</span> CV hochladen</span>
+          <span class="step-pill"><span class="icon">🤖</span> KI-Analyse (/api/analyze-cv)</span>
+          <span class="step-pill"><span class="icon">📊</span> Ergebnis: Stärken & Schwächen</span>
+          <span class="step-pill"><span class="icon">🔒</span> Teaser-Ergebnis (ohne Account)</span>
+        </div>
+        <div class="conversion-badge">📊 Ziel: Lead → Registrierung</div>
+      </div>
+      <div class="upsell-card">
+        <div class="label">🔓 Absatz-Punkt #1</div>
+        <div class="actions">
+          <div class="upsell-action"><span class="arrow">→</span> "Volles Ergebnis freischalten"</div>
+          <div class="upsell-action"><span class="arrow">→</span> "Was bist du wirklich wert? → Analyse starten"</div>
+          <div class="upsell-action"><span class="arrow">→</span> E-Mail-Sequenz bei Nicht-Registrierung</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="phase-row phase-2">
+      <div class="phase-number">
+        <div class="num">2</div>
+        <div class="line"></div>
+      </div>
+      <div class="phase-card">
+        <h3>Portal-Registrierung & Onboarding</h3>
+        <div class="subtitle">Geführter Einstieg: "Was ist dein Ziel?"</div>
+        <div class="steps">
+          <span class="step-pill"><span class="icon">✍️</span> Account erstellen</span>
+          <span class="step-pill"><span class="icon">🎯</span> Ziel auswählen</span>
+          <span class="step-pill"><span class="icon">👋</span> Welcome-Notification</span>
+          <span class="step-pill"><span class="icon">📊</span> Dashboard</span>
+        </div>
+        <div class="branch-grid">
+          <div class="branch">
+            <div class="branch-title">💰 "Mehr Gehalt"</div>
+            <div class="branch-desc">→ Analyse + Gehaltsverhandlung</div>
+          </div>
+          <div class="branch">
+            <div class="branch-title">📋 "Bewerben"</div>
+            <div class="branch-desc">→ CV-Check + Kanban</div>
+          </div>
+          <div class="branch">
+            <div class="branch-title">🤔 "Bleiben/Gehen?"</div>
+            <div class="branch-desc">→ Entscheidungs-Kompass</div>
+          </div>
+        </div>
+        <div class="conversion-badge">📊 Ziel: Registrierung → Erste Aktion</div>
+      </div>
+      <div class="upsell-card">
+        <div class="label">🎯 Absatz-Punkt #2</div>
+        <div class="actions">
+          <div class="upsell-action"><span class="arrow">→</span> Personalisierte Tool-Empfehlung</div>
+          <div class="upsell-action"><span class="arrow">→</span> Zielbasierter Einstieg statt Überflutung</div>
+          <div class="upsell-action"><span class="arrow">→</span> Aha-Moment in &lt; 5 Minuten</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="phase-row phase-3">
+      <div class="phase-number">
+        <div class="num">3</div>
+        <div class="line"></div>
+      </div>
+      <div class="phase-card">
+        <h3>Aktivierung — Erste Wertschöpfung</h3>
+        <div class="subtitle">Kostenlose Tools liefern echten Mehrwert → Kaufbereitschaft</div>
+        <div class="steps">
+          <span class="step-pill"><span class="icon">📈</span> Karriereanalyse (65 Fragen)</span>
+          <span class="step-pill"><span class="icon">🧭</span> Entscheidungs-Kompass</span>
+          <span class="step-pill"><span class="icon">💹</span> Marktwert-Cockpit</span>
+          <span class="step-pill"><span class="icon">🤖</span> KI-Coach Chat</span>
+          <span class="step-pill"><span class="icon">💰</span> Gehaltsdatenbank</span>
+        </div>
+        <div class="branch-grid">
+          <div class="branch">
+            <div class="branch-title">Analyse → PRIO</div>
+            <div class="branch-desc">"Deine #1 Priorität: Gehaltsverhandlung"</div>
+          </div>
+          <div class="branch">
+            <div class="branch-title">Kompass → Richtung</div>
+            <div class="branch-desc">Gehen → Bewerbung / Bleiben → Verhandlung</div>
+          </div>
+          <div class="branch">
+            <div class="branch-title">Marktwert → Lücke</div>
+            <div class="branch-desc">"Du lässt €X.XXX liegen"</div>
+          </div>
+        </div>
+        <div class="conversion-badge">📊 Ziel: Aktiver Nutzer → Masterclass-Buchung</div>
+      </div>
+      <div class="upsell-card">
+        <div class="label">🔥 Absatz-Punkt #3</div>
+        <div class="actions">
+          <div class="upsell-action"><span class="arrow">→</span> Analyse-Ergebnis → Kurs-Empfehlung</div>
+          <div class="upsell-action"><span class="arrow">→</span> Gehaltslücke → "Lerne verhandeln"</div>
+          <div class="upsell-action"><span class="arrow">→</span> KI-Coach empfiehlt Masterclass</div>
+          <div class="upsell-action"><span class="arrow">→</span> Impostor-Score → Confidence-Kurs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="phase-row phase-4">
+      <div class="phase-number">
+        <div class="num">4</div>
+        <div class="line"></div>
+      </div>
+      <div class="phase-card">
+        <h3>Masterclass — Monetarisierung</h3>
+        <div class="subtitle">Kostenpflichtige Kurse (13 Masterclasses verfügbar)</div>
+        <div class="steps">
+          <span class="step-pill"><span class="icon">🎬</span> Video-Lektionen</span>
+          <span class="step-pill"><span class="icon">📝</span> Übungen & Skripte</span>
+          <span class="step-pill"><span class="icon">⭐</span> XP & Level-Ups</span>
+          <span class="step-pill"><span class="icon">🏅</span> Badges & Zertifikate</span>
+          <span class="step-pill"><span class="icon">💹</span> Marktwert steigt sichtbar</span>
+        </div>
+        <div class="conversion-badge">📊 Ziel: Kurs abschließen → Cross-Sell</div>
+      </div>
+      <div class="upsell-card">
+        <div class="label">🔄 Absatz-Punkt #4</div>
+        <div class="actions">
+          <div class="upsell-action"><span class="arrow">→</span> Cross-Sell: "Nächster Kurs: LinkedIn-Branding"</div>
+          <div class="upsell-action"><span class="arrow">→</span> Bundle: "Alle 13 Kurse zum Vorteilspreis"</div>
+          <div class="upsell-action"><span class="arrow">→</span> Zertifikat: "Noch 2 Kurse bis Certified Pro"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="phase-row phase-5">
+      <div class="phase-number">
+        <div class="num">5</div>
+        <div class="line"></div>
+      </div>
+      <div class="phase-card">
+        <h3>Umsetzung — Verhandlung & Bewerbung</h3>
+        <div class="subtitle">User setzt das Gelernte in der Praxis um</div>
+        <div class="steps">
+          <span class="step-pill"><span class="icon">📋</span> Bewerbungs-Kanban nutzen</span>
+          <span class="step-pill"><span class="icon">🎯</span> Interview-Briefing generieren</span>
+          <span class="step-pill"><span class="icon">💰</span> Gehalt verhandeln</span>
+          <span class="step-pill"><span class="icon">📓</span> Gehalts-Tagebuch führen</span>
+          <span class="step-pill"><span class="icon">🚪</span> Exit-Strategie planen</span>
+        </div>
+        <div class="conversion-badge">📊 Ziel: Erfolg erzielen → Premium-Upsell</div>
+      </div>
+      <div class="upsell-card">
+        <div class="label">⚡ Absatz-Punkt #5</div>
+        <div class="actions">
+          <div class="upsell-action"><span class="arrow">→</span> 1:1 Coaching vor der Verhandlung</div>
+          <div class="upsell-action"><span class="arrow">→</span> Exit-Strategie-Paket (Premium)</div>
+          <div class="upsell-action"><span class="arrow">→</span> Peer-Matching: Accountability Partner</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 6 -->
+    <div class="phase-row phase-6">
+      <div class="phase-number">
+        <div class="num">6</div>
+        <div class="line"></div>
+      </div>
+      <div class="phase-card">
+        <h3>Alumni — Retention & Wachstum</h3>
+        <div class="subtitle">Ziel erreicht — langfristige Bindung & Weiterempfehlung</div>
+        <div class="steps">
+          <span class="step-pill"><span class="icon">📊</span> Alumni-Check-in (Quartalsweise)</span>
+          <span class="step-pill"><span class="icon">⭐</span> Testimonial & Erfolgsgeschichte</span>
+          <span class="step-pill"><span class="icon">🔄</span> Nächster Karriereschritt</span>
+          <span class="step-pill"><span class="icon">🏢</span> B2B-Brücke ins Unternehmen</span>
+        </div>
+        <div class="conversion-badge">📊 Ziel: Retention + Empfehlung + B2B</div>
+      </div>
+      <div class="upsell-card">
+        <div class="label">♻️ Absatz-Punkt #6</div>
+        <div class="actions">
+          <div class="upsell-action"><span class="arrow">→</span> Alumni-Abo (Dauerzugriff)</div>
+          <div class="upsell-action"><span class="arrow">→</span> Referral: "Empfiehl uns → Gutschrift"</div>
+          <div class="upsell-action"><span class="arrow">→</span> B2B: "Bring KI in dein Unternehmen"</div>
+          <div class="upsell-action"><span class="arrow">→</span> Advanced Masterclasses (Führung, etc.)</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background: linear-gradient(135deg, #6366f1, #CC1426);"></div>
+      Hauptprozess (links)
+    </div>
+    <div class="legend-item">
+      <div class="legend-box" style="border-color: #CC1426;"></div>
+      Absatz-/Upsell-Punkt (rechts)
+    </div>
+    <div class="legend-item">
+      <span style="font-size: 14px;">📊</span>
+      Conversion-Ziel pro Phase
+    </div>
+  </div>
+
+  <!-- KPI Tracking -->
+  <div class="kpi-bar">
+    <div class="kpi-card">
+      <div class="kpi-label">Phase 0 → 1</div>
+      <div class="kpi-value" style="color: #6366f1;">QR → CV</div>
+      <div class="kpi-desc">Scan-Rate auf Messe</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Phase 1 → 2</div>
+      <div class="kpi-value" style="color: #8b5cf6;">CV → Reg</div>
+      <div class="kpi-desc">Registrierungsrate nach Check</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Phase 3 → 4</div>
+      <div class="kpi-value" style="color: #CC1426;">Free → Paid</div>
+      <div class="kpi-desc">Masterclass-Buchungsrate</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Phase 6</div>
+      <div class="kpi-value" style="color: #10b981;">Referral</div>
+      <div class="kpi-desc">Weiterempfehlungsrate</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

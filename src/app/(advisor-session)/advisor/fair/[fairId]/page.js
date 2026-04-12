@@ -42,26 +42,36 @@ export default async function FairDashboard({ params }) {
 
   if (!fair) redirect('/advisor');
 
+  // Profil + Rolle prüfen
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const isSuperAdmin = ['admin', 'messeleiter'].includes(profile?.role);
+
   // Berater-ID prüfen
   const { data: advisor } = await admin
     .from('advisors')
     .select('id')
     .eq('user_id', user.id)
-    .single();
+    .maybeSingle();
 
-  if (!advisor) redirect('/advisor');
+  // Super-Admins können alle Messen öffnen, auch ohne Berater-Eintrag
+  if (!advisor && !isSuperAdmin) redirect('/advisor');
 
-  // Prüfe Zuordnung + Messeleiter-Status
-  const { data: assignment } = await admin
+  // Prüfe Zuordnung + Messeleiter-Status (Admins bekommen automatisch Messeleiter-Rechte)
+  const { data: assignment } = advisor ? await admin
     .from('fair_advisors')
     .select('id, is_manager')
     .eq('fair_id', fairId)
     .eq('advisor_user_id', user.id)
-    .maybeSingle();
+    .maybeSingle() : { data: null };
 
-  if (!assignment) redirect('/advisor');
+  if (!assignment && !isSuperAdmin) redirect('/advisor');
 
-  const isManager = assignment.is_manager === true;
+  const isManager = isSuperAdmin || assignment?.is_manager === true;
 
   // Leads laden (heute) — Messeleiter sieht alle, Berater nur eigene
   const today = new Date().toISOString().split('T')[0];

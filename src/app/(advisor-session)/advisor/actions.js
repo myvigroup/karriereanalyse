@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { sendEmail } from '@/lib/email';
 import { redirect } from 'next/navigation';
 
-// Hole advisor-ID des eingeloggten Users
+// Hole advisor-ID des eingeloggten Users (Admins ohne Berater-Eintrag bekommen userId ohne advisorId)
 async function getAdvisorId() {
   const supabase = createClient();
   const admin = createAdminClient();
@@ -18,14 +18,22 @@ async function getAdvisorId() {
     .eq('user_id', user.id)
     .maybeSingle();
 
-  if (!advisor) return null;
+  // Admins können auch ohne Berater-Eintrag arbeiten
+  if (!advisor) {
+    const { data: profile } = await admin
+      .from('profiles').select('role').eq('id', user.id).maybeSingle();
+    if (['admin', 'messeleiter'].includes(profile?.role)) {
+      return { advisorId: null, userId: user.id };
+    }
+    return null;
+  }
   return { advisorId: advisor.id, userId: user.id };
 }
 
 // Lead erstellen — nur mit Vorname, ohne Email/User
 export async function createLead(fairId, formData) {
   const advisor = await getAdvisorId();
-  if (!advisor) return { error: 'Kein Berater-Profil gefunden. Bitte neu einloggen.' };
+  if (!advisor) return { error: 'Kein Berater-Profil gefunden. Bitte erneut einloggen.' };
 
   const admin = createAdminClient();
   const name = formData.get('name');
@@ -73,11 +81,16 @@ export async function saveContactDetails(leadId, formData) {
 
   const leadName = `${lead.first_name} ${lead.last_name || ''}`.trim();
 
-  // Prüfe ob User existiert
-  const { data: existingUsers } = await admin.auth.admin.listUsers();
-  const existingUser = existingUsers?.users?.find(u => u.email === email);
+  // Prüfe ob User existiert (via profiles, nicht listUsers())
+  const { data: existingProfile } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle();
 
-  if (!existingUser) {
+  let userId = existingProfile?.id || null;
+
+  if (!existingProfile) {
     const { data: newUser, error: createError } = await admin.auth.admin.createUser({
       email,
       email_confirm: true,
@@ -85,18 +98,27 @@ export async function saveContactDetails(leadId, formData) {
     });
     if (createError) return { error: `User-Erstellung fehlgeschlagen: ${createError.message}` };
 
+    userId = newUser.user.id;
+
     await admin.from('profiles').update({
       name: leadName,
       membership_type: 'basis',
-    }).eq('id', newUser.user.id).then(() => {}).catch(() => {});
+    }).eq('id', userId).then(() => {}).catch(() => {});
   }
 
-  // Lead updaten mit Email + Phone
+  // Lead updaten mit Email + Phone + user_id + status
   await admin.from('fair_leads').update({
     email,
     phone,
+    user_id: userId,
+    status: 'feedback_pending',
     updated_at: new Date().toISOString(),
   }).eq('id', leadId);
+
+  // CV-Dokument ebenfalls mit user_id verknüpfen (damit cv-check Seite es findet)
+  if (userId) {
+    await admin.from('cv_documents').update({ user_id: userId }).eq('lead_id', leadId).then(() => {}).catch(() => {});
+  }
 
   redirect(`/advisor/fair/${lead.fair_id}/lead/${leadId}/summary`);
 }
@@ -194,11 +216,19 @@ export async function saveCategoryRating(feedbackId, category, rating) {
   return { success: true };
 }
 
+// Status auf feedback_pending setzen (nach Review → Contact)
+export async function markFeedbackPending(leadId) {
+  const admin = createAdminClient();
+  await admin.from('fair_leads').update({
+    status: 'feedback_pending',
+    updated_at: new Date().toISOString(),
+  }).eq('id', leadId);
+  return { success: true };
+}
+
 // Gespräch abschließen + Magic Link senden
 export async function completeFeedback(leadId) {
-  const { advisorId } = await getAdvisorId();
   const admin = createAdminClient();
-  const supabase = createClient();
 
   // Lead laden
   const { data: lead } = await admin.from('fair_leads')
@@ -207,9 +237,10 @@ export async function completeFeedback(leadId) {
     .maybeSingle();
 
   if (!lead) throw new Error('Lead nicht gefunden');
+  if (!lead.email) throw new Error('Keine E-Mail-Adresse für diesen Lead hinterlegt. Bitte zuerst Kontaktdaten erfassen.');
 
-  // Feedback abschließen
-  await supabase.from('cv_feedback')
+  // Feedback abschließen (via admin, um RLS zu umgehen)
+  await admin.from('cv_feedback')
     .update({ status: 'completed', updated_at: new Date().toISOString() })
     .eq('fair_lead_id', leadId);
 
