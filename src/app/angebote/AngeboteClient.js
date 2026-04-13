@@ -22,7 +22,11 @@ export default function AngeboteClient() {
       if (data.url) {
         window.location.href = data.url;
       } else if (data.error) {
-        alert(data.error === 'Nicht eingeloggt' ? 'Bitte logge dich zuerst ein.' : data.error);
+        if (data.error === 'Nicht eingeloggt') {
+          window.location.href = '/auth/login?redirect=/angebote';
+        } else {
+          alert(data.error);
+        }
       }
     } catch {
       alert('Verbindungsfehler. Bitte versuche es erneut.');
