@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import DashboardClient from './DashboardClient';
+import ProfileLoading from './ProfileLoading';
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -12,12 +13,7 @@ export default async function DashboardPage() {
     .from('profiles').select('*').eq('id', user.id).single();
 
   if (!profile) {
-    return (
-      <div className="page-container" style={{ paddingTop: 80, textAlign: 'center' }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700 }}>Profil wird eingerichtet...</h1>
-        <p style={{ color: 'var(--ki-text-secondary)', marginTop: 8 }}>Bitte lade die Seite in wenigen Sekunden neu.</p>
-      </div>
-    );
+    return <ProfileLoading />;
   }
 
   // Admin + Berater → Messe-Dashboard
