@@ -30,40 +30,61 @@ export default function ContactPage() {
   }
 
   return (
-    <div style={{ maxWidth: 560, margin: '0 auto' }}>
-      <Link
-        href={`/advisor/fair/${fairId}/lead/${leadId}/review`}
-        style={{ fontSize: 13, color: '#86868b', textDecoration: 'none', display: 'inline-block', marginBottom: 16 }}
-      >
-        &larr; Zurück zum Review
-      </Link>
+    <div style={{ maxWidth: 480, margin: '0 auto' }}>
 
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 8 }}>
-        Kontaktdaten erfassen
-      </h1>
-      <p style={{ color: '#86868b', marginBottom: 8 }}>
-        Damit dein Gesprächspartner die Ergebnisse in seinem Portal sehen kann.
-      </p>
-      <p style={{ color: '#86868b', fontSize: 14, marginBottom: 32, lineHeight: 1.5 }}>
-        <strong>Tipp:</strong> Sag: &ldquo;Ich melde dich jetzt kostenlos an — dann hast du dein Feedback, eine Karriereanalyse und mehr direkt in deinem Portal.&rdquo;
-      </p>
+      {/* Visitor-facing header */}
+      <div style={{ textAlign: 'center', marginBottom: 32 }}>
+        <div style={{
+          width: 56, height: 56, borderRadius: '50%',
+          background: 'linear-gradient(135deg, #CC1426, #8B0000)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 16px', fontSize: 24,
+        }}>
+          🎯
+        </div>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1A1A1A', marginBottom: 8, letterSpacing: '-0.02em' }}>
+          Ergebnisse kostenlos sichern
+        </h1>
+        <p style={{ color: '#6B7280', fontSize: 15, lineHeight: 1.5 }}>
+          Erhalte dein persönliches CV-Feedback per E-Mail — direkt in dein Karriere-Portal.
+        </p>
+      </div>
+
+      {/* Benefits — visible for visitor */}
+      <div style={{
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+        borderRadius: 16, padding: '16px 20px', marginBottom: 28,
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10,
+      }}>
+        {[
+          ['📋', 'Dein CV-Feedback'],
+          ['🎯', 'Kostenlose Karriereanalyse'],
+          ['🎓', 'Gratis Seminar-Zugang'],
+          ['🤖', 'KI-Karriere-Coach'],
+        ].map(([icon, label], i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 16 }}>{icon}</span>
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>{label}</span>
+          </div>
+        ))}
+      </div>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
-            E-Mail *
+            E-Mail-Adresse *
           </label>
           <input
             type="email"
             name="email"
             required
             autoFocus
-            placeholder="besucher@email.de"
+            placeholder="deine@email.de"
             style={{
               width: '100%',
               padding: '14px 16px',
               fontSize: 16,
-              border: '1px solid #E8E6E1',
+              border: '1.5px solid #E8E6E1',
               borderRadius: 12,
               outline: 'none',
               background: '#fff',
@@ -72,9 +93,9 @@ export default function ContactPage() {
           />
         </div>
 
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 24 }}>
           <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
-            Telefon <span style={{ fontWeight: 400, color: '#86868b' }}>(empfohlen)</span>
+            Telefon <span style={{ fontWeight: 400, color: '#9CA3AF', fontSize: 13 }}>(optional)</span>
           </label>
           <input
             type="tel"
@@ -84,7 +105,7 @@ export default function ContactPage() {
               width: '100%',
               padding: '14px 16px',
               fontSize: 16,
-              border: '1px solid #E8E6E1',
+              border: '1.5px solid #E8E6E1',
               borderRadius: 12,
               outline: 'none',
               background: '#fff',
@@ -93,39 +114,15 @@ export default function ContactPage() {
           />
         </div>
 
-        {/* Benefits Preview */}
-        <div style={{
-          background: '#FAFAF8', borderRadius: 12, padding: 16,
-          marginBottom: 20, border: '1px solid #E8E6E1',
-        }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A', marginBottom: 8 }}>
-            Das bekommt der Besucher:
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {[
-              '📋 Persönliches CV-Feedback im Portal',
-              '🎯 Kostenlose Karriereanalyse',
-              '🎓 Karriere-Grundlagen-Seminar',
-              '🤖 KI-Coach für Karrierefragen',
-            ].map((b, i) => (
-              <span key={i} style={{ fontSize: 13, color: '#6B7280' }}>{b}</span>
-            ))}
-          </div>
-        </div>
-
-        <p style={{ fontSize: 12, color: '#86868b', lineHeight: 1.5, marginBottom: 24 }}>
-          Mit der Teilnahme stimmt der Besucher der Verarbeitung seiner Daten gemäß unserer{' '}
+        <p style={{ fontSize: 12, color: '#9CA3AF', lineHeight: 1.5, marginBottom: 20, textAlign: 'center' }}>
+          Kostenlos & jederzeit kündbar. Mit der Anmeldung stimmst du unserer{' '}
           <a href="/datenschutz" target="_blank" style={{ color: '#CC1426' }}>Datenschutzerklärung</a> zu.
         </p>
 
         {error && (
           <div style={{
-            background: '#FEF2F2',
-            color: '#CC1426',
-            padding: '12px 16px',
-            borderRadius: 12,
-            fontSize: 14,
-            marginBottom: 16,
+            background: '#FEF2F2', color: '#CC1426', padding: '12px 16px',
+            borderRadius: 12, fontSize: 14, marginBottom: 16,
           }}>
             {error}
           </div>
@@ -142,14 +139,24 @@ export default function ContactPage() {
             border: 'none',
             borderRadius: 12,
             fontSize: 16,
-            fontWeight: 600,
+            fontWeight: 700,
             cursor: loading ? 'not-allowed' : 'pointer',
             transition: 'background 0.15s',
           }}
         >
-          {loading ? 'Wird gespeichert...' : 'Weiter zur Zusammenfassung'}
+          {loading ? 'Wird gespeichert...' : 'Jetzt kostenlos anmelden →'}
         </button>
       </form>
+
+      {/* Back link — small, for advisor only */}
+      <div style={{ textAlign: 'center', marginTop: 20 }}>
+        <Link
+          href={`/advisor/fair/${fairId}/lead/${leadId}/review`}
+          style={{ fontSize: 12, color: '#C4C4C4', textDecoration: 'none' }}
+        >
+          ← Zurück
+        </Link>
+      </div>
     </div>
   );
 }
