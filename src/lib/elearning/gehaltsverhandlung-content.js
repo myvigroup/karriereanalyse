@@ -12,6 +12,7 @@ export const LESSON_CONTENT = {
   '1.1': {
     id: 'b7010000-0000-0000-0000-000000000101',
     type: 'video_with_input',
+    vimeoId: '1181945346',
     title: 'Warum du aktuell unterbezahlt bist',
     duration: '3 Min.',
     takeaways: [
@@ -68,6 +69,7 @@ export const LESSON_CONTENT = {
   '1.3': {
     id: 'b7010000-0000-0000-0000-000000000103',
     type: 'video_with_slider',
+    vimeoId: '1182573431',
     title: 'Wie Gewinner in Gehaltsverhandlungen denken',
     duration: '3 Min.',
     takeaways: [
@@ -98,6 +100,7 @@ export const LESSON_CONTENT = {
   '2.1': {
     id: 'b7010000-0000-0000-0000-000000000201',
     type: 'video_with_three_numbers',
+    vimeoId: '1182574272',
     title: 'Was du wirklich wert bist',
     duration: '3 Min.',
     takeaways: [
@@ -117,6 +120,7 @@ export const LESSON_CONTENT = {
   '2.2': {
     id: 'b7010000-0000-0000-0000-000000000202',
     type: 'video',
+    vimeoId: '1182575073',
     title: 'Wie Arbeitgeber dein Gehalt wirklich bestimmen',
     duration: '3 Min.',
     takeaways: [
@@ -135,6 +139,7 @@ export const LESSON_CONTENT = {
   '2.3': {
     id: 'b7010000-0000-0000-0000-000000000203',
     type: 'video_with_impact',
+    vimeoId: '1182575753',
     title: 'Dein Marktwert in 3 Faktoren',
     duration: '4 Min.',
     takeaways: [
@@ -173,6 +178,7 @@ export const LESSON_CONTENT = {
   '3.1': {
     id: 'b7010000-0000-0000-0000-000000000301',
     type: 'video',
+    vimeoId: '1182576145',
     title: 'Warum du ohne Vorbereitung verlierst',
     duration: '3 Min.',
     takeaways: [
@@ -191,6 +197,7 @@ export const LESSON_CONTENT = {
   '3.2': {
     id: 'b7010000-0000-0000-0000-000000000302',
     type: 'video_with_pitch',
+    vimeoId: '1182576633',
     title: 'Dein persönlicher Gehalts-Pitch',
     duration: '4 Min.',
     takeaways: [
@@ -219,6 +226,7 @@ export const LESSON_CONTENT = {
   '3.3': {
     id: 'b7010000-0000-0000-0000-000000000303',
     type: 'video_with_arguments',
+    vimeoId: '1182578575',
     title: 'Deine stärksten Argumente',
     duration: '4 Min.',
     takeaways: [
@@ -250,6 +258,7 @@ export const LESSON_CONTENT = {
   '3.4': {
     id: 'b7010000-0000-0000-0000-000000000304',
     type: 'video_with_strategy',
+    vimeoId: '1182579186',
     title: 'Deine Strategie festlegen',
     duration: '4 Min.',
     takeaways: [
@@ -289,6 +298,7 @@ export const LESSON_CONTENT = {
   '4.1': {
     id: 'b7010000-0000-0000-0000-000000000401',
     type: 'video',
+    vimeoId: '1182579689',
     title: 'So startest du das Gespräch richtig',
     duration: '3 Min.',
     takeaways: [
@@ -310,6 +320,7 @@ export const LESSON_CONTENT = {
   '4.2': {
     id: 'b7010000-0000-0000-0000-000000000402',
     type: 'video',
+    vimeoId: '1182581460',
     title: 'Die häufigsten Arbeitgeber-Reaktionen',
     duration: '4 Min.',
     takeaways: [
@@ -350,6 +361,7 @@ export const LESSON_CONTENT = {
   '4.3': {
     id: 'b7010000-0000-0000-0000-000000000403',
     type: 'simulation',
+    vimeoId: '1182582736',
     simulationKey: 'nicht_drin',
     title: 'Simulation: "Das ist aktuell nicht drin"',
     duration: '5 Min.',
@@ -387,6 +399,7 @@ export const LESSON_CONTENT = {
   '5.1': {
     id: 'b7010000-0000-0000-0000-000000000501',
     type: 'video_with_template',
+    vimeoId: '1182583192',
     title: 'So schließt du die Verhandlung ab',
     duration: '3 Min.',
     takeaways: [
@@ -417,6 +430,7 @@ Mit freundlichen Grüßen
   '5.2': {
     id: 'b7010000-0000-0000-0000-000000000502',
     type: 'video_with_final',
+    vimeoId: '1182583525',
     title: 'Wenn sie Nein sagen — Dein Plan B',
     duration: '3 Min.',
     takeaways: [
