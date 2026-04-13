@@ -248,7 +248,7 @@ export default async function CVCheckPage() {
         )}
 
         {/* Two-column */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 20, alignItems: 'start' }}>
+        <div className="cv-check-layout">
 
           {/* Left: CV Preview */}
           <div style={{
