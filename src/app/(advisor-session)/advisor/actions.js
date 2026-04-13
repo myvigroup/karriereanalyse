@@ -208,6 +208,12 @@ export async function completeFeedback(leadId) {
   if (!lead) return { error: 'Lead nicht gefunden' };
   if (!lead.email) return { error: 'Keine E-Mail erfasst — bitte zuerst Kontaktdaten eingeben.' };
 
+  // Berater-Name laden
+  const { data: advisorProfile } = lead.advisor_user_id
+    ? await admin.from('advisors').select('display_name').eq('user_id', lead.advisor_user_id).maybeSingle()
+    : { data: null };
+  const advisorName = advisorProfile?.display_name || '';
+
   // Feedback abschließen (via admin, RLS umgehen)
   await admin.from('cv_feedback')
     .update({ status: 'completed', updated_at: new Date().toISOString() })
@@ -263,6 +269,7 @@ export async function completeFeedback(leadId) {
         telefon: lead.phone || '',
         zielstelle: lead.target_position || '',
         messe: fairName,
+        berater: advisorName,
         gesamtbewertung: feedback?.overall_rating || 0,
         zusammenfassung: feedback?.summary || '',
         datum: new Date().toISOString(),
