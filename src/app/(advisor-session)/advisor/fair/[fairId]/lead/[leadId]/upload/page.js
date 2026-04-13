@@ -5,6 +5,85 @@ import { useParams, useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
 import { createClient } from '@/lib/supabase/client';
 
+const UPLOAD_STEPS = [
+  { label: 'Lebenslauf wird hochgeladen…' },
+  { label: 'Datei wird gespeichert…' },
+  { label: 'Analyse wird vorbereitet…' },
+];
+
+function LoadingScreen({ progress }) {
+  // progress: 0 = none, 1 = step1 done, 2 = step2 done, 3 = all done
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 100,
+      background: 'linear-gradient(135deg, #f0f4f0 0%, #faf8f4 50%, #f5f0ea 100%)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 24,
+    }}>
+      <div style={{
+        background: '#fff', borderRadius: 24, padding: '40px 32px',
+        width: '100%', maxWidth: 440,
+        boxShadow: '0 4px 32px rgba(0,0,0,0.06)',
+      }}>
+        {/* Icon */}
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <span style={{ fontSize: 64 }}>📄</span>
+        </div>
+
+        {/* Steps */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+          {UPLOAD_STEPS.map((step, i) => {
+            const done = progress > i;
+            const active = progress === i;
+            return (
+              <div key={i} style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '14px 16px', borderRadius: 12,
+                background: done ? '#F0FDF4' : active ? '#1a6b5a' : '#F9F9F9',
+                border: `1px solid ${done ? '#BBF7D0' : active ? '#1a6b5a' : '#EDEDED'}`,
+                transition: 'all 0.4s ease',
+              }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                  background: done ? '#22C55E' : active ? 'rgba(255,255,255,0.2)' : '#E5E7EB',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 14,
+                }}>
+                  {done ? (
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M2 7l3.5 3.5L12 3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  ) : active ? (
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ animation: 'spin 1s linear infinite' }}>
+                      <circle cx="7" cy="7" r="5" stroke="rgba(255,255,255,0.3)" strokeWidth="2"/>
+                      <path d="M7 2a5 5 0 0 1 5 5" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  ) : null}
+                </div>
+                <span style={{
+                  fontSize: 15, fontWeight: 600,
+                  color: done ? '#15803D' : active ? '#fff' : '#9CA3AF',
+                }}>
+                  {step.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        <p style={{
+          textAlign: 'center', fontSize: 13, color: '#9CA3AF', lineHeight: 1.6, margin: 0,
+        }}>
+          Einen Moment – wir bereiten den Lebenslauf<br/>für die Analyse vor.
+        </p>
+      </div>
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      `}</style>
+    </div>
+  );
+}
+
 const ACCEPTED_TYPES = {
   'application/pdf': 'pdf',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
@@ -23,10 +102,10 @@ export default function CVUpload() {
 
   const [lead, setLead] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadStep, setUploadStep] = useState(0); // 0=none, 1,2,3=steps done
   const [error, setError] = useState(null);
   const [showQR, setShowQR] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(null);
 
   // Lead laden
   useEffect(() => {
@@ -72,21 +151,21 @@ export default function CVUpload() {
     }
 
     setUploading(true);
-    setUploadProgress('Wird hochgeladen...');
+    setUploadStep(0);
 
     try {
       const docId = crypto.randomUUID();
-      const ext = file.name.split('.').pop() || fileType;
-      const filePath = `${lead?.email || 'unknown'}/${docId}/${file.name}`;
+      const filePath = `${lead?.id || 'unknown'}/${docId}/${file.name}`;
 
-      // Storage-Upload
+      // Step 1: Storage-Upload
       const { error: uploadError } = await supabase.storage
         .from('cv-documents')
         .upload(filePath, file, { contentType: file.type });
 
       if (uploadError) throw new Error(uploadError.message);
+      setUploadStep(1);
 
-      // DB-Eintrag
+      // Step 2: DB-Eintrag
       const { error: dbError } = await supabase.from('cv_documents').insert({
         lead_id: leadId,
         storage_path: filePath,
@@ -96,18 +175,21 @@ export default function CVUpload() {
       });
 
       if (dbError) throw new Error(dbError.message);
+      setUploadStep(2);
 
-      // Lead-Status updaten
+      // Step 3: Lead-Status updaten
       await supabase.from('fair_leads')
         .update({ status: 'analyzing', updated_at: new Date().toISOString() })
         .eq('id', leadId);
 
-      setUploadProgress('Fertig!');
+      setUploadStep(3);
+      // Kurze Pause damit Schritt 3 sichtbar ist
+      await new Promise(r => setTimeout(r, 600));
       router.push(`/advisor/fair/${fairId}/lead/${leadId}/review`);
     } catch (err) {
       setError(err.message || 'Upload fehlgeschlagen');
       setUploading(false);
-      setUploadProgress(null);
+      setUploadStep(0);
     }
   }, [lead, leadId, fairId, router, supabase]);
 
@@ -126,6 +208,8 @@ export default function CVUpload() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de';
   const qrUrl = lead?.magic_token ? `${appUrl}/upload/${lead.magic_token}` : '';
 
+  if (uploading) return <LoadingScreen progress={uploadStep} />;
+
   return (
     <div style={{ maxWidth: 640, margin: '0 auto' }}>
       <a
@@ -140,7 +224,7 @@ export default function CVUpload() {
       </h1>
       {lead && (
         <p style={{ color: '#86868b', marginBottom: 32 }}>
-          für <strong>{`${lead.first_name} ${lead.last_name || ''}`.trim()}</strong> ({lead.email})
+          für <strong>{`${lead.first_name} ${lead.last_name || ''}`.trim()}</strong>
         </p>
       )}
 
@@ -166,11 +250,10 @@ export default function CVUpload() {
               borderRadius: 16,
               padding: 48,
               textAlign: 'center',
-              cursor: uploading ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
               background: dragOver ? '#FEF2F2' : '#fff',
               transition: 'all 0.2s',
               marginBottom: 16,
-              opacity: uploading ? 0.6 : 1,
             }}
           >
             <input
@@ -180,22 +263,15 @@ export default function CVUpload() {
               onChange={handleFileSelect}
               style={{ display: 'none' }}
             />
-            {uploading ? (
-              <div>
-                <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
-                <p style={{ fontWeight: 600, color: '#1A1A1A' }}>{uploadProgress}</p>
-              </div>
-            ) : (
-              <div>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>📄</div>
-                <p style={{ fontWeight: 600, color: '#1A1A1A', marginBottom: 4 }}>
-                  Datei hierhin ziehen
-                </p>
-                <p style={{ fontSize: 14, color: '#86868b' }}>
-                  oder klicken zum Auswählen · PDF, DOCX, JPG, PNG · Max. 10 MB
-                </p>
-              </div>
-            )}
+            <div>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>📄</div>
+              <p style={{ fontWeight: 600, color: '#1A1A1A', marginBottom: 4 }}>
+                Datei hierhin ziehen
+              </p>
+              <p style={{ fontSize: 14, color: '#86868b' }}>
+                oder klicken zum Auswählen · PDF, DOCX, JPG, PNG · Max. 10 MB
+              </p>
+            </div>
           </div>
 
           {/* Kamera-Button */}
