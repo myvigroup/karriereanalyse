@@ -3,9 +3,16 @@ import { useEffect } from 'react';
 
 export default function ProfileLoading() {
   useEffect(() => {
+    const attempts = parseInt(sessionStorage.getItem('profile_load_attempts') || '0');
+    if (attempts >= 2) {
+      sessionStorage.removeItem('profile_load_attempts');
+      window.location.href = '/onboarding';
+      return;
+    }
+    sessionStorage.setItem('profile_load_attempts', String(attempts + 1));
     const timer = setTimeout(() => {
       window.location.reload();
-    }, 2500);
+    }, 2000);
     return () => clearTimeout(timer);
   }, []);
 
