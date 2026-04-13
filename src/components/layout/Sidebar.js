@@ -250,14 +250,24 @@ export default function Sidebar({ profile, analysisResults }) {
       {/* Mobile Drawer */}
       <div style={{
         position: 'fixed', top: 0, left: 0, bottom: 0, width: 280,
-        background: 'var(--ki-card)', zIndex: 400, padding: '24px 12px',
+        background: 'var(--ki-card)', zIndex: 400, padding: '16px 12px',
         display: 'flex', flexDirection: 'column',
         transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
         transition: 'transform 0.25s ease',
         overflowY: 'auto',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-          <button onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 22, color: 'var(--ki-text-secondary)', padding: 4 }}>✕</button>
+        {/* Close button header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, padding: '0 8px' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'var(--ki-red)', textTransform: 'uppercase' }}>Menü</div>
+          <button
+            onClick={() => setMobileOpen(false)}
+            style={{
+              background: 'var(--ki-bg-alt)', border: 'none', cursor: 'pointer',
+              width: 36, height: 36, borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 18, color: 'var(--ki-text)', fontWeight: 400,
+            }}
+          >✕</button>
         </div>
         {sidebarContent}
       </div>
