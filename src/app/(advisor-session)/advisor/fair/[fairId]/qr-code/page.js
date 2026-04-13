@@ -15,34 +15,7 @@ export default function QRCodePage() {
 
   return (
     <>
-      {/* ── Druckansicht ── nur beim Drucken sichtbar */}
-      <div className="print-only" style={{ display: 'none' }}>
-        <div style={{ textAlign: 'center', padding: '60px 40px', fontFamily: 'sans-serif' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#CC1426', marginBottom: 8 }}>
-            KARRIERE-INSTITUT
-          </div>
-          <h1 style={{ fontSize: 26, fontWeight: 800, margin: '0 0 6px', color: '#1A1A1A' }}>
-            Kostenloser Lebenslauf-Check
-          </h1>
-          <p style={{ fontSize: 14, color: '#6B7280', margin: '0 0 32px' }}>
-            Scanne den QR-Code mit deinem Handy und erhalte sofort KI-Feedback zu deinem Lebenslauf.
-          </p>
-          {scanUrl && (
-            <div style={{ display: 'inline-block', padding: 20, border: '2px solid #E8E6E1', borderRadius: 16, marginBottom: 24 }}>
-              <QRCodeSVG value={scanUrl} size={260} level="H" />
-            </div>
-          )}
-          <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 40, wordBreak: 'break-all' }}>{scanUrl}</div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 32, fontSize: 13, color: '#4B5563' }}>
-            {['📋 Daten eingeben', '📄 Lebenslauf hochladen', '🤖 KI-Analyse erhalten'].map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>{s}</div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Normale Ansicht ── beim Drucken versteckt */}
-      <div className="no-print" style={{ maxWidth: 480, margin: '0 auto', padding: '40px 24px' }}>
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: '40px 24px' }}>
         <Link href={`/advisor/fair/${fairId}`} style={{ fontSize: 13, color: '#86868b', textDecoration: 'none', display: 'inline-block', marginBottom: 28 }}>
           ← Zurück zur Messe
         </Link>
@@ -73,29 +46,18 @@ export default function QRCodePage() {
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button
-            onClick={() => window.print()}
+        {scanUrl && (
+          <a
+            href={scanUrl} target="_blank" rel="noopener noreferrer"
             style={{
-              flex: 1, padding: '14px 0', borderRadius: 980, background: '#CC1426',
-              color: '#fff', border: 'none', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+              display: 'block', padding: '14px 0', borderRadius: 980, background: '#F3F4F6',
+              color: '#1A1A1A', fontWeight: 600, fontSize: 14, textDecoration: 'none',
+              textAlign: 'center',
             }}
           >
-            🖨️ Drucken
-          </button>
-          {scanUrl && (
-            <a
-              href={scanUrl} target="_blank" rel="noopener noreferrer"
-              style={{
-                flex: 1, padding: '14px 0', borderRadius: 980, background: '#F3F4F6',
-                color: '#1A1A1A', fontWeight: 600, fontSize: 14, textDecoration: 'none',
-                textAlign: 'center', display: 'block',
-              }}
-            >
-              🔗 Link testen
-            </a>
-          )}
-        </div>
+            🔗 Link testen
+          </a>
+        )}
 
         {/* Instructions */}
         <div style={{ marginTop: 28, padding: '20px', background: '#F9FAFB', borderRadius: 16, border: '1px solid #F3F4F6' }}>
@@ -114,17 +76,6 @@ export default function QRCodePage() {
         </div>
       </div>
 
-      <style>{`
-        @media print {
-          .no-print { display: none !important; }
-          .print-only { display: block !important; }
-          header, nav, aside, [class*="sidebar"], [class*="Sidebar"] { display: none !important; }
-          body { margin: 0; }
-        }
-        @media screen {
-          .print-only { display: none !important; }
-        }
-      `}</style>
     </>
   );
 }
