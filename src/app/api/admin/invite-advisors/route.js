@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { sendEmail } from '@/lib/email';
 
 const ADVISORS = [
   { email: 's.boufarache@mitnorm.com', name: 'Siham Boufarache' },
@@ -35,64 +36,48 @@ export async function GET(req) {
   const results = [];
 
   for (const advisor of ADVISORS) {
-    // Check if already exists
-    const { data: existing } = await admin.from('profiles').select('id').eq('email', advisor.email).maybeSingle();
-    if (existing) {
-      // Generate a new invite link for existing users too
-      const { data: linkData } = await admin.auth.admin.generateLink({
-        type: 'recovery',
-        email: advisor.email,
-        options: { redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/set-password` },
-      });
-      results.push({ email: advisor.email, name: advisor.name, status: 'already exists', link: linkData?.properties?.action_link || null });
-      continue;
-    }
-
-    // Create user without sending email
-    const { data: created, error: createError } = await admin.auth.admin.createUser({
-      email: advisor.email,
-      email_confirm: true,
-      user_metadata: { name: advisor.name },
-    });
-
-    if (createError || !created?.user) {
-      results.push({ email: advisor.email, name: advisor.name, status: `error: ${createError?.message}` });
-      continue;
-    }
-
-    const userId = created.user.id;
-
-    // Set profile role
-    await admin.from('profiles').upsert({
-      id: userId,
-      email: advisor.email,
-      name: advisor.name,
-      role: 'advisor',
-    });
-
-    // Create advisor entry (with email to satisfy NOT NULL)
-    const { error: advisorError } = await admin.from('advisors').insert({
-      user_id: userId,
-      display_name: advisor.name,
-      email: advisor.email,
-    });
-
-    // Generate invite/set-password link
-    const { data: linkData } = await admin.auth.admin.generateLink({
+    // Generate fresh set-password link
+    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: 'recovery',
       email: advisor.email,
       options: { redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/set-password` },
     });
 
+    if (linkError || !linkData?.properties?.action_link) {
+      results.push({ email: advisor.email, name: advisor.name, status: `link error: ${linkError?.message}` });
+      continue;
+    }
+
+    const link = linkData.properties.action_link;
+
+    // Send email via Brevo
+    const emailResult = await sendEmail({
+      to: advisor.email,
+      subject: 'Dein Zugang zum Karriere-Institut Berater-Portal',
+      html: `
+        <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: #CC1426; text-transform: uppercase; margin-bottom: 24px;">Das Karriere-Institut</div>
+          <h1 style="font-size: 24px; font-weight: 700; color: #1A1A1A; margin: 0 0 12px;">Hallo ${advisor.name.split(' ')[0]},</h1>
+          <p style="font-size: 16px; color: #444; line-height: 1.6; margin: 0 0 24px;">
+            dein Berater-Account ist bereit. Klicke auf den Button, um dein Passwort zu setzen und dich einzuloggen.
+          </p>
+          <a href="${link}" style="display: inline-block; background: #CC1426; color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; font-size: 15px; margin-bottom: 24px;">
+            Passwort setzen →
+          </a>
+          <p style="font-size: 13px; color: #86868b; margin: 0 0 8px;">
+            Nach dem Setzen deines Passworts kannst du dich jederzeit unter <a href="${process.env.NEXT_PUBLIC_APP_URL}/advisor/login" style="color: #CC1426;">${process.env.NEXT_PUBLIC_APP_URL}/advisor/login</a> einloggen.
+          </p>
+          <p style="font-size: 12px; color: #aaa; margin: 16px 0 0;">Dieser Link ist 24 Stunden gültig.</p>
+        </div>
+      `,
+    });
+
     results.push({
       email: advisor.email,
       name: advisor.name,
-      status: advisorError ? `user created, advisor error: ${advisorError.message}` : 'created',
-      link: linkData?.properties?.action_link || null,
+      status: emailResult?.error ? `email error: ${emailResult.error}` : 'email sent',
     });
   }
 
-  return NextResponse.json({ results }, {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return NextResponse.json({ results });
 }
