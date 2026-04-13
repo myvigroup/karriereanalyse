@@ -223,6 +223,18 @@ export default async function CVCheckPage() {
             border: '1px solid #E8E6E1', marginBottom: 24,
             boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
           }}>
+            {lead?.target_position && (
+              <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 13, color: '#9CA3AF' }}>Analysiert für:</span>
+                <span style={{
+                  fontSize: 14, fontWeight: 700, color: '#CC1426',
+                  background: '#FFF0F1', padding: '3px 12px', borderRadius: 980,
+                  border: '1px solid #FECDD3',
+                }}>
+                  🎯 {lead.target_position}
+                </span>
+              </div>
+            )}
             <ScoreGauge rating={feedback.overall_rating} />
             {feedback.summary && (
               <p style={{

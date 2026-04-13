@@ -43,11 +43,11 @@ export default function NewLead() {
         Neues Gespräch
       </h1>
       <p style={{ color: '#86868b', marginBottom: 32 }}>
-        Wie heißt dein Gesprächspartner?
+        Kurz erfassen, dann geht es zum CV-Upload.
       </p>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 20 }}>
           <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
             Vorname *
           </label>
@@ -66,6 +66,29 @@ export default function NewLead() {
               outline: 'none',
               background: '#fff',
               boxSizing: 'border-box',
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 4 }}>
+            Zielstelle / Zielbereich
+            <span style={{ fontWeight: 400, color: '#86868b', marginLeft: 6 }}>— wofür soll der CV angepasst werden?</span>
+          </label>
+          <input
+            type="text"
+            name="target_position"
+            placeholder="z.B. Kaufmann im Einzelhandel, Marketing Manager, Pflegefachkraft…"
+            style={{
+              width: '100%',
+              padding: '14px 18px',
+              fontSize: 16,
+              border: '1px solid #E8E6E1',
+              borderRadius: 12,
+              outline: 'none',
+              background: '#fff',
+              boxSizing: 'border-box',
+              color: '#1A1A1A',
             }}
           />
         </div>

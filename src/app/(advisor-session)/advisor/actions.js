@@ -29,6 +29,7 @@ export async function createLead(fairId, formData) {
 
   const admin = createAdminClient();
   const name = formData.get('name');
+  const target_position = formData.get('target_position')?.trim() || null;
   if (!name) return { error: 'Name ist ein Pflichtfeld' };
 
   // Fair-Lead erstellen (ohne email, ohne user_id)
@@ -37,6 +38,7 @@ export async function createLead(fairId, formData) {
     advisor_user_id: advisor.userId,
     first_name: name,
     last_name: '',
+    target_position,
     status: 'new',
   }).select('id').single();
 

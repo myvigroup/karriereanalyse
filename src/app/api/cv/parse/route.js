@@ -6,7 +6,7 @@ export async function POST(request) {
   const admin = createAdminClient();
 
   try {
-    const { documentId, feedbackId } = await request.json();
+    const { documentId, feedbackId, targetPosition } = await request.json();
     if (!documentId) {
       return NextResponse.json({ error: 'documentId fehlt' }, { status: 400 });
     }
@@ -67,7 +67,7 @@ export async function POST(request) {
     }).eq('id', documentId);
 
     // KI-Analyse starten
-    const aiAnalysis = await analyzeCVForFair(extractedText);
+    const aiAnalysis = await analyzeCVForFair(extractedText, targetPosition);
 
     // Analyse in Feedback speichern
     if (feedbackId && aiAnalysis) {
