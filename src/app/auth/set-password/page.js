@@ -129,7 +129,7 @@ export default function SetPasswordPage() {
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '2px', color: '#CC1426', textTransform: 'uppercase' }}>
             KARRIERE-INSTITUT
           </span>
-          <p style={{ color: '#86868b', fontSize: 13, margin: '6px 0 0' }}>Berater-Portal</p>
+          <p style={{ color: '#86868b', fontSize: 13, margin: '6px 0 0' }}>Konto-Einstellungen</p>
         </div>
 
         <div style={{ background: '#fff', borderRadius: 20, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
@@ -137,7 +137,7 @@ export default function SetPasswordPage() {
             Neues Passwort setzen
           </h1>
           <p style={{ color: '#86868b', fontSize: 14, margin: '0 0 28px', lineHeight: 1.5 }}>
-            Gib dein neues Passwort ein. Danach wirst du direkt ins Berater-Portal weitergeleitet.
+            Gib dein neues Passwort ein. Du wirst danach automatisch weitergeleitet.
           </p>
 
           {error ? (
@@ -225,7 +225,7 @@ export default function SetPasswordPage() {
                   marginTop: 4,
                 }}
               >
-                {loading ? 'Wird gespeichert…' : 'Passwort setzen & Portal öffnen'}
+                {loading ? 'Wird gespeichert…' : 'Passwort speichern'}
               </button>
             </form>
           )}
