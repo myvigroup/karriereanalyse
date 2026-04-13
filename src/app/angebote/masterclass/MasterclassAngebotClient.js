@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 const MODULES = [
   { icon: '🧠', title: 'Modul 1: Mindset', sub: 'Die innere Blockade lösen' },
@@ -8,6 +8,92 @@ const MODULES = [
   { icon: '🎭', title: 'Modul 4: Verhandlung', sub: 'Die Taktik im Gespräch' },
   { icon: '🏆', title: 'Modul 5: Abschluss', sub: 'Nach dem Ja' },
 ];
+
+function GehaltsRechner() {
+  const [salary, setSalary] = useState(50000);
+  const result = useMemo(() => {
+    const low = Math.round(salary * 0.07);
+    const high = Math.round(salary * 0.12);
+    const lowM = Math.round(low / 12);
+    const highM = Math.round(high / 12);
+    return { low, high, lowM, highM };
+  }, [salary]);
+
+  const fmtEur = (n) => n.toLocaleString('de-DE') + ' €';
+
+  return (
+    <section style={{ maxWidth: 640, margin: '40px auto 0', padding: '0 24px' }}>
+      <div style={{
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+        borderRadius: 20, padding: '32px 36px',
+        border: '1px solid rgba(255,255,255,0.06)',
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#ff6b7a', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
+            Dein Gehalts-Rechner
+          </div>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', margin: 0 }}>
+            Wie viel Geld lässt du gerade liegen?
+          </h2>
+        </div>
+
+        {/* Slider */}
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <label style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>
+              Dein aktuelles Jahresgehalt
+            </label>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
+              {fmtEur(salary)}
+            </div>
+          </div>
+          <input
+            type="range"
+            min={20000} max={200000} step={1000}
+            value={salary}
+            onChange={e => setSalary(Number(e.target.value))}
+            style={{ width: '100%', accentColor: '#CC1426', cursor: 'pointer' }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
+            <span>20.000 €</span>
+            <span>200.000 €</span>
+          </div>
+        </div>
+
+        {/* Result Box */}
+        <div style={{
+          background: 'rgba(204,20,38,0.15)', border: '1px solid rgba(204,20,38,0.4)',
+          borderRadius: 14, padding: '20px 24px', marginBottom: 20,
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: 16 }}>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>
+              Mit 7–12 % Gehaltserhöhung hättest du <strong style={{ color: 'rgba(255,255,255,0.8)' }}>mehr pro Jahr</strong>:
+            </div>
+            <div style={{ fontSize: 42, fontWeight: 900, color: '#ff6b7a', letterSpacing: '-0.04em', lineHeight: 1 }}>
+              {fmtEur(result.low)} – {fmtEur(result.high)}
+            </div>
+            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
+              = {fmtEur(result.lowM)} – {fmtEur(result.highM)} mehr pro Monat
+            </div>
+          </div>
+          <div style={{
+            background: 'rgba(0,0,0,0.3)', borderRadius: 10, padding: '12px 16px',
+            textAlign: 'center',
+          }}>
+            <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>
+              Das lässt du jedes Jahr liegen, weil du nicht verhandelst.
+            </span>
+          </div>
+        </div>
+
+        <div style={{ textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
+          Die Gehalts-Masterclass kostet einmalig <strong style={{ color: '#fff' }}>49 €</strong> —
+          das holst du in einer einzigen Verhandlung raus.
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function MasterclassAngebotClient() {
   const [interval, setInterval] = useState('monthly');
@@ -82,6 +168,8 @@ export default function MasterclassAngebotClient() {
           ))}
         </div>
       </section>
+
+      <GehaltsRechner />
 
       {/* Interval Toggle */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 4, margin: '40px 0 32px' }}>

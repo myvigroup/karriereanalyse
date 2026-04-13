@@ -94,9 +94,17 @@ export default async function AdminPage() {
   return (
     <div>
       {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Admin-Bereich</h1>
-        <p style={{ color: '#86868b', marginTop: 4, marginBottom: 0 }}>Messen, Berater und Kennzahlen verwalten</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+        <div>
+          <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Admin-Bereich</h1>
+          <p style={{ color: '#86868b', marginTop: 4, marginBottom: 0 }}>Messen, Berater und Kennzahlen verwalten</p>
+        </div>
+        <Link
+          href="/advisor/admin/platform"
+          style={{ padding: '9px 20px', background: '#1A1A1A', color: '#fff', borderRadius: 980, textDecoration: 'none', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}
+        >
+          📊 Plattform-Cockpit
+        </Link>
       </div>
 
       {/* KPI Cards */}
