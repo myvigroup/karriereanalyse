@@ -140,7 +140,7 @@ Gib mir als JSON:
  * @param {string} cvText - Extrahierter Text aus dem CV
  * @returns {Object} Strukturierte Analyse mit Preset-Vorschlägen pro Kategorie
  */
-export async function analyzeCVForFair(cvText) {
+export async function analyzeCVForFair(cvText, targetPosition) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey) {
@@ -159,7 +159,7 @@ export async function analyzeCVForFair(cvText) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
         max_tokens: 2500,
-        system: `Du bist ein erfahrener Karrierecoach auf einer Karrieremesse. Analysiere den Lebenslauf und gib strukturiertes Feedback.
+        system: `Du bist ein erfahrener Karrierecoach auf einer Karrieremesse. Analysiere den Lebenslauf${targetPosition ? ` speziell im Hinblick auf die Zielstelle "${targetPosition}"` : ''} und gib strukturiertes Feedback.
 
 Antworte NUR als valides JSON-Objekt ohne Markdown-Backticks. Format:
 {
@@ -198,7 +198,7 @@ Wirkung: "Starker erster Eindruck", "Erster Eindruck verbesserungswürdig", "Per
 Ratings sind 1-5 (1=schlecht, 5=sehr gut). Sei ehrlich aber konstruktiv.`,
         messages: [{
           role: 'user',
-          content: `Analysiere diesen Lebenslauf:\n\n${cvText.substring(0, 8000)}`,
+          content: `Analysiere diesen Lebenslauf${targetPosition ? ` im Hinblick auf die Zielstelle: "${targetPosition}"` : ''}:\n\n${cvText.substring(0, 8000)}`,
         }],
       }),
     });

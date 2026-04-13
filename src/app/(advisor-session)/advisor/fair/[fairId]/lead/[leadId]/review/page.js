@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { saveFeedback, toggleFeedbackItem, saveFeedbackFreetext, saveCategoryRating, markFeedbackPending } from '@/app/(advisor-session)/advisor/actions';
+import { saveFeedback, toggleFeedbackItem, saveFeedbackFreetext, saveCategoryRating } from '@/app/(advisor-session)/advisor/actions';
 
 const CATEGORIES = [
   { key: 'struktur', label: 'Struktur', icon: '📐' },
@@ -144,22 +144,26 @@ export default function CVReview() {
 
       setLoading(false);
 
-      // KI-Analyse automatisch triggern wenn Dokument + Feedback vorhanden und noch keine KI-Analyse
-      if (doc && existingFeedback && !existingFeedback.ai_analysis) {
-        triggerAiAnalysis(doc.id, existingFeedback.id);
+      // KI-Analyse automatisch triggern wenn:
+      // - Dokument existiert
+      // - Feedback existiert
+      // - Noch keine KI-Analyse da
+      // - Noch keine manuellen Items
+      if (doc && existingFeedback && !existingFeedback.ai_analysis && !hasExistingItems) {
+        triggerAiAnalysis(doc.id, existingFeedback.id, leadData?.target_position);
       }
     }
     load();
   }, [leadId, supabase]);
 
   // KI-Analyse triggern
-  async function triggerAiAnalysis(documentId, feedbackId) {
+  async function triggerAiAnalysis(documentId, feedbackId, targetPosition) {
     setAiStatus('analyzing');
     try {
       const res = await fetch('/api/cv/parse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId, feedbackId }),
+        body: JSON.stringify({ documentId, feedbackId, targetPosition }),
       });
       const data = await res.json();
 
@@ -341,9 +345,21 @@ export default function CVReview() {
           >
             &larr; Zurück
           </a>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '4px 0 0' }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '4px 0 2px' }}>
             CV-Review: {`${lead?.first_name || ''} ${lead?.last_name || ''}`.trim()}
           </h1>
+          {lead?.target_position && (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+              <span style={{ fontSize: 12, color: '#86868b' }}>Zielstelle:</span>
+              <span style={{
+                fontSize: 13, fontWeight: 700, color: '#CC1426',
+                background: '#FFF0F1', padding: '2px 10px', borderRadius: 980,
+                border: '1px solid #FECDD3',
+              }}>
+                🎯 {lead.target_position}
+              </span>
+            </div>
+          )}
         </div>
         {/* KI-Status Badge */}
         {aiStatus !== 'idle' && (
@@ -583,10 +599,7 @@ export default function CVReview() {
               }}
             />
             <button
-              onClick={async () => {
-                await markFeedbackPending(leadId);
-                router.push(`/advisor/fair/${fairId}/lead/${leadId}/contact`);
-              }}
+              onClick={() => router.push(`/advisor/fair/${fairId}/lead/${leadId}/contact`)}
               style={{
                 width: '100%',
                 padding: '14px',
@@ -599,7 +612,7 @@ export default function CVReview() {
                 cursor: 'pointer',
               }}
             >
-              Feedback-Bericht erstellen →
+              Weiter zu Kontaktdaten
             </button>
           </div>
         </div>

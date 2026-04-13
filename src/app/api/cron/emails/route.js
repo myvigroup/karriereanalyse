@@ -3,12 +3,11 @@ import { NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email';
 import { getTemplate } from '@/lib/email-templates';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder'
-);
-
 export async function GET(req) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
   // Verify cron secret (optional, for Vercel Cron)
   const authHeader = req.headers.get('authorization');
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {

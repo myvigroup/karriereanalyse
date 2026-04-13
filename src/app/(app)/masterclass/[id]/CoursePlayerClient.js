@@ -2207,14 +2207,20 @@ function VideoLesson({ lesson, isCompleted, onMarkComplete, saving }) {
 
   return (
     <div>
-      {/* Video — Vimeo embed or placeholder */}
-      <div style={{ borderRadius: 'var(--r-lg)', overflow: 'hidden', aspectRatio: '16/9', marginBottom: 24, background: '#000' }}>
-        {lesson.vimeo_id ? (
+      {/* Video */}
+      <div style={{
+        borderRadius: 'var(--r-lg)',
+        overflow: 'hidden',
+        aspectRatio: '16/9',
+        marginBottom: 24,
+        background: '#000',
+      }}>
+        {lesson.vimeoId ? (
           <iframe
-            src={`https://player.vimeo.com/video/${lesson.vimeo_id}?badge=0&autopause=0&player_id=0&app_id=58479&dnt=1`}
-            frameBorder="0"
-            allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-            style={{ width: '100%', height: '100%', display: 'block' }}
+            src={`https://player.vimeo.com/video/${lesson.vimeoId}?title=0&byline=0&portrait=0&dnt=1`}
+            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
             title={lesson.title}
           />
         ) : (

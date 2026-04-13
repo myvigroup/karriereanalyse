@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { sendEmail } from '@/lib/email';
 import { redirect } from 'next/navigation';
 
-// Hole advisor-ID des eingeloggten Users (Admins ohne Berater-Eintrag bekommen userId ohne advisorId)
+// Hole advisor-ID des eingeloggten Users
 async function getAdvisorId() {
   const supabase = createClient();
   const admin = createAdminClient();
@@ -18,34 +18,27 @@ async function getAdvisorId() {
     .eq('user_id', user.id)
     .maybeSingle();
 
-  // Admins können auch ohne Berater-Eintrag arbeiten
-  if (!advisor) {
-    const { data: profile } = await admin
-      .from('profiles').select('role').eq('id', user.id).maybeSingle();
-    if (['admin', 'messeleiter'].includes(profile?.role)) {
-      return { advisorId: null, userId: user.id };
-    }
-    return null;
-  }
+  if (!advisor) return null;
   return { advisorId: advisor.id, userId: user.id };
 }
 
 // Lead erstellen — nur mit Vorname, ohne Email/User
 export async function createLead(fairId, formData) {
   const advisor = await getAdvisorId();
-  if (!advisor) return { error: 'Kein Berater-Profil gefunden. Bitte erneut einloggen.' };
+  if (!advisor) return { error: 'Kein Berater-Profil gefunden. Bitte neu einloggen.' };
 
   const admin = createAdminClient();
   const name = formData.get('name');
-  const last_name = formData.get('last_name')?.trim() || '';
-  if (!name || !last_name) return { error: 'Vor- und Nachname sind Pflichtfelder' };
+  const target_position = formData.get('target_position')?.trim() || null;
+  if (!name) return { error: 'Name ist ein Pflichtfeld' };
 
   // Fair-Lead erstellen (ohne email, ohne user_id)
   const { data: lead, error: leadError } = await admin.from('fair_leads').insert({
     fair_id: fairId,
     advisor_user_id: advisor.userId,
     first_name: name,
-    last_name,
+    last_name: '',
+    target_position,
     status: 'new',
   }).select('id').single();
 
@@ -79,45 +72,50 @@ export async function saveContactDetails(leadId, formData) {
 
   if (!lead) return { error: 'Lead nicht gefunden' };
 
-  const leadName = `${lead.first_name} ${lead.last_name || ''}`.trim();
-
-  // Prüfe ob User existiert (via profiles, nicht listUsers())
-  const { data: existingProfile } = await admin
-    .from('profiles')
-    .select('id')
-    .eq('email', email)
-    .maybeSingle();
-
-  let userId = existingProfile?.id || null;
-
-  if (!existingProfile) {
-    const { data: newUser, error: createError } = await admin.auth.admin.createUser({
-      email,
-      email_confirm: true,
-      user_metadata: { name: leadName, source: 'fair' },
-    });
-    if (createError) return { error: `User-Erstellung fehlgeschlagen: ${createError.message}` };
-
-    userId = newUser.user.id;
-
-    await admin.from('profiles').update({
-      name: leadName,
-      membership_type: 'basis',
-    }).eq('id', userId).then(() => {}).catch(() => {});
-  }
-
-  // Lead updaten mit Email + Phone + user_id + status
+  // 1. E-Mail SOFORT speichern — unabhängig von User-Logik
   await admin.from('fair_leads').update({
     email,
     phone,
-    user_id: userId,
     status: 'feedback_pending',
     updated_at: new Date().toISOString(),
   }).eq('id', leadId);
 
-  // CV-Dokument ebenfalls mit user_id verknüpfen (damit cv-check Seite es findet)
-  if (userId) {
-    await admin.from('cv_documents').update({ user_id: userId }).eq('lead_id', leadId).then(() => {}).catch(() => {});
+  // 2. User finden oder erstellen (non-blocking — Fehler blockieren nicht den Flow)
+  try {
+    const leadName = `${lead.first_name} ${lead.last_name || ''}`.trim();
+
+    // Prüfe ob User existiert (via profiles)
+    const { data: existingProfile } = await admin
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+
+    let userId = existingProfile?.id || null;
+
+    if (!existingProfile) {
+      const { data: newUser, error: createError } = await admin.auth.admin.createUser({
+        email,
+        email_confirm: true,
+        user_metadata: { name: leadName, source: 'fair' },
+      });
+
+      if (!createError && newUser?.user?.id) {
+        userId = newUser.user.id;
+        await admin.from('profiles').update({
+          name: leadName,
+          membership_type: 'basis',
+        }).eq('id', userId).then(() => {}).catch(() => {});
+      }
+    }
+
+    // user_id auf Lead + CV-Dokument setzen
+    if (userId) {
+      await admin.from('fair_leads').update({ user_id: userId }).eq('id', leadId).then(() => {}).catch(() => {});
+      await admin.from('cv_documents').update({ user_id: userId }).eq('lead_id', leadId).then(() => {}).catch(() => {});
+    }
+  } catch (err) {
+    console.error('User-Erstellung fehlgeschlagen (non-blocking):', err);
   }
 
   redirect(`/advisor/fair/${lead.fair_id}/lead/${leadId}/summary`);
@@ -216,16 +214,6 @@ export async function saveCategoryRating(feedbackId, category, rating) {
   return { success: true };
 }
 
-// Status auf feedback_pending setzen (nach Review → Contact)
-export async function markFeedbackPending(leadId) {
-  const admin = createAdminClient();
-  await admin.from('fair_leads').update({
-    status: 'feedback_pending',
-    updated_at: new Date().toISOString(),
-  }).eq('id', leadId);
-  return { success: true };
-}
-
 // Gespräch abschließen + Magic Link senden
 export async function completeFeedback(leadId) {
   const admin = createAdminClient();
@@ -239,10 +227,22 @@ export async function completeFeedback(leadId) {
   if (!lead) return { error: 'Lead nicht gefunden' };
   if (!lead.email) return { error: 'Keine E-Mail erfasst — bitte zuerst Kontaktdaten eingeben.' };
 
-  // Feedback abschließen (via admin, um RLS zu umgehen)
+  // Berater-Name laden
+  const { data: advisorProfile } = lead.advisor_user_id
+    ? await admin.from('advisors').select('display_name').eq('user_id', lead.advisor_user_id).maybeSingle()
+    : { data: null };
+  const advisorName = advisorProfile?.display_name || '';
+
+  // Feedback abschließen (via admin, RLS umgehen)
   await admin.from('cv_feedback')
     .update({ status: 'completed', updated_at: new Date().toISOString() })
     .eq('fair_lead_id', leadId);
+
+  // Feedback für Bewertung laden
+  const { data: feedback } = await admin.from('cv_feedback')
+    .select('overall_rating, summary')
+    .eq('fair_lead_id', leadId)
+    .maybeSingle();
 
   // Lead abschließen
   await admin.from('fair_leads').update({
@@ -265,16 +265,37 @@ export async function completeFeedback(leadId) {
   }
 
   const magicLinkUrl = linkData?.properties?.action_link;
-
-  // E-Mail senden
   const fairName = lead.fairs?.name || 'der Karrieremesse';
   const leadName = `${lead.first_name} ${lead.last_name || ''}`.trim();
 
+  // E-Mail senden
   await sendEmail({
     to: lead.email,
     subject: 'Dein Lebenslauf-Check – Ergebnisse ansehen',
     html: buildCvCheckEmail(leadName, fairName, 'Dein Karriere-Coach', magicLinkUrl),
   });
+
+  // SharePoint-Webhook (Power Automate) — Fehler ignorieren, nicht blockieren
+  const webhookUrl = process.env.POWERAUTOMATE_WEBHOOK_URL;
+  if (webhookUrl) {
+    fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        vorname: lead.first_name,
+        nachname: lead.last_name || '',
+        email: lead.email,
+        telefon: lead.phone || '',
+        zielstelle: lead.target_position || '',
+        messe: fairName,
+        berater: advisorName,
+        gesamtbewertung: feedback?.overall_rating || 0,
+        zusammenfassung: feedback?.summary || '',
+        datum: new Date().toISOString(),
+        lead_id: leadId,
+      }),
+    }).catch(err => console.error('Webhook Fehler:', err));
+  }
 
   // Funnel-Events loggen (Fehler ignorieren)
   await admin.from('analytics_events').insert([
