@@ -98,6 +98,22 @@ export default async function LeadsPage({ searchParams }) {
 
   const { data: leads } = await query;
 
+  // Self-Service Checks laden (QR-Code Scans von Bewerbern ohne Termin)
+  let selfChecksQuery = admin
+    .from('self_service_checks')
+    .select('id, name, email, phone, fair_id, status, overall_rating, result_token, created_at, registered')
+    .eq('status', 'completed')
+    .order('created_at', { ascending: false });
+
+  if (isSuperAdmin) {
+    if (fairFilter) selfChecksQuery = selfChecksQuery.eq('fair_id', fairFilter);
+  } else if (fairIds.length > 0) {
+    if (fairFilter) selfChecksQuery = selfChecksQuery.eq('fair_id', fairFilter);
+    else selfChecksQuery = selfChecksQuery.in('fair_id', fairIds);
+  }
+
+  const { data: selfChecks } = await selfChecksQuery;
+
   const fairById = (fairs || []).reduce((acc, f) => { acc[f.id] = f; return acc; }, {});
 
   const formatDate = (d) => new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -335,6 +351,53 @@ export default async function LeadsPage({ searchParams }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Self-Service Checks (QR-Code Scans) */}
+      {selfChecks && selfChecks.length > 0 && (
+        <div style={{ marginTop: 40 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>QR-Code Selbst-Scans</h2>
+            <span style={{ background: '#F0FDF4', color: '#059669', fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 980, border: '1px solid #A7F3D0' }}>
+              {selfChecks.length} neu
+            </span>
+          </div>
+          <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 140px 100px', padding: '12px 20px', borderBottom: '1px solid #F0EEE9', background: '#FAFAF8' }}>
+              {['Name & Kontakt', 'Messe', 'Datum', 'Ergebnis'].map(h => (
+                <div key={h} style={{ fontSize: 12, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</div>
+              ))}
+            </div>
+            {selfChecks.map((sc, i) => {
+              const fair = fairById[sc.fair_id];
+              const ratingColor = !sc.overall_rating ? '#9CA3AF' : sc.overall_rating <= 2 ? '#EF4444' : sc.overall_rating === 3 ? '#F59E0B' : '#22C55E';
+              return (
+                <div key={sc.id} style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 140px 100px', alignItems: 'center', borderBottom: i < selfChecks.length - 1 ? '1px solid #F0EEE9' : 'none' }}>
+                  <div style={{ padding: '14px 0 14px 20px' }}>
+                    <div style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A', marginBottom: 2 }}>{sc.name || '–'}</div>
+                    {sc.phone && <div style={{ fontSize: 12, color: '#CC1426', fontWeight: 600 }}>📞 {sc.phone}</div>}
+                    {sc.email && <div style={{ fontSize: 12, color: '#86868b' }}>{sc.email}</div>}
+                    {sc.registered && <span style={{ fontSize: 11, fontWeight: 600, color: '#059669', background: '#F0FDF4', padding: '1px 7px', borderRadius: 980, border: '1px solid #A7F3D0' }}>Registriert</span>}
+                  </div>
+                  <div style={{ fontSize: 13, color: '#6B7280', padding: '14px 0' }}>{fair?.name || '–'}</div>
+                  <div style={{ fontSize: 13, color: '#6B7280', padding: '14px 0' }}>
+                    {formatDate(sc.created_at)}<br />
+                    <span style={{ fontSize: 12 }}>{formatTime(sc.created_at)}</span>
+                  </div>
+                  <div style={{ padding: '14px 20px 14px 0' }}>
+                    {sc.overall_rating ? (
+                      <a href={`/scan/result/${sc.result_token}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 700, color: ratingColor, textDecoration: 'none' }}>
+                        {sc.overall_rating}/5 →
+                      </a>
+                    ) : (
+                      <span style={{ fontSize: 12, color: '#9CA3AF' }}>–</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

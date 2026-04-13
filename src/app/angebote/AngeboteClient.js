@@ -77,7 +77,7 @@ export default function AngeboteClient() {
       </div>
 
       {/* 2-Column Pricing */}
-      <section style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px 60px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <section style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px 60px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
 
         {/* Einzelbuchung */}
         <div className="card" style={{ padding: 32, display: 'flex', flexDirection: 'column' }}>
