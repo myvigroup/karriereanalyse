@@ -56,7 +56,7 @@ export default async function LeadDetailPage({ params }) {
   const [{ data: fair }, { data: doc }, { data: feedback }] = await Promise.all([
     admin.from('fairs').select('name, start_date, end_date').eq('id', lead.fair_id).maybeSingle(),
     admin.from('cv_documents').select('*').eq('lead_id', leadId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
-    admin.from('cv_feedback').select('*, cv_feedback_items(*)').eq('lead_id', leadId).maybeSingle(),
+    admin.from('cv_feedback').select('*, cv_feedback_items(*)').eq('fair_lead_id', leadId).maybeSingle(),
   ]);
 
   // Signed URL für CV

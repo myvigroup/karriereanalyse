@@ -29,13 +29,19 @@ export default async function LeadsPage({ searchParams }) {
   const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).maybeSingle();
+  const isSuperAdmin = ['admin', 'messeleiter'].includes(profile?.role);
+
   const { data: advisor } = await admin
     .from('advisors')
     .select('id')
     .eq('user_id', user.id)
     .maybeSingle();
 
-  if (!advisor) return null;
+  // Admins ohne Berater-Eintrag dürfen trotzdem rein
+  if (!advisor && !isSuperAdmin) return (
+    <div style={{ padding: 40, color: '#86868b' }}>Kein Berater-Profil gefunden.</div>
+  );
 
   // Filter aus URL-Params
   const statusFilter = searchParams?.status || 'all';
@@ -51,26 +57,29 @@ export default async function LeadsPage({ searchParams }) {
   const fairIds = (assignments || []).map(a => a.fair_id);
   const managerFairIds = (assignments || []).filter(a => a.is_manager).map(a => a.fair_id);
 
-  const { data: fairs } = fairIds.length > 0
-    ? await admin.from('fairs').select('id, name').in('id', fairIds).order('start_date', { ascending: false })
-    : { data: [] };
+  // Alle Messen laden (Admin sieht alle, andere nur ihre)
+  const { data: fairs } = isSuperAdmin
+    ? await admin.from('fairs').select('id, name').order('start_date', { ascending: false })
+    : fairIds.length > 0
+      ? await admin.from('fairs').select('id, name').in('id', fairIds).order('start_date', { ascending: false })
+      : { data: [] };
 
-  // Leads laden — Messeleiter sieht alle Leads seiner Messen, Berater nur eigene
+  // Leads laden — Admin sieht alle, Messeleiter alle seiner Messen, Berater nur eigene
   let query = admin
     .from('fair_leads')
     .select('id, first_name, last_name, email, phone, status, follow_up_status, fair_id, advisor_user_id, created_at, updated_at')
     .order('created_at', { ascending: false });
 
-  // Sichtbarkeit: Messeleiter sieht alle Leads seiner Messen, Berater nur eigene
-  if (fairFilter) {
+  if (isSuperAdmin) {
+    // Admin sieht alles, nur Messe-Filter anwenden wenn gesetzt
+    if (fairFilter) query = query.eq('fair_id', fairFilter);
+  } else if (fairFilter) {
     const isManagerForFair = managerFairIds.includes(fairFilter);
     query = query.eq('fair_id', fairFilter);
     if (!isManagerForFair) query = query.eq('advisor_user_id', user.id);
   } else if (fairIds.length > 0 && managerFairIds.length > 0) {
-    // Hat mind. eine Manager-Messe: alle Leads dieser Messen sichtbar
     query = query.in('fair_id', fairIds);
   } else {
-    // Normaler Berater (oder keine Messe-Zuweisung): nur eigene Leads
     query = query.eq('advisor_user_id', user.id);
     if (fairIds.length > 0) query = query.in('fair_id', fairIds);
   }

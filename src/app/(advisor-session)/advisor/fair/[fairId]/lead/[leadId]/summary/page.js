@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { completeFeedback } from '@/app/(advisor-session)/advisor/actions';
 import Link from 'next/link';
 
@@ -24,7 +23,6 @@ function Stars({ count }) {
 export default function SummaryPage() {
   const { fairId, leadId } = useParams();
   const router = useRouter();
-  const supabase = createClient();
 
   const [lead, setLead] = useState(null);
   const [document, setDocument] = useState(null);
@@ -36,42 +34,20 @@ export default function SummaryPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: leadData } = await supabase
-        .from('fair_leads')
-        .select('*')
-        .eq('id', leadId)
-        .single();
-      setLead(leadData);
-
-      const { data: doc } = await supabase
-        .from('cv_documents')
-        .select('*')
-        .eq('lead_id', leadId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      setDocument(doc);
-
-      const { data: fb } = await supabase
-        .from('cv_feedback')
-        .select('*')
-        .eq('fair_lead_id', leadId)
-        .maybeSingle();
-      setFeedback(fb);
-
-      if (fb) {
-        const { data: fbItems } = await supabase
-          .from('cv_feedback_items')
-          .select('*')
-          .eq('cv_feedback_id', fb.id)
-          .order('sort_order');
-        setItems(fbItems || []);
+      try {
+        const res = await fetch(`/api/summary/${leadId}`);
+        const data = await res.json();
+        setLead(data.lead || null);
+        setDocument(data.document || null);
+        setFeedback(data.feedback || null);
+        setItems(data.items || []);
+      } catch (err) {
+        console.error('Summary load error:', err);
       }
-
       setLoading(false);
     }
     load();
-  }, [leadId, supabase]);
+  }, [leadId]);
 
   async function handleComplete() {
     setSubmitting(true);
@@ -91,16 +67,15 @@ export default function SummaryPage() {
   // Items nach Kategorie gruppieren
   const byCategory = {};
   (items || []).forEach(item => {
+    if (!item.content) return; // null-guard
+    const key = item.category;
+    if (!byCategory[key]) byCategory[key] = { presets: [], freetext: null, rating: 0 };
     if (item.content.startsWith('__rating_')) {
-      // Rating-Item
-      if (!byCategory[item.category]) byCategory[item.category] = { presets: [], freetext: null, rating: 0 };
-      byCategory[item.category].rating = item.rating;
+      byCategory[key].rating = item.rating || 0;
     } else if (item.type === 'preset') {
-      if (!byCategory[item.category]) byCategory[item.category] = { presets: [], freetext: null, rating: 0 };
-      byCategory[item.category].presets.push(item.content);
+      byCategory[key].presets.push(item.content);
     } else if (item.type === 'freetext') {
-      if (!byCategory[item.category]) byCategory[item.category] = { presets: [], freetext: null, rating: 0 };
-      byCategory[item.category].freetext = item.content;
+      byCategory[key].freetext = item.content;
     }
   });
 
