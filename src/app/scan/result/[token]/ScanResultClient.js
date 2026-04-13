@@ -154,15 +154,10 @@ export default function ScanResultClient({ check, itemsByCategory, token }) {
             }}>
               <div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div>
               <h3 style={{ fontSize: 20, fontWeight: 800, color: '#1A1A1A', margin: '0 0 8px' }}>Detailanalyse freischalten</h3>
-              <p style={{ fontSize: 14, color: '#6B7280', margin: '0 0 8px', lineHeight: 1.6 }}>
-                Gib deine Telefonnummer ein und erhalte sofort Zugang zur vollständigen Analyse — kostenlos.
+              <p style={{ fontSize: 14, color: '#6B7280', margin: '0 0 20px', lineHeight: 1.6 }}>
+                Gib deine Telefonnummer ein und erhalte sofort Zugang zur vollständigen Analyse — kostenlos.<br />
+                <span style={{ fontSize: 13, color: '#9CA3AF' }}>Damit wir dich bei Fragen zu deinen Ergebnissen erreichen können.</span>
               </p>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, background: '#FFF8F8', border: '1px solid #FDECEA', borderRadius: 10, padding: '10px 14px', marginBottom: 20, textAlign: 'left' }}>
-                <span style={{ fontSize: 16, flexShrink: 0 }}>📞</span>
-                <p style={{ fontSize: 13, color: '#6B7280', margin: 0, lineHeight: 1.5 }}>
-                  Einer unserer Karriere-Berater meldet sich bei dir, um die Ergebnisse persönlich mit dir zu besprechen und dir konkrete nächste Schritte zu empfehlen.
-                </p>
-              </div>
               <form onSubmit={handleRegister}>
                 <input
                   type="tel"
