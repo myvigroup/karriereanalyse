@@ -10,7 +10,6 @@ export const PRODUCTS = {
     type: 'subscription',
     stripePriceMonthly: process.env.STRIPE_PRICE_MASTERCLASS_MONTHLY,
     stripePriceYearly: process.env.STRIPE_PRICE_MASTERCLASS_YEARLY,
-    trialDays: 7,
     features: ['Alle Kurs-Module', 'Quiz & Praxis-Aufgaben', 'Zertifikate', 'Community-Zugang'],
     description: 'Kurse zu Gehaltsverhandlung, Rhetorik, Leadership und mehr',
   },

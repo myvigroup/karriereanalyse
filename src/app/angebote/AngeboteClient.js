@@ -159,8 +159,7 @@ export default function AngeboteClient() {
               = {yearlyTotal} €/Jahr · Du sparst {yearlySavings} €
             </div>
           ) : (
-            <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 20 }}>7 Tage kostenlos testen</div>
-          )}
+            )}
 
           <ul style={{ listStyle: 'none', marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
@@ -185,7 +184,7 @@ export default function AngeboteClient() {
             disabled={loading === 'MASTERCLASS'}
             style={{ width: '100%', marginTop: 'auto' }}
           >
-            {loading === 'MASTERCLASS' ? 'Wird geladen...' : interval === 'yearly' ? 'Premium-Mitgliedschaft starten' : '7 Tage kostenlos testen'}
+            {loading === 'MASTERCLASS' ? 'Wird geladen...' : 'Premium-Mitgliedschaft starten'}
           </button>
         </div>
       </section>
