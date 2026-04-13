@@ -2897,7 +2897,6 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
       {/* Course Header */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10, flexWrap: 'wrap' }}>
-          {course.icon && <span style={{ fontSize: 28 }}>{course.icon}</span>}
           <h1 className="page-title" style={{ margin: 0 }}>{course.title}</h1>
           <span className="pill pill-grey" style={{ fontSize: 13 }}>
             Modul {currentIndex + 1}/{totalCount}
@@ -2948,7 +2947,6 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                 {/* Lesson header */}
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 22 }}>{getLessonTypeIcon(lessonType)}</span>
                     <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', margin: 0 }}>{currentLesson.title}</h2>
                     {currentLesson.duration_minutes && (
                       <span style={{ fontSize: 13, color: 'var(--ki-text-tertiary)' }}>{currentLesson.duration_minutes} Min.</span>
@@ -3180,7 +3178,6 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                         }}
                       >
                         <span style={{ fontSize: 14, flexShrink: 0 }}>{statusIcon}</span>
-                        <span style={{ fontSize: 12, flexShrink: 0 }}>{getLessonTypeIcon(type)}</span>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{
                             fontSize: 13,
