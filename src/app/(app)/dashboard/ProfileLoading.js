@@ -3,16 +3,18 @@ import { useEffect } from 'react';
 
 export default function ProfileLoading() {
   useEffect(() => {
+    // Nach max. 5 Sekunden (2 Reloads) aufgeben und neu einloggen lassen
     const attempts = parseInt(sessionStorage.getItem('profile_load_attempts') || '0');
-    if (attempts >= 2) {
+    if (attempts >= 3) {
       sessionStorage.removeItem('profile_load_attempts');
-      window.location.href = '/onboarding';
+      // Ausloggen und neu starten
+      window.location.href = '/auth/login';
       return;
     }
     sessionStorage.setItem('profile_load_attempts', String(attempts + 1));
     const timer = setTimeout(() => {
       window.location.reload();
-    }, 2000);
+    }, 1500);
     return () => clearTimeout(timer);
   }, []);
 

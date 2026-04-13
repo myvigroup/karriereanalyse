@@ -89,10 +89,19 @@ export default function OnboardingClient({ profile, userId }) {
   const finish = useCallback(async () => {
     setSaving(true);
     try {
-      await supabase.from('profiles').update({
+      const { data: { user } } = await supabase.auth.getUser();
+      const email = user?.email || '';
+
+      // upsert statt update – funktioniert auch wenn Trigger das Profil noch nicht angelegt hat
+      const { error } = await supabase.from('profiles').upsert({
+        id: userId,
+        email,
         first_name: firstName,
         last_name: lastName,
-        name: `${firstName} ${lastName}`,
+        name: `${firstName} ${lastName}`.trim(),
+        avatar_initials: ((firstName[0] || '') + (lastName[0] || 'X')).toUpperCase(),
+        role: 'user',
+        phase: 'pre_coaching',
         industry,
         current_salary: currentSalary,
         target_salary: targetSalary,
@@ -101,8 +110,9 @@ export default function OnboardingClient({ profile, userId }) {
         onboarding_complete: true,
         total_points: 50,
         dsgvo_consent_at: new Date().toISOString(),
-      }).eq('id', userId);
+      }, { onConflict: 'id' });
 
+      if (error) throw error;
       window.location.href = '/dashboard';
     } catch (err) {
       console.error('Onboarding save failed:', err);
