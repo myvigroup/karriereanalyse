@@ -197,9 +197,7 @@ export async function saveCategoryRating(feedbackId, category, rating) {
 
 // Gespräch abschließen + Magic Link senden
 export async function completeFeedback(leadId) {
-  const { advisorId } = await getAdvisorId();
   const admin = createAdminClient();
-  const supabase = createClient();
 
   // Lead laden
   const { data: lead } = await admin.from('fair_leads')
@@ -207,12 +205,19 @@ export async function completeFeedback(leadId) {
     .eq('id', leadId)
     .maybeSingle();
 
-  if (!lead) throw new Error('Lead nicht gefunden');
+  if (!lead) return { error: 'Lead nicht gefunden' };
+  if (!lead.email) return { error: 'Keine E-Mail erfasst — bitte zuerst Kontaktdaten eingeben.' };
 
-  // Feedback abschließen
-  await supabase.from('cv_feedback')
+  // Feedback abschließen (via admin, RLS umgehen)
+  await admin.from('cv_feedback')
     .update({ status: 'completed', updated_at: new Date().toISOString() })
     .eq('fair_lead_id', leadId);
+
+  // Feedback für Bewertung laden
+  const { data: feedback } = await admin.from('cv_feedback')
+    .select('overall_rating, summary')
+    .eq('fair_lead_id', leadId)
+    .maybeSingle();
 
   // Lead abschließen
   await admin.from('fair_leads').update({
@@ -231,20 +236,40 @@ export async function completeFeedback(leadId) {
 
   if (linkError) {
     console.error('Magic Link Fehler:', linkError);
-    throw new Error('Magic Link konnte nicht generiert werden');
+    return { error: 'Magic Link konnte nicht generiert werden: ' + linkError.message };
   }
 
   const magicLinkUrl = linkData?.properties?.action_link;
-
-  // E-Mail senden
   const fairName = lead.fairs?.name || 'der Karrieremesse';
   const leadName = `${lead.first_name} ${lead.last_name || ''}`.trim();
 
+  // E-Mail senden
   await sendEmail({
     to: lead.email,
     subject: 'Dein Lebenslauf-Check – Ergebnisse ansehen',
     html: buildCvCheckEmail(leadName, fairName, 'Dein Karriere-Coach', magicLinkUrl),
   });
+
+  // SharePoint-Webhook (Power Automate) — Fehler ignorieren, nicht blockieren
+  const webhookUrl = process.env.POWERAUTOMATE_WEBHOOK_URL;
+  if (webhookUrl) {
+    fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        vorname: lead.first_name,
+        nachname: lead.last_name || '',
+        email: lead.email,
+        telefon: lead.phone || '',
+        zielstelle: lead.target_position || '',
+        messe: fairName,
+        gesamtbewertung: feedback?.overall_rating || 0,
+        zusammenfassung: feedback?.summary || '',
+        datum: new Date().toISOString(),
+        lead_id: leadId,
+      }),
+    }).catch(err => console.error('Webhook Fehler:', err));
+  }
 
   // Funnel-Events loggen (Fehler ignorieren)
   await admin.from('analytics_events').insert([
