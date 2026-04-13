@@ -1,13 +1,12 @@
 'use client';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', company: '', position: '', password: '', confirm: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [success, setSuccess] = useState(false);
   const supabase = createClient();
 
   function update(k, v) { setForm(f => ({ ...f, [k]: v })); }
@@ -27,11 +26,48 @@ export default function RegisterPage() {
       },
     });
     if (error) { setError(error.message); setLoading(false); return; }
-    router.push('/dashboard');
+    setSuccess(true);
+    setLoading(false);
   }
 
   const fieldStyle = { display: 'flex', flexDirection: 'column', gap: 6 };
   const labelStyle = { fontSize: 13, fontWeight: 500, color: 'var(--ki-text-secondary)' };
+
+  if (success) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--ki-bg)', padding: 24 }}>
+        <div style={{ maxWidth: 480, width: '100%', textAlign: 'center' }}>
+          <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '0.1em', color: 'var(--ki-red)', marginBottom: 32, textTransform: 'uppercase' }}>Karriere-Institut</div>
+          <div style={{
+            width: 72, height: 72, borderRadius: '50%',
+            background: 'rgba(204,20,38,0.08)', border: '2px solid rgba(204,20,38,0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 24px',
+          }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--ki-red)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 12 }}>E-Mail bestätigen</h1>
+          <p style={{ fontSize: 16, color: 'var(--ki-text-secondary)', lineHeight: 1.6, marginBottom: 24 }}>
+            Wir haben eine Bestätigungsmail an <strong style={{ color: 'var(--ki-text)' }}>{form.email}</strong> gesendet.
+            Bitte klicke auf den Link in der E-Mail, um dein Konto zu aktivieren.
+          </p>
+          <div style={{
+            background: '#FFF9E6', border: '1px solid #FDE68A',
+            borderRadius: 10, padding: '12px 16px', marginBottom: 32,
+            fontSize: 13, color: '#92400E', lineHeight: 1.5, textAlign: 'left',
+          }}>
+            📬 Keine E-Mail erhalten? Bitte prüfe auch deinen <strong>Spam-Ordner</strong>.
+          </div>
+          <a href="/auth/login" className="btn btn-primary" style={{ display: 'inline-block', padding: '12px 32px', fontSize: 15 }}>
+            Zur Anmeldeseite
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--ki-bg)', padding: 24 }}>
