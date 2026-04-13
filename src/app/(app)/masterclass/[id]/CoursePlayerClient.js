@@ -1443,15 +1443,26 @@ function GehaltLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, s
   if (content.type === 'simulation') {
     return (
       <div>
-        {content.vimeoId && (
+        {(content.videoUrl || content.vimeoId) && (
           <div style={{ borderRadius: 'var(--r-lg)', overflow: 'hidden', background: '#000', aspectRatio: '16/9', marginBottom: 24 }}>
-            <iframe
-              src={`https://player.vimeo.com/video/${content.vimeoId}?title=0&byline=0&portrait=0&badge=0&logo=0&share=0&dnt=1`}
-              style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowFullScreen
-              title={content.title}
-            />
+            {content.videoUrl ? (
+              <video
+                src={content.videoUrl}
+                style={{ width: '100%', height: '100%', display: 'block' }}
+                controls
+                controlsList="nodownload"
+                playsInline
+                title={content.title}
+              />
+            ) : (
+              <iframe
+                src={`https://player.vimeo.com/video/${content.vimeoId}?title=0&byline=0&portrait=0&badge=0&logo=0&share=0&dnt=1`}
+                style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                title={content.title}
+              />
+            )}
           </div>
         )}
         <GehaltSimulationWidget
@@ -1475,7 +1486,16 @@ function GehaltLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, s
       <>
         {/* Video player */}
         <div style={{ borderRadius: 'var(--r-lg)', overflow: 'hidden', background: '#000', aspectRatio: '16/9', marginBottom: 24 }}>
-          {content.vimeoId ? (
+          {content.videoUrl ? (
+            <video
+              src={content.videoUrl}
+              style={{ width: '100%', height: '100%', display: 'block' }}
+              controls
+              controlsList="nodownload"
+              playsInline
+              title={content.title}
+            />
+          ) : content.vimeoId ? (
             <iframe
               src={`https://player.vimeo.com/video/${content.vimeoId}?title=0&byline=0&portrait=0&badge=0&logo=0&share=0&dnt=1`}
               style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}

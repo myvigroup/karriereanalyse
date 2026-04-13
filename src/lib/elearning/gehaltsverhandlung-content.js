@@ -70,6 +70,7 @@ export const LESSON_CONTENT = {
     id: 'b7010000-0000-0000-0000-000000000103',
     type: 'video_with_slider',
     vimeoId: '1182573431',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/1.3_Modul%201_Gewinner%20denken.prproj.mp4',
     title: 'Wie Gewinner in Gehaltsverhandlungen denken',
     duration: '3 Min.',
     takeaways: [

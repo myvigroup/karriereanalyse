@@ -136,23 +136,44 @@ export default async function FairDashboard({ params }) {
         </div>
       </div>
 
-      {/* Neues Gespräch */}
-      <Link href={`/advisor/fair/${fairId}/new-lead`} style={{ textDecoration: 'none' }}>
-        <div style={{
-          background: '#CC1426',
-          color: '#fff',
-          borderRadius: 16,
-          padding: '20px 32px',
-          textAlign: 'center',
-          fontSize: 18,
-          fontWeight: 600,
-          marginBottom: 32,
-          cursor: 'pointer',
-          transition: 'opacity 0.2s',
-        }}>
-          + Neues Gespräch starten
-        </div>
-      </Link>
+      {/* Actions */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
+        <Link href={`/advisor/fair/${fairId}/new-lead`} style={{ textDecoration: 'none' }}>
+          <div style={{
+            background: '#CC1426',
+            color: '#fff',
+            borderRadius: 16,
+            padding: '20px 32px',
+            textAlign: 'center',
+            fontSize: 18,
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'opacity 0.2s',
+          }}>
+            + Neues Gespräch starten
+          </div>
+        </Link>
+        <Link href={`/advisor/fair/${fairId}/qr-code`} style={{ textDecoration: 'none' }}>
+          <div style={{
+            background: '#fff',
+            color: '#1A1A1A',
+            borderRadius: 16,
+            padding: '16px 32px',
+            textAlign: 'center',
+            fontSize: 15,
+            fontWeight: 600,
+            cursor: 'pointer',
+            border: '1.5px solid #E8E6E1',
+            transition: 'background 0.15s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}>
+            <span style={{ fontSize: 18 }}>⬛</span> QR-Code für Selbst-Check
+          </div>
+        </Link>
+      </div>
 
       {/* Heutige Leads */}
       <h2 style={{ fontSize: 18, fontWeight: 600, color: '#1A1A1A', marginBottom: 16 }}>
