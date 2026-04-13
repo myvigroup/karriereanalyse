@@ -1473,22 +1473,34 @@ function GehaltLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, s
   function VideoBlock() {
     return (
       <>
-        {/* Video placeholder */}
-        <div style={{
-          borderRadius: 'var(--r-lg)', overflow: 'hidden',
-          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)',
-          aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexDirection: 'column', gap: 16, marginBottom: 24,
-        }}>
-          <div style={{
-            width: 72, height: 72, borderRadius: '50%',
-            background: 'rgba(204,20,38,0.2)', border: '2px solid rgba(204,20,38,0.4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
-          }}>▶</div>
-          <div style={{ color: 'white', fontSize: 16, fontWeight: 600 }}>{lesson.title}</div>
-          <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>
-            Video · {content.duration || lesson.duration_minutes + ' Min.'}
-          </div>
+        {/* Video player */}
+        <div style={{ borderRadius: 'var(--r-lg)', overflow: 'hidden', background: '#000', aspectRatio: '16/9', marginBottom: 24 }}>
+          {content.vimeoId ? (
+            <iframe
+              src={`https://player.vimeo.com/video/${content.vimeoId}?title=0&byline=0&portrait=0&dnt=1`}
+              style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+              title={content.title}
+            />
+          ) : (
+            <div style={{
+              width: '100%', height: '100%',
+              background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexDirection: 'column', gap: 16,
+            }}>
+              <div style={{
+                width: 72, height: 72, borderRadius: '50%',
+                background: 'rgba(204,20,38,0.2)', border: '2px solid rgba(204,20,38,0.4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
+              }}>▶</div>
+              <div style={{ color: 'white', fontSize: 16, fontWeight: 600 }}>{lesson.title}</div>
+              <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>
+                Video · {content.duration || lesson.duration_minutes + ' Min.'}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Takeaways */}
