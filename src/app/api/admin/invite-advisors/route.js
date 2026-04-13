@@ -22,6 +22,7 @@ const ADVISORS = [
   { email: 'e.legros@mitnorm.com', name: 'Elisa Legros' },
   { email: 'a.pertsovski@mitnorm.com', name: 'Alexander Pertsovski' },
   { email: 's.sharifimehr@mitnorm.com', name: 'Shania Sharifimehr' },
+  { email: 'digitalmarketing@myvi.de', name: 'Digital Marketing' },
 ];
 
 export async function GET(req) {
