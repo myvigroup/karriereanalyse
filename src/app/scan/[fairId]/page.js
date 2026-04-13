@@ -89,6 +89,7 @@ export default function ScanPage() {
   const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   // Step 1: Submit contact info
   const handleInfoSubmit = async (e) => {
@@ -281,6 +282,34 @@ export default function ScanPage() {
               onChange={e => handleFileSelect(e.target.files?.[0])}
               style={{ display: 'none' }}
             />
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={e => handleFileSelect(e.target.files?.[0])}
+              style={{ display: 'none' }}
+            />
+
+            {/* Camera button */}
+            {!selectedFile && (
+              <button
+                onClick={() => cameraInputRef.current?.click()}
+                style={{
+                  width: '100%', padding: '14px 24px', borderRadius: 12,
+                  background: '#F3F4F6', color: '#1A1A1A', border: '1.5px solid #E8E6E1',
+                  fontWeight: 600, fontSize: 15, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  marginBottom: 12,
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+                Foto aufnehmen
+              </button>
+            )}
 
             {error && (
               <div style={{ padding: '12px 16px', borderRadius: 10, background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', fontSize: 14, marginBottom: 16 }}>
