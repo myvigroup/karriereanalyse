@@ -1,13 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
+import ScanResultClient from './ScanResultClient';
 
-const CATEGORY_LABELS = {
-  struktur: { label: 'Struktur', icon: '📋', desc: 'Aufbau & Vollständigkeit' },
-  inhalt: { label: 'Inhalt', icon: '💼', desc: 'Erfahrungen & Kompetenzen' },
-  design: { label: 'Design', icon: '🎨', desc: 'Optik & Lesbarkeit' },
-  wirkung: { label: 'Wirkung', icon: '✨', desc: 'Gesamteindruck & Positionierung' },
-};
-
+// Unused — kept only for pending/error states below
 function ScoreGauge({ rating }) {
   const pct = ((rating - 1) / 4) * 100;
   const color = rating <= 2 ? '#EF4444' : rating === 3 ? '#F59E0B' : '#22C55E';
@@ -209,73 +204,5 @@ export default async function ScanResultPage({ params }) {
     itemsByCategory[cat] = (items || []).filter(it => it.category === cat);
   }
 
-  return (
-    <div style={{ maxWidth: 520, margin: '0 auto', padding: '24px 16px 64px' }}>
-      {/* Hero Card */}
-      <div style={{
-        background: '#fff', borderRadius: 20, border: '1px solid #E8E6E1',
-        marginBottom: 20, overflow: 'hidden',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-      }}>
-        {/* Name header */}
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid #F3F4F6', background: '#FAFAF8' }}>
-          <div style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 2 }}>Ergebnis für</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A' }}>{check.name}</div>
-          {check.target_position && (
-            <div style={{ fontSize: 13, color: '#6B7280', marginTop: 2 }}>
-              Zielposition: <strong>{check.target_position}</strong>
-            </div>
-          )}
-        </div>
-
-        {/* Score */}
-        {check.overall_rating && <ScoreGauge rating={check.overall_rating} />}
-
-        {/* Summary */}
-        {check.summary && (
-          <div style={{ padding: '0 24px 24px' }}>
-            <div style={{ padding: '16px', borderRadius: 12, background: '#F9FAFB', border: '1px solid #F3F4F6' }}>
-              <p style={{ margin: 0, fontSize: 14, color: '#4B5563', lineHeight: 1.7 }}>
-                {check.summary}
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Category Cards */}
-      <h2 style={{ fontSize: 17, fontWeight: 700, color: '#1A1A1A', margin: '0 0 14px' }}>
-        Detailanalyse
-      </h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 28 }}>
-        {categories.map(cat => (
-          <CategoryCard key={cat} category={cat} items={itemsByCategory[cat] || []} />
-        ))}
-      </div>
-
-      {/* CTA Card */}
-      <div style={{
-        background: 'linear-gradient(135deg, #CC1426 0%, #A01020 100%)',
-        borderRadius: 20,
-        padding: '28px 24px',
-        textAlign: 'center',
-        color: '#fff',
-      }}>
-        <div style={{ fontSize: 32, marginBottom: 12 }}>🚀</div>
-        <h3 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 8px' }}>
-          Lebenslauf weiter verbessern?
-        </h3>
-        <p style={{ fontSize: 14, margin: '0 0 20px', opacity: 0.9, lineHeight: 1.6 }}>
-          Mit einem kostenlosen Konto bekommst du Zugang zu allen Karriere-Tools und kannst deinen Lebenslauf jederzeit neu analysieren.
-        </p>
-        <Link href="/auth/login" style={{
-          display: 'inline-block', padding: '14px 32px', borderRadius: 980,
-          background: '#fff', color: '#CC1426', fontWeight: 700, fontSize: 15,
-          textDecoration: 'none',
-        }}>
-          Jetzt kostenlos registrieren →
-        </Link>
-      </div>
-    </div>
-  );
+  return <ScanResultClient check={check} itemsByCategory={itemsByCategory} token={token} />;
 }
