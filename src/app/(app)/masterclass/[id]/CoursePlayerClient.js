@@ -1443,6 +1443,17 @@ function GehaltLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, s
   if (content.type === 'simulation') {
     return (
       <div>
+        {content.vimeoId && (
+          <div style={{ borderRadius: 'var(--r-lg)', overflow: 'hidden', background: '#000', aspectRatio: '16/9', marginBottom: 24 }}>
+            <iframe
+              src={`https://player.vimeo.com/video/${content.vimeoId}?title=0&byline=0&portrait=0&dnt=1`}
+              style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+              title={content.title}
+            />
+          </div>
+        )}
         <GehaltSimulationWidget
           simulationKey={content.simulationKey}
           maxScore={content.maxScore}
