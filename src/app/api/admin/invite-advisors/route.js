@@ -34,6 +34,16 @@ export async function GET(req) {
   const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
+  // Require explicit confirmation param to prevent accidental re-sends
+  const { searchParams } = new URL(req.url);
+  if (searchParams.get('confirm') !== 'yes') {
+    return NextResponse.json({
+      message: 'Dry run — no emails sent. Add ?confirm=yes to actually send.',
+      count: ADVISORS.length,
+      advisors: ADVISORS.map(a => a.email),
+    });
+  }
+
   const results = [];
 
   for (const advisor of ADVISORS) {
