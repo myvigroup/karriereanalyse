@@ -74,11 +74,16 @@ export async function saveContactDetails(leadId, formData) {
 
   const leadName = `${lead.first_name} ${lead.last_name || ''}`.trim();
 
-  // Prüfe ob User existiert
-  const { data: existingUsers } = await admin.auth.admin.listUsers();
-  const existingUser = existingUsers?.users?.find(u => u.email === email);
+  // Prüfe ob User existiert (via profiles, nicht listUsers())
+  const { data: existingProfile } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle();
 
-  if (!existingUser) {
+  let userId = existingProfile?.id || null;
+
+  if (!existingProfile) {
     const { data: newUser, error: createError } = await admin.auth.admin.createUser({
       email,
       email_confirm: true,
@@ -86,18 +91,27 @@ export async function saveContactDetails(leadId, formData) {
     });
     if (createError) return { error: `User-Erstellung fehlgeschlagen: ${createError.message}` };
 
+    userId = newUser.user.id;
+
     await admin.from('profiles').update({
       name: leadName,
       membership_type: 'basis',
-    }).eq('id', newUser.user.id).then(() => {}).catch(() => {});
+    }).eq('id', userId).then(() => {}).catch(() => {});
   }
 
-  // Lead updaten mit Email + Phone
+  // Lead updaten mit Email, Phone, user_id + Status
   await admin.from('fair_leads').update({
     email,
     phone,
+    user_id: userId,
+    status: 'feedback_pending',
     updated_at: new Date().toISOString(),
   }).eq('id', leadId);
+
+  // CV-Dokument ebenfalls mit user_id verknüpfen
+  if (userId) {
+    await admin.from('cv_documents').update({ user_id: userId }).eq('lead_id', leadId).then(() => {}).catch(() => {});
+  }
 
   redirect(`/advisor/fair/${lead.fair_id}/lead/${leadId}/summary`);
 }
