@@ -236,8 +236,8 @@ export async function completeFeedback(leadId) {
     .eq('id', leadId)
     .maybeSingle();
 
-  if (!lead) throw new Error('Lead nicht gefunden');
-  if (!lead.email) throw new Error('Keine E-Mail-Adresse für diesen Lead hinterlegt. Bitte zuerst Kontaktdaten erfassen.');
+  if (!lead) return { error: 'Lead nicht gefunden' };
+  if (!lead.email) return { error: 'Keine E-Mail erfasst — bitte zuerst Kontaktdaten eingeben.' };
 
   // Feedback abschließen (via admin, um RLS zu umgehen)
   await admin.from('cv_feedback')
@@ -261,7 +261,7 @@ export async function completeFeedback(leadId) {
 
   if (linkError) {
     console.error('Magic Link Fehler:', linkError);
-    throw new Error('Magic Link konnte nicht generiert werden');
+    return { error: 'Magic Link konnte nicht generiert werden: ' + linkError.message };
   }
 
   const magicLinkUrl = linkData?.properties?.action_link;

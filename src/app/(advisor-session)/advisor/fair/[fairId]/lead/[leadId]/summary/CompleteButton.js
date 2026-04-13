@@ -11,10 +11,15 @@ export default function CompleteButton({ leadId }) {
     setSubmitting(true);
     setError(null);
     try {
-      await completeFeedback(leadId);
+      const result = await completeFeedback(leadId);
+      if (result?.error) {
+        setError(result.error);
+        setSubmitting(false);
+      }
+      // Bei Erfolg: redirect() in der Action leitet weiter
     } catch (err) {
       if (err?.digest?.startsWith('NEXT_REDIRECT')) throw err;
-      setError(err.message || 'Ein Fehler ist aufgetreten');
+      setError('Ein Fehler ist aufgetreten. Bitte erneut versuchen.');
       setSubmitting(false);
     }
   }
