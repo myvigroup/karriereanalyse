@@ -23,7 +23,7 @@ export async function middleware(request) {
   if (!user && !isAuthPage && !isBeraterAuthPage && !isPublicUpload && !isPublicPage) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
-  if (user && isAuthPage && request.nextUrl.pathname !== '/auth/callback') {
+  if (user && isAuthPage && pathname !== '/auth/callback' && pathname !== '/auth/set-password') {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
   return response;
