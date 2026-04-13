@@ -234,7 +234,7 @@ export default function OnboardingClient({ profile, userId }) {
 
             <select className="input" value={birthYear} onChange={e => setBirthYear(e.target.value)} style={{ marginBottom: 24, color: birthYear ? 'var(--ki-text)' : 'var(--ki-text-tertiary)' }}>
               <option value="">Geburtsjahr wählen</option>
-              {Array.from({ length: 26 }, (_, i) => 2005 - i).map(y => (
+              {Array.from({ length: 81 }, (_, i) => 2005 - i).map(y => (
                 <option key={y} value={y}>{y}</option>
               ))}
             </select>
