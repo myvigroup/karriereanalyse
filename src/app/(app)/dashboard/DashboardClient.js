@@ -69,7 +69,7 @@ function MesseAngebotBlock({ fairLead, profile }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
           {[
             ['📅', '1x Seminar/Monat', '(Wert 99 €)'],
-            ['💰', 'Gehaltsverhandlung Mastery', 'inklusive'],
+            ['💰', 'Gehalts-Masterclass', 'inklusive'],
             ['◎', 'Karriere-Analyse', 'vollständig'],
             ['📚', 'Alle E-Learning Kurse', 'inklusive'],
           ].map(([icon, title, sub]) => (

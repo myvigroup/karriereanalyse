@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Gehaltsverhandlung Mastery — Karriere-Institut',
+  title: 'Gehalts-Masterclass — Karriere-Institut',
   description: 'Der Kurs, der dein Gehalt ändert. 5 Module, konkrete Skripte, Simulations-Training. Einmalig 49 € — lebenslanger Zugang.',
 };
 

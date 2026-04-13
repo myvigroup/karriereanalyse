@@ -2322,6 +2322,17 @@ function VideoLesson({ lesson, isCompleted, onMarkComplete, saving }) {
         )}
       </div>
 
+      {/* Weiter-Button direkt unter dem Video */}
+      <div style={{ marginBottom: 24 }}>
+        {!isCompleted ? (
+          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%', fontSize: 15, padding: '14px' }}>
+            {saving ? 'Speichert...' : 'Weiter →'}
+          </button>
+        ) : (
+          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
+        )}
+      </div>
+
       {/* Key takeaways */}
       <div className="card" style={{ marginBottom: 24, background: 'var(--ki-bg-alt)', border: 'none' }}>
         <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>
@@ -2336,14 +2347,6 @@ function VideoLesson({ lesson, isCompleted, onMarkComplete, saving }) {
           ))}
         </div>
       </div>
-
-      {!isCompleted ? (
-        <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ gap: 8 }}>
-          {saving ? 'Speichert...' : '✅ Als erledigt markieren (+30 XP)'}
-        </button>
-      ) : (
-        <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
-      )}
     </div>
   );
 }

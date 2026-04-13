@@ -22,7 +22,7 @@ const CONFIGS = {
   },
   masterclass: {
     icon: '💰',
-    title: 'Gehaltsverhandlung Mastery',
+    title: 'Gehalts-Masterclass',
     subtitle: 'Von Angst zu Strategie — lerne wie du dein Gehalt systematisch um 7–12 % steigerst.',
     features: [
       '5 Module · 17 Lektionen · ~55 Minuten',

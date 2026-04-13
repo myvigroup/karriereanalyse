@@ -163,7 +163,7 @@ export default function AngeboteClient() {
           <ul style={{ listStyle: 'none', marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
               ['📅', '1x Seminar/Monat', 'Jeden Monat ein neuer Skill, der dich im Job weiterbringt'],
-              ['💰', 'Gehaltsverhandlung Mastery', '7–12 % mehr Gehalt — mit System und Skripten'],
+              ['💰', 'Gehalts-Masterclass', '7–12 % mehr Gehalt — mit System und Skripten'],
               ['📚', 'Alle E-Learning Kurse', 'Rhetorik, Leadership, Achtsamkeit & mehr'],
               ['◎', 'Karriere-Analyse', 'Verstehe, wo du stehst — und wo du hinwillst'],
             ].map(([icon, title, desc], i) => (
@@ -198,7 +198,7 @@ export default function AngeboteClient() {
           <div style={{ fontSize: 36 }}>💰</div>
           <div style={{ flex: 1, minWidth: 200 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 4 }}>
-              Nur die Gehaltsverhandlung Mastery?
+              Nur die Gehalts-Masterclass?
             </div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>
               Einmalig ab 49 € — oder mit der Mitgliedschaft inklusive.

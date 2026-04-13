@@ -50,7 +50,7 @@ export default function MasterclassAngebotClient() {
       <section style={{ textAlign: 'center', padding: '60px 24px 16px', maxWidth: 640, margin: '0 auto' }}>
         <div style={{ fontSize: 48, marginBottom: 12 }}>💰</div>
         <h1 style={{ fontSize: 34, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.15, marginBottom: 12 }}>
-          Gehaltsverhandlung Mastery
+          Gehalts-Masterclass
         </h1>
         <p style={{ fontSize: 16, color: 'var(--ki-text-secondary)', lineHeight: 1.65, marginBottom: 8 }}>
           Von Angst zu Strategie: Lerne wie du dein Gehalt systematisch um 7–12 % steigerst —
@@ -110,7 +110,7 @@ export default function MasterclassAngebotClient() {
             Einzelkauf · Lebenslanger Zugang
           </div>
           <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8 }}>
-            Gehaltsverhandlung Mastery
+            Gehalts-Masterclass
           </h2>
           <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 20, lineHeight: 1.55 }}>
             Einmaliger Kauf — für immer zugänglich.
@@ -207,7 +207,7 @@ export default function MasterclassAngebotClient() {
 
           <ul style={{ listStyle: 'none', marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[
-              'Gehaltsverhandlung Mastery inklusive',
+              'Gehalts-Masterclass inklusive',
               '1x Premium-Seminar pro Monat (Wert 99 €)',
               'Alle weiteren E-Learning Kurse',
               'Karriere-Analyse vollständig',

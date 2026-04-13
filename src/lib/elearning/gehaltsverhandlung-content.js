@@ -1,5 +1,5 @@
 // ================================================
-// Gehaltsverhandlung Mastery — Content Data
+// Gehalts-Masterclass — Content Data
 // 5 Module | 15 Lektionen | ~55 Minuten
 // ================================================
 
