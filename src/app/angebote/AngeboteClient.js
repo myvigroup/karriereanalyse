@@ -158,8 +158,7 @@ export default function AngeboteClient() {
             <div style={{ fontSize: 13, color: 'var(--ki-success)', fontWeight: 600, marginBottom: 20 }}>
               = {yearlyTotal} €/Jahr · Du sparst {yearlySavings} €
             </div>
-          ) : (
-            )}
+          ) : null}
 
           <ul style={{ listStyle: 'none', marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
