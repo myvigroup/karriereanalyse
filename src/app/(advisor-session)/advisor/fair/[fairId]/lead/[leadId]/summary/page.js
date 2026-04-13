@@ -1,73 +1,47 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { completeFeedback } from '@/app/(advisor-session)/advisor/actions';
+import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
+import CompleteButton from './CompleteButton';
 
 const CATEGORY_LABELS = {
   struktur: { label: 'Struktur', icon: '📐' },
-  inhalt: { label: 'Inhalt', icon: '📝' },
-  design: { label: 'Design', icon: '🎨' },
-  wirkung: { label: 'Wirkung', icon: '✨' },
+  inhalt:   { label: 'Inhalt',   icon: '📝' },
+  design:   { label: 'Design',   icon: '🎨' },
+  wirkung:  { label: 'Wirkung',  icon: '✨' },
 };
 
 function Stars({ count }) {
   return (
     <span style={{ color: '#D4A017' }}>
-      {'★'.repeat(count)}{'☆'.repeat(5 - count)}
+      {'★'.repeat(count || 0)}{'☆'.repeat(5 - (count || 0))}
     </span>
   );
 }
 
-export default function SummaryPage() {
-  const { fairId, leadId } = useParams();
-  const router = useRouter();
+export default async function SummaryPage({ params }) {
+  const { fairId, leadId } = params;
+  const admin = createAdminClient();
 
-  const [lead, setLead] = useState(null);
-  const [document, setDocument] = useState(null);
-  const [feedback, setFeedback] = useState(null);
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  const { data: lead } = await admin
+    .from('fair_leads').select('*').eq('id', leadId).maybeSingle();
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(`/api/summary/${leadId}`);
-        const data = await res.json();
-        setLead(data.lead || null);
-        setDocument(data.document || null);
-        setFeedback(data.feedback || null);
-        setItems(data.items || []);
-      } catch (err) {
-        console.error('Summary load error:', err);
-      }
-      setLoading(false);
-    }
-    load();
-  }, [leadId]);
+  const { data: doc } = await admin
+    .from('cv_documents').select('*').eq('lead_id', leadId)
+    .order('created_at', { ascending: false }).limit(1).maybeSingle();
 
-  async function handleComplete() {
-    setSubmitting(true);
-    setError(null);
-    try {
-      await completeFeedback(leadId);
-    } catch (err) {
-      setError(err.message || 'Ein Fehler ist aufgetreten');
-      setSubmitting(false);
-    }
-  }
+  const { data: fb } = await admin
+    .from('cv_feedback').select('*').eq('fair_lead_id', leadId).maybeSingle();
 
-  if (loading) {
-    return <div style={{ textAlign: 'center', padding: 64, color: '#86868b' }}>Wird geladen...</div>;
-  }
+  const { data: rawItems } = fb
+    ? await admin.from('cv_feedback_items').select('*')
+        .eq('cv_feedback_id', fb.id).order('sort_order')
+    : { data: [] };
+
+  const items = rawItems || [];
 
   // Items nach Kategorie gruppieren
   const byCategory = {};
-  (items || []).forEach(item => {
-    if (!item.content) return; // null-guard
+  items.forEach(item => {
+    if (!item.content) return;
     const key = item.category;
     if (!byCategory[key]) byCategory[key] = { presets: [], freetext: null, rating: 0 };
     if (item.content.startsWith('__rating_')) {
@@ -85,7 +59,7 @@ export default function SummaryPage() {
         href={`/advisor/fair/${fairId}/lead/${leadId}/contact`}
         style={{ fontSize: 13, color: '#86868b', textDecoration: 'none', display: 'inline-block', marginBottom: 16 }}
       >
-        &larr; Zurück zu Kontaktdaten
+        ← Zurück zu Kontaktdaten
       </Link>
 
       <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 24 }}>
@@ -93,34 +67,21 @@ export default function SummaryPage() {
       </h1>
 
       {/* Lead-Info */}
-      <div style={{
-        background: '#fff', borderRadius: 16, padding: 20,
-        border: '1px solid #E8E6E1', marginBottom: 16,
-      }}>
+      <div style={{ background: '#fff', borderRadius: 16, padding: 20, border: '1px solid #E8E6E1', marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
           <strong>{`${lead?.first_name || ''} ${lead?.last_name || ''}`.trim()}</strong>
-          <span style={{ color: '#86868b', fontSize: 14 }}>{lead?.email}</span>
+          <span style={{ color: '#86868b', fontSize: 14 }}>{lead?.email || 'Noch keine E-Mail'}</span>
         </div>
-        {document && (
-          <div style={{ fontSize: 14, color: '#86868b' }}>
-            CV: {document.file_name}
-          </div>
-        )}
+        {doc && <div style={{ fontSize: 14, color: '#86868b' }}>CV: {doc.file_name}</div>}
       </div>
 
       {/* Gesamtbewertung */}
-      {feedback?.overall_rating && (
-        <div style={{
-          background: '#fff', borderRadius: 16, padding: 20,
-          border: '1px solid #E8E6E1', marginBottom: 16,
-          textAlign: 'center',
-        }}>
+      {fb?.overall_rating > 0 && (
+        <div style={{ background: '#fff', borderRadius: 16, padding: 20, border: '1px solid #E8E6E1', marginBottom: 16, textAlign: 'center' }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: '#86868b', marginBottom: 8 }}>Gesamtbewertung</div>
-          <div style={{ fontSize: 28 }}><Stars count={feedback.overall_rating} /></div>
-          {feedback.summary && (
-            <p style={{ color: '#1A1A1A', marginTop: 12, lineHeight: 1.5, fontSize: 14 }}>
-              {feedback.summary}
-            </p>
+          <div style={{ fontSize: 28 }}><Stars count={fb.overall_rating} /></div>
+          {fb.summary && (
+            <p style={{ color: '#1A1A1A', marginTop: 12, lineHeight: 1.5, fontSize: 14 }}>{fb.summary}</p>
           )}
         </div>
       )}
@@ -129,15 +90,8 @@ export default function SummaryPage() {
       {Object.entries(CATEGORY_LABELS).map(([key, { label, icon }]) => {
         const cat = byCategory[key];
         if (!cat || (cat.presets.length === 0 && !cat.freetext && !cat.rating)) return null;
-
         return (
-          <div
-            key={key}
-            style={{
-              background: '#fff', borderRadius: 16, padding: 20,
-              border: '1px solid #E8E6E1', marginBottom: 12,
-            }}
-          >
+          <div key={key} style={{ background: '#fff', borderRadius: 16, padding: 20, border: '1px solid #E8E6E1', marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>{icon} {label}</h3>
               {cat.rating > 0 && <Stars count={cat.rating} />}
@@ -145,61 +99,20 @@ export default function SummaryPage() {
             {cat.presets.length > 0 && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: cat.freetext ? 12 : 0 }}>
                 {cat.presets.map((p, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      padding: '4px 12px',
-                      borderRadius: 980,
-                      background: '#F3F4F6',
-                      fontSize: 13,
-                      color: '#1A1A1A',
-                    }}
-                  >
+                  <span key={i} style={{ padding: '4px 12px', borderRadius: 980, background: '#F3F4F6', fontSize: 13, color: '#1A1A1A' }}>
                     {p}
                   </span>
                 ))}
               </div>
             )}
             {cat.freetext && (
-              <p style={{ fontSize: 14, color: '#6B7280', margin: 0, lineHeight: 1.5 }}>
-                {cat.freetext}
-              </p>
+              <p style={{ fontSize: 14, color: '#6B7280', margin: 0, lineHeight: 1.5 }}>{cat.freetext}</p>
             )}
           </div>
         );
       })}
 
-      {/* Fehler */}
-      {error && (
-        <div style={{
-          background: '#FEF2F2', color: '#CC1426', padding: '12px 16px',
-          borderRadius: 12, fontSize: 14, marginBottom: 16,
-        }}>
-          {error}
-        </div>
-      )}
-
-      {/* Abschluss-Button */}
-      <button
-        onClick={handleComplete}
-        disabled={submitting}
-        style={{
-          width: '100%',
-          padding: '18px',
-          background: submitting ? '#E8E6E1' : '#CC1426',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 16,
-          fontSize: 17,
-          fontWeight: 700,
-          cursor: submitting ? 'not-allowed' : 'pointer',
-          marginTop: 8,
-          marginBottom: 32,
-          transition: 'background 0.15s',
-        }}
-      >
-        {submitting ? 'Wird gesendet...' : 'Gespräch abschließen & Magic Link senden'}
-      </button>
+      <CompleteButton leadId={leadId} />
     </div>
   );
 }
