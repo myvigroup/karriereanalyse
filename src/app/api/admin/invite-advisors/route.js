@@ -24,7 +24,6 @@ const ADVISORS = [
 ];
 
 export async function GET(req) {
-  // Only allow admins
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -39,22 +38,29 @@ export async function GET(req) {
     // Check if already exists
     const { data: existing } = await admin.from('profiles').select('id').eq('email', advisor.email).maybeSingle();
     if (existing) {
-      results.push({ email: advisor.email, status: 'skipped (already exists)' });
+      // Generate a new invite link for existing users too
+      const { data: linkData } = await admin.auth.admin.generateLink({
+        type: 'recovery',
+        email: advisor.email,
+        options: { redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/set-password` },
+      });
+      results.push({ email: advisor.email, name: advisor.name, status: 'already exists', link: linkData?.properties?.action_link || null });
       continue;
     }
 
-    // Invite user — sends email with set-password link
-    const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(advisor.email, {
-      data: { name: advisor.name },
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/set-password`,
+    // Create user without sending email
+    const { data: created, error: createError } = await admin.auth.admin.createUser({
+      email: advisor.email,
+      email_confirm: true,
+      user_metadata: { name: advisor.name },
     });
 
-    if (inviteError || !invited?.user) {
-      results.push({ email: advisor.email, status: `error: ${inviteError?.message}` });
+    if (createError || !created?.user) {
+      results.push({ email: advisor.email, name: advisor.name, status: `error: ${createError?.message}` });
       continue;
     }
 
-    const userId = invited.user.id;
+    const userId = created.user.id;
 
     // Set profile role
     await admin.from('profiles').upsert({
@@ -64,18 +70,29 @@ export async function GET(req) {
       role: 'advisor',
     });
 
-    // Create advisor entry
+    // Create advisor entry (with email to satisfy NOT NULL)
     const { error: advisorError } = await admin.from('advisors').insert({
       user_id: userId,
       display_name: advisor.name,
+      email: advisor.email,
     });
 
-    if (advisorError) {
-      results.push({ email: advisor.email, status: `user created, advisor insert error: ${advisorError.message}` });
-    } else {
-      results.push({ email: advisor.email, status: 'invited' });
-    }
+    // Generate invite/set-password link
+    const { data: linkData } = await admin.auth.admin.generateLink({
+      type: 'recovery',
+      email: advisor.email,
+      options: { redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/set-password` },
+    });
+
+    results.push({
+      email: advisor.email,
+      name: advisor.name,
+      status: advisorError ? `user created, advisor error: ${advisorError.message}` : 'created',
+      link: linkData?.properties?.action_link || null,
+    });
   }
 
-  return NextResponse.json({ results });
+  return NextResponse.json({ results }, {
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
