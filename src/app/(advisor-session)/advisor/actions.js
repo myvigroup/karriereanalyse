@@ -72,45 +72,50 @@ export async function saveContactDetails(leadId, formData) {
 
   if (!lead) return { error: 'Lead nicht gefunden' };
 
-  const leadName = `${lead.first_name} ${lead.last_name || ''}`.trim();
-
-  // Prüfe ob User existiert (via profiles, nicht listUsers())
-  const { data: existingProfile } = await admin
-    .from('profiles')
-    .select('id')
-    .eq('email', email)
-    .maybeSingle();
-
-  let userId = existingProfile?.id || null;
-
-  if (!existingProfile) {
-    const { data: newUser, error: createError } = await admin.auth.admin.createUser({
-      email,
-      email_confirm: true,
-      user_metadata: { name: leadName, source: 'fair' },
-    });
-    if (createError) return { error: `User-Erstellung fehlgeschlagen: ${createError.message}` };
-
-    userId = newUser.user.id;
-
-    await admin.from('profiles').update({
-      name: leadName,
-      membership_type: 'basis',
-    }).eq('id', userId).then(() => {}).catch(() => {});
-  }
-
-  // Lead updaten mit Email, Phone, user_id + Status
+  // 1. E-Mail SOFORT speichern — unabhängig von User-Logik
   await admin.from('fair_leads').update({
     email,
     phone,
-    user_id: userId,
     status: 'feedback_pending',
     updated_at: new Date().toISOString(),
   }).eq('id', leadId);
 
-  // CV-Dokument ebenfalls mit user_id verknüpfen
-  if (userId) {
-    await admin.from('cv_documents').update({ user_id: userId }).eq('lead_id', leadId).then(() => {}).catch(() => {});
+  // 2. User finden oder erstellen (non-blocking — Fehler blockieren nicht den Flow)
+  try {
+    const leadName = `${lead.first_name} ${lead.last_name || ''}`.trim();
+
+    // Prüfe ob User existiert (via profiles)
+    const { data: existingProfile } = await admin
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+
+    let userId = existingProfile?.id || null;
+
+    if (!existingProfile) {
+      const { data: newUser, error: createError } = await admin.auth.admin.createUser({
+        email,
+        email_confirm: true,
+        user_metadata: { name: leadName, source: 'fair' },
+      });
+
+      if (!createError && newUser?.user?.id) {
+        userId = newUser.user.id;
+        await admin.from('profiles').update({
+          name: leadName,
+          membership_type: 'basis',
+        }).eq('id', userId).then(() => {}).catch(() => {});
+      }
+    }
+
+    // user_id auf Lead + CV-Dokument setzen
+    if (userId) {
+      await admin.from('fair_leads').update({ user_id: userId }).eq('id', leadId).then(() => {}).catch(() => {});
+      await admin.from('cv_documents').update({ user_id: userId }).eq('lead_id', leadId).then(() => {}).catch(() => {});
+    }
+  } catch (err) {
+    console.error('User-Erstellung fehlgeschlagen (non-blocking):', err);
   }
 
   redirect(`/advisor/fair/${lead.fair_id}/lead/${leadId}/summary`);
