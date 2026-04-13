@@ -112,7 +112,7 @@ export default function SetPasswordPage() {
       return;
     }
 
-    window.location.href = '/advisor';
+    window.location.href = '/dashboard';
   }
 
   return (

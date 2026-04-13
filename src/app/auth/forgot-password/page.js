@@ -12,7 +12,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setLoading(true);
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/set-password`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/auth/set-password`,
     });
     setSent(true);
     setLoading(false);

@@ -5,10 +5,16 @@ import { NextResponse } from 'next/server';
 export async function GET(request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
+  const next = requestUrl.searchParams.get('next');
 
   if (code) {
     const supabase = createClient();
     await supabase.auth.exchangeCodeForSession(code);
+
+    // Wenn explizites Ziel angegeben (z.B. /auth/set-password bei Password-Reset)
+    if (next) {
+      return NextResponse.redirect(new URL(next, request.url));
+    }
 
     // Rolle prüfen → Advisor/Admin direkt zum Berater-Dashboard
     const { data: { user } } = await supabase.auth.getUser();
