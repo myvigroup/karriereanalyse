@@ -2879,7 +2879,7 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
       {allDone ? (
         <CourseCompletionScreen course={course} quizScore={quizScore} />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 32, alignItems: 'start' }}>
+        <div className="course-layout">
           {/* LEFT: Current lesson content */}
           <div>
             {currentLesson && (
