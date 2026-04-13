@@ -1482,19 +1482,57 @@ function GehaltLessonRouter({ lesson, lessonType, isCompleted, onMarkComplete, s
   const takeaways = content.takeaways || [];
 
   function VideoBlock() {
+    const videoRef = useRef(null);
+    const [playing, setPlaying] = useState(false);
+
+    const handlePlay = () => {
+      if (videoRef.current) {
+        videoRef.current.play();
+        setPlaying(true);
+      }
+    };
+
     return (
       <>
         {/* Video player */}
-        <div style={{ borderRadius: 'var(--r-lg)', overflow: 'hidden', background: '#000', aspectRatio: '16/9', marginBottom: 24 }}>
+        <div style={{ borderRadius: 'var(--r-lg)', overflow: 'hidden', background: '#000', aspectRatio: '16/9', marginBottom: 24, position: 'relative' }}>
           {content.videoUrl ? (
-            <video
-              src={content.videoUrl}
-              style={{ width: '100%', height: '100%', display: 'block' }}
-              controls
-              controlsList="nodownload"
-              playsInline
-              title={content.title}
-            />
+            <>
+              <video
+                ref={videoRef}
+                src={content.videoUrl}
+                style={{ width: '100%', height: '100%', display: 'block' }}
+                controls
+                controlsList="nodownload"
+                playsInline
+                title={content.title}
+                onPlay={() => setPlaying(true)}
+                onPause={() => setPlaying(false)}
+              />
+              {!playing && (
+                <div
+                  onClick={handlePlay}
+                  style={{
+                    position: 'absolute', inset: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(0,0,0,0.35)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div style={{
+                    width: 72, height: 72, borderRadius: '50%',
+                    background: '#CC1426',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 8px 32px rgba(204,20,38,0.5)',
+                    transition: 'transform 0.15s, box-shadow 0.15s',
+                  }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                      <polygon points="6,3 20,12 6,21" />
+                    </svg>
+                  </div>
+                </div>
+              )}
+            </>
           ) : content.vimeoId ? (
             <iframe
               src={`https://player.vimeo.com/video/${content.vimeoId}?title=0&byline=0&portrait=0&badge=0&logo=0&share=0&dnt=1`}
