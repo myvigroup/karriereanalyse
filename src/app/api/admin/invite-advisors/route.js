@@ -47,6 +47,21 @@ export async function GET(req) {
   const results = [];
 
   for (const advisor of ADVISORS) {
+    // Create user if not exists
+    const { data: existing } = await admin.from('profiles').select('id').eq('email', advisor.email).maybeSingle();
+    if (!existing) {
+      const { data: created, error: createError } = await admin.auth.admin.createUser({
+        email: advisor.email,
+        email_confirm: true,
+        user_metadata: { name: advisor.name },
+      });
+      if (!createError && created?.user) {
+        const userId = created.user.id;
+        await admin.from('profiles').upsert({ id: userId, email: advisor.email, name: advisor.name, role: 'advisor' });
+        await admin.from('advisors').insert({ user_id: userId, display_name: advisor.name, email: advisor.email }).maybeSingle();
+      }
+    }
+
     // Generate fresh set-password link
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: 'recovery',
