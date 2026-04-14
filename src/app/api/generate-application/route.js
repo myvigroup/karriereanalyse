@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { callAI } from '@/lib/ai-provider';
 
 export async function POST(request) {
   try {
@@ -24,12 +25,7 @@ export async function POST(request) {
       .eq('id', user.id)
       .single();
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(getMockApplication(company, position, profile));
-    }
-
-    const prompt = `Erstelle ein professionelles Anschreiben auf Deutsch f\u00FCr folgende Bewerbung:
+    const prompt = `Erstelle ein professionelles Anschreiben auf Deutsch für folgende Bewerbung:
 
 Firma: ${company}
 Position: ${position}
@@ -38,11 +34,11 @@ Branche: ${profile?.industry || 'nicht angegeben'}
 Erfahrung: ${profile?.experience_years || 'nicht angegeben'} Jahre
 
 Regeln:
-- Maximal 300 W\u00F6rter
-- Professionell aber pers\u00F6nlich
+- Maximal 300 Wörter
+- Professionell aber persönlich
 - Keine Floskeln wie "hiermit bewerbe ich mich"
 - Konkreter Bezug zur Position
-- Schlie\u00DFe mit einem klaren Call-to-Action
+- Schließe mit einem klaren Call-to-Action
 
 Gib auch eine Betreffzeile an.
 
@@ -52,25 +48,14 @@ BETREFF: [Betreffzeile]
 [Anschreiben]`;
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1024,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-      const data = await response.json();
-      const text = data.content?.[0]?.text || '';
-      const parts = text.split('---');
-      const subjectLine = (parts[0] || '').replace('BETREFF:', '').trim();
-      const coverLetter = (parts[1] || text).trim();
-      return NextResponse.json({ cover_letter: coverLetter, subject_line: subjectLine });
+      const text = await callAI({ system: 'Du bist ein erfahrener Bewerbungscoach.', userMessage: prompt, maxTokens: 1024 });
+      if (text) {
+        const parts = text.split('---');
+        const subjectLine = (parts[0] || '').replace('BETREFF:', '').trim();
+        const coverLetter = (parts[1] || text).trim();
+        return NextResponse.json({ cover_letter: coverLetter, subject_line: subjectLine });
+      }
+      return NextResponse.json(getMockApplication(company, position, profile));
     } catch {
       return NextResponse.json(getMockApplication(company, position, profile));
     }

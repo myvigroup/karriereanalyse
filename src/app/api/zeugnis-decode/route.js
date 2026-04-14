@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { callAI, parseJSON } from '@/lib/ai-provider';
 
 export async function POST(request) {
   try {
@@ -16,25 +17,7 @@ export async function POST(request) {
     const { text } = await request.json();
     if (!text) return NextResponse.json({ error: 'No text provided' }, { status: 400 });
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(getMockDecode(text));
-    }
-
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1500,
-          messages: [{
-            role: 'user',
-            content: `Analysiere das folgende deutsche Arbeitszeugnis und entschl\u00FCssle die Geheimcodes.
+    const userPrompt = `Analysiere das folgende deutsche Arbeitszeugnis und entschlüssle die Geheimcodes.
 
 Arbeitszeugnis-Text:
 ${text}
@@ -42,10 +25,10 @@ ${text}
 Antworte NUR als JSON:
 {
   "decoded_phrases": [
-    { "original": "Originalformulierung", "meaning": "Tats\u00E4chliche Bedeutung", "grade": 1-6 }
+    { "original": "Originalformulierung", "meaning": "Tatsächliche Bedeutung", "grade": 1-6 }
   ],
   "overall_grade": 1-6,
-  "summary": "Zusammenfassung in 2-3 S\u00E4tzen"
+  "summary": "Zusammenfassung in 2-3 Sätzen"
 }
 
 Bekannte Codes:
@@ -53,21 +36,19 @@ Bekannte Codes:
 - "stets zu unserer vollen Zufriedenheit" = Note 2
 - "zu unserer vollen Zufriedenheit" = Note 3
 - "zu unserer Zufriedenheit" = Note 4
-- "im Gro\u00DFen und Ganzen zu unserer Zufriedenheit" = Note 5
-- "hat sich bem\u00FCht" = Note 6`,
-          }],
-        }),
-      });
-      const data = await response.json();
-      const content = data.content?.[0]?.text || '';
-      try {
-        return NextResponse.json(JSON.parse(content));
-      } catch {
+- "im Großen und Ganzen zu unserer Zufriedenheit" = Note 5
+- "hat sich bemüht" = Note 6`;
+
+    try {
+      const content = await callAI({ system: 'Du bist ein Experte für deutsche Arbeitszeugnisse.', userMessage: userPrompt, maxTokens: 1500 });
+      if (content) {
+        const parsed = parseJSON(content);
+        if (parsed) return NextResponse.json(parsed);
         return NextResponse.json({ decoded_phrases: [], overall_grade: 0, summary: content });
       }
-    } catch {
-      return NextResponse.json(getMockDecode(text));
-    }
+    } catch { /* fallback below */ }
+
+    return NextResponse.json(getMockDecode(text));
   } catch (error) {
     console.error('Zeugnis decode error:', error);
     return NextResponse.json({ error: 'Decode failed' }, { status: 500 });

@@ -306,4 +306,5 @@ function getMockCoachingInsights(analysisResults) {
   };
 }
 
-export default { analyzeCVWithAI, analyzeCVForFair, generateCoachingInsights, extractTextFromImageAI };
+export { callAI, parseJSON };
+export default { callAI, parseJSON, analyzeCVWithAI, analyzeCVForFair, generateCoachingInsights, extractTextFromImageAI };
