@@ -6,6 +6,7 @@ import AutoRefresh from './AutoRefresh';
 
 export const revalidate = 30;
 
+const TZ = 'Europe/Berlin';
 const fmt = (n) => (n || 0).toLocaleString('de-DE');
 const fmtEur = (cents) => `${((cents || 0) / 100).toLocaleString('de-DE', { minimumFractionDigits: 2 })} €`;
 function ago(d) {
@@ -17,9 +18,18 @@ function ago(d) {
   if (h < 24) return `vor ${h} Std.`;
   return `vor ${Math.floor(h / 24)} Tagen`;
 }
-function shortDate(d) {
-  if (!d) return '–';
-  return new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+function berlinNow() {
+  return new Date().toLocaleString('de-DE', { timeZone: TZ, day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+// Tagesbeginn in Berlin-Zeit als UTC ISO-String
+function berlinTodayStart() {
+  const now = new Date();
+  const berlinMs = new Date(now.toLocaleString('en-US', { timeZone: TZ })).getTime();
+  const utcMs = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' })).getTime();
+  const offsetMs = berlinMs - utcMs; // Berlin is ahead of UTC (e.g. +2h in CEST)
+  const berlinMidnight = new Date(now.toLocaleString('en-US', { timeZone: TZ }));
+  berlinMidnight.setHours(0, 0, 0, 0);
+  return new Date(berlinMidnight.getTime() - offsetMs).toISOString();
 }
 
 export default async function PlatformDashboard() {
@@ -32,7 +42,7 @@ export default async function PlatformDashboard() {
   if (!['admin', 'messeleiter'].includes(myProfile?.role)) redirect('/advisor');
 
   const now = new Date();
-  const todayStart = `${now.toISOString().split('T')[0]}T00:00:00`;
+  const todayStart = berlinTodayStart();
   const weekAgo = new Date(now - 7 * 86400000).toISOString();
   const monthAgo = new Date(now - 30 * 86400000).toISOString();
 
@@ -112,12 +122,20 @@ export default async function PlatformDashboard() {
   }, {});
 
   // ── Berater-Rangliste ────────────────────────────────────────────────────
-  const liveThreshold = new Date(now - 30 * 60000).toISOString(); // aktiv = Lead in letzten 30 Min
+  const liveThreshold = new Date(now - 30 * 60000).toISOString();
+  // Live = Login-Event in den letzten 30 Min
+  const advisorUserIds = new Set((advisors || []).map(a => a.user_id));
+  const recentAdvisorLogins = (analyticsEvents || []).filter(e =>
+    e.event_name === 'login' && advisorUserIds.has(e.user_id) && e.created_at >= liveThreshold
+  );
+  const liveAdvisorIds = new Set(recentAdvisorLogins.map(e => e.user_id));
+
   const advisorStats = (advisors || []).map(adv => {
     const myLeads = (allFairLeads || []).filter(l => l.advisor_user_id === adv.user_id);
     const today = myLeads.filter(l => l.created_at >= todayStart);
     const lastLead = myLeads[0]?.created_at || null;
-    const isLive = lastLead && lastLead >= liveThreshold;
+    const lastLogin = recentAdvisorLogins.find(e => e.user_id === adv.user_id)?.created_at || null;
+    const isLive = liveAdvisorIds.has(adv.user_id);
     const completed = myLeads.filter(l => ['completed','contacted','converted'].includes(l.status)).length;
     return {
       ...adv,
@@ -125,6 +143,7 @@ export default async function PlatformDashboard() {
       today: today.length,
       completed,
       lastLead,
+      lastLogin,
       isLive,
     };
   }).sort((a, b) => b.today - a.today || b.total - a.total);
@@ -168,10 +187,14 @@ export default async function PlatformDashboard() {
   const premiumUsers = (allUsers || []).filter(u => u.subscription_plan && u.subscription_plan !== 'FREE').length;
   const onboardingDone = (allUsers || []).filter(u => u.onboarding_complete).length;
 
+  const qrTotal = (selfChecks || []).length;
+  const qrToday = (selfChecks || []).filter(s => s.created_at >= todayStart).length;
+
   const kpis = [
     { label: 'Nutzer gesamt', value: fmt(totalUsers), sub: `+${fmt((newUsersWeek || []).length)} diese Woche`, color: '#CC1426' },
     { label: 'Neu heute', value: fmt((newUsersToday || []).length), sub: 'Registrierungen', color: '#D97706' },
     { label: 'Logins heute', value: fmt(uniqueLoginsToday), sub: `${fmt(loginsToday)} Sessions`, color: '#0891B2' },
+    { label: 'QR-Scans', value: fmt(qrTotal), sub: `+${fmt(qrToday)} heute`, color: '#0891B2' },
     { label: 'CV-Checks', value: fmt((cvDocsAll || []).length), sub: `+${fmt((cvToday || []).length)} heute`, color: '#1D4ED8' },
     { label: 'Analysen', value: fmt((analysisAll || []).length), sub: `+${fmt((analysisToday || []).length)} heute`, color: '#059669' },
     { label: 'Premium-User', value: fmt(premiumUsers), sub: `von ${fmt(totalUsers)} gesamt`, color: '#7C3AED' },
@@ -191,7 +214,7 @@ export default async function PlatformDashboard() {
           </div>
           <h1 style={{ fontSize: 26, fontWeight: 700, margin: 0 }}>Plattform-Cockpit</h1>
           <p style={{ color: '#86868b', marginTop: 4, fontSize: 13 }}>
-            Aktualisiert automatisch · {new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} Uhr
+            Aktualisiert automatisch · {berlinNow()} Uhr
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -203,7 +226,7 @@ export default async function PlatformDashboard() {
       </div>
 
       {/* KPI Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))', gap: 12, marginBottom: 28 }}>
         {kpis.map((k, i) => (
           <div key={i} style={{ background: '#fff', borderRadius: 14, padding: '18px 20px', border: '1px solid #E8E6E1' }}>
             <div style={{ fontSize: 30, fontWeight: 800, color: k.color, lineHeight: 1, letterSpacing: '-0.03em' }}>{k.value}</div>
@@ -225,7 +248,7 @@ export default async function PlatformDashboard() {
               </div>
             )}
           </div>
-          <span style={{ fontSize: 12, color: '#86868b' }}>Live = Lead in letzten 30 Min.</span>
+          <span style={{ fontSize: 12, color: '#86868b' }}>Live = Login in letzten 30 Min.</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 0 }}>
@@ -251,7 +274,7 @@ export default async function PlatformDashboard() {
               </div>
 
               <div style={{ fontSize: 11, color: '#86868b', marginBottom: 10 }}>
-                {adv.isLive ? <span style={{ color: '#059669', fontWeight: 600 }}>🟢 Gerade aktiv</span> : adv.lastLead ? `Zuletzt: ${ago(adv.lastLead)}` : 'Noch keine Aktivität'}
+                {adv.isLive ? <span style={{ color: '#059669', fontWeight: 600 }}>🟢 Gerade aktiv</span> : adv.lastLogin ? `Login: ${ago(adv.lastLogin)}` : adv.lastLead ? `Lead: ${ago(adv.lastLead)}` : 'Noch keine Aktivität'}
               </div>
 
               {/* Stats */}
