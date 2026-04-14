@@ -116,8 +116,9 @@ export default async function LeadsPage({ searchParams }) {
 
   const fairById = (fairs || []).reduce((acc, f) => { acc[f.id] = f; return acc; }, {});
 
-  const formatDate = (d) => new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const formatTime = (d) => new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  const TZ = 'Europe/Berlin';
+  const formatDate = (d) => new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: TZ });
+  const formatTime = (d) => new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: TZ });
 
   const filterHref = (params) => {
     const base = {

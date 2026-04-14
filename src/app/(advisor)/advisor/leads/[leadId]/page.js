@@ -67,8 +67,9 @@ export default async function LeadDetailPage({ params }) {
   }
 
   const statusInfo = STATUS_LABELS[lead.status] || STATUS_LABELS.new;
-  const formatDate = (d) => d ? new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '–';
-  const formatDateTime = (d) => d ? new Date(d).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+  const TZ = 'Europe/Berlin';
+  const formatDate = (d) => d ? new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: TZ }) : '–';
+  const formatDateTime = (d) => d ? new Date(d).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: TZ }) : '–';
 
   // Feedback items nach Kategorie gruppieren
   const itemsByCategory = {};
