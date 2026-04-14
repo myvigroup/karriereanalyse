@@ -27,14 +27,13 @@ export default function AdminCoursesClient({ courses: initialCourses }) {
     if (!file) return;
     setUploadingThumbnail(courseId);
     try {
-      const ext = file.name.split('.').pop().toLowerCase();
-      const path = `course-thumbnails/${courseId}.${ext}`;
-      const { error: upErr } = await supabase.storage.from('public-assets').upload(path, file, { upsert: true, contentType: file.type });
-      if (upErr) throw upErr;
-      const { data: urlData } = supabase.storage.from('public-assets').getPublicUrl(path);
-      const publicUrl = urlData?.publicUrl + '?v=' + Date.now();
-      await supabase.from('courses').update({ thumbnail_url: publicUrl }).eq('id', courseId);
-      setCourses(prev => prev.map(c => c.id === courseId ? { ...c, thumbnail_url: publicUrl } : c));
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('courseId', courseId);
+      const res = await fetch('/api/admin/upload-thumbnail', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload fehlgeschlagen');
+      setCourses(prev => prev.map(c => c.id === courseId ? { ...c, thumbnail_url: data.url } : c));
     } catch (err) {
       alert('Upload fehlgeschlagen: ' + err.message);
     } finally {
