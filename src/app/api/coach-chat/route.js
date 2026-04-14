@@ -4,6 +4,8 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { buildCoachPrompt } from '@/lib/coach-prompt';
 import { callAI } from '@/lib/ai-provider';
 
+export const maxDuration = 30;
+
 export async function POST(request) {
   try {
     const supabase = createClient();

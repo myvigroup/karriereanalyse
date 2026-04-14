@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { callAI, parseJSON } from '@/lib/ai-provider';
 
+export const maxDuration = 30;
+
 export async function POST(request) {
   try {
     const supabase = createClient();

@@ -1,9 +1,11 @@
+export const maxDuration = 300;
+
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { runCVAnalysis } from '@/lib/cv-analysis-worker';
 import { NextResponse } from 'next/server';
 
-export const maxDuration = 300; // 5 Minuten für Batch-Verarbeitung
+ // 5 Minuten für Batch-Verarbeitung
 
 async function authAdmin() {
   const supabase = createClient();

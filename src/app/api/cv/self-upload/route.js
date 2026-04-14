@@ -4,6 +4,9 @@ import { NextResponse } from 'next/server';
 import { analyzeCVForFair, extractTextFromImageAI } from '@/lib/ai-provider';
 import { sanitizeFilename } from '@/lib/utils';
 
+// Längeres Timeout für KI-Analyse (Vercel Pro: bis 300s)
+export const maxDuration = 60;
+
 const ACCEPTED_TYPES = {
   'application/pdf': 'pdf',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
