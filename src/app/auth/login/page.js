@@ -17,8 +17,13 @@ function LoginContent() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { setError(error.message); setLoading(false); return; }
+    // Berater mit temp-Passwort → direkt zu set-password
+    if (data?.user?.user_metadata?.needs_password_setup) {
+      router.push('/auth/set-password');
+      return;
+    }
     const redirect = searchParams.get('redirect');
     router.push(redirect || '/dashboard');
   }

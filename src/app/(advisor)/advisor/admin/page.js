@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { deleteAdvisor } from './actions';
+import BulkInviteButton from './BulkInviteButton';
 
 const STATUS_BADGE = {
   upcoming: { label: 'Bevorstehend', bg: '#FFF3E0', color: '#D97706' },
@@ -184,12 +185,15 @@ export default async function AdminPage() {
       {/* ── Berater ──────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Berater</h2>
-        <Link
-          href="/advisor/admin/advisors/new"
-          style={{ padding: '9px 18px', background: '#1A1A1A', color: '#fff', borderRadius: 980, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}
-        >
-          + Neuen Berater
-        </Link>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <BulkInviteButton />
+          <Link
+            href="/advisor/admin/advisors/new"
+            style={{ padding: '9px 18px', background: '#1A1A1A', color: '#fff', borderRadius: 980, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}
+          >
+            + Neuen Berater
+          </Link>
+        </div>
       </div>
 
       <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden' }}>

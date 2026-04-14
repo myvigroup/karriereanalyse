@@ -128,28 +128,53 @@ export async function resendAdvisorInvite(formData) {
   redirect('/advisor/admin');
 }
 
+// Temp-Passwort Ansatz: kein Magic Link, kein PKCE — funktioniert in JEDEM Browser
 async function generateAndSendInvite(admin, email, name, appUrl) {
-  const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
-    type: 'magiclink',
-    email,
-    // Über /auth/callback routen damit der PKCE-Code server-seitig
-    // ausgetauscht wird — funktioniert in ALLEN Browsern (inkl. WhatsApp, Mail-Apps)
-    options: { redirectTo: `${appUrl}/auth/callback?next=/auth/set-password` },
-  });
+  // Sicheres temp-Passwort generieren
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  let tempPassword = 'KI-';
+  for (let i = 0; i < 10; i++) tempPassword += chars[Math.floor(Math.random() * chars.length)];
 
-  if (linkError) throw new Error(`Einladungslink konnte nicht erstellt werden: ${linkError.message}`);
-
-  const inviteUrl = linkData?.properties?.action_link;
+  // Passwort direkt setzen (kein Magic Link, kein PKCE)
+  const { data: { users } } = await admin.auth.admin.listUsers({ perPage: 1000 });
+  const existing = users.find(u => u.email === email);
+  if (existing) {
+    await admin.auth.admin.updateUserById(existing.id, {
+      password: tempPassword,
+      user_metadata: { needs_password_setup: true },
+    });
+  }
 
   await sendEmail({
     to: email,
     subject: 'Dein Zugang zum Karriere-Institut Portal',
-    html: buildAdvisorInviteEmail(name, inviteUrl, appUrl),
+    html: buildAdvisorInviteEmail(name, email, tempPassword, appUrl),
   });
 }
 
-function buildAdvisorInviteEmail(name, inviteUrl, appUrl) {
+// Alle Berater auf einmal mit neuen Zugangsdaten versorgen
+export async function resendAllAdvisorInvites() {
+  const admin = await requireAdmin();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de';
+
+  const { data: advisors } = await admin.from('advisors').select('user_id, display_name, email');
+  if (!advisors?.length) return { sent: 0 };
+
+  let sent = 0;
+  for (const adv of advisors) {
+    try {
+      await generateAndSendInvite(admin, adv.email, adv.display_name, appUrl);
+      sent++;
+    } catch (e) {
+      console.error('Failed to send invite to', adv.email, e);
+    }
+  }
+  return { sent };
+}
+
+function buildAdvisorInviteEmail(name, email, tempPassword, appUrl) {
   const firstName = name?.split(' ')[0] || name;
+  const loginUrl = `${appUrl}/auth/login`;
   return `<!DOCTYPE html>
 <html lang="de">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -159,22 +184,32 @@ function buildAdvisorInviteEmail(name, inviteUrl, appUrl) {
       <span style="font-size:11px;font-weight:700;letter-spacing:2px;color:#CC1426;text-transform:uppercase">KARRIERE-INSTITUT</span>
     </div>
     <div style="background:white;border-radius:16px;padding:32px;box-shadow:0 2px 8px rgba(0,0,0,0.04)">
-      <h2 style="font-size:22px;font-weight:700;margin:0 0 16px">Willkommen im Berater-Portal</h2>
-      <p style="color:#86868b;line-height:1.6;margin:0 0 12px">Hallo ${firstName},</p>
-      <p style="color:#86868b;line-height:1.6;margin:0 0 12px">du wurdest als Berater zum Karriere-Institut Messe-Portal eingeladen. Klicke auf den Button unten, um dein Passwort zu setzen und loszulegen.</p>
-      <p style="color:#86868b;line-height:1.6;margin:0 0 24px">Im Portal kannst du Messegespräche erfassen, Lebensläufe analysieren und Feedback an Besucher senden.</p>
-      <div style="text-align:center;margin:24px 0">
-        <a href="${inviteUrl}" style="display:inline-block;padding:14px 32px;background:#CC1426;color:white;border-radius:980px;text-decoration:none;font-weight:600;font-size:15px">Passwort setzen & Portal öffnen</a>
+      <h2 style="font-size:22px;font-weight:700;margin:0 0 16px">Dein Zugang zum Berater-Portal</h2>
+      <p style="color:#86868b;line-height:1.6;margin:0 0 20px">Hallo ${firstName},<br><br>
+      hier sind deine Zugangsdaten für das Karriere-Institut Messe-Portal:</p>
+
+      <div style="background:#F5F5F7;border-radius:12px;padding:20px 24px;margin-bottom:24px">
+        <div style="margin-bottom:12px">
+          <div style="font-size:11px;font-weight:600;color:#86868b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">E-Mail</div>
+          <div style="font-size:15px;font-weight:600;color:#1d1d1f;font-family:monospace">${email}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#86868b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Temporäres Passwort</div>
+          <div style="font-size:18px;font-weight:700;color:#CC1426;font-family:monospace;letter-spacing:2px">${tempPassword}</div>
+        </div>
       </div>
-      <p style="color:#86868b;line-height:1.6;font-size:13px;margin:0">Der Link ist 24 Stunden gültig. Falls du diese E-Mail nicht erwartet hast, kannst du sie ignorieren.</p>
+
+      <div style="text-align:center;margin:24px 0">
+        <a href="${loginUrl}" style="display:inline-block;padding:14px 36px;background:#CC1426;color:white;border-radius:980px;text-decoration:none;font-weight:600;font-size:15px">Jetzt einloggen →</a>
+      </div>
+
+      <p style="color:#86868b;line-height:1.6;font-size:13px;margin:16px 0 0;background:#FFF9E6;border-radius:8px;padding:12px 14px;border-left:3px solid #F59E0B">
+        <strong style="color:#92400E">Wichtig:</strong> Nach dem ersten Login wirst du aufgefordert, ein eigenes Passwort zu setzen.
+      </p>
     </div>
     <div style="text-align:center;margin-top:24px;font-size:12px;color:#86868b">
       <p>&copy; 2026 - Das Karriere-Institut | +49 511 5468 4547</p>
       <p>info@daskarriereinstitut.de</p>
-      <p style="margin-top:12px">
-        <a href="${appUrl}/datenschutz" style="color:#86868b;text-decoration:underline">Datenschutz</a> &middot;
-        <a href="${appUrl}/impressum" style="color:#86868b;text-decoration:underline">Impressum</a>
-      </p>
     </div>
   </div>
 </body>
