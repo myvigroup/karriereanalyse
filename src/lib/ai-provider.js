@@ -1,41 +1,147 @@
 /**
  * KARRIERE-INSTITUT — AI Provider
- * 
- * Verbindung zur Claude API für:
- * - Lebenslauf-Analyse (CV Check)
- * - Karriere-Empfehlungen
- * - Coaching-Insights
+ *
+ * Unterstützt Claude (Anthropic) und ChatGPT (OpenAI).
+ * Priorität: ANTHROPIC_API_KEY → OPENAI_API_KEY → Mock
  */
 
-const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
+// ============================================================
+// PROVIDER DETECTION
+// ============================================================
+function getProvider() {
+  if (process.env.ANTHROPIC_API_KEY) return 'anthropic';
+  if (process.env.OPENAI_API_KEY) return 'openai';
+  return null;
+}
 
-/**
- * Analysiert einen Lebenslauf-Text mit Claude
- * @param {string} cvText - Extrahierter Text aus dem CV-PDF
- * @param {string} careerGoal - Das Karriereziel des Users
- * @param {Object} analysisScores - Kompetenz-Scores für Kontext
- * @returns {Object} { strengths: string[], improvements: string[], missingKeywords: string[], summary: string }
- */
-export async function analyzeCVWithAI(cvText, careerGoal, analysisScores = {}) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+// ============================================================
+// UNIFIED COMPLETION CALL
+// ============================================================
+async function callAI({ system, userMessage, maxTokens = 2000 }) {
+  const provider = getProvider();
 
-  if (!apiKey) {
-    console.warn('ANTHROPIC_API_KEY nicht gesetzt — verwende Mock-Analyse');
-    return getMockCVAnalysis(careerGoal);
+  if (provider === 'anthropic') {
+    return callAnthropic({ system, userMessage, maxTokens });
   }
+  if (provider === 'openai') {
+    return callOpenAI({ system, userMessage, maxTokens });
+  }
+  return null;
+}
 
+async function callAnthropic({ system, userMessage, maxTokens }) {
   try {
-    const response = await fetch(ANTHROPIC_API_URL, {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
-        max_tokens: 2000,
-        system: `Du bist ein erfahrener Executive-Headhunter und Karrierecoach für den deutschsprachigen Markt.
+        max_tokens: maxTokens,
+        system,
+        messages: [{ role: 'user', content: userMessage }],
+      }),
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.content?.[0]?.text || null;
+  } catch (e) {
+    console.error('[ai-provider] Anthropic error:', e);
+    return null;
+  }
+}
+
+async function callOpenAI({ system, userMessage, maxTokens }) {
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        max_tokens: maxTokens,
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: userMessage },
+        ],
+      }),
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || null;
+  } catch (e) {
+    console.error('[ai-provider] OpenAI error:', e);
+    return null;
+  }
+}
+
+function parseJSON(text) {
+  if (!text) return null;
+  try {
+    const clean = text.replace(/```json[\s\S]*?```|```[\s\S]*?```/g, m =>
+      m.replace(/```json|```/g, '')
+    ).trim();
+    return JSON.parse(clean);
+  } catch {
+    return null;
+  }
+}
+
+// ============================================================
+// CV-ANALYSE FÜR MESSE / SELF-UPLOAD (Struktur/Inhalt/Design/Wirkung)
+// ============================================================
+export async function analyzeCVForFair(cvText, targetPosition) {
+  const provider = getProvider();
+  if (!provider) {
+    console.warn('[ai-provider] Kein API-Key — verwende Mock-Analyse');
+    return getMockFairAnalysis();
+  }
+
+  const system = `Du bist ein erfahrener Karrierecoach auf einer Karrieremesse. Analysiere den Lebenslauf${targetPosition ? ` speziell im Hinblick auf die Zielstelle "${targetPosition}"` : ''} und gib strukturiertes Feedback.
+
+Antworte NUR als valides JSON-Objekt ohne Markdown-Backticks. Format:
+{
+  "overallRating": 3,
+  "summary": "2-3 Sätze Gesamteinschätzung",
+  "categories": {
+    "struktur": { "rating": 3, "selectedPresets": ["Klarer chronologischer Aufbau"], "comment": "Kurzer Kommentar" },
+    "inhalt": { "rating": 3, "selectedPresets": ["Relevante Erfahrungen gut hervorgehoben"], "comment": "Kurzer Kommentar" },
+    "design": { "rating": 3, "selectedPresets": ["Professionelles, modernes Layout"], "comment": "Kurzer Kommentar" },
+    "wirkung": { "rating": 3, "selectedPresets": ["Starker erster Eindruck"], "comment": "Kurzer Kommentar" }
+  }
+}
+
+WICHTIG: selectedPresets NUR aus dieser Liste:
+Struktur: "Klarer chronologischer Aufbau", "Chronologische Lücken vorhanden", "Übersichtliche Gliederung", "Zu unübersichtlich / überladen", "Kontaktdaten vollständig", "Kontaktdaten unvollständig", "Gute Länge (1-2 Seiten)", "Zu lang / zu kurz"
+Inhalt: "Relevante Erfahrungen gut hervorgehoben", "Wichtige Erfahrungen fehlen oder sind versteckt", "Kompetenzen klar formuliert", "Kompetenzen zu vage beschrieben", "Messbare Erfolge genannt", "Keine konkreten Ergebnisse / Zahlen", "Gute Keyword-Optimierung", "Keywords für Zielbranche fehlen"
+Design: "Professionelles, modernes Layout", "Layout veraltet oder unprofessionell", "Gute Lesbarkeit und Schriftgröße", "Schwer lesbar / zu kleine Schrift", "Konsistente Formatierung", "Inkonsistente Formatierung", "Angemessenes Foto", "Foto fehlt oder unvorteilhaft"
+Wirkung: "Starker erster Eindruck", "Erster Eindruck verbesserungswürdig", "Persönlichkeit kommt rüber", "Wirkt austauschbar / generisch", "Klare Positionierung erkennbar", "Positionierung unklar", "Motivierender Gesamteindruck", "Gesamteindruck eher schwach"
+
+Ratings 1-5. Sei ehrlich aber konstruktiv.`;
+
+  const userMessage = `Analysiere diesen Lebenslauf${targetPosition ? ` für die Zielstelle: "${targetPosition}"` : ''}:\n\n${cvText.substring(0, 8000)}`;
+
+  const text = await callAI({ system, userMessage, maxTokens: 2500 });
+  const result = parseJSON(text);
+  return result || getMockFairAnalysis();
+}
+
+// ============================================================
+// CV-ANALYSE MIT KI (Stärken / Verbesserungen / Keywords)
+// ============================================================
+export async function analyzeCVWithAI(cvText, careerGoal, analysisScores = {}) {
+  const provider = getProvider();
+  if (!provider) {
+    console.warn('[ai-provider] Kein API-Key — verwende Mock-Analyse');
+    return getMockCVAnalysis(careerGoal);
+  }
+
+  const system = `Du bist ein erfahrener Executive-Headhunter und Karrierecoach für den deutschsprachigen Markt.
 Analysiere Lebensläufe strategisch und gib konkretes, umsetzbares Feedback.
 Antworte NUR als valides JSON-Objekt ohne Markdown-Backticks.
 Format:
@@ -45,179 +151,103 @@ Format:
   "missingKeywords": ["Keyword 1", "Keyword 2", "Keyword 3"],
   "summary": "2-3 Sätze Gesamtbewertung",
   "score": 65
-}`,
-        messages: [{
-          role: 'user',
-          content: `Analysiere diesen Lebenslauf für das Karriereziel "${careerGoal || 'Führungsposition'}".
+}`;
 
-LEBENSLAUF:
-${cvText.substring(0, 8000)}
+  const userMessage = `Analysiere diesen Lebenslauf für das Karriereziel "${careerGoal || 'Führungsposition'}".\n\nLEBENSLAUF:\n${cvText.substring(0, 8000)}\n\nGib mir:\n1. Die 3 größten Stärken\n2. Die 3 wichtigsten Verbesserungsvorschläge\n3. 5 fehlende Keywords für ATS-Systeme\n4. Eine Gesamtbewertung (2-3 Sätze)\n5. Einen Score von 0-100\n\nNur JSON.`;
 
-Gib mir:
-1. Die 3 größten Stärken des CVs
-2. Die 3 wichtigsten Verbesserungsvorschläge (konkret und umsetzbar)
-3. 5 fehlende Keywords die für ATS-Systeme und Headhunter wichtig wären
-4. Eine Gesamtbewertung (2-3 Sätze)
-5. Einen Score von 0-100
-
-Antworte NUR als JSON-Objekt.`
-        }],
-      }),
-    });
-
-    if (!response.ok) {
-      console.error('AI API Error:', response.status);
-      return getMockCVAnalysis(careerGoal);
-    }
-
-    const data = await response.json();
-    const text = data.content?.[0]?.text || '';
-    const clean = text.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
-  } catch (error) {
-    console.error('AI Analysis failed:', error);
-    return getMockCVAnalysis(careerGoal);
-  }
+  const text = await callAI({ system, userMessage, maxTokens: 2000 });
+  const result = parseJSON(text);
+  return result || getMockCVAnalysis(careerGoal);
 }
 
-/**
- * Generiert Coaching-Empfehlungen basierend auf Analyse-Ergebnissen
- * @param {Object[]} analysisResults - Kompetenz-Scores
- * @param {Object} profile - User-Profil
- * @returns {Object} { recommendations: string[], nextSteps: string[], focusAreas: string[] }
- */
+// ============================================================
+// COACHING INSIGHTS
+// ============================================================
 export async function generateCoachingInsights(analysisResults, profile) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const provider = getProvider();
+  if (!provider) return getMockCoachingInsights(analysisResults);
 
-  if (!apiKey) {
-    return getMockCoachingInsights(analysisResults);
-  }
+  const scores = analysisResults.map(r => `${r.title}: ${r.score}%`).join('\n');
+  const system = 'Du bist ein Karrierecoach. Gib strategische Empfehlungen basierend auf dem Kompetenzprofil. Antworte NUR als JSON.';
+  const userMessage = `Kompetenzprofil von ${profile?.name || 'Coachee'}:\n${scores}\n\nKarriereziel: ${profile?.career_goal || 'Nicht definiert'}\n\nJSON-Format:\n{\n  "recommendations": ["3 strategische Empfehlungen"],\n  "nextSteps": ["3 konkrete nächste Schritte"],\n  "focusAreas": ["Die 2 wichtigsten Fokus-Bereiche"]\n}`;
 
-  try {
-    const scores = analysisResults.map(r => `${r.title}: ${r.score}%`).join('\n');
-
-    const response = await fetch(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 1500,
-        system: 'Du bist ein Karrierecoach. Gib strategische Empfehlungen basierend auf dem Kompetenzprofil. Antworte NUR als JSON.',
-        messages: [{
-          role: 'user',
-          content: `Kompetenzprofil von ${profile?.name || 'Coachee'}:
-${scores}
-
-Karriereziel: ${profile?.career_goal || 'Nicht definiert'}
-Aktuelles Gehalt: €${profile?.current_salary || 'Unbekannt'}
-Zielgehalt: €${profile?.target_salary || 'Unbekannt'}
-
-Gib mir als JSON:
-{
-  "recommendations": ["3 strategische Empfehlungen"],
-  "nextSteps": ["3 konkrete nächste Schritte"],
-  "focusAreas": ["Die 2 wichtigsten Fokus-Bereiche"]
-}`
-        }],
-      }),
-    });
-
-    const data = await response.json();
-    const text = data.content?.[0]?.text || '';
-    return JSON.parse(text.replace(/```json|```/g, '').trim());
-  } catch (error) {
-    return getMockCoachingInsights(analysisResults);
-  }
+  const text = await callAI({ system, userMessage, maxTokens: 1500 });
+  const result = parseJSON(text);
+  return result || getMockCoachingInsights(analysisResults);
 }
 
-/**
- * Analysiert einen CV-Text speziell für den Messe-CV-Check.
- * Gibt strukturiertes Feedback zurück, das direkt den Preset-Kategorien entspricht.
- * @param {string} cvText - Extrahierter Text aus dem CV
- * @returns {Object} Strukturierte Analyse mit Preset-Vorschlägen pro Kategorie
- */
-export async function analyzeCVForFair(cvText, targetPosition) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+// ============================================================
+// IMAGE TEXT EXTRACTION (Vision)
+// ============================================================
+export async function extractTextFromImageAI(buffer, filename) {
+  const base64 = buffer.toString('base64');
+  const ext = filename?.split('.')?.pop()?.toLowerCase();
+  const mediaType = ext === 'png' ? 'image/png' : 'image/jpeg';
 
-  if (!apiKey) {
-    console.warn('ANTHROPIC_API_KEY nicht gesetzt — verwende Mock-Analyse');
-    return getMockFairAnalysis();
-  }
-
-  try {
-    const response = await fetch(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 2500,
-        system: `Du bist ein erfahrener Karrierecoach auf einer Karrieremesse. Analysiere den Lebenslauf${targetPosition ? ` speziell im Hinblick auf die Zielstelle "${targetPosition}"` : ''} und gib strukturiertes Feedback.
-
-Antworte NUR als valides JSON-Objekt ohne Markdown-Backticks. Format:
-{
-  "overallRating": 3,
-  "summary": "2-3 Sätze Gesamteinschätzung",
-  "categories": {
-    "struktur": {
-      "rating": 3,
-      "selectedPresets": ["Klarer chronologischer Aufbau", "Kontaktdaten vollständig"],
-      "comment": "Kurzer Freitext-Kommentar zur Struktur"
-    },
-    "inhalt": {
-      "rating": 3,
-      "selectedPresets": ["Relevante Erfahrungen gut hervorgehoben"],
-      "comment": "Kurzer Freitext-Kommentar zum Inhalt"
-    },
-    "design": {
-      "rating": 3,
-      "selectedPresets": ["Professionelles, modernes Layout"],
-      "comment": "Kurzer Freitext-Kommentar zum Design"
-    },
-    "wirkung": {
-      "rating": 3,
-      "selectedPresets": ["Starker erster Eindruck"],
-      "comment": "Kurzer Freitext-Kommentar zur Wirkung"
+  // Try Anthropic Vision
+  if (process.env.ANTHROPIC_API_KEY) {
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4000,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+              { type: 'text', text: 'Extrahiere den kompletten Text aus diesem Lebenslauf-Bild. Nur den Text, keine Kommentare.' },
+            ],
+          }],
+        }),
+      });
+      const data = await response.json();
+      const text = data.content?.[0]?.text || '';
+      if (text.length > 20) return text;
+    } catch (e) {
+      console.error('[ai-provider] Anthropic vision error:', e);
     }
   }
-}
 
-WICHTIG: Die selectedPresets müssen EXAKT aus dieser Liste stammen:
-Struktur: "Klarer chronologischer Aufbau", "Chronologische Lücken vorhanden", "Übersichtliche Gliederung", "Zu unübersichtlich / überladen", "Kontaktdaten vollständig", "Kontaktdaten unvollständig", "Gute Länge (1-2 Seiten)", "Zu lang / zu kurz"
-Inhalt: "Relevante Erfahrungen gut hervorgehoben", "Wichtige Erfahrungen fehlen oder sind versteckt", "Kompetenzen klar formuliert", "Kompetenzen zu vage beschrieben", "Messbare Erfolge genannt", "Keine konkreten Ergebnisse / Zahlen", "Gute Keyword-Optimierung", "Keywords für Zielbranche fehlen"
-Design: "Professionelles, modernes Layout", "Layout veraltet oder unprofessionell", "Gute Lesbarkeit und Schriftgröße", "Schwer lesbar / zu kleine Schrift", "Konsistente Formatierung", "Inkonsistente Formatierung", "Angemessenes Foto", "Foto fehlt oder unvorteilhaft"
-Wirkung: "Starker erster Eindruck", "Erster Eindruck verbesserungswürdig", "Persönlichkeit kommt rüber", "Wirkt austauschbar / generisch", "Klare Positionierung erkennbar", "Positionierung unklar", "Motivierender Gesamteindruck", "Gesamteindruck eher schwach"
-
-Ratings sind 1-5 (1=schlecht, 5=sehr gut). Sei ehrlich aber konstruktiv.`,
-        messages: [{
-          role: 'user',
-          content: `Analysiere diesen Lebenslauf${targetPosition ? ` im Hinblick auf die Zielstelle: "${targetPosition}"` : ''}:\n\n${cvText.substring(0, 8000)}`,
-        }],
-      }),
-    });
-
-    if (!response.ok) {
-      console.error('AI API Error:', response.status);
-      return getMockFairAnalysis();
+  // Try OpenAI Vision
+  if (process.env.OPENAI_API_KEY) {
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          max_tokens: 4000,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image_url', image_url: { url: `data:${mediaType};base64,${base64}` } },
+              { type: 'text', text: 'Extrahiere den kompletten Text aus diesem Lebenslauf-Bild. Nur den Text, keine Kommentare.' },
+            ],
+          }],
+        }),
+      });
+      const data = await response.json();
+      return data.choices?.[0]?.message?.content || '';
+    } catch (e) {
+      console.error('[ai-provider] OpenAI vision error:', e);
     }
-
-    const data = await response.json();
-    const text = data.content?.[0]?.text || '';
-    const clean = text.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
-  } catch (error) {
-    console.error('CV Fair Analysis failed:', error);
-    return getMockFairAnalysis();
   }
+
+  return '';
 }
 
+// ============================================================
+// MOCK RESPONSES
+// ============================================================
 function getMockFairAnalysis() {
   return {
     overallRating: 3,
@@ -231,10 +261,6 @@ function getMockFairAnalysis() {
   };
 }
 
-// ============================================================
-// MOCK RESPONSES (Wenn kein API Key vorhanden)
-// ============================================================
-
 function getMockCVAnalysis(careerGoal) {
   return {
     strengths: [
@@ -247,14 +273,8 @@ function getMockCVAnalysis(careerGoal) {
       'Erfolge quantifizieren: Statt "Umsatz gesteigert" → "Umsatz um 35% in 12 Monaten gesteigert".',
       'Keywords für ATS optimieren: Branchenspezifische Begriffe aus aktuellen Stellenausschreibungen einbauen.',
     ],
-    missingKeywords: [
-      'Stakeholder Management',
-      'P&L Verantwortung',
-      'Digital Transformation',
-      'OKR / KPI Framework',
-      'Change Management',
-    ],
-    summary: `Der Lebenslauf bietet eine solide Basis für ${careerGoal || 'eine Führungsposition'}. Die Berufserfahrung ist relevant, allerdings fehlt eine klare Positionierung als Führungskraft. Mit gezielter Optimierung der Keywords und einer stärkeren Quantifizierung der Erfolge steigt die Einladungsquote deutlich.`,
+    missingKeywords: ['Stakeholder Management', 'P&L Verantwortung', 'Digital Transformation', 'OKR / KPI Framework', 'Change Management'],
+    summary: `Der Lebenslauf bietet eine solide Basis für ${careerGoal || 'eine Führungsposition'}. Mit gezielter Optimierung der Keywords steigt die Einladungsquote deutlich.`,
     score: 62,
   };
 }
@@ -263,24 +283,19 @@ function getMockCoachingInsights(analysisResults) {
   const sorted = [...(analysisResults || [])].sort((a, b) => a.score - b.score);
   const weakest = sorted[0]?.title || 'Verhandlung';
   const secondWeakest = sorted[1]?.title || 'Selbstmarketing';
-
   return {
     recommendations: [
-      `Priorität auf ${weakest} legen — hier liegt das größte Steigerungspotenzial für deinen Marktwert.`,
+      `Priorität auf ${weakest} legen — hier liegt das größte Steigerungspotenzial.`,
       `${secondWeakest} parallel entwickeln, da beide Felder synergetisch wirken.`,
-      'LinkedIn-Profil innerhalb der nächsten 7 Tage optimieren — das ist der schnellste Hebel für Sichtbarkeit.',
+      'LinkedIn-Profil optimieren — schnellster Hebel für Sichtbarkeit.',
     ],
     nextSteps: [
       `Masterclass-Modul "${weakest}" diese Woche starten`,
       'Lebenslauf mit den KI-Empfehlungen überarbeiten',
-      '3 relevante Kontakte auf LinkedIn identifizieren und ansprechen',
+      '3 relevante Kontakte auf LinkedIn ansprechen',
     ],
     focusAreas: [weakest, secondWeakest],
   };
 }
 
-export default {
-  analyzeCVWithAI,
-  analyzeCVForFair,
-  generateCoachingInsights,
-};
+export default { analyzeCVWithAI, analyzeCVForFair, generateCoachingInsights, extractTextFromImageAI };

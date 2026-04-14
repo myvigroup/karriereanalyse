@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
-import { analyzeCVForFair } from '@/lib/ai-provider';
+import { analyzeCVForFair, extractTextFromImageAI } from '@/lib/ai-provider';
 
 /**
  * Extracts text + runs AI analysis for a CV document.
@@ -76,7 +76,7 @@ export async function runCVAnalysis({ documentId, feedbackId, targetPosition }) 
       const result = await mammoth.extractRawText({ buffer });
       extractedText = result.value;
     } else if (doc.file_type === 'image') {
-      extractedText = await extractTextFromImage(buffer, doc.file_name);
+      extractedText = await extractTextFromImageAI(buffer, doc.file_name);
     }
   } catch (extractErr) {
     console.error('[cv-analysis] Extraction error:', extractErr);
@@ -115,46 +115,3 @@ export async function runCVAnalysis({ documentId, feedbackId, targetPosition }) 
   };
 }
 
-// Claude Vision für Bild-basierte CVs
-async function extractTextFromImage(buffer, filename) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return '';
-
-  const base64 = buffer.toString('base64');
-  const ext = filename?.split('.')?.pop()?.toLowerCase();
-  const mediaType = ext === 'png' ? 'image/png' : 'image/jpeg';
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
-        messages: [{
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: { type: 'base64', media_type: mediaType, data: base64 },
-            },
-            {
-              type: 'text',
-              text: 'Extrahiere den kompletten Text aus diesem Lebenslauf-Bild. Gib nur den extrahierten Text zurück, keine Kommentare.',
-            },
-          ],
-        }],
-      }),
-    });
-
-    const data = await response.json();
-    return data.content?.[0]?.text || '';
-  } catch (error) {
-    console.error('[cv-analysis] Vision extraction failed:', error);
-    return '';
-  }
-}

@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { analyzeCVForFair, extractTextFromImageAI } from '@/lib/ai-provider';
 
 const ACCEPTED_TYPES = {
   'application/pdf': 'pdf',
@@ -97,13 +98,36 @@ export async function POST(request) {
 
     if (feedbackError) throw new Error('Feedback-Eintrag fehlgeschlagen: ' + feedbackError.message);
 
-    // KI-Analyse
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    // Text extrahieren
+    let cvText = '';
+    if (fileType === 'docx') {
+      const mammoth = await import('mammoth');
+      const result = await mammoth.extractRawText({ buffer });
+      cvText = result.value?.trim() || '';
+    } else if (fileType === 'pdf') {
+      try {
+        const pdfParse = (await import('pdf-parse')).default;
+        const pdfData = await pdfParse(buffer);
+        cvText = pdfData.text || '';
+      } catch {
+        // PDF text extraction failed - will send raw to AI below
+      }
+    } else if (fileType === 'image') {
+      cvText = await extractTextFromImageAI(buffer, file.name);
+    }
+
+    // KI-Analyse via ai-provider (Claude oder OpenAI, je nach verfügbarem API-Key)
     let aiResult = null;
 
-    if (apiKey) {
-      const ext = file.name.split('.').pop()?.toLowerCase() || '';
-      aiResult = await analyzeWithClaude(buffer, ext, fileType, apiKey);
+    if (cvText.length > 20) {
+      aiResult = await analyzeCVForFair(cvText, null);
+    } else if (fileType === 'pdf') {
+      // Fallback: PDF direkt an Claude senden (Vision)
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      if (apiKey) {
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+        aiResult = await analyzeWithClaude(buffer, ext, fileType, apiKey);
+      }
     }
 
     if (!aiResult) {
