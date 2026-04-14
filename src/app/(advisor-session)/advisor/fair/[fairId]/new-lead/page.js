@@ -6,6 +6,11 @@ import { createLead } from '@/app/(advisor-session)/advisor/actions';
 import Link from 'next/link';
 
 const BERUFSFELDER = [
+  { group: 'Studium / Ausbildung (allgemein)', options: [
+    'Duales Studium (allgemein)',
+    'Ausbildungsplatz (allgemein)',
+    'Studium (allgemein)',
+  ]},
   { group: 'Kaufmännisch & Verwaltung', options: [
     'Kaufmann/-frau für Büromanagement',
     'Kaufmann/-frau im Einzelhandel',
@@ -64,11 +69,6 @@ const BERUFSFELDER = [
     'Wissenschaft / Forschung',
     'Öffentlicher Dienst / Verwaltung',
     'Polizei / Bundeswehr',
-  ]},
-  { group: 'Studium / Ausbildung (allgemein)', options: [
-    'Duales Studium (allgemein)',
-    'Ausbildungsplatz (allgemein)',
-    'Studium (allgemein)',
   ]},
 ];
 
