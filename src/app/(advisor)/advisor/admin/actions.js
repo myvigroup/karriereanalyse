@@ -78,37 +78,30 @@ export async function createAdvisorAccount(formData) {
 
   if (authError) {
     if (!authError.message.includes('already been registered')) return { error: authError.message };
-    // Bestehenden User per E-Mail suchen
+    // Berater existiert bereits → KEIN automatischer Resend (würde alte Links ungültig machen)
     const { data: { users } } = await admin.auth.admin.listUsers({ perPage: 1000 });
     const existing = users.find(u => u.email === email);
     if (!existing) return { error: 'Benutzer konnte nicht gefunden werden.' };
-    userId = existing.id;
-    await admin.auth.admin.updateUserById(userId, { user_metadata: { name, needs_password_setup: true } });
-  } else {
-    userId = authData.user.id;
+    // Profil + Advisor aktualisieren, aber KEINE neue Einladung senden
+    await admin.from('profiles').upsert({ id: existing.id, email, name, role });
+    await admin.from('advisors').upsert({ user_id: existing.id, display_name: name, email });
+    return {
+      alreadyExists: true,
+      userId: existing.id,
+      email,
+      name,
+      returnFair: returnFair || null,
+    };
   }
 
-  // Profil + Advisor-Eintrag anlegen/aktualisieren
+  userId = authData.user.id;
+
+  // Profil + Advisor-Eintrag anlegen
   await admin.from('profiles').upsert({ id: userId, email, name, role });
   await admin.from('advisors').upsert({ user_id: userId, display_name: name, email });
 
-  // Einladungslink generieren (Passwort setzen)
-  const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
-    type: 'magiclink',
-    email,
-    options: { redirectTo: `${appUrl}/auth/set-password` },
-  });
-
-  if (linkError) return { error: `Einladungslink konnte nicht erstellt werden: ${linkError.message}` };
-
-  const inviteUrl = linkData?.properties?.action_link;
-
-  // Eigene Einladungsmail senden
-  await sendEmail({
-    to: email,
-    subject: 'Deine Einladung zum Karriere-Institut Berater-Portal',
-    html: buildAdvisorInviteEmail(name, inviteUrl, appUrl),
-  });
+  // Einladungslink generieren + senden (nur für NEUE Berater)
+  await generateAndSendInvite(admin, email, name, appUrl);
 
   // Wenn von einer Messe aus aufgerufen: direkt zuweisen
   if (returnFair) {
@@ -117,6 +110,42 @@ export async function createAdvisorAccount(formData) {
   }
 
   redirect('/advisor/admin');
+}
+
+// Neue separate Action: Einladung explizit erneut senden
+export async function resendAdvisorInvite(formData) {
+  const admin = await requireAdmin();
+  const email = formData.get('email')?.trim().toLowerCase();
+  const name = formData.get('name')?.trim();
+  const returnFair = formData.get('returnFair');
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de';
+
+  if (!email) return { error: 'E-Mail fehlt.' };
+
+  await generateAndSendInvite(admin, email, name, appUrl);
+
+  if (returnFair) redirect(`/advisor/admin/fairs/${returnFair}`);
+  redirect('/advisor/admin');
+}
+
+async function generateAndSendInvite(admin, email, name, appUrl) {
+  const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+    type: 'magiclink',
+    email,
+    // Über /auth/callback routen damit der PKCE-Code server-seitig
+    // ausgetauscht wird — funktioniert in ALLEN Browsern (inkl. WhatsApp, Mail-Apps)
+    options: { redirectTo: `${appUrl}/auth/callback?next=/auth/set-password` },
+  });
+
+  if (linkError) throw new Error(`Einladungslink konnte nicht erstellt werden: ${linkError.message}`);
+
+  const inviteUrl = linkData?.properties?.action_link;
+
+  await sendEmail({
+    to: email,
+    subject: 'Dein Zugang zum Karriere-Institut Portal',
+    html: buildAdvisorInviteEmail(name, inviteUrl, appUrl),
+  });
 }
 
 function buildAdvisorInviteEmail(name, inviteUrl, appUrl) {

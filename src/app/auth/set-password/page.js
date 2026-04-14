@@ -142,8 +142,18 @@ export default function SetPasswordPage() {
 
           {error ? (
             <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '16px 14px' }}>
-              <p style={{ fontSize: 13, color: '#DC2626', margin: '0 0 12px', fontWeight: 600 }}>Link ungültig</p>
-              <p style={{ fontSize: 13, color: '#DC2626', margin: 0 }}>{error}</p>
+              <p style={{ fontSize: 14, color: '#DC2626', margin: '0 0 8px', fontWeight: 700 }}>Link ungültig oder abgelaufen</p>
+              <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px', lineHeight: 1.5 }}>
+                Dieser Link kann nur <strong>einmal</strong> und nur im Browser verwendet werden, in dem du ihn geöffnet hast.<br /><br />
+                Bitte wende dich an dein Team um einen <strong>neuen Einladungslink</strong> zu erhalten, oder nutze die Passwort-vergessen-Funktion.
+              </p>
+              <a href="/auth/forgot-password" style={{
+                display: 'block', textAlign: 'center',
+                padding: '10px 0', background: '#CC1426', color: '#fff',
+                borderRadius: 980, fontSize: 13, fontWeight: 600, textDecoration: 'none',
+              }}>
+                Neuen Link per E-Mail anfordern →
+              </a>
             </div>
           ) : !sessionReady ? (
             <div style={{ textAlign: 'center', padding: '24px 0', color: '#86868b', fontSize: 14 }}>
