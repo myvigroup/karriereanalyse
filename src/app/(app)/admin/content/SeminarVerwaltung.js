@@ -21,6 +21,7 @@ export default function SeminarVerwaltung({ seminars: initial }) {
       next_date: s.next_date || '',
       is_active: s.is_active !== false,
       sort_order: s.sort_order || 0,
+      webinargeek_webinar_id: s.webinargeek_webinar_id || '',
     });
   }
 
@@ -30,6 +31,7 @@ export default function SeminarVerwaltung({ seminars: initial }) {
       ...form,
       next_date: form.next_date || null,
       teams_link: form.teams_link || null,
+      webinargeek_webinar_id: form.webinargeek_webinar_id || null,
       sort_order: parseInt(form.sort_order) || 0,
       updated_at: new Date().toISOString(),
     };
@@ -80,7 +82,7 @@ export default function SeminarVerwaltung({ seminars: initial }) {
                   <textarea className="input" rows={2} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 80px', gap: 12, marginBottom: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
                   <div>
                     <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-secondary)', display: 'block', marginBottom: 4 }}>Teams-Link</label>
                     <input className="input" placeholder="https://teams.microsoft.com/..." value={form.teams_link} onChange={e => setForm(p => ({ ...p, teams_link: e.target.value }))} />
@@ -88,6 +90,16 @@ export default function SeminarVerwaltung({ seminars: initial }) {
                   <div>
                     <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-secondary)', display: 'block', marginBottom: 4 }}>Termin</label>
                     <input className="input" type="date" value={form.next_date} onChange={e => setForm(p => ({ ...p, next_date: e.target.value }))} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: 12, marginBottom: 16 }}>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-secondary)', display: 'block', marginBottom: 4 }}>
+                      WebinarGeek Webinar-ID
+                      <span style={{ fontWeight: 400, marginLeft: 4, opacity: 0.6 }}>(z.B. 529467)</span>
+                    </label>
+                    <input className="input" placeholder="529467" value={form.webinargeek_webinar_id} onChange={e => setForm(p => ({ ...p, webinargeek_webinar_id: e.target.value }))} />
                   </div>
                   <div>
                     <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-secondary)', display: 'block', marginBottom: 4 }}>Reihenf.</label>
@@ -114,7 +126,9 @@ export default function SeminarVerwaltung({ seminars: initial }) {
                   <div style={{ fontSize: 13, fontWeight: 600, color: s.next_date ? 'var(--ki-text)' : 'var(--ki-text-tertiary)' }}>
                     {formatDate(s.next_date)}
                   </div>
-                  {s.teams_link ? (
+                  {s.webinargeek_webinar_id ? (
+                    <span style={{ fontSize: 11, color: 'var(--ki-success)', fontWeight: 500 }}>WebinarGeek #{s.webinargeek_webinar_id}</span>
+                  ) : s.teams_link ? (
                     <span style={{ fontSize: 11, color: 'var(--ki-success)', fontWeight: 500 }}>Teams-Link gesetzt</span>
                   ) : (
                     <span style={{ fontSize: 11, color: 'var(--ki-red)', fontWeight: 500 }}>Kein Link</span>

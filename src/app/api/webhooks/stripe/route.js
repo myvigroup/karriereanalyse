@@ -1,6 +1,7 @@
 import { stripe } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { registerForWebinar } from '@/lib/webinargeek';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -83,6 +84,43 @@ export async function POST(req) {
           content: `Dein Zugang ist freigeschaltet.`,
           type: 'achievement',
         });
+
+        // WebinarGeek: Auto-register for seminar after purchase
+        if (productKey === 'SEMINAR' && session.metadata?.seminar_id) {
+          try {
+            const { data: seminar } = await supabaseAdmin
+              .from('seminars')
+              .select('id, title, webinargeek_webinar_id')
+              .eq('id', session.metadata.seminar_id)
+              .single();
+
+            if (seminar?.webinargeek_webinar_id) {
+              const { data: profile } = await supabaseAdmin
+                .from('profiles')
+                .select('first_name, last_name, name, email, phone')
+                .eq('id', userId)
+                .single();
+
+              const result = await registerForWebinar(seminar.webinargeek_webinar_id, {
+                firstName: profile?.first_name || profile?.name?.split(' ')[0] || '',
+                lastName: profile?.last_name || '',
+                email: profile?.email || session.customer_email,
+                phone: profile?.phone || '',
+              });
+
+              await supabaseAdmin.from('webinar_registrations').insert({
+                user_id: userId,
+                seminar_id: seminar.id,
+                webinargeek_subscription_id: result.subscription?.id?.toString(),
+                watch_link: result.watchLink,
+                broadcast_id: result.broadcastId?.toString(),
+                stripe_session_id: session.id,
+              });
+            }
+          } catch (wgErr) {
+            console.error('WebinarGeek auto-registration failed (non-fatal):', wgErr);
+          }
+        }
         break;
       }
 
