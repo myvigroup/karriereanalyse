@@ -85,7 +85,7 @@ export default async function PlatformDashboard() {
     admin.from('fair_leads').select('id,fair_id,status,created_at').order('created_at', { ascending: false }),
     admin.from('lesson_progress').select('user_id,lesson_id,completed_at').eq('completed', true).order('completed_at', { ascending: false }).limit(40),
     admin.from('cv_documents').select('user_id,created_at').eq('is_current', true).order('created_at', { ascending: false }).limit(20),
-    admin.from('advisors').select('user_id,display_name,email'),
+    admin.from('profiles').select('id,name,email').eq('role', 'advisor').order('name'),
     admin.from('fair_leads').select('id,advisor_user_id,status,created_at,updated_at').order('created_at', { ascending: false }),
     admin.from('analysis_sessions').select('user_id,completed_at').not('completed_at', 'is', null).order('completed_at', { ascending: false }).limit(20),
     admin.from('transactions').select('user_id,amount,product_key,created_at').eq('status', 'completed').order('created_at', { ascending: false }).limit(20),
@@ -124,26 +124,32 @@ export default async function PlatformDashboard() {
   // ── Berater-Rangliste ────────────────────────────────────────────────────
   const liveThreshold = new Date(now - 30 * 60000).toISOString();
   // Live = Login-Event in den letzten 30 Min
-  const advisorUserIds = new Set((advisors || []).map(a => a.user_id));
+  // advisors = profiles mit role='advisor', Felder: id, name, email
+  const advisorUserIds = new Set((advisors || []).map(a => a.id));
   const recentAdvisorLogins = (analyticsEvents || []).filter(e =>
     e.event_name === 'login' && advisorUserIds.has(e.user_id) && e.created_at >= liveThreshold
   );
   const liveAdvisorIds = new Set(recentAdvisorLogins.map(e => e.user_id));
 
   const advisorStats = (advisors || []).map(adv => {
-    const myLeads = (allFairLeads || []).filter(l => l.advisor_user_id === adv.user_id);
+    // fair_leads.advisor_user_id = profile.id des Beraters
+    const myLeads = (allFairLeads || []).filter(l => l.advisor_user_id === adv.id);
     const today = myLeads.filter(l => l.created_at >= todayStart);
     const lastLead = myLeads[0]?.created_at || null;
-    const lastLogin = recentAdvisorLogins.find(e => e.user_id === adv.user_id)?.created_at || null;
-    const isLive = liveAdvisorIds.has(adv.user_id);
+    const lastLogin = (analyticsEvents || []).find(e => e.event_name === 'login' && e.user_id === adv.id)?.created_at || null;
+    const isLive = liveAdvisorIds.has(adv.id);
     const completed = myLeads.filter(l => ['completed','contacted','converted'].includes(l.status)).length;
+    const loginsToday = (analyticsEvents || []).filter(e => e.event_name === 'login' && e.user_id === adv.id && e.created_at >= todayStart).length;
     return {
-      ...adv,
+      user_id: adv.id,
+      display_name: adv.name || adv.email,
+      email: adv.email,
       total: myLeads.length,
       today: today.length,
       completed,
       lastLead,
       lastLogin,
+      loginsToday,
       isLive,
     };
   }).sort((a, b) => b.today - a.today || b.total - a.total);
@@ -278,10 +284,14 @@ export default async function PlatformDashboard() {
               </div>
 
               {/* Stats */}
-              <div style={{ display: 'flex', gap: 16 }}>
+              <div style={{ display: 'flex', gap: 14 }}>
+                <div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: adv.loginsToday > 0 ? '#059669' : '#D1D5DB', lineHeight: 1 }}>{adv.loginsToday}</div>
+                  <div style={{ fontSize: 10, color: '#86868b', marginTop: 2 }}>Logins</div>
+                </div>
                 <div>
                   <div style={{ fontSize: 22, fontWeight: 800, color: adv.today > 0 ? '#CC1426' : '#D1D5DB', lineHeight: 1 }}>{adv.today}</div>
-                  <div style={{ fontSize: 10, color: '#86868b', marginTop: 2 }}>Heute</div>
+                  <div style={{ fontSize: 10, color: '#86868b', marginTop: 2 }}>Leads h.</div>
                 </div>
                 <div>
                   <div style={{ fontSize: 22, fontWeight: 800, color: '#1A1A1A', lineHeight: 1 }}>{adv.total}</div>
