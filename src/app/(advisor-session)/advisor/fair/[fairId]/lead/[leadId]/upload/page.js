@@ -130,11 +130,14 @@ export default function CVUpload() {
   useEffect(() => {
     if (!showQR) return;
     const interval = setInterval(async () => {
-      const res = await fetch(`/api/lead/${leadId}/upload-status`);
-      const data = await res.json();
-      if (data.uploaded) {
-        router.push(`/advisor/fair/${fairId}/lead/${leadId}/review`);
-      }
+      try {
+        const res = await fetch(`/api/lead/${leadId}/upload-status`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.uploaded) {
+          router.push(`/advisor/fair/${fairId}/lead/${leadId}/review`);
+        }
+      } catch { /* Network error — retry next interval */ }
     }, 3000);
     return () => clearInterval(interval);
   }, [showQR, leadId, fairId, router]);

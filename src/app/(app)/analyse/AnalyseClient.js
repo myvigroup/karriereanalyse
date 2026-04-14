@@ -266,7 +266,9 @@ export default function AnalyseClient({ profile, existingSession, userId, hasFul
         current_field: currentFieldIdx,
         status: currentFieldIdx >= KOMPETENZFELDER.length - 1 ? 'completed' : 'in_progress',
         completed_at: currentFieldIdx >= KOMPETENZFELDER.length - 1 ? new Date().toISOString() : null,
-      }, { onConflict: 'user_id' });
+      }, { onConflict: 'user_id' }).then(({ error }) => {
+        if (error) console.error('[Analyse] Save failed:', error.message);
+      });
       return newScores;
     });
     setShowFieldResult(true);
@@ -276,19 +278,22 @@ export default function AnalyseClient({ profile, existingSession, userId, hasFul
     if (selectedOption) return;
     setSelectedOption(option);
 
+    const fieldId = currentField?.id;
+    const qIdx = questionIndex;
+    const fIdx = fieldIndex;
     setTimeout(() => {
-      const fieldId = currentField.id;
+      if (!fieldId) return;
       const prev = answers[fieldId] || [];
       const updated = [...prev];
-      updated[questionIndex] = option.score;
+      updated[qIdx] = option.score;
       const newAnswers = { ...answers, [fieldId]: updated };
       setAnswers(newAnswers);
       setSelectedOption(null);
 
-      if (questionIndex < 3) {
-        setQuestionIndex(questionIndex + 1);
+      if (qIdx < 3) {
+        setQuestionIndex(qIdx + 1);
       } else {
-        finishField(newAnswers, fieldId, fieldIndex);
+        finishField(newAnswers, fieldId, fIdx);
       }
     }, 500);
   }, [selectedOption, currentField, answers, questionIndex, finishField, fieldIndex]);

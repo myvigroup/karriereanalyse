@@ -211,7 +211,7 @@ export default function GlobalSearch() {
               {filteredCourses.map((course) => (
                 <button
                   key={course.id}
-                  onClick={() => navigate(`/masterclass/${course.slug || course.id}`)}
+                  onClick={() => navigate(`/masterclass/${course.id}`)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',

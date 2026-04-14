@@ -19,7 +19,18 @@ function LoginContent() {
     setError('');
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) { setError(error.message); setLoading(false); return; }
+    if (error) {
+      const msg = error.message?.toLowerCase() || '';
+      if (msg.includes('invalid login') || msg.includes('invalid credentials')) {
+        setError('E-Mail oder Passwort ist falsch. Falls du dich zum ersten Mal anmeldest, nutze bitte "Passwort vergessen?" um ein Passwort zu setzen.');
+      } else if (msg.includes('email not confirmed')) {
+        setError('Deine E-Mail-Adresse wurde noch nicht bestätigt. Bitte prüfe dein Postfach.');
+      } else {
+        setError(error.message);
+      }
+      setLoading(false);
+      return;
+    }
     trackEvent(supabase, data.user.id, EVENTS.LOGIN, { source: 'web' });
     if (data?.user?.user_metadata?.needs_password_setup) {
       router.push('/auth/set-password');
