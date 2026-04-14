@@ -59,7 +59,7 @@ export async function POST(request, { params }) {
 
   // Upload in Supabase Storage
   const docId = crypto.randomUUID();
-  const filePath = `${lead.email}/${docId}/${file.name}`;
+  const filePath = `${lead.id}/${docId}/${file.name}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
   const { error: uploadError } = await admin.storage

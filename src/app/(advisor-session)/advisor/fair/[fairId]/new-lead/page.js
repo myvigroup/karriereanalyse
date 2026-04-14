@@ -91,11 +91,16 @@ export default function NewLead() {
   const [error, setError] = useState(null);
   const [selectedField, setSelectedField] = useState('');
   const [showCustom, setShowCustom] = useState(false);
+  const [studyArea, setStudyArea] = useState('');
+
+  const STUDIUM_OPTIONS = ['Duales Studium (allgemein)', 'Ausbildungsplatz (allgemein)', 'Studium (allgemein)'];
+  const showStudyArea = STUDIUM_OPTIONS.includes(selectedField);
 
   function handleFieldChange(e) {
     const val = e.target.value;
     setSelectedField(val);
     setShowCustom(val === '__sonstiges__');
+    if (!STUDIUM_OPTIONS.includes(val)) setStudyArea('');
   }
 
   async function handleSubmit(e) {
@@ -110,6 +115,13 @@ export default function NewLead() {
       formData.set('target_position', formData.get('custom_target_position') || '');
     }
     formData.delete('custom_target_position');
+
+    // Studiengang/Bereich an target_position anhängen
+    const area = formData.get('study_area')?.trim();
+    if (area) {
+      formData.set('target_position', `${formData.get('target_position')} – ${area}`);
+    }
+    formData.delete('study_area');
 
     try {
       const result = await createLead(fairId, formData);
@@ -155,7 +167,7 @@ export default function NewLead() {
           />
         </div>
 
-        <div style={{ marginBottom: showCustom ? 12 : 24 }}>
+        <div style={{ marginBottom: (showCustom || showStudyArea) ? 12 : 24 }}>
           <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 4 }}>
             Zielbranche / Berufsfeld
             <span style={{ fontWeight: 400, color: '#86868b', marginLeft: 6 }}>— in welche Richtung geht's?</span>
@@ -192,6 +204,20 @@ export default function NewLead() {
               autoFocus
               placeholder="z.B. Eventmanagement, Übersetzung, Architektur…"
               style={inputStyle}
+            />
+          </div>
+        )}
+
+        {showStudyArea && (
+          <div style={{ marginBottom: 24 }}>
+            <input
+              type="text"
+              name="study_area"
+              value={studyArea}
+              onChange={e => setStudyArea(e.target.value)}
+              autoFocus
+              placeholder="Studiengang / Ausbildungsbereich z.B. BWL, Informatik, Mechatronik…"
+              style={{ ...inputStyle, background: '#FAFAF8', borderColor: '#D97706' }}
             />
           </div>
         )}

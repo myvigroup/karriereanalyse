@@ -110,17 +110,17 @@ export default async function LeadDetailPage({ params }) {
               )}
             </div>
           </div>
-          {['new', 'analyzing', 'feedback_pending'].includes(lead.status) && (
-            <Link
-              href={`/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`}
-              style={{
-                padding: '10px 20px', background: '#CC1426', color: '#fff',
-                borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 14,
-              }}
-            >
-              Gespräch fortsetzen →
-            </Link>
-          )}
+          <Link
+            href={`/advisor/fair/${lead.fair_id}/lead/${lead.id}/review`}
+            style={{
+              padding: '10px 20px',
+              background: ['new', 'analyzing', 'feedback_pending'].includes(lead.status) ? '#CC1426' : '#F3F4F6',
+              color: ['new', 'analyzing', 'feedback_pending'].includes(lead.status) ? '#fff' : '#6B7280',
+              borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 14,
+            }}
+          >
+            {['new', 'analyzing', 'feedback_pending'].includes(lead.status) ? 'Gespräch fortsetzen →' : 'Feedback bearbeiten'}
+          </Link>
         </div>
       </div>
 
