@@ -235,7 +235,7 @@ async function callClaude(content, apiKey, withPdfBeta = false) {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-4-20250514',
         max_tokens: 2500,
         system: ANALYSIS_SYSTEM,
         messages: [{ role: 'user', content }],
