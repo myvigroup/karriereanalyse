@@ -12,7 +12,7 @@ export const LESSON_CONTENT = {
   '1.1': {
     id: 'b7010000-0000-0000-0000-000000000101',
     type: 'video_with_input',
-    vimeoId: '1181945346',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/1.1_Modul%201_Aktuell%20unterbezahlt.prproj.mp4',
     title: 'Warum du aktuell unterbezahlt bist',
     duration: '3 Min.',
     takeaways: [
@@ -32,7 +32,7 @@ export const LESSON_CONTENT = {
   '1.2': {
     id: 'b7010000-0000-0000-0000-000000000102',
     type: 'video_with_choice',
-    vimeoId: '1182571541',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/1.2_Modul%201_Mindset.prproj.mp4',
     title: 'Warum die meisten Angst vor Gehaltsgesprächen haben',
     duration: '3 Min.',
     takeaways: [
@@ -69,7 +69,6 @@ export const LESSON_CONTENT = {
   '1.3': {
     id: 'b7010000-0000-0000-0000-000000000103',
     type: 'video_with_slider',
-    vimeoId: '1182573431',
     videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/1.3_Modul%201_Gewinner%20denken.prproj.mp4',
     title: 'Wie Gewinner in Gehaltsverhandlungen denken',
     duration: '3 Min.',
@@ -101,7 +100,7 @@ export const LESSON_CONTENT = {
   '2.1': {
     id: 'b7010000-0000-0000-0000-000000000201',
     type: 'video_with_three_numbers',
-    vimeoId: '1182574272',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/2.1_Modul%202_Kenne%20deinen%20Wert.prproj.mp4',
     title: 'Was du wirklich wert bist',
     duration: '3 Min.',
     takeaways: [
@@ -121,7 +120,7 @@ export const LESSON_CONTENT = {
   '2.2': {
     id: 'b7010000-0000-0000-0000-000000000202',
     type: 'video',
-    vimeoId: '1182575073',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/2.2_Modul%202_Wie%20AG%20Gehalt%20bestimmt.prproj.mp4',
     title: 'Wie Arbeitgeber dein Gehalt wirklich bestimmen',
     duration: '3 Min.',
     takeaways: [
@@ -140,7 +139,7 @@ export const LESSON_CONTENT = {
   '2.3': {
     id: 'b7010000-0000-0000-0000-000000000203',
     type: 'video_with_impact',
-    vimeoId: '1182575753',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/2.3_Modul%202_Dein%20Marktwert.prproj.mp4',
     title: 'Dein Marktwert in 3 Faktoren',
     duration: '4 Min.',
     takeaways: [
@@ -179,7 +178,7 @@ export const LESSON_CONTENT = {
   '3.1': {
     id: 'b7010000-0000-0000-0000-000000000301',
     type: 'video',
-    vimeoId: '1182576145',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/3.1_Modul%203_ohne%20Vorbereitung%20verlierst%20du.mp4',
     title: 'Warum du ohne Vorbereitung verlierst',
     duration: '3 Min.',
     takeaways: [
@@ -198,7 +197,7 @@ export const LESSON_CONTENT = {
   '3.2': {
     id: 'b7010000-0000-0000-0000-000000000302',
     type: 'video_with_pitch',
-    vimeoId: '1182576633',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/3.2_Modul%203_Dein%20persoenlich%20Gehalts-Pitch.mp4',
     title: 'Dein persönlicher Gehalts-Pitch',
     duration: '4 Min.',
     takeaways: [
@@ -227,7 +226,7 @@ export const LESSON_CONTENT = {
   '3.3': {
     id: 'b7010000-0000-0000-0000-000000000303',
     type: 'video_with_arguments',
-    vimeoId: '1182578575',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/3.3_Modul%203_Deine%20staerksten%20Argumente.mp4',
     title: 'Deine stärksten Argumente',
     duration: '4 Min.',
     takeaways: [
@@ -259,7 +258,7 @@ export const LESSON_CONTENT = {
   '3.4': {
     id: 'b7010000-0000-0000-0000-000000000304',
     type: 'video_with_strategy',
-    vimeoId: '1182579186',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/3.4_Modul%203_Strategie%20festlegen.mp4',
     title: 'Deine Strategie festlegen',
     duration: '4 Min.',
     takeaways: [
@@ -299,7 +298,7 @@ export const LESSON_CONTENT = {
   '4.1': {
     id: 'b7010000-0000-0000-0000-000000000401',
     type: 'video',
-    vimeoId: '1182579689',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/4.1_Modul%204_Start%20ins%20Gespraech.mp4',
     title: 'So startest du das Gespräch richtig',
     duration: '3 Min.',
     takeaways: [
@@ -321,7 +320,7 @@ export const LESSON_CONTENT = {
   '4.2': {
     id: 'b7010000-0000-0000-0000-000000000402',
     type: 'video',
-    vimeoId: '1182581460',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/4.2_Modul%204_Arbeitgeber_Reaktion.mp4',
     title: 'Die häufigsten Arbeitgeber-Reaktionen',
     duration: '4 Min.',
     takeaways: [
@@ -400,7 +399,7 @@ export const LESSON_CONTENT = {
   '5.1': {
     id: 'b7010000-0000-0000-0000-000000000501',
     type: 'video_with_template',
-    vimeoId: '1182583192',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/5.1_Modul%205_Verhandlung%20abschliessen.mp4',
     title: 'So schließt du die Verhandlung ab',
     duration: '3 Min.',
     takeaways: [
@@ -431,7 +430,7 @@ Mit freundlichen Grüßen
   '5.2': {
     id: 'b7010000-0000-0000-0000-000000000502',
     type: 'video_with_final',
-    vimeoId: '1182583525',
+    videoUrl: 'https://pvqpbvxmtpuwzfzuynyq.supabase.co/storage/v1/object/public/videos/5.2_Modul%205_wenn%20sie%20Nein%20sagen.mp4',
     title: 'Wenn sie Nein sagen — Dein Plan B',
     duration: '3 Min.',
     takeaways: [
