@@ -2,6 +2,7 @@
 import { useState, Suspense } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { trackEvent, EVENTS } from '@/lib/analytics';
 
 function LoginContent() {
   const [email, setEmail] = useState('');
@@ -19,6 +20,8 @@ function LoginContent() {
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { setError(error.message); setLoading(false); return; }
+    // Login tracken
+    trackEvent(supabase, data.user.id, EVENTS.LOGIN, { source: 'web' });
     // Berater mit temp-Passwort → direkt zu set-password
     if (data?.user?.user_metadata?.needs_password_setup) {
       router.push('/auth/set-password');

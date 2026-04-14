@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { trackEvent, EVENTS } from '@/lib/analytics';
 
 export default function AdvisorLoginPage() {
   const [email, setEmail] = useState('');
@@ -37,6 +38,8 @@ export default function AdvisorLoginPage() {
       return;
     }
 
+    // Login tracken (Berater)
+    trackEvent(supabase, data.user.id, EVENTS.LOGIN, { source: 'advisor' });
     router.push('/advisor/leads');
   }
 
