@@ -97,7 +97,34 @@ export default async function LeadsPage({ searchParams }) {
     query = query.eq('follow_up_status', followUpFilter);
   }
 
-  const { data: leads } = await query;
+  const { data: rawLeads } = await query;
+
+  // Duplikate entfernen: pro Name + Messe nur den besten Lead behalten
+  // "Bester" = höchster Status, bei Gleichstand neuestes Datum
+  const STATUS_PRIORITY = { completed: 5, converted: 5, contacted: 4, feedback_pending: 3, analyzing: 2, new: 1 };
+  const dedupedLeads = (() => {
+    const seen = new Map();
+    for (const lead of rawLeads || []) {
+      const key = [
+        (lead.first_name || '').toLowerCase().trim(),
+        (lead.last_name || '').toLowerCase().trim(),
+        lead.fair_id,
+      ].join('__');
+      const existing = seen.get(key);
+      if (!existing) {
+        seen.set(key, lead);
+      } else {
+        const ep = STATUS_PRIORITY[existing.status] || 0;
+        const np = STATUS_PRIORITY[lead.status] || 0;
+        if (np > ep || (np === ep && new Date(lead.created_at) > new Date(existing.created_at))) {
+          seen.set(key, lead);
+        }
+      }
+    }
+    return Array.from(seen.values()).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  })();
+  const duplicateCount = (rawLeads?.length || 0) - dedupedLeads.length;
+  const leads = dedupedLeads;
 
   // Berater-Namen laden (für Admin-Ansicht)
   let advisorById = {};
@@ -157,9 +184,20 @@ export default async function LeadsPage({ searchParams }) {
         </h1>
         {isSuperAdmin && <RetriggerButton />}
       </div>
-      <p style={{ color: '#86868b', marginBottom: 32 }}>
+      <p style={{ color: '#86868b', marginBottom: duplicateCount > 0 ? 8 : 32 }}>
         Alle Gespräche und CV-Checks im Überblick.
       </p>
+      {duplicateCount > 0 && (
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          background: '#FEF3C7', border: '1px solid #FCD34D',
+          borderRadius: 8, padding: '6px 12px', marginBottom: 24,
+          fontSize: 12, color: '#92400E', fontWeight: 500,
+        }}>
+          <span>⚠️</span>
+          <span>{duplicateCount} Duplikat{duplicateCount !== 1 ? 'e' : ''} ausgeblendet — es wird jeweils nur der neueste/fortgeschrittenste Eintrag pro Person angezeigt.</span>
+        </div>
+      )}
 
       {/* Filter-Leiste */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
