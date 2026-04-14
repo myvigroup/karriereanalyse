@@ -139,7 +139,7 @@ export default async function CVCheckPage() {
 
   if (!doc) redirect('/dashboard');
 
-  // Feedback laden — via fair_leads verknüpft
+  // Feedback laden — zuerst via fair_leads, dann direkt über cv_document_id
   const { data: lead } = await admin
     .from('fair_leads')
     .select('*, fairs(name, start_date)')
@@ -148,13 +148,27 @@ export default async function CVCheckPage() {
     .limit(1)
     .maybeSingle();
 
-  const { data: feedback } = lead
-    ? await admin
-        .from('cv_feedback')
-        .select('*')
-        .eq('fair_lead_id', lead.id)
-        .maybeSingle()
-    : { data: null };
+  let feedback = null;
+
+  // 1. Versuch: via fair_lead (Berater-Flow)
+  if (lead) {
+    const { data: fb } = await admin
+      .from('cv_feedback')
+      .select('*')
+      .eq('fair_lead_id', lead.id)
+      .maybeSingle();
+    feedback = fb;
+  }
+
+  // 2. Fallback: direkt über cv_document_id (Self-Upload-Flow)
+  if (!feedback && doc) {
+    const { data: fb } = await admin
+      .from('cv_feedback')
+      .select('*')
+      .eq('cv_document_id', doc.id)
+      .maybeSingle();
+    feedback = fb;
+  }
 
   const { data: rawItems } = feedback
     ? await admin
