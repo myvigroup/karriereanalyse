@@ -5,6 +5,13 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_place
 });
 
 export const PRODUCTS = {
+  MASTERCLASS_SINGLE: {
+    name: 'Gehalts-Masterclass Einzelkauf',
+    type: 'payment',
+    stripePrice: process.env.STRIPE_PRICE_MASTERCLASS_SINGLE || 'price_1TM38q0KdzLHV06QlMHV6TSJ',
+    features: ['5 Module · 17 Lektionen', 'Interaktive Gehalts-Simulationen', 'Konkrete Skripte & Pitches', 'Lebenslanger Zugang', 'Kurs-Zertifikat'],
+    description: 'Einmaliger Kauf — für immer zugänglich',
+  },
   MASTERCLASS: {
     name: 'Masterclass',
     type: 'subscription',
@@ -12,6 +19,7 @@ export const PRODUCTS = {
     stripePriceYearly: process.env.STRIPE_PRICE_MASTERCLASS_YEARLY,
     features: ['Alle Kurs-Module', 'Quiz & Praxis-Aufgaben', 'Zertifikate', 'Community-Zugang'],
     description: 'Kurse zu Gehaltsverhandlung, Rhetorik, Leadership und mehr',
+    trialDays: 7,
   },
   SEMINAR: {
     name: 'Seminare',
