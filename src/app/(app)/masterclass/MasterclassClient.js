@@ -277,12 +277,11 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
   const tabs = [
     { key: 'alle', label: 'Alle' },
     { key: 'e-learnings', label: 'E-Learnings' },
-    { key: 'analyse-tools', label: 'Analyse-Tools' },
     { key: 'seminare', label: 'Seminare' },
   ];
 
   const showELearnings = activeTab === 'alle' || activeTab === 'e-learnings';
-  const showAnalyse = activeTab === 'alle' || activeTab === 'analyse-tools';
+  const showAnalyse = false;
   const showSeminare = activeTab === 'alle' || activeTab === 'seminare';
 
   return (
@@ -293,7 +292,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
         <InfoTooltip moduleId="masterclass" profile={profile} />
       </div>
       <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)', marginBottom: 28 }}>
-        Lerne in deinem eigenen Tempo — E-Learnings, Analyse-Tools & Live-Seminare.
+        Lerne in deinem eigenen Tempo — E-Learnings & Live-Seminare.
       </p>
 
       {/* ── Tabs ── */}
