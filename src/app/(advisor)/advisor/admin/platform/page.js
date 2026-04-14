@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import AutoRefresh from './AutoRefresh';
 
 export const revalidate = 30;
 
@@ -193,9 +194,12 @@ export default async function PlatformDashboard() {
             Aktualisiert automatisch · {new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} Uhr
           </p>
         </div>
-        <Link href="/advisor/admin" style={{ fontSize: 13, padding: '8px 16px', border: '1px solid #E8E6E1', borderRadius: 980, textDecoration: 'none', color: '#1A1A1A' }}>
-          ← Zurück
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <AutoRefresh intervalSeconds={30} />
+          <Link href="/advisor/admin" style={{ fontSize: 13, padding: '8px 16px', border: '1px solid #E8E6E1', borderRadius: 980, textDecoration: 'none', color: '#1A1A1A' }}>
+            ← Zurück
+          </Link>
+        </div>
       </div>
 
       {/* KPI Grid */}
