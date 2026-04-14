@@ -3109,8 +3109,64 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
                 </div>
               </>
             )}
+            {/* Spacer so content isn't hidden behind sticky bottom bar */}
+            <div style={{ height: 76 }} />
           </div>
 
+          {/* ── Sticky Bottom Nav Bar (position:fixed, outside grid flow) ── */}
+          <div style={{
+            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+            background: 'rgba(255,255,255,0.95)',
+            backdropFilter: 'blur(12px)',
+            borderTop: '1px solid var(--ki-border)',
+            padding: '12px 24px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+          }}>
+            {/* Left: lesson info */}
+            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <span style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', fontWeight: 600 }}>
+                Lektion {currentIndex + 1}/{totalCount}
+              </span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 280 }}>
+                {currentLesson.title}
+              </span>
+            </div>
+
+            {/* Right: action buttons */}
+            <div style={{ display: 'flex', gap: 10, flexShrink: 0, alignItems: 'center' }}>
+              {currentIndex > 0 && (
+                <button
+                  onClick={() => navigateTo(currentIndex - 1)}
+                  className="btn btn-secondary"
+                  style={{ padding: '9px 16px', fontSize: 13 }}
+                >
+                  ← Zurück
+                </button>
+              )}
+              {!isCompleted ? (
+                <button
+                  onClick={() => markComplete(getXpForType(lessonType))}
+                  className="btn btn-primary"
+                  disabled={saving}
+                  style={{ padding: '9px 20px', fontSize: 14, fontWeight: 700 }}
+                >
+                  {saving ? 'Speichert…' : currentIndex >= totalCount - 1 ? '✅ Kurs abschließen' : 'Lektion abschließen & Weiter →'}
+                </button>
+              ) : currentIndex < totalCount - 1 ? (
+                <button
+                  onClick={() => navigateTo(currentIndex + 1)}
+                  className="btn btn-primary"
+                  style={{ padding: '9px 20px', fontSize: 14, fontWeight: 700 }}
+                >
+                  Weiter zur nächsten Lektion →
+                </button>
+              ) : (
+                <span className="pill pill-green" style={{ fontSize: 13, padding: '8px 16px' }}>
+                  ✅ Kurs abgeschlossen!
+                </span>
+              )}
+            </div>
+          </div>
           {/* RIGHT: Module Sidebar */}
           <div style={{ position: 'sticky', top: 24 }}>
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
