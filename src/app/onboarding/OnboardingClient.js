@@ -39,6 +39,7 @@ export default function OnboardingClient({ profile, userId }) {
   const supabase = createClient();
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   // Step 2
   const [firstName, setFirstName] = useState(profile?.first_name || '');
@@ -88,37 +89,22 @@ export default function OnboardingClient({ profile, userId }) {
 
   const finish = useCallback(async () => {
     setSaving(true);
+    setSaveError('');
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const email = user?.email || '';
-
-      // upsert statt update – funktioniert auch wenn Trigger das Profil noch nicht angelegt hat
-      const { error } = await supabase.from('profiles').upsert({
-        id: userId,
-        email,
-        first_name: firstName,
-        last_name: lastName,
-        name: `${firstName} ${lastName}`.trim(),
-        avatar_initials: ((firstName[0] || '') + (lastName[0] || 'X')).toUpperCase(),
-        role: 'user',
-        phase: 'pre_coaching',
-        industry,
-        current_salary: currentSalary,
-        target_salary: targetSalary,
-        career_obstacle: obstacle,
-        experience_years: experience,
-        onboarding_complete: true,
-        total_points: 50,
-        dsgvo_consent_at: new Date().toISOString(),
-      }, { onConflict: 'id' });
-
-      if (error) throw error;
+      const res = await fetch('/api/complete-onboarding', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, industry, currentSalary, targetSalary, obstacle, experience }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Speichern fehlgeschlagen');
       window.location.href = '/dashboard';
     } catch (err) {
       console.error('Onboarding save failed:', err);
+      setSaveError('Speichern fehlgeschlagen — bitte nochmal versuchen.');
       setSaving(false);
     }
-  }, [supabase, userId, firstName, lastName, industry, currentSalary, targetSalary, obstacle, experience]);
+  }, [firstName, lastName, industry, currentSalary, targetSalary, obstacle, experience]);
 
   // Radar chart SVG
   const RadarChart = ({ values, labels, size = 200 }) => {
@@ -395,6 +381,11 @@ export default function OnboardingClient({ profile, userId }) {
               </div>
             </div>
 
+            {saveError && (
+              <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(204,20,38,0.06)', color: 'var(--ki-red)', fontSize: 13, marginBottom: 8 }}>
+                {saveError}
+              </div>
+            )}
             <button className="btn btn-primary" onClick={finish} disabled={saving} style={{ width: '100%', padding: '14px 24px', fontSize: 16, opacity: saving ? 0.7 : 1 }}>
               {saving ? 'Wird gespeichert...' : 'Zum Dashboard'}
             </button>
