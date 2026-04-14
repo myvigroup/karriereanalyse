@@ -27,12 +27,12 @@ export async function runCVAnalysis({ documentId, feedbackId, targetPosition }) 
     if (feedbackId) {
       const { data: existing } = await admin
         .from('cv_feedback')
-        .select('ai_parsed_at')
+        .select('ai_parsed_at, ai_analysis')
         .eq('id', feedbackId)
         .maybeSingle();
 
       if (existing?.ai_parsed_at) {
-        return { success: true, skipped: true };
+        return { success: true, skipped: true, aiAnalysis: existing.ai_analysis };
       }
 
       const aiAnalysis = await analyzeCVForFair(doc.extracted_text, targetPosition);
@@ -42,7 +42,7 @@ export async function runCVAnalysis({ documentId, feedbackId, targetPosition }) 
           ai_parsed_at: new Date().toISOString(),
         }).eq('id', feedbackId);
       }
-      return { success: true };
+      return { success: true, aiAnalysis };
     }
     return { success: true, skipped: true };
   }
@@ -100,6 +100,7 @@ export async function runCVAnalysis({ documentId, feedbackId, targetPosition }) 
 
   // KI-Analyse starten
   const aiAnalysis = await analyzeCVForFair(extractedText, targetPosition);
+  console.log('[cv-analysis] aiAnalysis result:', aiAnalysis ? 'OK' : 'null/failed');
 
   if (feedbackId && aiAnalysis) {
     await admin.from('cv_feedback').update({
@@ -112,6 +113,7 @@ export async function runCVAnalysis({ documentId, feedbackId, targetPosition }) 
     success: true,
     extractedLength: extractedText.length,
     hasAiAnalysis: !!aiAnalysis,
+    aiAnalysis,
   };
 }
 

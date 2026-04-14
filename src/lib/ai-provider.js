@@ -45,7 +45,11 @@ async function callAnthropic({ system, userMessage, maxTokens }) {
         messages: [{ role: 'user', content: userMessage }],
       }),
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      const errBody = await response.text();
+      console.error('[ai-provider] Anthropic HTTP', response.status, errBody);
+      return null;
+    }
     const data = await response.json();
     return data.content?.[0]?.text || null;
   } catch (e) {
@@ -71,7 +75,11 @@ async function callOpenAI({ system, userMessage, maxTokens }) {
         ],
       }),
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      const errBody = await response.text();
+      console.error('[ai-provider] OpenAI HTTP', response.status, errBody);
+      return null;
+    }
     const data = await response.json();
     return data.choices?.[0]?.message?.content || null;
   } catch (e) {
