@@ -20,15 +20,16 @@ export default function GlobalSearch() {
       try {
         const supabase = createClient();
 
-        const [coursesRes, contactsRes, applicationsRes] = await Promise.all([
-          supabase.from('courses').select('id, title, slug'),
-          supabase.from('contacts').select('id, name, company'),
-          supabase.from('applications').select('id, company_name, position'),
-        ]);
+        // Nur courses abfragen — contacts/applications-Tabellen existieren nicht
+        const coursesRes = await supabase
+          .from('courses')
+          .select('id, title')
+          .eq('is_published', true)
+          .order('title');
 
         setCourses(coursesRes.data || []);
-        setContacts(contactsRes.data || []);
-        setApplications(applicationsRes.data || []);
+        setContacts([]);
+        setApplications([]);
       } catch (err) {
         console.error('GlobalSearch: failed to fetch data', err);
       } finally {
