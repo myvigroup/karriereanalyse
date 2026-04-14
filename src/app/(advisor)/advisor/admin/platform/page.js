@@ -55,6 +55,8 @@ export default async function PlatformDashboard() {
     { data: recentCv },
     { data: recentAnalysis },
     { data: recentTransactions },
+    { data: advisors },
+    { data: allFairLeads },
   ] = await Promise.all([
     admin.from('profiles').select('id,email,name,first_name,last_name,created_at,onboarding_complete,subscription_plan,purchased_products,role,phase').eq('role', 'user').order('created_at', { ascending: false }),
     admin.from('profiles').select('id').eq('role', 'user').gte('created_at', todayStart),
@@ -72,6 +74,8 @@ export default async function PlatformDashboard() {
     admin.from('fair_leads').select('id,fair_id,status,created_at').order('created_at', { ascending: false }),
     admin.from('lesson_progress').select('user_id,lesson_id,completed_at').eq('completed', true).order('completed_at', { ascending: false }).limit(40),
     admin.from('cv_documents').select('user_id,created_at').eq('is_current', true).order('created_at', { ascending: false }).limit(20),
+    admin.from('advisors').select('user_id,display_name,email'),
+    admin.from('fair_leads').select('id,advisor_user_id,status,created_at,updated_at').order('created_at', { ascending: false }),
     admin.from('analysis_sessions').select('user_id,completed_at').not('completed_at', 'is', null).order('completed_at', { ascending: false }).limit(20),
     admin.from('transactions').select('user_id,amount,product_key,created_at').eq('status', 'completed').order('created_at', { ascending: false }).limit(20),
   ]);
@@ -105,6 +109,26 @@ export default async function PlatformDashboard() {
     acc[t.user_id].push(t.product_key);
     return acc;
   }, {});
+
+  // ── Berater-Rangliste ────────────────────────────────────────────────────
+  const liveThreshold = new Date(now - 30 * 60000).toISOString(); // aktiv = Lead in letzten 30 Min
+  const advisorStats = (advisors || []).map(adv => {
+    const myLeads = (allFairLeads || []).filter(l => l.advisor_user_id === adv.user_id);
+    const today = myLeads.filter(l => l.created_at >= todayStart);
+    const lastLead = myLeads[0]?.created_at || null;
+    const isLive = lastLead && lastLead >= liveThreshold;
+    const completed = myLeads.filter(l => ['completed','contacted','converted'].includes(l.status)).length;
+    return {
+      ...adv,
+      total: myLeads.length,
+      today: today.length,
+      completed,
+      lastLead,
+      isLive,
+    };
+  }).sort((a, b) => b.today - a.today || b.total - a.total);
+
+  const liveCount = advisorStats.filter(a => a.isLive).length;
 
   // Revenue
   const revenueTotal = (transactions || []).reduce((s, t) => s + (t.amount || 0), 0);
@@ -183,6 +207,67 @@ export default async function PlatformDashboard() {
             <div style={{ fontSize: 11, color: '#86868b', marginTop: 2 }}>{k.sub}</div>
           </div>
         ))}
+      </div>
+
+      {/* Berater-Rangliste */}
+      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden', marginBottom: 24 }}>
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid #F0EEE9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FAFAF8' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <h2 style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>Berater-Rangliste</h2>
+            {liveCount > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: '#D1FAE5', borderRadius: 980, padding: '3px 10px' }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#059669', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#059669' }}>{liveCount} LIVE</span>
+              </div>
+            )}
+          </div>
+          <span style={{ fontSize: 12, color: '#86868b' }}>Live = Lead in letzten 30 Min.</span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 0 }}>
+          {advisorStats.length === 0 ? (
+            <div style={{ padding: 32, textAlign: 'center', color: '#86868b', fontSize: 13, gridColumn: '1 / -1' }}>Keine Berater</div>
+          ) : advisorStats.map((adv, i) => (
+            <div key={adv.user_id} style={{
+              padding: '14px 20px',
+              borderRight: '1px solid #F0EEE9',
+              borderBottom: '1px solid #F0EEE9',
+              background: adv.isLive ? 'rgba(5,150,105,0.03)' : 'transparent',
+              position: 'relative',
+            }}>
+              {/* Rang */}
+              <div style={{ position: 'absolute', top: 10, right: 12, fontSize: 18, fontWeight: 900, color: i === 0 ? '#F59E0B' : i === 1 ? '#9CA3AF' : i === 2 ? '#CD7F32' : '#E5E7EB' }}>
+                #{i + 1}
+              </div>
+
+              {/* Live-Indikator */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: adv.isLive ? '#059669' : '#D1D5DB', flexShrink: 0 }} />
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{adv.display_name}</div>
+              </div>
+
+              <div style={{ fontSize: 11, color: '#86868b', marginBottom: 10 }}>
+                {adv.isLive ? <span style={{ color: '#059669', fontWeight: 600 }}>🟢 Gerade aktiv</span> : adv.lastLead ? `Zuletzt: ${ago(adv.lastLead)}` : 'Noch keine Aktivität'}
+              </div>
+
+              {/* Stats */}
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: adv.today > 0 ? '#CC1426' : '#D1D5DB', lineHeight: 1 }}>{adv.today}</div>
+                  <div style={{ fontSize: 10, color: '#86868b', marginTop: 2 }}>Heute</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: '#1A1A1A', lineHeight: 1 }}>{adv.total}</div>
+                  <div style={{ fontSize: 10, color: '#86868b', marginTop: 2 }}>Gesamt</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: adv.completed > 0 ? '#059669' : '#D1D5DB', lineHeight: 1 }}>{adv.completed}</div>
+                  <div style={{ fontSize: 10, color: '#86868b', marginTop: 2 }}>Abgeschl.</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Activity Feed + Messen */}
@@ -345,6 +430,7 @@ export default async function PlatformDashboard() {
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
       `}</style>
     </div>
   );
