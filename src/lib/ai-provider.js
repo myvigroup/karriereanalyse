@@ -110,7 +110,7 @@ export async function analyzeCVForFair(cvText, targetPosition) {
     return getMockFairAnalysis();
   }
 
-  const system = `Du bist ein erfahrener Karrierecoach auf einer Karrieremesse. Analysiere den Lebenslauf${targetPosition ? ` speziell im Hinblick auf die Zielstelle "${targetPosition}"` : ''} und gib strukturiertes Feedback.
+  const system = `Du bist ein erfahrener Karrierecoach auf einer Karrieremesse. Du bist kompetent in ALLEN Branchen — von MINT/Technik (IT, Ingenieurwesen, Naturwissenschaften, Mathematik) bis BWL, Soziales und Kreativberufe. Analysiere den Lebenslauf${targetPosition ? ` speziell im Hinblick auf die Zielstelle "${targetPosition}"` : ''} branchenspezifisch und gib strukturiertes Feedback.
 
 Antworte NUR als valides JSON-Objekt ohne Markdown-Backticks. Format:
 {
@@ -126,7 +126,7 @@ Antworte NUR als valides JSON-Objekt ohne Markdown-Backticks. Format:
 
 WICHTIG: selectedPresets NUR aus dieser Liste:
 Struktur: "Klarer chronologischer Aufbau", "Chronologische Lücken vorhanden", "Übersichtliche Gliederung", "Zu unübersichtlich / überladen", "Kontaktdaten vollständig", "Kontaktdaten unvollständig", "Gute Länge (1-2 Seiten)", "Zu lang / zu kurz"
-Inhalt: "Relevante Erfahrungen gut hervorgehoben", "Wichtige Erfahrungen fehlen oder sind versteckt", "Kompetenzen klar formuliert", "Kompetenzen zu vage beschrieben", "Messbare Erfolge genannt", "Keine konkreten Ergebnisse / Zahlen", "Gute Keyword-Optimierung", "Keywords für Zielbranche fehlen"
+Inhalt: "Relevante Erfahrungen gut hervorgehoben", "Wichtige Erfahrungen fehlen oder sind versteckt", "Kompetenzen klar formuliert", "Kompetenzen zu vage beschrieben", "Messbare Erfolge genannt", "Keine konkreten Ergebnisse / Zahlen", "Gute Keyword-Optimierung", "Keywords für Zielbranche fehlen", "Technische Skills gut dargestellt", "Fachspezifische Zertifizierungen/Tools fehlen", "Projekterfahrung konkret beschrieben", "Branchenspezifische Fachbegriffe fehlen"
 Design: "Professionelles, modernes Layout", "Layout veraltet oder unprofessionell", "Gute Lesbarkeit und Schriftgröße", "Schwer lesbar / zu kleine Schrift", "Konsistente Formatierung", "Inkonsistente Formatierung", "Angemessenes Foto", "Foto fehlt oder unvorteilhaft"
 Wirkung: "Starker erster Eindruck", "Erster Eindruck verbesserungswürdig", "Persönlichkeit kommt rüber", "Wirkt austauschbar / generisch", "Klare Positionierung erkennbar", "Positionierung unklar", "Motivierender Gesamteindruck", "Gesamteindruck eher schwach"
 
