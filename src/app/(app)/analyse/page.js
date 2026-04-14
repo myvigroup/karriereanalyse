@@ -31,5 +31,5 @@ export default async function AnalysePage() {
     return <PaywallGate feature="analyse" />;
   }
 
-  return <AnalyseClient profile={profile} existingSession={existingSession} userId={user.id} />;
+  return <AnalyseClient profile={profile} existingSession={existingSession} userId={user.id} hasFullAccess={hasAccess(profile, 'analyse_full')} />;
 }

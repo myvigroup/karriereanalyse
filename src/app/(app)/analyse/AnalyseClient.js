@@ -137,7 +137,92 @@ function LockedCard({ children }) {
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function AnalyseClient({ profile, existingSession, userId }) {
+// ============================================================
+// FIELD RESULT CARD (rich per-field interpretation)
+// ============================================================
+function FieldResultCard({ field, score, isLocked }) {
+  const level = getScoreLevel(score);
+
+  const interpretation = score >= 75
+    ? `Du zeigst im Bereich ${field.name} klare Stärken. ${field.intro.was} Mit einem Score von ${score}% bist du hier deutlich besser aufgestellt als der Durchschnitt — ein echter Vorteil, den du aktiv nutzen solltest.`
+    : score >= 50
+    ? `Im Bereich ${field.name} bist du solide aufgestellt, hast aber noch konkretes Wachstumspotenzial. ${field.intro.was} Dein Score von ${score}% zeigt: die Grundlagen sind vorhanden — mit gezieltem Training kannst du hier in die Exzellenz-Zone kommen.`
+    : `${field.name} ist ein klares Wachstumsfeld für dich. ${field.intro.warum} Mit einem Score von ${score}% liegt hier enormes Entwicklungspotenzial — und genau das ist die Chance, dich von anderen abzuheben.`;
+
+  return (
+    <div className="card animate-in" style={{ padding: 0, overflow: 'hidden', marginBottom: 16 }}>
+      {/* Header row */}
+      <div style={{ padding: '18px 22px', borderLeft: `4px solid ${field.color}`, display: 'flex', alignItems: 'center', gap: 14 }}>
+        <span style={{ fontSize: 28, flexShrink: 0 }}>{field.icon}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{field.name}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ flex: 1, height: 6, background: '#F0EEE9', borderRadius: 3 }}>
+              <div style={{ height: '100%', width: `${score}%`, background: level.color, borderRadius: 3, transition: 'width 1s ease' }} />
+            </div>
+            <span style={{ fontSize: 16, fontWeight: 800, color: level.color, minWidth: 46 }}>{score}%</span>
+          </div>
+        </div>
+        <div style={{
+          padding: '4px 12px', borderRadius: 980, background: `${level.color}18`,
+          color: level.color, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0,
+        }}>
+          {level.badge} {level.label}
+        </div>
+      </div>
+
+      {/* Details */}
+      {isLocked ? (
+        <LockedCard>
+          <div style={{ padding: '16px 22px 24px' }}>
+            {[90, 70, 85].map((w, i) => (
+              <div key={i} style={{ height: 10, background: '#F0EEE9', borderRadius: 5, marginBottom: 10, width: `${w}%` }} />
+            ))}
+          </div>
+        </LockedCard>
+      ) : (
+        <div style={{ padding: '4px 22px 22px' }}>
+          {/* Outcome callout */}
+          <div style={{
+            background: `${field.color}0f`, border: `1px solid ${field.color}30`,
+            borderRadius: 10, padding: '10px 14px', margin: '14px 0',
+            fontSize: 13, fontWeight: 600, color: field.color, lineHeight: 1.5,
+          }}>
+            💡 {field.outcome.headline}
+          </div>
+
+          {/* Deine persönliche Auswertung */}
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 8 }}>
+            Deine persönliche Auswertung
+          </div>
+          <p style={{ fontSize: 14, lineHeight: 1.8, color: '#3d3d3d', marginBottom: 16 }}>
+            {interpretation}
+          </p>
+          <p style={{ fontSize: 13, lineHeight: 1.75, color: '#6B7280', marginBottom: score < 70 ? 16 : 0 }}>
+            {field.outcome.text}
+          </p>
+
+          {/* Schwaechen — only if score < 70 */}
+          {score < 70 && (
+            <div style={{ marginTop: 4 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 10 }}>
+                Klassische Anzeichen in diesem Feld:
+              </div>
+              {field.intro.schwaechen.map((s, i) => (
+                <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, fontSize: 13, color: '#555', lineHeight: 1.5 }}>
+                  <span style={{ color: '#CC1426', flexShrink: 0, marginTop: 1 }}>✗</span>
+                  <span>{s}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function AnalyseClient({ profile, existingSession, userId, hasFullAccess }) {
   const supabase = createClient();
 
   // Phase: 1=welcome, 2=questions, 3=results
@@ -659,35 +744,24 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
           </div>
         </div>
 
-        {/* All 12 fields — first 4 open, rest locked */}
-        <div className="card" style={{ padding: 20, marginBottom: 20 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Alle 12 Kompetenzfelder</h3>
-
-          {/* First 3 open */}
-          {sortedScores.slice(0, 3).map((f, i) => (
-            <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid #F0EEE9' }}>
-              <span style={{ fontSize: 18 }}>{f.icon}</span>
-              <span style={{ flex: 1, fontSize: 14, fontWeight: 500 }}>{f.name}</span>
-              <div style={{ width: 80, height: 6, background: '#F0EEE9', borderRadius: 3 }}>
-                <div style={{ height: '100%', width: `${f.score}%`, background: f.level.color, borderRadius: 3 }} />
-              </div>
-              <span style={{ fontSize: 13, fontWeight: 700, color: f.level.color, minWidth: 38, textAlign: 'right' }}>{f.score}%</span>
-            </div>
+        {/* Per-field detailed cards */}
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 6 }}>
+            Deine persönliche Auswertung
+          </h2>
+          <p style={{ fontSize: 13, color: '#86868b', marginBottom: 20 }}>
+            {hasFullAccess
+              ? 'Alle 12 Kompetenzfelder mit detaillierter Interpretation'
+              : 'Top 3 Felder mit detaillierter Interpretation — restliche Felder im Gespräch mit deinem Karriere-Berater'}
+          </p>
+          {sortedScores.map((f, i) => (
+            <FieldResultCard
+              key={f.id}
+              field={f}
+              score={f.score}
+              isLocked={!hasFullAccess && i >= 3}
+            />
           ))}
-
-          {/* Rest locked */}
-          <LockedCard>
-            {sortedScores.slice(3).map((f) => (
-              <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid #F0EEE9' }}>
-                <span style={{ fontSize: 18 }}>{f.icon}</span>
-                <span style={{ flex: 1, fontSize: 14, fontWeight: 500 }}>{f.name}</span>
-                <div style={{ width: 80, height: 6, background: '#F0EEE9', borderRadius: 3 }}>
-                  <div style={{ height: '100%', width: `${f.score}%`, background: f.level.color, borderRadius: 3 }} />
-                </div>
-                <span style={{ fontSize: 13, fontWeight: 700, color: f.level.color, minWidth: 38, textAlign: 'right' }}>{f.score}%</span>
-              </div>
-            ))}
-          </LockedCard>
         </div>
 
         {/* Masterclass Empfehlung */}
