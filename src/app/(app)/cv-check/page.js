@@ -209,6 +209,18 @@ export default async function CVCheckPage() {
     }
   });
 
+  // Karriere-Analyse Status laden
+  const { data: analysisSession } = await supabase
+    .from('analysis_sessions')
+    .select('overall_score, completed_at')
+    .eq('user_id', user.id)
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const hasAnalysis = !!analysisSession;
+
   const fairName = lead?.fairs?.name;
   const hasRating = feedback?.overall_rating > 0;
 
@@ -340,26 +352,73 @@ export default async function CVCheckPage() {
               <CategoryCard key={key} label={label} icon={icon} cat={byCategory[key]} />
             ))}
 
-            {/* CTA Card */}
-            <div style={{
-              background: 'linear-gradient(135deg, #CC1426 0%, #a01020 100%)',
-              borderRadius: 16, padding: 24, color: '#fff', textAlign: 'center',
-            }}>
-              <div style={{ fontSize: 32, marginBottom: 12 }}>🚀</div>
-              <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 8px' }}>
-                Karriereanalyse starten
-              </h3>
-              <p style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.5, margin: '0 0 16px' }}>
-                Entdecke in 13 Kompetenzfeldern, was wirklich in dir steckt.
-              </p>
-              <Link href="/analyse" style={{
-                display: 'block', padding: '12px', background: '#fff',
-                color: '#CC1426', borderRadius: 980, textDecoration: 'none',
-                fontWeight: 700, fontSize: 14,
+            {/* CTA Card — Analyse abgeschlossen oder noch nicht */}
+            {hasAnalysis ? (
+              <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid #E8E6E1', background: '#fff' }}>
+                {/* Completed header */}
+                <div style={{
+                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                  padding: '18px 20px', color: '#fff',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                    <span style={{ fontSize: 20 }}>✅</span>
+                    <span style={{ fontSize: 15, fontWeight: 800 }}>Karriere-Analyse abgeschlossen</span>
+                  </div>
+                  <div style={{ fontSize: 13, opacity: 0.9, lineHeight: 1.4 }}>
+                    Dein Karriere-Blutbild wurde erstellt — Gesamtscore:{' '}
+                    <strong>{analysisSession.overall_score}%</strong>
+                  </div>
+                </div>
+                {/* Next steps */}
+                <div style={{ padding: '14px 16px' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>
+                    Deine nächsten Schritte
+                  </div>
+                  {[
+                    { icon: '📊', title: 'Analyse-Ergebnisse ansehen', desc: 'Deine 12 Kompetenzscores im Detail', href: '/analyse', primary: true },
+                    { icon: '🎓', title: 'Empfohlene Masterclass', desc: 'Dein schwächstes Feld gezielt stärken', href: '/masterclass' },
+                    { icon: '🤖', title: 'KI-Coach fragen', desc: 'Persönliche Karrieretipps auf Basis deiner Analyse', href: '/coach' },
+                  ].map((step, i) => (
+                    <Link key={i} href={step.href} style={{ textDecoration: 'none' }}>
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: '10px 12px', borderRadius: 10, marginBottom: 6,
+                        background: step.primary ? '#F0FDF4' : '#F9FAFB',
+                        border: `1px solid ${step.primary ? '#BBF7D0' : '#F3F4F6'}`,
+                        transition: 'opacity 0.15s',
+                      }}>
+                        <span style={{ fontSize: 18, flexShrink: 0 }}>{step.icon}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: step.primary ? '#065F46' : '#1A1A1A' }}>{step.title}</div>
+                          <div style={{ fontSize: 11, color: '#6B7280', lineHeight: 1.3 }}>{step.desc}</div>
+                        </div>
+                        <span style={{ fontSize: 14, color: step.primary ? '#059669' : '#9CA3AF', flexShrink: 0 }}>→</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div style={{
+                background: 'linear-gradient(135deg, #CC1426 0%, #a01020 100%)',
+                borderRadius: 16, padding: 24, color: '#fff', textAlign: 'center',
               }}>
-                Jetzt kostenlos starten →
-              </Link>
-            </div>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>🚀</div>
+                <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 8px' }}>
+                  Karriereanalyse starten
+                </h3>
+                <p style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.5, margin: '0 0 16px' }}>
+                  Entdecke in 12 Kompetenzfeldern, was wirklich in dir steckt.
+                </p>
+                <Link href="/analyse" style={{
+                  display: 'block', padding: '12px', background: '#fff',
+                  color: '#CC1426', borderRadius: 980, textDecoration: 'none',
+                  fontWeight: 700, fontSize: 14,
+                }}>
+                  Jetzt kostenlos starten →
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 
@@ -372,7 +431,7 @@ export default async function CVCheckPage() {
             {[
               { icon: '🎓', title: 'Masterclass', desc: 'Expertenwissen in kompakten E-Learning-Modulen.', link: '/masterclass', cta: 'Module entdecken' },
               { icon: '🤖', title: 'KI-Coach', desc: 'Dein persönlicher Karriere-Assistent – 24/7.', link: '/coach', cta: 'Coach starten' },
-              { icon: '🎯', title: 'Karriereanalyse', desc: '13 Kompetenzfelder – dein persönlicher Score.', link: '/analyse', cta: 'Analyse starten' },
+              { icon: '🎯', title: 'Karriereanalyse', desc: '12 Kompetenzfelder – dein persönlicher Score.', link: '/analyse', cta: hasAnalysis ? 'Ergebnisse ansehen' : 'Analyse starten' },
             ].map((item, i) => (
               <Link key={i} href={item.link} style={{ textDecoration: 'none' }}>
                 <div style={{
