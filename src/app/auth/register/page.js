@@ -70,37 +70,43 @@ export default function RegisterPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--ki-bg)', padding: 24 }}>
+    <>
+      <style>{`
+        @media (max-width: 480px) {
+          .register-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+    <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', background: 'var(--ki-bg)', padding: '32px 16px' }}>
       <div style={{ maxWidth: 480, width: '100%' }}>
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '0.1em', color: 'var(--ki-red)', marginBottom: 12, textTransform: 'uppercase' }}>Karriere-Institut</div>
-          <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.03em' }}>Konto erstellen</h1>
+          <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em' }}>Konto erstellen</h1>
           <p style={{ color: 'var(--ki-text-secondary)', marginTop: 8 }}>Starte jetzt deine Karriereanalyse.</p>
         </div>
 
         <form onSubmit={handleRegister} className="card" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div className="register-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div style={fieldStyle}>
               <label style={labelStyle}>Vorname *</label>
-              <input className="input" value={form.firstName} onChange={e => update('firstName', e.target.value)} required />
+              <input className="input" value={form.firstName} onChange={e => update('firstName', e.target.value)} required autoComplete="given-name" />
             </div>
             <div style={fieldStyle}>
               <label style={labelStyle}>Nachname *</label>
-              <input className="input" value={form.lastName} onChange={e => update('lastName', e.target.value)} required />
+              <input className="input" value={form.lastName} onChange={e => update('lastName', e.target.value)} required autoComplete="family-name" />
             </div>
           </div>
           <div style={fieldStyle}>
             <label style={labelStyle}>E-Mail *</label>
-            <input className="input" type="email" value={form.email} onChange={e => update('email', e.target.value)} required />
+            <input className="input" type="email" value={form.email} onChange={e => update('email', e.target.value)} required autoComplete="email" />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div className="register-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div style={fieldStyle}>
               <label style={labelStyle}>Unternehmen</label>
-              <input className="input" value={form.company} onChange={e => update('company', e.target.value)} />
+              <input className="input" value={form.company} onChange={e => update('company', e.target.value)} autoComplete="organization" />
             </div>
             <div style={fieldStyle}>
               <label style={labelStyle}>Position</label>
-              <input className="input" value={form.position} onChange={e => update('position', e.target.value)} />
+              <input className="input" value={form.position} onChange={e => update('position', e.target.value)} autoComplete="organization-title" />
             </div>
           </div>
           <div style={fieldStyle}>
@@ -129,5 +135,6 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
