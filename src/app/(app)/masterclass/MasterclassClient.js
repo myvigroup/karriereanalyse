@@ -200,9 +200,16 @@ function CourseCard({ course, i, hasAnalyseData }) {
         borderRadius: '12px 12px 0 0',
         background: course.thumbnail_url
           ? `url(${course.thumbnail_url}) center/cover no-repeat`
-          : 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)',
+          : 'linear-gradient(135deg, #CC1426 0%, #8B0D1A 40%, #1a1a1a 100%)',
         flexShrink: 0,
       }}>
+        {/* Subtle pattern overlay for fallback */}
+        {!course.thumbnail_url && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 40%)',
+          }} />
+        )}
         {/* Dark overlay for text readability on image thumbnails */}
         {course.thumbnail_url && (
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)' }} />
@@ -211,11 +218,14 @@ function CourseCard({ course, i, hasAnalyseData }) {
         <div style={{
           position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
         }}>
-          <span style={{ fontSize: 36 }}>{course.icon || '📘'}</span>
+          <span style={{ fontSize: 36, filter: course.thumbnail_url ? 'none' : 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }}>{course.icon || '📘'}</span>
           <div style={{
-            width: 40, height: 40, borderRadius: '50%', background: '#CC1426',
+            width: 40, height: 40, borderRadius: '50%',
+            background: course.thumbnail_url ? '#CC1426' : 'rgba(255,255,255,0.15)',
+            backdropFilter: course.thumbnail_url ? 'none' : 'blur(4px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            boxShadow: '0 2px 12px rgba(204,20,38,0.5)',
+            boxShadow: course.thumbnail_url ? '0 2px 12px rgba(204,20,38,0.5)' : '0 2px 12px rgba(0,0,0,0.2)',
+            border: course.thumbnail_url ? 'none' : '1px solid rgba(255,255,255,0.2)',
           }}>
             <span style={{ fontSize: 14, marginLeft: 3, color: '#fff' }}>▶</span>
           </div>

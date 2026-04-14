@@ -10,6 +10,7 @@ export default function AdminCoursesClient({ courses: initialCourses }) {
   const [editingLesson, setEditingLesson] = useState(null);
   const [lessonForm, setLessonForm] = useState({});
   const [saving, setSaving] = useState(false);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(null);
 
   function toggleCourse(id) {
     setExpandedCourse(expandedCourse === id ? null : id);
@@ -20,6 +21,25 @@ export default function AdminCoursesClient({ courses: initialCourses }) {
     const newVal = !course.is_published;
     await supabase.from('courses').update({ is_published: newVal }).eq('id', course.id);
     setCourses(prev => prev.map(c => c.id === course.id ? { ...c, is_published: newVal } : c));
+  }
+
+  async function handleThumbnailUpload(courseId, file) {
+    if (!file) return;
+    setUploadingThumbnail(courseId);
+    try {
+      const ext = file.name.split('.').pop().toLowerCase();
+      const path = `course-thumbnails/${courseId}.${ext}`;
+      const { error: upErr } = await supabase.storage.from('public-assets').upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from('public-assets').getPublicUrl(path);
+      const publicUrl = urlData?.publicUrl + '?v=' + Date.now();
+      await supabase.from('courses').update({ thumbnail_url: publicUrl }).eq('id', courseId);
+      setCourses(prev => prev.map(c => c.id === courseId ? { ...c, thumbnail_url: publicUrl } : c));
+    } catch (err) {
+      alert('Upload fehlgeschlagen: ' + err.message);
+    } finally {
+      setUploadingThumbnail(null);
+    }
   }
 
   function startEditLesson(lesson) {
@@ -115,6 +135,41 @@ export default function AdminCoursesClient({ courses: initialCourses }) {
                   {course.is_published ? '● Published' : '○ Draft'}
                 </button>
               </div>
+
+              {/* Thumbnail Upload (when expanded) */}
+              {isExpanded && (
+                <div style={{ padding: '16px 24px', borderTop: '1px solid var(--ki-border)', background: 'var(--ki-bg-alt)', display: 'flex', alignItems: 'center', gap: 16 }}>
+                  {course.thumbnail_url ? (
+                    <div style={{ width: 120, height: 68, borderRadius: 8, overflow: 'hidden', flexShrink: 0, border: '1px solid var(--ki-border)' }}>
+                      <img src={course.thumbnail_url} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  ) : (
+                    <div style={{ width: 120, height: 68, borderRadius: 8, background: 'linear-gradient(135deg, #CC1426, #1a1a1a)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
+                      {course.icon || '📘'}
+                    </div>
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-secondary)', display: 'block', marginBottom: 6 }}>
+                      Thumbnail-Bild
+                    </label>
+                    <label style={{
+                      display: 'inline-block', padding: '6px 14px', borderRadius: 8, border: '1px solid var(--ki-border)',
+                      fontSize: 13, fontWeight: 500, cursor: 'pointer', background: '#fff',
+                      color: uploadingThumbnail === course.id ? 'var(--ki-text-tertiary)' : 'var(--ki-text)',
+                    }}>
+                      {uploadingThumbnail === course.id ? 'Hochladen...' : course.thumbnail_url ? 'Bild ersetzen' : 'Bild hochladen'}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        style={{ display: 'none' }}
+                        onChange={(e) => handleThumbnailUpload(course.id, e.target.files?.[0])}
+                        disabled={uploadingThumbnail === course.id}
+                      />
+                    </label>
+                    <span style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginLeft: 8 }}>JPG, PNG oder WebP</span>
+                  </div>
+                </div>
+              )}
 
               {/* Expanded: Modules & Lessons */}
               {isExpanded && (
