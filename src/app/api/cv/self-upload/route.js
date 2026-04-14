@@ -115,7 +115,21 @@ export async function POST(request) {
         // PDF text extraction failed - will send raw to AI below
       }
     } else if (fileType === 'image') {
+      // Extract text from main image
       cvText = await extractTextFromImageAI(buffer, file.name);
+
+      // Check for additional page images (multi-page CV from camera)
+      for (let i = 2; i <= 10; i++) {
+        const pageFile = formData.get(`page_${i}`);
+        if (!pageFile || !(pageFile instanceof File)) break;
+        try {
+          const pageBuffer = Buffer.from(await pageFile.arrayBuffer());
+          const pageText = await extractTextFromImageAI(pageBuffer, pageFile.name);
+          if (pageText) cvText += '\n\n--- Seite ' + i + ' ---\n\n' + pageText;
+        } catch {
+          // Continue with pages we have
+        }
+      }
     }
 
     // KI-Analyse via ai-provider (Claude oder OpenAI, je nach verfügbarem API-Key)

@@ -4,14 +4,17 @@ import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 const ACCEPTED = '.pdf,.docx,.jpg,.jpeg,.png,.heic';
+const IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic'];
 
 export default function CVUploadPage() {
   const router = useRouter();
   const fileInputRef = useRef(null);
+  const addMoreRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(null);
   const [error, setError] = useState(null);
+  const [imagePages, setImagePages] = useState([]); // For multi-image CV
 
   const upload = useCallback(async (file) => {
     setError(null);
@@ -28,7 +31,6 @@ export default function CVUploadPage() {
       if (!res.ok) throw new Error(data.error || 'Upload fehlgeschlagen');
 
       setProgress('KI analysiert deinen Lebenslauf…');
-      // Small delay so user sees the "analyzing" message
       await new Promise(r => setTimeout(r, 800));
 
       router.push('/cv-check');
@@ -39,22 +41,170 @@ export default function CVUploadPage() {
     }
   }, [router]);
 
+  const uploadMultipleImages = useCallback(async () => {
+    if (imagePages.length === 0) return;
+    setError(null);
+    setUploading(true);
+    setProgress(`${imagePages.length} Seiten werden hochgeladen…`);
+
+    // Upload first image as the main file, send all page texts to AI
+    const formData = new FormData();
+    formData.append('file', imagePages[0]);
+    // Append additional pages
+    imagePages.slice(1).forEach((page, i) => {
+      formData.append(`page_${i + 2}`, page);
+    });
+
+    try {
+      const res = await fetch('/api/cv/self-upload', { method: 'POST', body: formData });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Upload fehlgeschlagen');
+
+      setProgress('KI analysiert deinen Lebenslauf…');
+      await new Promise(r => setTimeout(r, 800));
+
+      router.push('/cv-check');
+    } catch (err) {
+      setError(err.message);
+      setUploading(false);
+      setProgress(null);
+    }
+  }, [imagePages, router]);
+
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) upload(file);
+    if (file) {
+      if (IMAGE_TYPES.includes(file.type)) {
+        setImagePages(prev => [...prev, file]);
+      } else {
+        upload(file);
+      }
+    }
   }, [upload]);
 
   const handleSelect = (e) => {
     const file = e.target.files?.[0];
-    if (file) upload(file);
+    if (!file) return;
+    if (IMAGE_TYPES.includes(file.type) && imagePages.length > 0) {
+      // Adding more pages
+      setImagePages(prev => [...prev, file]);
+    } else if (IMAGE_TYPES.includes(file.type)) {
+      // First image — show multi-page option
+      setImagePages([file]);
+    } else {
+      // PDF or DOCX — upload directly
+      upload(file);
+    }
   };
+
+  const handleAddMore = (e) => {
+    const file = e.target.files?.[0];
+    if (file && IMAGE_TYPES.includes(file.type)) {
+      setImagePages(prev => [...prev, file]);
+    }
+  };
+
+  const removePage = (index) => {
+    setImagePages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Multi-image staging view
+  if (imagePages.length > 0 && !uploading) {
+    return (
+      <div className="page-container" style={{ paddingTop: 40, paddingBottom: 64, maxWidth: 640 }}>
+        <a href="/dashboard" style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 24 }}>
+          &larr; Dashboard
+        </a>
+
+        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Seiten deines Lebenslaufs</h1>
+        <p style={{ color: 'var(--ki-text-secondary)', marginBottom: 24, fontSize: 15 }}>
+          {imagePages.length === 1
+            ? 'Hat dein Lebenslauf mehrere Seiten? Dann klicke auf "Seite hinzufügen".'
+            : `${imagePages.length} Seiten bereit — füge weitere hinzu oder starte die Analyse.`
+          }
+        </p>
+
+        {error && (
+          <div style={{
+            background: 'rgba(204,20,38,0.06)', border: '1px solid rgba(204,20,38,0.2)',
+            borderRadius: 12, padding: '12px 16px', fontSize: 14, color: 'var(--ki-red)', marginBottom: 20,
+          }}>
+            {error}
+          </div>
+        )}
+
+        {/* Page thumbnails */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>
+          {imagePages.map((page, i) => (
+            <div key={i} style={{
+              position: 'relative', borderRadius: 12, overflow: 'hidden',
+              border: '1px solid var(--ki-border)', background: 'var(--ki-card)',
+            }}>
+              <img
+                src={URL.createObjectURL(page)}
+                alt={`Seite ${i + 1}`}
+                style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }}
+              />
+              <div style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0,
+                background: 'rgba(0,0,0,0.6)', padding: '6px 10px',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: '#fff' }}>Seite {i + 1}</span>
+                <button
+                  onClick={() => removePage(i)}
+                  style={{ background: 'none', border: 'none', color: '#FF6B6B', cursor: 'pointer', fontSize: 16, padding: 0, lineHeight: 1 }}
+                >
+                  &times;
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {/* Add more button */}
+          <button
+            onClick={() => addMoreRef.current?.click()}
+            style={{
+              border: '2px dashed var(--ki-border)', borderRadius: 12,
+              height: 180, display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 8,
+              cursor: 'pointer', background: 'transparent', color: 'var(--ki-text-secondary)',
+            }}
+          >
+            <span style={{ fontSize: 28 }}>+</span>
+            <span style={{ fontSize: 12, fontWeight: 600 }}>Seite hinzufügen</span>
+          </button>
+          <input ref={addMoreRef} type="file" accept="image/*" capture="environment" onChange={handleAddMore} style={{ display: 'none' }} />
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button
+            onClick={uploadMultipleImages}
+            className="btn btn-primary"
+            style={{ flex: 1, padding: '14px', fontSize: 15, fontWeight: 700 }}
+          >
+            {imagePages.length === 1 ? 'Mit 1 Seite analysieren' : `Alle ${imagePages.length} Seiten analysieren`}
+          </button>
+          <button
+            onClick={() => setImagePages([])}
+            className="btn btn-secondary"
+            style={{ padding: '14px 20px', fontSize: 14 }}
+          >
+            Abbrechen
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-container" style={{ paddingTop: 40, paddingBottom: 64, maxWidth: 640 }}>
       <a href="/dashboard" style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 24 }}>
-        ← Dashboard
+        &larr; Dashboard
       </a>
 
       <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Lebenslauf-Check</h1>
@@ -105,7 +255,7 @@ export default function CVUploadPage() {
               Datei hierhin ziehen oder klicken
             </div>
             <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>
-              PDF, DOCX, JPG, PNG · Max. 10 MB
+              PDF, DOCX, JPG, PNG · Max. 10 MB · Mehrseitige Fotos werden kombiniert
             </div>
           </div>
         )}
