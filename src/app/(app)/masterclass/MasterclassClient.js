@@ -188,12 +188,45 @@ function CourseCard({ course, i, hasAnalyseData }) {
         cursor: 'pointer', animationDelay: `${(i || 0) * 0.05}s`, display: 'flex', flexDirection: 'column',
       }}
     >
-      {course.isTopEmpfehlung ? (
-        <span className="pill pill-red" style={{ position: 'absolute', top: 12, right: 12, fontSize: 11, fontWeight: 700 }}>#1 Empfehlung</span>
-      ) : course.isPrio ? (
-        <span className="pill pill-gold" style={{ position: 'absolute', top: 12, right: 12, fontSize: 11, fontWeight: 700 }}>2x XP</span>
-      ) : null}
-      <div style={{ fontSize: 36, marginBottom: 10 }}>{course.icon || '📘'}</div>
+      {/* Thumbnail area */}
+      <div style={{
+        position: 'relative',
+        width: 'calc(100% + 48px)',
+        marginLeft: -24,
+        marginTop: -24,
+        marginBottom: 16,
+        height: 140,
+        overflow: 'hidden',
+        borderRadius: '12px 12px 0 0',
+        background: course.thumbnail_url
+          ? `url(${course.thumbnail_url}) center/cover no-repeat`
+          : 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)',
+        flexShrink: 0,
+      }}>
+        {/* Dark overlay for text readability on image thumbnails */}
+        {course.thumbnail_url && (
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)' }} />
+        )}
+        {/* Emoji + play button */}
+        <div style={{
+          position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+        }}>
+          <span style={{ fontSize: 36 }}>{course.icon || '📘'}</span>
+          <div style={{
+            width: 40, height: 40, borderRadius: '50%', background: '#CC1426',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            boxShadow: '0 2px 12px rgba(204,20,38,0.5)',
+          }}>
+            <span style={{ fontSize: 14, marginLeft: 3, color: '#fff' }}>▶</span>
+          </div>
+        </div>
+        {/* Pill badge on thumbnail */}
+        {course.isTopEmpfehlung ? (
+          <span className="pill pill-red" style={{ position: 'absolute', top: 10, right: 10, fontSize: 11, fontWeight: 700 }}>#1 Empfehlung</span>
+        ) : course.isPrio ? (
+          <span className="pill pill-gold" style={{ position: 'absolute', top: 10, right: 10, fontSize: 11, fontWeight: 700 }}>2x XP</span>
+        ) : null}
+      </div>
       <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.02em', marginBottom: 4 }}>{course.title}</div>
       {course.description && <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginBottom: 10, lineHeight: 1.5, flex: 1 }}>{course.description}</div>}
       {course.empfehlung && hasAnalyseData && <div style={{ fontSize: 11, color: 'var(--ki-text-secondary)', marginBottom: 8, lineHeight: 1.4, fontStyle: 'italic' }}>{course.empfehlung}</div>}

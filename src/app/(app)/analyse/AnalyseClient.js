@@ -142,9 +142,7 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
 
   // Phase: 1=welcome, 2=questions, 3=results
   const [phase, setPhase] = useState(
-    existingSession?.status === 'completed' ? 3
-      : existingSession?.status === 'in_progress' ? 2
-        : 1
+    existingSession?.status === 'completed' ? 3 : 1
   );
   const [fieldIndex, setFieldIndex] = useState(existingSession?.current_field || 0);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -321,8 +319,9 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
     }
 
     return (
-      <div style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div className="card animate-in" style={{ maxWidth: 520, textAlign: 'center', padding: 48 }}>
+      <div style={{ padding: '24px 0', maxWidth: 720, margin: '0 auto' }}>
+        {/* ── Welcome Card ── */}
+        <div className="card animate-in" style={{ textAlign: 'center', padding: 48, marginBottom: 48 }}>
           <div style={{ fontSize: 56, marginBottom: 16 }}>🧠</div>
           <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 8 }}>
             Dein Karriere-Blutbild
@@ -346,22 +345,52 @@ export default function AnalyseClient({ profile, existingSession, userId }) {
             </div>
           </div>
 
-          <div style={{
-            background: '#F5F5F7', borderRadius: 12, padding: '12px 16px',
-            marginBottom: 28, fontSize: 13, color: '#6B7280', lineHeight: 1.6, textAlign: 'left',
-          }}>
-            {KOMPETENZFELDER.map(f => (
-              <span key={f.id} style={{ marginRight: 8, display: 'inline-block' }}>{f.icon} {f.name}</span>
-            ))}
-          </div>
-
           <button
             className="btn btn-primary"
             onClick={() => { setPhase(2); setShowIntro(true); }}
-            style={{ width: '100%', padding: '14px 24px', fontSize: 16 }}
+            style={{ padding: '14px 36px', fontSize: 16 }}
           >
             Analyse starten →
           </button>
+        </div>
+
+        {/* ── Competency Overview ── */}
+        <div style={{ marginBottom: 48 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 6, textAlign: 'center' }}>
+            Was wird analysiert?
+          </h2>
+          <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', textAlign: 'center', marginBottom: 28 }}>
+            In diesen 12 Kompetenzfeldern erhältst du deinen persönlichen Score
+          </p>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gap: 12,
+          }}>
+            {KOMPETENZFELDER.map((f) => (
+              <div
+                key={f.id}
+                className="card"
+                style={{
+                  padding: '16px 18px',
+                  borderLeft: `3px solid ${f.color}`,
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 12,
+                }}
+              >
+                <div style={{ fontSize: 26, flexShrink: 0, lineHeight: 1 }}>{f.icon}</div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 3, color: 'var(--ki-text)' }}>
+                    {f.name}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--ki-text-secondary)', lineHeight: 1.4 }}>
+                    {f.outcome.headline}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
