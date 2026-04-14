@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
 import { createClient } from '@/lib/supabase/client';
+import { sanitizeFilename } from '@/lib/utils';
 
 const UPLOAD_STEPS = [
   { label: 'Lebenslauf wird hochgeladen…' },
@@ -155,7 +156,8 @@ export default function CVUpload() {
 
     try {
       const docId = crypto.randomUUID();
-      const filePath = `${lead?.id || 'unknown'}/${docId}/${file.name}`;
+      const safeFilename = sanitizeFilename(file.name);
+      const filePath = `${lead?.id || 'unknown'}/${docId}/${safeFilename}`;
 
       // Step 1: Storage-Upload
       const { error: uploadError } = await supabase.storage

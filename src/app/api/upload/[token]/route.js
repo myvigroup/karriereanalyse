@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { runCVAnalysis } from '@/lib/cv-analysis-worker';
 import { NextResponse } from 'next/server';
+import { sanitizeFilename } from '@/lib/utils';
 
 // Längeres Timeout für AI-Analyse
 export const maxDuration = 60;
@@ -63,7 +64,8 @@ export async function POST(request, { params }) {
 
   // Upload in Supabase Storage
   const docId = crypto.randomUUID();
-  const filePath = `${lead.id}/${docId}/${file.name}`;
+  const safeFilename = sanitizeFilename(file.name);
+  const filePath = `${lead.id}/${docId}/${safeFilename}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
   const { error: uploadError } = await admin.storage

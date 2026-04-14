@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { analyzeCVForFair, extractTextFromImageAI } from '@/lib/ai-provider';
+import { sanitizeFilename } from '@/lib/utils';
 
 const ACCEPTED_TYPES = {
   'application/pdf': 'pdf',
@@ -67,7 +68,8 @@ export async function POST(request) {
 
     // File uploaden
     const docId = crypto.randomUUID();
-    const storagePath = `users/${user.id}/${docId}/${file.name}`;
+    const safeFilename = sanitizeFilename(file.name);
+    const storagePath = `users/${user.id}/${docId}/${safeFilename}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
     const { error: uploadError } = await admin.storage
