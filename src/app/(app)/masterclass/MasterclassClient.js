@@ -255,9 +255,29 @@ function CourseCard({ course, i, hasAnalyseData }) {
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function MasterclassClient({ courses, progress, analysisResults, profile }) {
+export default function MasterclassClient({ courses, progress, analysisResults, profile, seminars: seminarsFromDB }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('alle');
+
+  // Use DB seminars if available, fallback to hardcoded
+  const activeSeminars = (seminarsFromDB && seminarsFromDB.length > 0) ? seminarsFromDB : SEMINARE;
+  const [bookingLoading, setBookingLoading] = useState(false);
+
+  async function bookSeminar(e) {
+    e.preventDefault();
+    setBookingLoading(true);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productKey: 'SEMINAR' }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else alert(data.error || 'Checkout fehlgeschlagen');
+    } catch { alert('Fehler beim Checkout'); }
+    finally { setBookingLoading(false); }
+  }
 
   // Build a Set of completed lesson IDs
   const completedSet = useMemo(
@@ -574,7 +594,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
           }}>
             <div style={{ flex: 1, minWidth: 200 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 4 }}>
-                Alle 13 Seminare — mit Mitgliedschaft
+                Alle {activeSeminars.length} Seminare — mit Mitgliedschaft
               </div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>
                 Einzeln ab 99 € · Oder: Unbegrenzter Zugang mit dem Masterclass-Abo
@@ -597,7 +617,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
               <span style={{ fontSize: 14, fontWeight: 700 }}>Termine 2026</span>
               <span style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginLeft: 4 }}>Samstags · 09:30 – 12:00 Uhr · Online via Teams</span>
             </div>
-            {Object.entries(groupByMonth(SEMINARE)).map(([month, sems]) => (
+            {Object.entries(groupByMonth(activeSeminars)).map(([month, sems]) => (
               <div key={month}>
                 <div style={{ padding: '10px 20px 6px', fontSize: 11, fontWeight: 700, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', background: 'var(--ki-bg-alt)', borderBottom: '1px solid var(--ki-border)' }}>
                   {month}
@@ -630,9 +650,9 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                           🔴 Live →
                         </a>
                       ) : (
-                        <a href="/angebote" style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-red)', textDecoration: 'none', flexShrink: 0 }}>
-                          Buchen →
-                        </a>
+                        <button onClick={bookSeminar} disabled={bookingLoading} style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-red)', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
+                          {bookingLoading ? '...' : 'Buchen →'}
+                        </button>
                       )}
                     </div>
                   );
@@ -643,7 +663,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
 
           {/* ── Seminar Cards ── */}
           <div className="grid-2">
-            {SEMINARE.map((seminar, i) => {
+            {activeSeminars.map((seminar, i) => {
               const isLive = isSeminarLive(seminar.next_date);
               const dateStr = seminar.next_date
                 ? new Date(seminar.next_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -678,9 +698,9 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                       </a>
                     ) : (
                       <>
-                        <a href="/angebote" className="btn btn-primary" style={{ fontSize: 13, padding: '9px 18px' }}>
-                          Einzeln buchen · 99 €
-                        </a>
+                        <button onClick={bookSeminar} disabled={bookingLoading} className="btn btn-primary" style={{ fontSize: 13, padding: '9px 18px' }}>
+                          {bookingLoading ? 'Laden...' : 'Einzeln buchen · 99 €'}
+                        </button>
                         <a href="/angebote" className="btn btn-secondary" style={{ fontSize: 13, padding: '9px 18px' }}>
                           Mit Abo →
                         </a>
