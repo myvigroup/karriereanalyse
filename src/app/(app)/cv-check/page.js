@@ -124,6 +124,8 @@ export default async function CVCheckPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
+  const needsPasswordSetup = user.user_metadata?.needs_password_setup === true;
+
   // CV-Dokument laden — versuche zuerst mit is_current, dann ohne
   let doc = null;
   const { data: currentDoc } = await admin
@@ -203,6 +205,38 @@ export default async function CVCheckPage() {
       paddingBottom: 64,
     }}>
       <div className="page-container" style={{ paddingTop: 32, maxWidth: 1100, margin: '0 auto' }}>
+
+        {/* Passwort-Setup Banner */}
+        {needsPasswordSetup && (
+          <div style={{
+            background: 'linear-gradient(135deg, #FFF7ED, #FEF3C7)',
+            border: '1px solid #FCD34D',
+            borderRadius: 16, padding: '16px 20px',
+            marginBottom: 20,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            gap: 16, flexWrap: 'wrap',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 24 }}>🔑</span>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#92400E' }}>Eigenes Passwort setzen</div>
+                <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.4 }}>
+                  Du hast ein temporäres Passwort. Bitte ändere es jetzt, um deinen Account zu sichern.
+                </div>
+              </div>
+            </div>
+            <Link
+              href="/auth/set-password?returnTo=/cv-check"
+              style={{
+                padding: '10px 18px', background: '#D97706', color: '#fff',
+                borderRadius: 980, textDecoration: 'none', fontWeight: 600, fontSize: 13,
+                whiteSpace: 'nowrap', flexShrink: 0,
+              }}
+            >
+              Passwort ändern →
+            </Link>
+          </div>
+        )}
 
         {/* Header */}
         <div style={{ marginBottom: 24 }}>

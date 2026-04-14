@@ -57,6 +57,7 @@ export async function GET(request) {
       if (profile.onboarding_complete === false) {
         return NextResponse.redirect(new URL('/onboarding', request.url));
       }
+
     }
   }
 

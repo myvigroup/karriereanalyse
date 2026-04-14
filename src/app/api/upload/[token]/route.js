@@ -1,5 +1,9 @@
 import { createAdminClient } from '@/lib/supabase/admin';
+import { runCVAnalysis } from '@/lib/cv-analysis-worker';
 import { NextResponse } from 'next/server';
+
+// Längeres Timeout für AI-Analyse
+export const maxDuration = 60;
 
 const ACCEPTED_TYPES = {
   'application/pdf': 'pdf',
@@ -14,10 +18,10 @@ export async function POST(request, { params }) {
   const { token } = params;
   const admin = createAdminClient();
 
-  // Token validieren (magic_token ist die Produktions-Spalte)
+  // Token validieren
   const { data: lead, error: leadError } = await admin
     .from('fair_leads')
-    .select('id, email, fair_id, advisor_user_id, magic_token_expires_at')
+    .select('id, email, fair_id, advisor_user_id, magic_token_expires_at, target_position')
     .eq('magic_token', token)
     .maybeSingle();
 
@@ -34,7 +38,7 @@ export async function POST(request, { params }) {
   const { count } = await admin
     .from('cv_documents')
     .select('*', { count: 'exact', head: true })
-    .eq('fair_lead_id', lead.id);
+    .eq('lead_id', lead.id);
 
   if (count >= 3) {
     return NextResponse.json({ error: 'Maximale Anzahl an Uploads erreicht' }, { status: 429 });
@@ -71,14 +75,14 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: 'Upload fehlgeschlagen' }, { status: 500 });
   }
 
-  // DB-Eintrag erstellen
-  const { error: dbError } = await admin.from('cv_documents').insert({
+  // DB-Eintrag erstellen (mit ID zurückgeben)
+  const { data: docRecord, error: dbError } = await admin.from('cv_documents').insert({
     lead_id: lead.id,
     storage_path: filePath,
     file_name: file.name,
     file_type: fileType,
     file_size_bytes: file.size,
-  });
+  }).select('id').single();
 
   if (dbError) {
     console.error('DB insert error:', dbError);
@@ -91,12 +95,31 @@ export async function POST(request, { params }) {
     updated_at: new Date().toISOString(),
   }).eq('id', lead.id);
 
-  // Funnel-Event (Fehler ignorieren)
+  // Feedback-Eintrag erstellen
+  const { data: feedbackRecord } = await admin.from('cv_feedback').insert({
+    cv_document_id: docRecord.id,
+    fair_lead_id: lead.id,
+    status: 'draft',
+  }).select('id').single();
+
+  // Funnel-Event
   await admin.from('analytics_events').insert({
     event_name: 'cv_uploaded',
     fair_id: lead.fair_id,
     metadata: { lead_id: lead.id, source: 'qr_upload' },
   }).then(() => {}).catch(() => {});
+
+  // KI-Analyse direkt hier starten (synchron, kein separates HTTP-Request nötig)
+  // Fehler werden ignoriert — Upload gilt trotzdem als erfolgreich
+  try {
+    await runCVAnalysis({
+      documentId: docRecord.id,
+      feedbackId: feedbackRecord?.id,
+      targetPosition: lead.target_position || '',
+    });
+  } catch (analysisErr) {
+    console.error('Auto-analysis error (non-fatal):', analysisErr);
+  }
 
   return NextResponse.json({ success: true });
 }

@@ -214,6 +214,14 @@ export async function saveCategoryRating(feedbackId, category, rating) {
   return { success: true };
 }
 
+// Temporäres Passwort generieren (lesbar, mobil-freundlich)
+function generateTempPassword() {
+  const words = ['Karriere', 'Institut', 'Berater', 'Analyse', 'Messe'];
+  const word = words[Math.floor(Math.random() * words.length)];
+  const num = Math.floor(1000 + Math.random() * 9000);
+  return `${word}${num}!`;
+}
+
 // Gespräch abschließen + Magic Link senden
 export async function completeFeedback(leadId) {
   const admin = createAdminClient();
@@ -251,6 +259,21 @@ export async function completeFeedback(leadId) {
     updated_at: new Date().toISOString(),
   }).eq('id', leadId);
 
+  // Temporäres Passwort setzen (damit User sich jederzeit einloggen kann, ohne Passwort-Reset)
+  let tempPassword = null;
+  if (lead.user_id) {
+    tempPassword = generateTempPassword();
+    try {
+      await admin.auth.admin.updateUserById(lead.user_id, {
+        password: tempPassword,
+        user_metadata: { needs_password_setup: true },
+      });
+    } catch (pwErr) {
+      console.error('Temp-Passwort setzen fehlgeschlagen (non-blocking):', pwErr);
+      tempPassword = null;
+    }
+  }
+
   // Magic Link generieren
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de';
   const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
@@ -272,7 +295,7 @@ export async function completeFeedback(leadId) {
   await sendEmail({
     to: lead.email,
     subject: 'Dein Lebenslauf-Check – Ergebnisse ansehen',
-    html: buildCvCheckEmail(leadName, fairName, 'Dein Karriere-Coach', magicLinkUrl),
+    html: buildCvCheckEmail(leadName, fairName, 'Dein Karriere-Coach', magicLinkUrl, lead.email, tempPassword),
   });
 
   // SharePoint-Webhook (Power Automate) — Fehler ignorieren, nicht blockieren
@@ -306,8 +329,21 @@ export async function completeFeedback(leadId) {
   redirect(`/advisor/fair/${lead.fair_id}/lead/${leadId}/done`);
 }
 
-function buildCvCheckEmail(name, fairName, advisorName, magicLinkUrl) {
+function buildCvCheckEmail(name, fairName, advisorName, magicLinkUrl, email, tempPassword) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de';
+  const credentialsBlock = tempPassword ? `
+    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:20px;margin:20px 0">
+      <p style="font-size:13px;font-weight:700;color:#15803D;margin:0 0 10px">🔑 Deine Zugangsdaten – bitte speichern!</p>
+      <table style="font-size:14px;color:#1A1A1A;border-collapse:collapse">
+        <tr><td style="padding:3px 12px 3px 0;color:#6B7280;white-space:nowrap">E-Mail:</td><td style="font-weight:600">${email}</td></tr>
+        <tr><td style="padding:3px 12px 3px 0;color:#6B7280;white-space:nowrap">Passwort:</td><td style="font-weight:600;font-size:16px;letter-spacing:1px">${tempPassword}</td></tr>
+      </table>
+      <p style="font-size:12px;color:#6B7280;margin:10px 0 0;line-height:1.5">
+        Mit diesen Zugangsdaten kannst du dich jederzeit unter <a href="${appUrl}/auth/login" style="color:#CC1426">${appUrl}/auth/login</a> einloggen.<br>
+        Bitte ändere dein Passwort nach dem ersten Login.
+      </p>
+    </div>` : '';
+
   return `<!DOCTYPE html>
 <html lang="de">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -322,8 +358,9 @@ function buildCvCheckEmail(name, fairName, advisorName, magicLinkUrl) {
       <p style="color:#86868b;line-height:1.6">Danke für deinen Besuch bei uns auf der <strong>${fairName}</strong>! ${advisorName} hat deinen Lebenslauf analysiert und dir konkretes Feedback zusammengestellt.</p>
       <p style="color:#86868b;line-height:1.6">Klicke hier, um deine persönlichen Ergebnisse zu sehen:</p>
       <div style="text-align:center;margin:24px 0">
-        <a href="${magicLinkUrl}" style="display:inline-block;padding:14px 32px;background:#CC1426;color:white;border-radius:980px;text-decoration:none;font-weight:600;font-size:15px">Ergebnisse ansehen</a>
+        <a href="${magicLinkUrl}" style="display:inline-block;padding:14px 32px;background:#CC1426;color:white;border-radius:980px;text-decoration:none;font-weight:600;font-size:15px">Ergebnisse ansehen →</a>
       </div>
+      ${credentialsBlock}
       <p style="color:#86868b;line-height:1.6;font-size:14px"><strong>Tipp:</strong> Nutze das Feedback direkt, um deinen Lebenslauf zu verbessern. Und wenn du tiefer gehen willst – starte deine kostenlose Karriereanalyse.</p>
     </div>
     <div style="text-align:center;margin-top:24px;font-size:12px;color:#86868b">

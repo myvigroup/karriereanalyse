@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
 import FollowUpSelect from './FollowUpSelect';
+import RetriggerButton from './RetriggerButton';
 
 const STATUS_LABELS = {
   new: { label: 'Neu', bg: '#F3F4F6', color: '#6B7280' },
@@ -98,6 +99,21 @@ export default async function LeadsPage({ searchParams }) {
 
   const { data: leads } = await query;
 
+  // Berater-Namen laden (für Admin-Ansicht)
+  let advisorById = {};
+  if (isSuperAdmin && leads && leads.length > 0) {
+    const advisorUserIds = [...new Set(leads.map(l => l.advisor_user_id).filter(Boolean))];
+    if (advisorUserIds.length > 0) {
+      const { data: advisorProfiles } = await admin
+        .from('profiles')
+        .select('id, first_name, last_name, name')
+        .in('id', advisorUserIds);
+      (advisorProfiles || []).forEach(p => {
+        advisorById[p.id] = p.first_name || p.name || 'Unbekannt';
+      });
+    }
+  }
+
   // Self-Service Checks laden (QR-Code Scans von Bewerbern ohne Termin)
   let selfChecksQuery = admin
     .from('self_service_checks')
@@ -135,9 +151,12 @@ export default async function LeadsPage({ searchParams }) {
 
   return (
     <div>
-      <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
-        Lebenslauf-Checks
-      </h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 4 }}>
+        <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
+          Lebenslauf-Checks
+        </h1>
+        {isSuperAdmin && <RetriggerButton />}
+      </div>
       <p style={{ color: '#86868b', marginBottom: 32 }}>
         Alle Gespräche und CV-Checks im Überblick.
       </p>
@@ -260,12 +279,15 @@ export default async function LeadsPage({ searchParams }) {
           {/* Tabellen-Header */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '1.4fr 1fr 140px 160px 80px',
+            gridTemplateColumns: isSuperAdmin ? '1.2fr 0.9fr 110px 120px 160px 80px' : '1.4fr 1fr 140px 160px 80px',
             padding: '12px 20px',
             borderBottom: '1px solid #F0EEE9',
             background: '#FAFAF8',
           }}>
-            {['Name & Kontakt', 'Messe', 'Datum', 'Nachfassen', 'Aktion'].map(h => (
+            {(isSuperAdmin
+              ? ['Name & Kontakt', 'Messe', 'Datum', 'Berater', 'Nachfassen', 'Aktion']
+              : ['Name & Kontakt', 'Messe', 'Datum', 'Nachfassen', 'Aktion']
+            ).map(h => (
               <div key={h} style={{ fontSize: 12, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {h}
               </div>
@@ -276,6 +298,7 @@ export default async function LeadsPage({ searchParams }) {
             const statusInfo = STATUS_LABELS[lead.status] || STATUS_LABELS.new;
             const fair = fairById[lead.fair_id];
             const isOpen = ['new', 'analyzing', 'feedback_pending'].includes(lead.status);
+            const advisorName = isSuperAdmin ? (advisorById[lead.advisor_user_id] || '–') : null;
 
             return (
               <div
@@ -283,7 +306,7 @@ export default async function LeadsPage({ searchParams }) {
                 className="lead-row"
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '1.4fr 1fr 140px 160px 80px',
+                  gridTemplateColumns: isSuperAdmin ? '1.2fr 0.9fr 110px 120px 160px 80px' : '1.4fr 1fr 140px 160px 80px',
                   alignItems: 'center',
                   borderBottom: i < leads.length - 1 ? '1px solid #F0EEE9' : 'none',
                   position: 'relative',
@@ -334,6 +357,25 @@ export default async function LeadsPage({ searchParams }) {
                   {formatDate(lead.created_at)}<br />
                   <span style={{ fontSize: 12 }}>{formatTime(lead.created_at)}</span>
                 </div>
+
+                {/* Berater (nur für Admins) */}
+                {isSuperAdmin && (
+                  <div style={{ padding: '14px 8px 14px 0', position: 'relative', zIndex: 1 }}>
+                    <span style={{
+                      fontSize: 12, fontWeight: 600,
+                      color: '#1A1A1A',
+                      background: '#F5F5F7',
+                      padding: '3px 8px', borderRadius: 6,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: 'inline-block',
+                      maxWidth: '100%',
+                    }}>
+                      {advisorName}
+                    </span>
+                  </div>
+                )}
 
                 {/* Follow-up Status */}
                 <div style={{ padding: '14px 0', position: 'relative', zIndex: 1 }}>

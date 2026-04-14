@@ -41,10 +41,19 @@ export default function SetPasswordPage() {
     // or SIGNED_IN when the session is newly established — covers both
     // cases: detectSessionInUrl auto-processing and manual setSession()
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
         resolved = true;
         clearTimeout(errorTimeout);
-        window.history.replaceState(null, '', window.location.pathname);
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        setSessionReady(true);
+      }
+    });
+
+    // Direkt prüfen ob bereits eine Session existiert (z.B. nach Magic Link Login)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        resolved = true;
+        clearTimeout(errorTimeout);
         setSessionReady(true);
       }
     });
@@ -112,7 +121,10 @@ export default function SetPasswordPage() {
       return;
     }
 
-    window.location.href = '/dashboard';
+    // Nach Passwort setzen: CV-Check User → zurück zu /cv-check, andere → /dashboard
+    const params = new URLSearchParams(window.location.search);
+    const returnTo = params.get('returnTo') || '/dashboard';
+    window.location.href = returnTo;
   }
 
   return (
