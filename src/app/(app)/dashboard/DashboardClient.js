@@ -174,8 +174,17 @@ function WebinarBanner() {
         <div style={{ width: 1, height: 40, background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
 
         <div style={{ flex: 1, position: 'relative' }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 3 }}>
-            Karriere statt Zufall
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>
+              Karriere statt Zufall
+            </span>
+            <span style={{
+              fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 980,
+              background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)',
+              border: '1px solid rgba(255,255,255,0.2)', textTransform: 'uppercase', letterSpacing: '0.05em',
+            }}>
+              Webinar
+            </span>
           </div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.4 }}>
             Dein smarter Weg ins Berufsleben mit Perspektive &amp; Top-Gehalt
