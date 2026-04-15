@@ -349,6 +349,14 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
               </div>
               <span style={{ color: 'var(--ki-red)', fontWeight: 600 }}>→</span>
             </a>
+            <a href={(() => { const u = new URLSearchParams(); if (userEmail) u.set('email', userEmail); const n = (profile?.name || profile?.first_name || '').split(' ')[0]; if (n) u.set('firstname', n); const b = 'https://daskarriereinstitut.webinargeek.com/karriere-statt-zufall-die-5-schritte-zu-deinem-erfolgreichen-berufseinstieg-traumgehalt'; return u.toString() ? `${b}?${u}` : b; })()} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 'var(--r-md)', background: 'rgba(204,20,38,0.04)', textDecoration: 'none', color: 'inherit', border: '1px solid rgba(204,20,38,0.1)' }}>
+              <span style={{ fontSize: 18 }}>🎬</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>Kostenloses Webinar anmelden</div>
+                <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>Karriere statt Zufall · Täglich 10:00 & 17:30</div>
+              </div>
+              <span style={{ color: 'var(--ki-red)', fontWeight: 600 }}>→</span>
+            </a>
             {activeApps > 0 && (
               <a href="/applications" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 'var(--r-md)', background: 'var(--ki-bg-alt)', textDecoration: 'none', color: 'inherit' }}>
                 <span style={{ fontSize: 18 }}>✉</span>
