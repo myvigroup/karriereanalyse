@@ -105,7 +105,7 @@ function MesseAngebotBlock({ fairLead, profile }) {
 }
 
 // ─── Webinar Banner mit Countdown ───────────────────────────────────────────
-function WebinarBanner() {
+function WebinarBanner({ userEmail, userName }) {
   const [countdown, setCountdown] = useState('');
   const [isLive, setIsLive] = useState(false);
 
@@ -141,7 +141,11 @@ function WebinarBanner() {
     return () => clearInterval(timer);
   }, []);
 
-  const webinarUrl = 'https://daskarriereinstitut.webinargeek.com/karriere-statt-zufall-die-5-schritte-zu-deinem-erfolgreichen-berufseinstieg-traumgehalt';
+  const baseUrl = 'https://daskarriereinstitut.webinargeek.com/karriere-statt-zufall-die-5-schritte-zu-deinem-erfolgreichen-berufseinstieg-traumgehalt';
+  const prefill = new URLSearchParams();
+  if (userEmail) prefill.set('email', userEmail);
+  if (userName) prefill.set('firstname', userName.split(' ')[0]);
+  const webinarUrl = prefill.toString() ? `${baseUrl}?${prefill.toString()}` : baseUrl;
 
   return (
     <a href={webinarUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', marginBottom: 24 }}>
@@ -205,7 +209,7 @@ function WebinarBanner() {
 }
 
 // ─── Main Dashboard ──────────────────────────────────────────────────────────
-export default function DashboardClient({ profile, analysisSession, analysisResults, progress, courses, applications, cvFeedback, hasCvDoc, fairLead }) {
+export default function DashboardClient({ profile, analysisSession, analysisResults, progress, courses, applications, cvFeedback, hasCvDoc, fairLead, userEmail }) {
   const hasAnalysis = !!analysisSession;
   const pers = useMemo(() => berechnePersonalisierung(analysisResults, profile?.phase), [analysisResults, profile?.phase]);
   const activeApps = (applications || []).filter(a => !['rejected', 'accepted'].includes(a.status)).length;
@@ -222,7 +226,7 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
       </div>
 
       {/* Webinar Banner mit Countdown */}
-      <WebinarBanner />
+      <WebinarBanner userEmail={userEmail} userName={profile?.name || profile?.first_name || ''} />
 
       {/* CV-Check Upload CTA (kein CV vorhanden) */}
       {!hasCvDoc && (
@@ -317,6 +321,34 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
                 </div>
               </a>
             ))}
+            {!hasCvDoc && (
+              <a href="/cv-check/upload" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 'var(--r-md)', background: 'var(--ki-bg-alt)', textDecoration: 'none', color: 'inherit' }}>
+                <span style={{ fontSize: 18 }}>📋</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>Lebenslauf hochladen</div>
+                  <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>KI-Feedback in 30 Sek.</div>
+                </div>
+                <span style={{ color: 'var(--ki-red)', fontWeight: 600 }}>→</span>
+              </a>
+            )}
+            {hasCvDoc && (
+              <a href="/cv-check" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 'var(--r-md)', background: 'var(--ki-bg-alt)', textDecoration: 'none', color: 'inherit' }}>
+                <span style={{ fontSize: 18 }}>📋</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>CV-Feedback ansehen</div>
+                  <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>{cvFeedback?.overall_rating ? `${cvFeedback.overall_rating}/5 Sterne` : 'Ergebnis ansehen'}</div>
+                </div>
+                <span style={{ color: 'var(--ki-red)', fontWeight: 600 }}>→</span>
+              </a>
+            )}
+            <a href="/masterclass" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 'var(--r-md)', background: 'var(--ki-bg-alt)', textDecoration: 'none', color: 'inherit' }}>
+              <span style={{ fontSize: 18 }}>🎓</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>Masterclass & Seminare</div>
+                <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>E-Learnings, Live-Seminare & Workshops</div>
+              </div>
+              <span style={{ color: 'var(--ki-red)', fontWeight: 600 }}>→</span>
+            </a>
             {activeApps > 0 && (
               <a href="/applications" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 'var(--r-md)', background: 'var(--ki-bg-alt)', textDecoration: 'none', color: 'inherit' }}>
                 <span style={{ fontSize: 18 }}>✉</span>
@@ -362,10 +394,41 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
               <a href="/analyse" style={{ fontSize: 12, fontWeight: 600, marginTop: 4, display: 'block' }}>Alle Felder →</a>
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '20px 0' }}>
-              <div style={{ fontSize: 40, marginBottom: 8 }}>◎</div>
-              <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 12 }}>12 Kompetenzfelder analysieren</p>
-              <a href="/analyse" className="btn btn-primary" style={{ fontSize: 13 }}>Analyse starten</a>
+            <div style={{ textAlign: 'center', padding: '12px 0' }}>
+              {/* Radar-Vorschau */}
+              <div style={{
+                position: 'relative', width: 120, height: 120, margin: '0 auto 16px',
+              }}>
+                <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
+                  {/* Hintergrund-Ringe */}
+                  {[40, 30, 20].map(r => (
+                    <circle key={r} cx="50" cy="50" r={r} fill="none" stroke="var(--ki-border)" strokeWidth="0.5" />
+                  ))}
+                  {/* Beispiel-Fläche (animiert) */}
+                  <polygon
+                    points="50,15 78,30 85,60 65,85 35,85 15,60 22,30"
+                    fill="rgba(204,20,38,0.1)" stroke="#CC1426" strokeWidth="1.5"
+                    style={{ opacity: 0.6 }}
+                  />
+                  {/* Punkte */}
+                  {[[50,15],[78,30],[85,60],[65,85],[35,85],[15,60],[22,30]].map(([x,y], i) => (
+                    <circle key={i} cx={x} cy={y} r="2.5" fill="#CC1426" />
+                  ))}
+                </svg>
+                <div style={{
+                  position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 700, color: 'var(--ki-red)',
+                }}>
+                  12 Felder
+                </div>
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ki-text)', marginBottom: 4 }}>
+                Dein Karriere-Blutbild
+              </div>
+              <p style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginBottom: 14, lineHeight: 1.5, padding: '0 8px' }}>
+                Finde heraus wo du stehst — in 12 Kompetenzfeldern. Dauert nur ~10 Minuten.
+              </p>
+              <a href="/analyse" className="btn btn-primary" style={{ fontSize: 13, padding: '10px 24px' }}>Jetzt analysieren →</a>
             </div>
           )}
         </div>

@@ -84,6 +84,7 @@ export default async function DashboardPage() {
       cvFeedback={cvFeedback}
       hasCvDoc={!!cvDoc}
       fairLead={fairLead || null}
+      userEmail={user.email}
     />
   );
 }
