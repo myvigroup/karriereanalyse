@@ -394,42 +394,79 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
               <a href="/analyse" style={{ fontSize: 12, fontWeight: 600, marginTop: 4, display: 'block' }}>Alle Felder →</a>
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '12px 0' }}>
-              {/* Radar-Vorschau */}
+            <a href="/analyse" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
               <div style={{
-                position: 'relative', width: 120, height: 120, margin: '0 auto 16px',
+                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                borderRadius: 'var(--r-md)', padding: '24px 20px', margin: '-24px', marginBottom: 0,
+                textAlign: 'center', position: 'relative', overflow: 'hidden',
               }}>
-                <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
-                  {/* Hintergrund-Ringe */}
-                  {[40, 30, 20].map(r => (
-                    <circle key={r} cx="50" cy="50" r={r} fill="none" stroke="var(--ki-border)" strokeWidth="0.5" />
+                {/* Deko-Elemente */}
+                <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 30% 70%, rgba(204,20,38,0.15) 0%, transparent 50%), radial-gradient(circle at 70% 30%, rgba(255,255,255,0.05) 0%, transparent 40%)' }} />
+
+                {/* Kompetenzfeld-Icons im Hintergrund */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 16, opacity: 0.4, position: 'relative' }}>
+                  {['🛡️', '🎯', '💎', '💬', '🤝', '🎤'].map((icon, i) => (
+                    <span key={i} style={{ fontSize: 16 }}>{icon}</span>
                   ))}
-                  {/* Beispiel-Fläche (animiert) */}
-                  <polygon
-                    points="50,15 78,30 85,60 65,85 35,85 15,60 22,30"
-                    fill="rgba(204,20,38,0.1)" stroke="#CC1426" strokeWidth="1.5"
-                    style={{ opacity: 0.6 }}
-                  />
-                  {/* Punkte */}
-                  {[[50,15],[78,30],[85,60],[65,85],[35,85],[15,60],[22,30]].map(([x,y], i) => (
-                    <circle key={i} cx={x} cy={y} r="2.5" fill="#CC1426" />
+                </div>
+
+                {/* Radar SVG */}
+                <div style={{ position: 'relative', width: 140, height: 140, margin: '0 auto 16px' }}>
+                  <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
+                    {[40, 30, 20, 10].map(r => (
+                      <circle key={r} cx="50" cy="50" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+                    ))}
+                    {/* 12 Achsen */}
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const angle = (i * 30 - 90) * Math.PI / 180;
+                      return <line key={i} x1="50" y1="50" x2={50 + 40 * Math.cos(angle)} y2={50 + 40 * Math.sin(angle)} stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />;
+                    })}
+                    {/* Beispiel-Polygon */}
+                    <polygon
+                      points={Array.from({ length: 12 }, (_, i) => {
+                        const angle = (i * 30 - 90) * Math.PI / 180;
+                        const r = 15 + Math.random() * 22;
+                        return `${50 + r * Math.cos(angle)},${50 + r * Math.sin(angle)}`;
+                      }).join(' ')}
+                      fill="rgba(204,20,38,0.25)" stroke="#CC1426" strokeWidth="1.5"
+                    />
+                  </svg>
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{
+                      background: 'rgba(204,20,38,0.9)', borderRadius: '50%', width: 36, height: 36,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, fontWeight: 800, color: '#fff',
+                    }}>
+                      ?
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 6, position: 'relative', letterSpacing: '-0.02em' }}>
+                  Dein Karriere-Blutbild
+                </div>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 0, lineHeight: 1.5, position: 'relative' }}>
+                  12 Kompetenzfelder · ~10 Minuten · Sofort-Ergebnis
+                </p>
+
+                {/* Zweite Icon-Reihe */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 16, opacity: 0.4, position: 'relative' }}>
+                  {['🧘', '🪞', '⚡', '✨', '❤️', '🔥'].map((icon, i) => (
+                    <span key={i} style={{ fontSize: 16 }}>{icon}</span>
                   ))}
-                </svg>
+                </div>
+
+                {/* CTA */}
                 <div style={{
-                  position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 11, fontWeight: 700, color: 'var(--ki-red)',
+                  marginTop: 20, padding: '12px 0', borderTop: '1px solid rgba(255,255,255,0.1)',
+                  fontSize: 14, fontWeight: 700, color: '#fff', position: 'relative',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 }}>
-                  12 Felder
+                  Jetzt analysieren
+                  <span style={{ fontSize: 18 }}>→</span>
                 </div>
               </div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ki-text)', marginBottom: 4 }}>
-                Dein Karriere-Blutbild
-              </div>
-              <p style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginBottom: 14, lineHeight: 1.5, padding: '0 8px' }}>
-                Finde heraus wo du stehst — in 12 Kompetenzfeldern. Dauert nur ~10 Minuten.
-              </p>
-              <a href="/analyse" className="btn btn-primary" style={{ fontSize: 13, padding: '10px 24px' }}>Jetzt analysieren →</a>
-            </div>
+            </a>
           )}
         </div>
       </div>
