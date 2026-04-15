@@ -52,11 +52,17 @@ export default async function MasterclassPage() {
     .eq('is_active', true)
     .order('sort_order');
 
+  const { data: seminarRegistrations } = await supabase
+    .from('webinar_registrations')
+    .select('seminar_id')
+    .eq('user_id', user.id);
+
   return <MasterclassClient
     courses={courses || []}
     progress={progress || []}
     analysisResults={formattedResults}
     profile={profile}
     seminars={seminars || []}
+    seminarRegistrations={seminarRegistrations || []}
   />;
 }

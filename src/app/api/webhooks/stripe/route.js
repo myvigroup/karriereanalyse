@@ -1,7 +1,9 @@
 import { stripe } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-import { registerForWebinar } from '@/lib/webinargeek';
+import { sendEmail } from '@/lib/email';
+
+const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'info@daskarriereinstitut.de';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -85,40 +87,55 @@ export async function POST(req) {
           type: 'achievement',
         });
 
-        // WebinarGeek: Auto-register for seminar after purchase
+        // Seminar-Buchung: Registrierung + Admin-Benachrichtigung
         if (productKey === 'SEMINAR' && session.metadata?.seminar_id) {
           try {
             const { data: seminar } = await supabaseAdmin
               .from('seminars')
-              .select('id, title, webinargeek_webinar_id')
+              .select('id, title, next_date')
               .eq('id', session.metadata.seminar_id)
               .single();
 
-            if (seminar?.webinargeek_webinar_id) {
+            if (seminar) {
               const { data: profile } = await supabaseAdmin
                 .from('profiles')
                 .select('first_name, last_name, name, email, phone')
                 .eq('id', userId)
                 .single();
 
-              const result = await registerForWebinar(seminar.webinargeek_webinar_id, {
-                firstName: profile?.first_name || profile?.name?.split(' ')[0] || '',
-                lastName: profile?.last_name || '',
-                email: profile?.email || session.customer_email,
-                phone: profile?.phone || '',
-              });
-
+              // Registrierung speichern
               await supabaseAdmin.from('webinar_registrations').insert({
                 user_id: userId,
                 seminar_id: seminar.id,
-                webinargeek_subscription_id: result.subscription?.id?.toString(),
-                watch_link: result.watchLink,
-                broadcast_id: result.broadcastId?.toString(),
                 stripe_session_id: session.id,
               });
+
+              // Admin per E-Mail benachrichtigen
+              const userName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || profile?.name || 'Unbekannt';
+              const userEmail = profile?.email || session.customer_email;
+              const seminarDate = seminar.next_date
+                ? new Date(seminar.next_date + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                : 'Termin offen';
+
+              await sendEmail({
+                to: ADMIN_EMAIL,
+                subject: `Neue Seminar-Buchung (Stripe): ${seminar.title}`,
+                html: `
+                  <h2>Neue Seminar-Buchung via Stripe</h2>
+                  <table style="border-collapse:collapse;font-family:sans-serif;font-size:14px;">
+                    <tr><td style="padding:6px 16px 6px 0;font-weight:bold;">Seminar:</td><td>${seminar.title}</td></tr>
+                    <tr><td style="padding:6px 16px 6px 0;font-weight:bold;">Termin:</td><td>${seminarDate}</td></tr>
+                    <tr><td style="padding:6px 16px 6px 0;font-weight:bold;">Name:</td><td>${userName}</td></tr>
+                    <tr><td style="padding:6px 16px 6px 0;font-weight:bold;">E-Mail:</td><td><a href="mailto:${userEmail}">${userEmail}</a></td></tr>
+                    <tr><td style="padding:6px 16px 6px 0;font-weight:bold;">Telefon:</td><td>${profile?.phone || '—'}</td></tr>
+                    <tr><td style="padding:6px 16px 6px 0;font-weight:bold;">Betrag:</td><td>${(session.amount_total / 100).toFixed(2)} €</td></tr>
+                  </table>
+                  <p style="margin-top:20px;font-size:13px;color:#666;">Bitte den Webinar-Link manuell an den Teilnehmer senden.</p>
+                `,
+              });
             }
-          } catch (wgErr) {
-            console.error('WebinarGeek auto-registration failed (non-fatal):', wgErr);
+          } catch (err) {
+            console.error('Seminar booking notification failed (non-fatal):', err);
           }
         }
         break;

@@ -255,28 +255,49 @@ function CourseCard({ course, i, hasAnalyseData }) {
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function MasterclassClient({ courses, progress, analysisResults, profile, seminars: seminarsFromDB }) {
+export default function MasterclassClient({ courses, progress, analysisResults, profile, seminars: seminarsFromDB, seminarRegistrations }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('alle');
 
   // Use DB seminars if available, fallback to hardcoded
   const activeSeminars = (seminarsFromDB && seminarsFromDB.length > 0) ? seminarsFromDB : SEMINARE;
-  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(null); // seminarId or null
+  const [bookedSeminars, setBookedSeminars] = useState(
+    () => new Set((seminarRegistrations || []).map(r => r.seminar_id))
+  );
 
-  async function bookSeminar(e) {
-    e.preventDefault();
-    setBookingLoading(true);
+  const isPremium = profile?.subscription_plan && profile.subscription_plan !== 'FREE';
+  const hasSeminarAccess = isPremium || (profile?.purchased_products || []).includes('SEMINAR');
+
+  async function bookSeminar(seminarId) {
+    setBookingLoading(seminarId);
     try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productKey: 'SEMINAR' }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else alert(data.error || 'Checkout fehlgeschlagen');
-    } catch { alert('Fehler beim Checkout'); }
-    finally { setBookingLoading(false); }
+      if (hasSeminarAccess) {
+        // Premium oder SEMINAR gekauft → direkt registrieren
+        const res = await fetch('/api/webinar/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ seminarId }),
+        });
+        const data = await res.json();
+        if (data.success || data.alreadyRegistered) {
+          setBookedSeminars(prev => new Set([...prev, seminarId]));
+        } else {
+          alert(data.error || 'Buchung fehlgeschlagen');
+        }
+      } else {
+        // Free → Stripe Checkout
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productKey: 'SEMINAR', seminarId }),
+        });
+        const data = await res.json();
+        if (data.url) window.location.href = data.url;
+        else alert(data.error || 'Checkout fehlgeschlagen');
+      }
+    } catch { alert('Fehler bei der Buchung'); }
+    finally { setBookingLoading(null); }
   }
 
   // Build a Set of completed lesson IDs
@@ -649,9 +670,11 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                           style={{ fontSize: 12, fontWeight: 700, color: '#16a34a', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
                           🔴 Live →
                         </a>
+                      ) : bookedSeminars.has(s.id) ? (
+                        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-success)', flexShrink: 0 }}>Gebucht ✓</span>
                       ) : (
-                        <button onClick={bookSeminar} disabled={bookingLoading} style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-red)', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
-                          {bookingLoading ? '...' : 'Buchen →'}
+                        <button onClick={() => bookSeminar(s.id)} disabled={bookingLoading === s.id} style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-red)', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
+                          {bookingLoading === s.id ? '...' : hasSeminarAccess ? 'Buchen →' : 'Buchen · 99€'}
                         </button>
                       )}
                     </div>
@@ -698,12 +721,24 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                       </a>
                     ) : (
                       <>
-                        <button onClick={bookSeminar} disabled={bookingLoading} className="btn btn-primary" style={{ fontSize: 13, padding: '9px 18px' }}>
-                          {bookingLoading ? 'Laden...' : 'Einzeln buchen · 99 €'}
-                        </button>
-                        <a href="/angebote" className="btn btn-secondary" style={{ fontSize: 13, padding: '9px 18px' }}>
-                          Mit Abo →
-                        </a>
+                        {bookedSeminars.has(seminar.id) ? (
+                          <span className="btn" style={{ fontSize: 13, padding: '9px 18px', background: '#D1FAE5', color: '#059669', border: '1px solid #BBF7D0', fontWeight: 600 }}>
+                            Gebucht ✓
+                          </span>
+                        ) : hasSeminarAccess ? (
+                          <button onClick={() => bookSeminar(seminar.id)} disabled={bookingLoading === seminar.id} className="btn btn-primary" style={{ fontSize: 13, padding: '9px 18px' }}>
+                            {bookingLoading === seminar.id ? 'Wird gebucht...' : 'Kostenlos buchen'}
+                          </button>
+                        ) : (
+                          <>
+                            <button onClick={() => bookSeminar(seminar.id)} disabled={bookingLoading === seminar.id} className="btn btn-primary" style={{ fontSize: 13, padding: '9px 18px' }}>
+                              {bookingLoading === seminar.id ? 'Laden...' : 'Einzeln buchen · 99 €'}
+                            </button>
+                            <a href="/angebote" className="btn btn-secondary" style={{ fontSize: 13, padding: '9px 18px' }}>
+                              Mit Abo →
+                            </a>
+                          </>
+                        )}
                       </>
                     )}
                   </div>

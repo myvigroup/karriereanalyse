@@ -8,7 +8,7 @@ export async function POST(req) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Nicht eingeloggt' }, { status: 401 });
 
-    const { productKey, interval } = await req.json();
+    const { productKey, interval, seminarId } = await req.json();
     const product = PRODUCTS[productKey];
     if (!product) return NextResponse.json({ error: 'Produkt nicht gefunden' }, { status: 400 });
 
@@ -26,7 +26,7 @@ export async function POST(req) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/angebote`,
       customer_email: user.email,
-      metadata: { user_id: user.id, product_key: productKey },
+      metadata: { user_id: user.id, product_key: productKey, ...(seminarId ? { seminar_id: seminarId } : {}) },
       locale: 'de',
       allow_promotion_codes: true,
     };
