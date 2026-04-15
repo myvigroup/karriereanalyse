@@ -403,12 +403,7 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
                 {/* Deko-Elemente */}
                 <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 30% 70%, rgba(204,20,38,0.15) 0%, transparent 50%), radial-gradient(circle at 70% 30%, rgba(255,255,255,0.05) 0%, transparent 40%)' }} />
 
-                {/* Kompetenzfeld-Icons im Hintergrund */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 16, opacity: 0.4, position: 'relative' }}>
-                  {['🛡️', '🎯', '💎', '💬', '🤝', '🎤'].map((icon, i) => (
-                    <span key={i} style={{ fontSize: 16 }}>{icon}</span>
-                  ))}
-                </div>
+                <div style={{ height: 8 }} />
 
                 {/* Radar SVG */}
                 <div style={{ position: 'relative', width: 140, height: 140, margin: '0 auto 16px' }}>
@@ -449,12 +444,7 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
                   12 Kompetenzfelder · ~10 Minuten · Sofort-Ergebnis
                 </p>
 
-                {/* Zweite Icon-Reihe */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 16, opacity: 0.4, position: 'relative' }}>
-                  {['🧘', '🪞', '⚡', '✨', '❤️', '🔥'].map((icon, i) => (
-                    <span key={i} style={{ fontSize: 16 }}>{icon}</span>
-                  ))}
-                </div>
+                <div style={{ height: 4 }} />
 
                 {/* CTA */}
                 <div style={{
