@@ -1,5 +1,5 @@
 'use client';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { berechnePersonalisierung } from '@/lib/personalization';
 
 function MesseAngebotBlock({ fairLead, profile }) {
@@ -104,24 +104,42 @@ function MesseAngebotBlock({ fairLead, profile }) {
   );
 }
 
-// ─── Gratis-Webinar Banner ──────────────────────────────────────────────────
-function GratisWebinarBanner() {
-  const now = new Date();
-  const hour = now.getHours();
-  const min = now.getMinutes();
+// ─── Webinar Banner mit Countdown ───────────────────────────────────────────
+function WebinarBanner() {
+  const [countdown, setCountdown] = useState('');
+  const [isLive, setIsLive] = useState(false);
 
-  // Nächster Termin berechnen
-  let nextTime, isLiveSoon;
-  if (hour < 10 || (hour === 10 && min < 30)) {
-    nextTime = 'Heute um 10:00 Uhr';
-    isLiveSoon = hour >= 9 && hour < 10;
-  } else if (hour < 17 || (hour === 17 && min < 30)) {
-    nextTime = 'Heute um 17:30 Uhr';
-    isLiveSoon = hour >= 17 && min < 30;
-  } else {
-    nextTime = 'Morgen um 10:00 Uhr';
-    isLiveSoon = false;
-  }
+  useEffect(() => {
+    function getNextWebinar() {
+      const now = new Date();
+      const today10 = new Date(now); today10.setHours(10, 0, 0, 0);
+      const today1730 = new Date(now); today1730.setHours(17, 30, 0, 0);
+      const tomorrow10 = new Date(now); tomorrow10.setDate(tomorrow10.getDate() + 1); tomorrow10.setHours(10, 0, 0, 0);
+
+      if (now < today10) return today10;
+      if (now < today1730) return today1730;
+      return tomorrow10;
+    }
+
+    function update() {
+      const next = getNextWebinar();
+      const diff = next - new Date();
+      if (diff <= 0) { setIsLive(true); setCountdown('Jetzt live!'); return; }
+
+      setIsLive(diff < 5 * 60 * 1000); // < 5 min = live feeling
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+
+      if (h > 0) setCountdown(`${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`);
+      else if (m > 0) setCountdown(`${m}m ${s.toString().padStart(2, '0')}s`);
+      else setCountdown(`${s}s`);
+    }
+
+    update();
+    const timer = setInterval(update, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const webinarUrl = 'https://daskarriereinstitut.webinargeek.com/karriere-statt-zufall-die-5-schritte-zu-deinem-erfolgreichen-berufseinstieg-traumgehalt';
 
@@ -133,42 +151,34 @@ function GratisWebinarBanner() {
         display: 'flex', alignItems: 'center', gap: 20,
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Subtle pattern */}
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%)',
         }} />
 
+        {/* Countdown Timer */}
         <div style={{
-          width: 52, height: 52, borderRadius: 'var(--r-md)', flexShrink: 0,
-          background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24,
-          position: 'relative',
+          minWidth: 72, flexShrink: 0, textAlign: 'center', position: 'relative',
         }}>
-          🎬
+          <div style={{
+            fontSize: isLive ? 14 : 20, fontWeight: 800, color: '#fff',
+            fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em',
+          }}>
+            {countdown}
+          </div>
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', marginTop: 2, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            {isLive ? '🔴 Live' : 'bis zum Start'}
+          </div>
         </div>
 
+        <div style={{ width: 1, height: 40, background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
+
         <div style={{ flex: 1, position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>
-              Gratis-Webinar: Karriere statt Zufall
-            </span>
-            {isLiveSoon && (
-              <span style={{
-                fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 980,
-                background: 'rgba(34,197,94,0.3)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.4)',
-                animation: 'pulse 1.5s ease-in-out infinite',
-              }}>
-                GLEICH LIVE
-              </span>
-            )}
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 3 }}>
+            Karriere statt Zufall
           </div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.4 }}>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.4 }}>
             Dein smarter Weg ins Berufsleben mit Perspektive &amp; Top-Gehalt
-          </div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
-            📅 Täglich um 10:00 &amp; 17:30 Uhr · Kostenlos · {nextTime}
           </div>
         </div>
 
@@ -178,7 +188,7 @@ function GratisWebinarBanner() {
           fontSize: 13, fontWeight: 700, flexShrink: 0,
           position: 'relative',
         }}>
-          Jetzt anmelden →
+          Kostenlos anmelden →
         </div>
       </div>
     </a>
@@ -202,8 +212,8 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
         <h1 className="page-title" style={{ margin: 0 }}>Dashboard</h1>
       </div>
 
-      {/* Gratis-Webinar Banner — immer sichtbar */}
-      <GratisWebinarBanner />
+      {/* Webinar Banner mit Countdown */}
+      <WebinarBanner />
 
       {/* CV-Check Upload CTA (kein CV vorhanden) */}
       {!hasCvDoc && (
