@@ -403,49 +403,41 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
             </div>
           ) : (
             <a href="/analyse" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-              <div style={{
-                background: 'linear-gradient(135deg, #CC1426 0%, #8B0D1A 100%)',
-                borderRadius: 'var(--r-md)', padding: '24px 20px', margin: '-24px', marginBottom: 0,
-                position: 'relative', overflow: 'hidden',
-              }}>
-                <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 90% 10%, rgba(255,255,255,0.12) 0%, transparent 50%)' }} />
+              <div style={{ position: 'relative' }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--ki-text)', marginBottom: 16, letterSpacing: '-0.02em' }}>
+                  Wo stehst du wirklich?
+                </div>
 
-                <div style={{ position: 'relative' }}>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 16, letterSpacing: '-0.02em' }}>
-                    Wo stehst du wirklich?
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-                    {[
-                      ['Erkenne deine Stärken', 'Finde heraus was dich von anderen abhebt'],
-                      ['Entdecke blinde Flecken', 'Sehe was dir für den nächsten Schritt fehlt'],
-                      ['Bekomme deinen Karriereplan', 'Personalisierte Empfehlungen für dich'],
-                    ].map(([title, sub]) => (
-                      <div key={title} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                        <div style={{
-                          width: 20, height: 20, borderRadius: '50%', flexShrink: 0, marginTop: 1,
-                          background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 10, color: '#fff', fontWeight: 700,
-                        }}>&#10003;</div>
-                        <div>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>{title}</div>
-                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', lineHeight: 1.3 }}>{sub}</div>
-                        </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                  {[
+                    ['Erkenne deine Stärken', 'Finde heraus was dich von anderen abhebt'],
+                    ['Entdecke blinde Flecken', 'Sehe was dir für den nächsten Schritt fehlt'],
+                    ['Bekomme deinen Karriereplan', 'Personalisierte Empfehlungen für dich'],
+                  ].map(([title, sub]) => (
+                    <div key={title} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                      <div style={{
+                        width: 20, height: 20, borderRadius: '50%', flexShrink: 0, marginTop: 1,
+                        background: 'rgba(204,20,38,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 10, color: '#CC1426', fontWeight: 700,
+                      }}>&#10003;</div>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ki-text)', lineHeight: 1.3 }}>{title}</div>
+                        <div style={{ fontSize: 11, color: 'var(--ki-text-secondary)', lineHeight: 1.3 }}>{sub}</div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
+                </div>
 
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 14 }}>
-                    12 Kompetenzfelder · ~10 Minuten · Sofort-Ergebnis
-                  </div>
+                <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginBottom: 14 }}>
+                  12 Kompetenzfelder · ~10 Minuten · Sofort-Ergebnis
+                </div>
 
-                  <div style={{
-                    background: '#fff', color: '#CC1426', borderRadius: 'var(--r-md)',
-                    padding: '12px', textAlign: 'center',
-                    fontSize: 14, fontWeight: 700,
-                  }}>
-                    Kostenlos starten →
-                  </div>
+                <div style={{
+                  background: '#CC1426', color: '#fff', borderRadius: 'var(--r-md)',
+                  padding: '12px', textAlign: 'center',
+                  fontSize: 14, fontWeight: 700,
+                }}>
+                  Kostenlos starten →
                 </div>
               </div>
             </a>
