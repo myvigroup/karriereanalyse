@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { deleteAdvisor, assignAdvisorToFair, removeAdvisorFromFair, changeAdvisorRole } from '../../actions';
+// TODO: Implement admin advisor actions
+// // TODO: Implement admin advisor actions
 
 const ROLE_LABELS = {
   advisor: 'Berater',

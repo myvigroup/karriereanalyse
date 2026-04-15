@@ -104,6 +104,87 @@ function MesseAngebotBlock({ fairLead, profile }) {
   );
 }
 
+// ─── Gratis-Webinar Banner ──────────────────────────────────────────────────
+function GratisWebinarBanner() {
+  const now = new Date();
+  const hour = now.getHours();
+  const min = now.getMinutes();
+
+  // Nächster Termin berechnen
+  let nextTime, isLiveSoon;
+  if (hour < 10 || (hour === 10 && min < 30)) {
+    nextTime = 'Heute um 10:00 Uhr';
+    isLiveSoon = hour >= 9 && hour < 10;
+  } else if (hour < 17 || (hour === 17 && min < 30)) {
+    nextTime = 'Heute um 17:30 Uhr';
+    isLiveSoon = hour >= 17 && min < 30;
+  } else {
+    nextTime = 'Morgen um 10:00 Uhr';
+    isLiveSoon = false;
+  }
+
+  const webinarUrl = 'https://daskarriereinstitut.webinargeek.com/karriere-statt-zufall-die-5-schritte-zu-deinem-erfolgreichen-berufseinstieg-traumgehalt';
+
+  return (
+    <a href={webinarUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', marginBottom: 24 }}>
+      <div style={{
+        background: 'linear-gradient(135deg, #CC1426 0%, #8B0D1A 40%, #1a1a1a 100%)',
+        borderRadius: 'var(--r-lg)', padding: '20px 24px',
+        display: 'flex', alignItems: 'center', gap: 20,
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Subtle pattern */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%)',
+        }} />
+
+        <div style={{
+          width: 52, height: 52, borderRadius: 'var(--r-md)', flexShrink: 0,
+          background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24,
+          position: 'relative',
+        }}>
+          🎬
+        </div>
+
+        <div style={{ flex: 1, position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>
+              Gratis-Webinar: Karriere statt Zufall
+            </span>
+            {isLiveSoon && (
+              <span style={{
+                fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 980,
+                background: 'rgba(34,197,94,0.3)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.4)',
+                animation: 'pulse 1.5s ease-in-out infinite',
+              }}>
+                GLEICH LIVE
+              </span>
+            )}
+          </div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.4 }}>
+            Dein smarter Weg ins Berufsleben mit Perspektive &amp; Top-Gehalt
+          </div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
+            📅 Täglich um 10:00 &amp; 17:30 Uhr · Kostenlos · {nextTime}
+          </div>
+        </div>
+
+        <div style={{
+          padding: '10px 18px', borderRadius: 'var(--r-md)',
+          background: '#fff', color: '#CC1426',
+          fontSize: 13, fontWeight: 700, flexShrink: 0,
+          position: 'relative',
+        }}>
+          Jetzt anmelden →
+        </div>
+      </div>
+    </a>
+  );
+}
+
 // ─── Main Dashboard ──────────────────────────────────────────────────────────
 export default function DashboardClient({ profile, analysisSession, analysisResults, progress, courses, applications, cvFeedback, hasCvDoc, fairLead }) {
   const hasAnalysis = !!analysisSession;
@@ -120,6 +201,9 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
         </div>
         <h1 className="page-title" style={{ margin: 0 }}>Dashboard</h1>
       </div>
+
+      {/* Gratis-Webinar Banner — immer sichtbar */}
+      <GratisWebinarBanner />
 
       {/* CV-Check Upload CTA (kein CV vorhanden) */}
       {!hasCvDoc && (
