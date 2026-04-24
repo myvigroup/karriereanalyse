@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Karriere-Institut × Mies van der Rohe Schule — Exklusive Seminare für Techniker</title>
+<meta name="description" content="Exklusive Karriere- und Technikerseminare für Schüler der Mies van der Rohe Schule Aachen. Jetzt kostenfrei Platz sichern — Event am 7. Mai." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+  /* ---------- Reset & Base ---------- */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #FFFFFF;
+    color: #2A2A2A;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; }
+
+  :root {
+    /* Karriere-Institut palette (von daskariereinstitut.de) */
+    --ki-red: #E30613;
+    --ki-red-hover: #C20510;
+    --ki-red-soft: #FCE6E8;
+    --ki-red-line: #F8C8CC;
+    --ki-text: #2A2A2A;
+    --ki-text-muted: #6B6B6B;
+    --ki-bg: #FFFFFF;
+    --ki-bg-soft: #F8F6F3;
+    --ki-bg-grey: #F2EFEA;
+    --ki-border: #E8E4DD;
+    --ki-dark: #1A1A1A;
+    --max: 1240px;
+    --script: "Caveat", "Brush Script MT", cursive;
+  }
+
+  /* ---------- Layout ---------- */
+  .container { max-width: var(--max); margin: 0 auto; padding: 0 32px; }
+  section { padding: 88px 0; }
+  @media (max-width: 720px) {
+    section { padding: 56px 0; }
+    .container { padding: 0 22px; }
+  }
+
+  /* ---------- Typography ---------- */
+  h1, h2, h3, h4 {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 800;
+    color: var(--ki-text);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  h1 { font-size: clamp(34px, 5vw, 56px); font-weight: 800; }
+  h2 { font-size: clamp(28px, 3.8vw, 44px); font-weight: 800; }
+  h3 { font-size: clamp(20px, 2.2vw, 26px); font-weight: 700; }
+
+  .lead {
+    font-size: 17px; line-height: 1.65; color: var(--ki-text-muted);
+    max-width: 560px;
+  }
+
+  .eyebrow {
+    color: var(--ki-red); font-weight: 700; font-size: 13px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 18px; display: inline-block;
+  }
+
+  .script {
+    font-family: var(--script); color: var(--ki-red);
+    font-weight: 700; font-style: italic;
+    line-height: 1;
+  }
+
+  /* ---------- Utility top bar ---------- */
+  .utility-bar {
+    background: var(--ki-red); color: #fff;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.05em;
+  }
+  .utility-row {
+    display: flex; justify-content: flex-end; align-items: center;
+    gap: 24px; padding: 10px 0;
+  }
+  .utility-row a {
+    color: #fff; display: inline-flex; align-items: center; gap: 8px;
+    text-transform: uppercase; transition: opacity .15s ease;
+  }
+  .utility-row a:hover { opacity: 0.85; }
+  .utility-row .icon { width: 16px; height: 16px; }
+  @media (max-width: 640px) {
+    .utility-row { justify-content: center; gap: 16px; padding: 8px 0; }
+    .utility-row .label-only { display: none; }
+  }
+
+  /* ---------- Header ---------- */
+  header.site {
+    background: #fff;
+    border-bottom: 1px solid var(--ki-border);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .header-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 0; gap: 24px;
+  }
+  .brand-row {
+    display: inline-flex; align-items: center; gap: 18px;
+  }
+  .brand-link { display: inline-flex; align-items: center; }
+  .logo-ki {
+    height: 44px; width: auto; display: block;
+  }
+  .logo-mvdr {
+    height: 52px; width: auto; display: block;
+  }
+  .brand-x {
+    color: var(--ki-text-muted); font-weight: 400; font-size: 22px; line-height: 1;
+  }
+  @media (max-width: 720px) {
+    .logo-ki { height: 36px; }
+    .logo-mvdr { height: 42px; }
+    .brand-row { gap: 12px; }
+    .brand-x { font-size: 18px; }
+  }
+  @media (max-width: 480px) {
+    .brand-link.mvdr-link { display: none; }
+    .brand-x { display: none; }
+  }
+
+  nav.main {
+    display: flex; gap: 32px; align-items: center; flex: 1; justify-content: center;
+  }
+  nav.main a {
+    font-weight: 700; font-size: 15px; color: var(--ki-text);
+    transition: color .15s ease;
+  }
+  nav.main a:hover { color: var(--ki-red); }
+  @media (max-width: 980px) { nav.main { display: none; } }
+
+  .header-ctas { display: flex; gap: 12px; }
+  @media (max-width: 720px) { .header-ctas .secondary-cta { display: none; } }
+
+  /* ---------- Buttons (rounded pills, uppercase) ---------- */
+  .btn-pill {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 14px 28px;
+    background: var(--ki-red); color: #fff;
+    border-radius: 999px;
+    font-weight: 700; font-size: 13px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
+    white-space: nowrap;
+  }
+  .btn-pill:hover {
+    background: var(--ki-red-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(227,6,19,0.25);
+  }
+  .btn-pill.lg { padding: 18px 36px; font-size: 14px; }
+  .btn-pill.outline {
+    background: transparent; color: var(--ki-red);
+    border: 2px solid var(--ki-red);
+    padding: 12px 26px;
+  }
+  .btn-pill.outline:hover { background: var(--ki-red); color: #fff; }
+  .btn-pill.dark {
+    background: var(--ki-dark); color: #fff;
+  }
+  .btn-pill.dark:hover { background: #000; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    min-height: 640px;
+    display: flex; align-items: center;
+    color: #fff;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(110deg, rgba(20,20,30,0.85) 0%, rgba(20,20,30,0.55) 55%, rgba(20,20,30,0.15) 100%),
+      linear-gradient(135deg, #2a3540 0%, #4a5560 50%, #6b7680 100%);
+    z-index: 0;
+  }
+  /* Subtle photographic texture overlay */
+  .hero-bg::after {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 75% 45%, rgba(255,200,180,0.18), transparent 55%),
+      radial-gradient(ellipse at 25% 80%, rgba(40,50,70,0.4), transparent 60%);
+    mix-blend-mode: overlay;
+  }
+  .hero-photo-note {
+    position: absolute; right: 24px; bottom: 16px;
+    color: rgba(255,255,255,0.5); font-size: 11px;
+    letter-spacing: 0.05em; z-index: 1;
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    padding: 100px 0;
+    width: 100%;
+  }
+  .hero-content .container { max-width: var(--max); }
+  .hero-inner { max-width: 680px; }
+  .hero h1 {
+    color: #fff;
+    font-size: clamp(36px, 5.4vw, 60px);
+    line-height: 1.1;
+    margin-bottom: 28px;
+  }
+  .hero h1 .accent { color: #fff; }
+  .hero p.lead {
+    color: rgba(255,255,255,0.92); max-width: 580px;
+    font-size: 18px; margin-bottom: 36px;
+  }
+  .hero .meta-tag {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(227,6,19,0.95);
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .hero .meta-tag .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #fff;
+  }
+  .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+
+  /* Next-Steps card sitting in the hero */
+  .next-card {
+    margin-top: -56px;
+    position: relative; z-index: 5;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.12);
+    padding: 36px 40px;
+  }
+  .next-card .nc-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+    margin-bottom: 28px; flex-wrap: wrap;
+  }
+  .next-card .nc-title {
+    font-size: 22px; font-weight: 800; color: var(--ki-text);
+    letter-spacing: -0.01em;
+  }
+  .next-card .nc-sub {
+    font-size: 14px; color: var(--ki-text-muted);
+  }
+  .next-card .steps {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  }
+  .next-card .step-item {
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .next-card .step-num {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--ki-red); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 15px; flex-shrink: 0;
+  }
+  .next-card .step-body .h {
+    font-size: 16px; font-weight: 700; color: var(--ki-text); margin-bottom: 4px;
+  }
+  .next-card .step-body .b {
+    font-size: 14px; color: var(--ki-text-muted); line-height: 1.5;
+  }
+  @media (max-width: 880px) {
+    .next-card { padding: 28px 24px; margin-top: -40px; }
+    .next-card .steps { grid-template-columns: 1fr; gap: 20px; }
+  }
+
+  /* ---------- Section heads ---------- */
+  .sec-head { max-width: 760px; margin-bottom: 56px; }
+  .sec-head.center { text-align: center; margin-left: auto; margin-right: auto; }
+  .sec-head h2 .underline {
+    background: linear-gradient(transparent 65%, var(--ki-red-line) 65%);
+    padding: 0 4px;
+  }
+  .sec-head p { color: var(--ki-text-muted); font-size: 17px; margin-top: 14px; }
+
+  /* ---------- Tracks ---------- */
+  .tracks { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  @media (max-width: 800px) { .tracks { grid-template-columns: 1fr; } }
+  .track {
+    background: #fff;
+    border: 1px solid var(--ki-border);
+    border-radius: 14px;
+    padding: 36px;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    position: relative;
+  }
+  .track:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.08);
+    border-color: var(--ki-red);
+  }
+  .track-tag {
+    display: inline-block; padding: 6px 16px;
+    background: var(--ki-red-soft); color: var(--ki-red);
+    border-radius: 999px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .track h3 { margin-bottom: 10px; color: var(--ki-text); }
+  .track .who { color: var(--ki-text-muted); font-size: 15px; margin-bottom: 24px; }
+  .track ul { list-style: none; }
+  .track li {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0; border-top: 1px solid var(--ki-border);
+    font-size: 15px; line-height: 1.55;
+  }
+  .track li:first-child { border-top: none; padding-top: 0; }
+  .track li::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ki-red);
+    margin-top: 7px; flex-shrink: 0;
+  }
+  .track .pick-row { margin-top: 28px; }
+
+  /* ---------- 3-Step Roadmap ---------- */
+  .roadmap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; position: relative; }
+  @media (max-width: 800px) { .roadmap { grid-template-columns: 1fr; } }
+  .step {
+    background: #fff;
+    border: 1px solid var(--ki-border);
+    border-radius: 14px;
+    padding: 32px;
+    position: relative;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .step:hover { border-color: var(--ki-red); transform: translateY(-2px); }
+  .step .num-circle {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--ki-red); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 22px;
+    margin-bottom: 22px;
+  }
+  .step h3 { margin-bottom: 10px; color: var(--ki-text); }
+  .step p { color: var(--ki-text-muted); font-size: 15px; }
+
+  /* ---------- Modules ---------- */
+  .modules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 900px) { .modules { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .modules { grid-template-columns: 1fr; } }
+  .mod {
+    background: #fff;
+    border: 1px solid var(--ki-border);
+    border-radius: 12px;
+    padding: 26px;
+    transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+  }
+  .mod:hover {
+    border-color: var(--ki-red);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.05);
+  }
+  .mod-icon {
+    width: 48px; height: 48px;
+    background: var(--ki-red-soft); color: var(--ki-red);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+    border-radius: 12px;
+  }
+  .mod-icon svg { width: 24px; height: 24px; }
+  .mod h4 { font-size: 17px; font-weight: 700; margin-bottom: 6px; color: var(--ki-text); }
+  .mod p { font-size: 14px; color: var(--ki-text-muted); line-height: 1.55; }
+
+  /* ---------- Stats Strip ---------- */
+  .stats-strip {
+    background: var(--ki-red);
+    color: #fff;
+    padding: 56px 0;
+  }
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
+  }
+  @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; gap: 24px; } }
+  .stat-cell {
+    text-align: center;
+  }
+  .stat-cell .n {
+    font-size: clamp(40px, 5vw, 56px);
+    font-weight: 800;
+    line-height: 1; letter-spacing: -0.02em;
+    color: #fff;
+  }
+  .stat-cell .l {
+    font-weight: 700; margin-top: 12px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    font-size: 13px;
+    color: rgba(255,255,255,0.95);
+  }
+  .stat-cell p { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 6px; }
+
+  /* ---------- Form ---------- */
+  .form-wrap {
+    background: #fff;
+    border: 1px solid var(--ki-border);
+    border-radius: 14px;
+    padding: 48px;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.04);
+  }
+  @media (max-width: 700px) { .form-wrap { padding: 28px 22px; } }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label {
+    font-size: 12px; font-weight: 700; color: var(--ki-text);
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .field label .req { color: var(--ki-red); margin-left: 2px; }
+  .field input, .field textarea, .field select {
+    background: var(--ki-bg-soft);
+    border: 1.5px solid var(--ki-border);
+    border-radius: 999px;
+    padding: 14px 22px;
+    color: var(--ki-text); font-size: 15px;
+    font-family: inherit;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .field textarea {
+    border-radius: 16px; min-height: 120px; resize: vertical;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none; border-color: var(--ki-red); background: #fff;
+  }
+  .form-section-title {
+    font-size: 12px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ki-red); margin: 36px 0 16px;
+  }
+  .form-section-title:first-child { margin-top: 0; }
+
+  /* Pill choices */
+  .pills { display: flex; flex-wrap: wrap; gap: 10px; }
+  .pill {
+    position: relative;
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 11px 20px;
+    background: var(--ki-bg-soft);
+    border: 1.5px solid var(--ki-border);
+    border-radius: 999px;
+    font-size: 14px; color: var(--ki-text);
+    cursor: pointer; user-select: none;
+    transition: all .15s ease;
+    font-weight: 600;
+  }
+  .pill:hover { border-color: var(--ki-text); background: #fff; }
+  .pill input { position: absolute; opacity: 0; pointer-events: none; }
+  .pill:has(input:checked) {
+    border-color: var(--ki-red); background: var(--ki-red); color: #fff;
+  }
+  .pill .check {
+    width: 16px; height: 16px; border: 1.5px solid var(--ki-text-muted);
+    border-radius: 3px; display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .pill input:checked ~ .check {
+    background: #fff; border-color: #fff;
+  }
+  .pill input:checked ~ .check::after {
+    content: "✓"; color: var(--ki-red); font-weight: 800; font-size: 11px; line-height: 1;
+  }
+  .pill.radio .check { border-radius: 50%; }
+  .pill input:checked ~ .check.r-dot {
+    background: #fff; border-color: #fff;
+  }
+  .pill input:checked ~ .check.r-dot::after {
+    content: ""; width: 7px; height: 7px; background: var(--ki-red); border-radius: 50%;
+  }
+
+  .submit-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; margin-top: 40px; flex-wrap: wrap;
+    padding-top: 32px; border-top: 1px solid var(--ki-border);
+  }
+  .submit-row .legal { font-size: 12px; color: var(--ki-text-muted); max-width: 480px; line-height: 1.55; }
+  .submit-row .legal a { color: var(--ki-red); text-decoration: underline; }
+
+  .success {
+    display: none; text-align: center; padding: 60px 20px;
+  }
+  .success.show { display: block; }
+  .success .check-big {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--ki-red-soft); color: var(--ki-red);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 42px; font-weight: 800; margin-bottom: 22px;
+  }
+  .success h3 { margin-bottom: 10px; }
+  .success p { color: var(--ki-text-muted); font-size: 16px; }
+
+  /* ---------- FAQ ---------- */
+  .faq { display: grid; gap: 12px; max-width: 860px; margin: 0 auto; }
+  .faq-item {
+    background: #fff; border: 1px solid var(--ki-border);
+    border-radius: 12px;
+  }
+  .faq-item summary {
+    cursor: pointer; padding: 22px 26px;
+    font-weight: 700; font-size: 16px; color: var(--ki-text);
+    list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::after {
+    content: "+"; font-size: 26px; color: var(--ki-red); font-weight: 400; line-height: 1;
+    transition: transform .2s ease;
+  }
+  .faq-item[open] summary::after { transform: rotate(45deg); }
+  .faq-item .faq-body {
+    padding: 0 26px 22px; color: var(--ki-text-muted); font-size: 15px; line-height: 1.7;
+  }
+
+  /* ---------- Footer ---------- */
+  footer.site {
+    background: var(--ki-dark); color: rgba(255,255,255,0.75);
+    padding: 56px 0 36px; font-size: 14px;
+  }
+  footer.site .footer-grid {
+    display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px;
+    padding-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  @media (max-width: 720px) { footer.site .footer-grid { grid-template-columns: 1fr; } }
+  footer .brand-foot { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+  footer .logo-ki-foot { height: 40px; width: auto; filter: brightness(0) invert(1); }
+  footer .logo-mvdr-foot { height: 44px; width: auto; filter: brightness(0) invert(1); }
+  footer .brand-foot .x-foot { color: rgba(255,255,255,0.4); font-size: 18px; }
+  footer h5 { color: #fff; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+  footer ul { list-style: none; display: grid; gap: 10px; }
+  footer a { color: rgba(255,255,255,0.75); }
+  footer a:hover { color: var(--ki-red); }
+  footer .legal-row {
+    display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    padding-top: 24px; font-size: 12px; color: rgba(255,255,255,0.5);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============== Utility Top Bar ============== -->
+<div class="utility-bar">
+  <div class="container utility-row">
+    <a href="#kontakt"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="label-only">Aachen</span></a>
+    <a href="#" aria-label="Sprache"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span class="label-only">DE</span></a>
+    <a href="#mitglieder"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Zum Mitgliederbereich</a>
+  </div>
+</div>
+
+<!-- ============== Header ============== -->
+<header class="site">
+  <div class="container header-row">
+    <div class="brand-row">
+      <a href="#" class="brand-link" aria-label="Karriere-Institut">
+        <img src="karriere-institut-logo.svg" alt="Karriere-Institut" class="logo-ki" />
+      </a>
+      <span class="brand-x" aria-hidden="true">×</span>
+      <a href="#" class="brand-link mvdr-link" aria-label="Mies van der Rohe Schule Aachen">
+        <img src="mvdr-schule-logo.svg" alt="Mies van der Rohe Schule Aachen" class="logo-mvdr" />
+      </a>
+    </div>
+
+    <nav class="main">
+      <a href="#tracks">Seminare</a>
+      <a href="#themen">Themen</a>
+      <a href="#warum">Warum wir</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+
+    <div class="header-ctas">
+      <a href="#tracks" class="btn-pill outline secondary-cta">Programm ansehen</a>
+      <a href="#anmeldung" class="btn-pill">Jetzt anmelden</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============== Hero ============== -->
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <span class="hero-photo-note">Bildplatzhalter — hier kommt euer Eventfoto/Stage rein</span>
+  <div class="hero-content">
+    <div class="container">
+      <div class="hero-inner">
+        <span class="meta-tag"><span class="dot"></span>Exklusiv für die MvdR Schule Aachen</span>
+        <h1>Vom Techniker zum<br><span class="accent">Karriereprofi.</span></h1>
+        <p class="lead">
+          Bewerbung, Gehaltsverhandlung, Soft Skills und Finanzen — alles, was du für deinen
+          Statuswechsel nach der Technikerschule brauchst. Kompakt, praxisnah, kostenfrei.
+        </p>
+        <div class="hero-ctas">
+          <a href="#anmeldung" class="btn-pill lg">Platz sichern →</a>
+          <a href="#tracks" class="btn-pill lg outline" style="background:rgba(255,255,255,0.08); color:#fff; border-color:rgba(255,255,255,0.6);">Programm entdecken</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== Next Steps Card ============== -->
+<div class="container">
+  <div class="next-card">
+    <div class="nc-head">
+      <div>
+        <div class="nc-title">So geht's weiter</div>
+        <div class="nc-sub">Nach unserer Präsentation an der MvdR Schule — dein Weg ins Karriere-Programm.</div>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="h">Hier eintragen</div>
+          <div class="b">60 Sekunden, kostenfrei. Du wählst direkt deine Wunsch-Themen.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="h">Bestätigung per E-Mail</div>
+          <div class="b">Wir schicken dir alle Infos zum Karriere- und Technikerseminar.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="h">Persönliches Erstgespräch</div>
+          <div class="b">Wir melden uns mit den Seminar-Terminen und klären deine Fragen.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== Tracks ============== -->
+<section id="tracks">
+  <div class="container">
+    <div class="sec-head">
+      <span class="eyebrow">Zwei Wege</span>
+      <h2>Welcher Weg <span class="underline">passt zu dir?</span></h2>
+      <p>Egal, ob du gerade einen neuen Job suchst oder schon festangestellt bist — wir haben das passende Format für deinen nächsten Karriereschritt.</p>
+    </div>
+
+    <div class="tracks">
+      <div class="track">
+        <span class="track-tag">Für Jobsuchende</span>
+        <h3>Karriereseminar</h3>
+        <p class="who">Du suchst aktuell einen neuen Job oder willst nach dem Abschluss durchstarten.</p>
+        <ul>
+          <li>Bewerbungsstrategie &amp; CV-Optimierung speziell für Techniker</li>
+          <li>Wie du dich vom „Handwerker" zum gefragten Spezialisten positionierst</li>
+          <li>Vorstellungsgespräch: Souverän auftreten und überzeugen</li>
+          <li>Grundlagen Finanzen: Steuern, Brutto/Netto, erste Gehaltsschritte</li>
+        </ul>
+        <div class="pick-row">
+          <a href="#anmeldung" class="btn-pill" data-pick="karriere">Diesen Weg wählen</a>
+        </div>
+      </div>
+
+      <div class="track">
+        <span class="track-tag">Für Festangestellte</span>
+        <h3>Technikerseminar</h3>
+        <p class="who">Du bist bereits im Job und willst den Bildungsaufstieg nutzen.</p>
+        <ul>
+          <li>Statuswechsel: Vom Handwerk zu kommunikativen &amp; Software-Aufgaben</li>
+          <li>Gehaltsverhandlung: Was dein neuer Abschluss wirklich wert ist</li>
+          <li>Soft Skills für Führungs- &amp; Kommunikationsrollen</li>
+          <li>Weiche Gehaltsfaktoren: bAV, Dienstwagen, Vermögensaufbau, Steuern</li>
+        </ul>
+        <div class="pick-row">
+          <a href="#anmeldung" class="btn-pill" data-pick="techniker">Diesen Weg wählen</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 3-Step Roadmap ============== -->
+<section style="background: var(--ki-bg-soft);">
+  <div class="container">
+    <div class="sec-head">
+      <span class="eyebrow">Deine Roadmap</span>
+      <h2>Drei Schritte zur <span class="underline">nächsten Stufe.</span></h2>
+      <p>Ein klarer Weg, den du in deinem Tempo gehst — vom Grundlagenseminar bis zum 1:1-Coaching.</p>
+    </div>
+    <div class="roadmap">
+      <div class="step">
+        <div class="num-circle">1</div>
+        <h3>Karriereseminar</h3>
+        <p>Grundlagen zu Bewerbung, Karrierestrategie und ersten Finanzthemen — der perfekte Einstieg.</p>
+      </div>
+      <div class="step">
+        <div class="num-circle">2</div>
+        <h3>Technikerseminar</h3>
+        <p>Statuswechsel meistern, Soft Skills aufbauen und Gehaltsverhandlung lernen.</p>
+      </div>
+      <div class="step">
+        <div class="num-circle">3</div>
+        <h3>1:1 Coaching</h3>
+        <p>Individuelle Karriere- und Finanzberatung — dein persönlicher Sparringpartner.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== Modules ============== -->
+<section id="themen">
+  <div class="container">
+    <div class="sec-head">
+      <span class="eyebrow">Inhalte</span>
+      <h2>Themen, die <span class="underline">wirklich zählen.</span></h2>
+      <p>Praxisnahe Module — abgestimmt auf das, was Techniker in den ersten Berufsjahren wirklich brauchen.</p>
+    </div>
+    <div class="modules">
+      <div class="mod">
+        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <h4>Bewerbung &amp; CV</h4>
+        <p>Lebenslauf, Anschreiben und LinkedIn-Profil, das überzeugt.</p>
+      </div>
+      <div class="mod">
+        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <h4>Gehaltsverhandlung</h4>
+        <p>Wie du selbstbewusst mehr forderst — und auch bekommst.</p>
+      </div>
+      <div class="mod">
+        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.13a4 4 0 0 1 0 7.75M22 21v-2a4 4 0 0 0-3-3.85"/></svg></div>
+        <h4>Soft Skills</h4>
+        <p>Kommunikation, Führung und Konfliktlösung im Tech-Umfeld.</p>
+      </div>
+      <div class="mod">
+        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+        <h4>Finanzplanung</h4>
+        <p>Vom Brutto zum Netto: Wie du mehr aus deinem Gehalt machst.</p>
+      </div>
+      <div class="mod">
+        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <h4>Altersvorsorge</h4>
+        <p>bAV, Riester, ETF — die richtige Mischung für deinen Start.</p>
+      </div>
+      <div class="mod">
+        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg></div>
+        <h4>Statuswechsel</h4>
+        <p>Vom Handwerk zur Spezialisten- oder Führungsrolle wachsen.</p>
+      </div>
+      <div class="mod">
+        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg></div>
+        <h4>Steueroptimierung</h4>
+        <p>Was du absetzen kannst und wie du legal Steuern sparst.</p>
+      </div>
+      <div class="mod">
+        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <h4>Dienstwagen &amp; Co.</h4>
+        <p>Weiche Gehaltsfaktoren clever verhandeln und nutzen.</p>
+      </div>
+      <div class="mod">
+        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5L17 22l-5-3-5 3 1.5-8.5"/></svg></div>
+        <h4>Vermögensaufbau</h4>
+        <p>Langfristig denken: ETF, Immobilie, Liquiditätsplanung.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== Stats Strip (rote Bande) ============== -->
+<section id="warum" class="stats-strip" style="padding: 72px 0;">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-cell">
+        <div class="n">13</div>
+        <div class="l">Kompetenzfelder</div>
+        <p>Karriere · Kommunikation · Finanzen</p>
+      </div>
+      <div class="stat-cell">
+        <div class="n">52</div>
+        <div class="l">Lektionen</div>
+        <p>Praxisnah und jederzeit abrufbar</p>
+      </div>
+      <div class="stat-cell">
+        <div class="n">€40k+</div>
+        <div class="l">Marktwert-Potenzial</div>
+        <p>Möglicher Mehrwert über deine Karriere</p>
+      </div>
+      <div class="stat-cell">
+        <div class="n">1:1</div>
+        <div class="l">Persönliches Coaching</div>
+        <p>Dein Sparringpartner für die nächste Stufe</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== Form ============== -->
+<section id="anmeldung">
+  <div class="container">
+    <div class="sec-head center">
+      <span class="eyebrow">Anmeldung</span>
+      <h2>Sichere dir deinen <span class="underline">kostenfreien Platz.</span></h2>
+      <p>Trag dich in &lt; 60 Sekunden ein. Wir melden uns mit allen Details und stimmen die Inhalte auf eure Wünsche ab.</p>
+    </div>
+
+    <form class="form-wrap" id="signupForm" novalidate>
+      <div id="formContent">
+
+        <div class="form-section-title">Kontaktdaten</div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="firstname">Vorname<span class="req">*</span></label>
+            <input type="text" id="firstname" name="firstname" required autocomplete="given-name" />
+          </div>
+          <div class="field">
+            <label for="lastname">Nachname<span class="req">*</span></label>
+            <input type="text" id="lastname" name="lastname" required autocomplete="family-name" />
+          </div>
+          <div class="field">
+            <label for="email">E-Mail<span class="req">*</span></label>
+            <input type="email" id="email" name="email" required autocomplete="email" />
+          </div>
+          <div class="field">
+            <label for="phone">Mobilnummer (optional)</label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel" />
+          </div>
+        </div>
+
+        <div class="form-section-title">Deine Situation</div>
+        <div class="pills">
+          <label class="pill radio">
+            <input type="radio" name="status" value="jobsuche" required />
+            <span class="check r-dot"></span>
+            <span>Ich suche aktuell einen neuen Job</span>
+          </label>
+          <label class="pill radio">
+            <input type="radio" name="status" value="festangestellt" required />
+            <span class="check r-dot"></span>
+            <span>Ich bin festangestellt &amp; will den nächsten Schritt</span>
+          </label>
+          <label class="pill radio">
+            <input type="radio" name="status" value="unsicher" required />
+            <span class="check r-dot"></span>
+            <span>Noch unsicher</span>
+          </label>
+        </div>
+
+        <div class="form-section-title">Welches Seminar interessiert dich?</div>
+        <div class="pills">
+          <label class="pill"><input type="checkbox" name="seminar" value="karriere" /><span class="check"></span><span>Karriereseminar (Grundlagen)</span></label>
+          <label class="pill"><input type="checkbox" name="seminar" value="techniker" /><span class="check"></span><span>Technikerseminar (Aufstieg)</span></label>
+          <label class="pill"><input type="checkbox" name="seminar" value="masterclass" /><span class="check"></span><span>Masterclass Gehalt</span></label>
+          <label class="pill"><input type="checkbox" name="seminar" value="coaching" /><span class="check"></span><span>1:1 Coaching</span></label>
+        </div>
+
+        <div class="form-section-title">Welche Themen sollen wir vertiefen?</div>
+        <div class="pills">
+          <label class="pill"><input type="checkbox" name="topics" value="bewerbung" /><span class="check"></span><span>Bewerbung &amp; CV</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="vorstellung" /><span class="check"></span><span>Vorstellungsgespräch</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="gehalt" /><span class="check"></span><span>Gehaltsverhandlung</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="softskills" /><span class="check"></span><span>Soft Skills</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="fuehrung" /><span class="check"></span><span>Führung &amp; Kommunikation</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="finanzen" /><span class="check"></span><span>Finanzplanung</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="steuern" /><span class="check"></span><span>Steueroptimierung</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="bav" /><span class="check"></span><span>Betriebliche Altersvorsorge</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="dienstwagen" /><span class="check"></span><span>Dienstwagen &amp; weiche Faktoren</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="vermoegen" /><span class="check"></span><span>Vermögensaufbau / ETF</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="immobilie" /><span class="check"></span><span>Immobilien</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="statuswechsel" /><span class="check"></span><span>Statuswechsel meistern</span></label>
+        </div>
+
+        <div class="form-section-title">Noch etwas, was wir wissen sollten?</div>
+        <div class="field full">
+          <label for="freitext">Eigene Themenwünsche, Fragen oder Hinweise (optional)</label>
+          <textarea id="freitext" name="freitext" placeholder="z. B. „Ich würde gerne wissen, wie ich meine Weiterbildung steuerlich absetzen kann." rows="4"></textarea>
+        </div>
+
+        <div class="submit-row">
+          <p class="legal">
+            Mit Absenden stimmst du zu, dass wir dich per E-Mail/Telefon zu den Seminaren kontaktieren dürfen.
+            Details in unserer <a href="#datenschutz">Datenschutzerklärung</a>.
+          </p>
+          <button type="submit" class="btn-pill lg">Platz sichern →</button>
+        </div>
+      </div>
+
+      <div class="success" id="success">
+        <div class="check-big">✓</div>
+        <h3>Danke! Du bist auf der Liste.</h3>
+        <p>Wir melden uns in den nächsten Tagen mit allen Details zum Event am 7. Mai.</p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ============== FAQ ============== -->
+<section id="faq" style="background: var(--ki-bg-soft);">
+  <div class="container">
+    <div class="sec-head center">
+      <span class="eyebrow">FAQ</span>
+      <h2>Häufige <span class="underline">Fragen.</span></h2>
+    </div>
+    <div class="faq">
+      <details class="faq-item">
+        <summary>Was kostet die Teilnahme?</summary>
+        <div class="faq-body">Für Schüler der Mies van der Rohe Schule ist die Teilnahme am Erst-Seminar kostenfrei. Weiterführende Module (z. B. Masterclass Gehalt, 1:1 Coaching) sind optional und werden separat besprochen.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Muss ich mich für beide Seminare entscheiden?</summary>
+        <div class="faq-body">Nein. Du kannst dich nur für das Karriereseminar, nur für das Technikerseminar oder für beide anmelden — je nachdem, was zu deiner Situation passt. Im Anmeldeformular kannst du beides auswählen.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Wann und wo findet das Event statt?</summary>
+        <div class="faq-body">Das Kennenlern-Event findet am <strong>7. Mai 2026</strong> direkt an der Mies van der Rohe Schule in Aachen statt. Die genaue Uhrzeit und den Raum bekommst du nach deiner Anmeldung per E-Mail.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Was passiert mit meinen Daten?</summary>
+        <div class="faq-body">Deine Daten werden ausschließlich für die Organisation der Seminare genutzt und nicht an Dritte weitergegeben. Du kannst deine Einwilligung jederzeit per E-Mail widerrufen.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Wer steht hinter dem Karriere-Institut?</summary>
+        <div class="faq-body">Wir sind ein Team aus Karriere- und Finanzcoaches, das Fach- und Führungskräfte beim nächsten Schritt begleitet — Analyse, Masterclass und Coaching aus einer Hand. Beim Event lernst du das Team persönlich kennen.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============== Footer ============== -->
+<footer class="site">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="brand-foot">
+          <img src="karriere-institut-logo.svg" alt="Karriere-Institut" class="logo-ki-foot" />
+          <span class="x-foot">×</span>
+          <img src="mvdr-schule-logo.svg" alt="Mies van der Rohe Schule" class="logo-mvdr-foot" />
+        </div>
+        <p style="max-width: 380px; margin-top: 8px;">In Kooperation mit der Mies van der Rohe Schule Aachen — exklusive Karriere- und Finanzseminare für Techniker.</p>
+      </div>
+      <div>
+        <h5>Programm</h5>
+        <ul>
+          <li><a href="#tracks">Karriereseminar</a></li>
+          <li><a href="#tracks">Technikerseminar</a></li>
+          <li><a href="#themen">Themen</a></li>
+          <li><a href="#anmeldung">Anmeldung</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Rechtliches</h5>
+        <ul>
+          <li><a href="#impressum">Impressum</a></li>
+          <li><a href="#datenschutz">Datenschutz</a></li>
+          <li><a href="mailto:digitalmarketing@myvi.de">Kontakt</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal-row">
+      <div>© 2026 Karriere-Institut · Alle Rechte vorbehalten.</div>
+      <div>Designed for Mies van der Rohe Schule Aachen</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ----- Pre-fill seminar choice from track buttons -----
+  document.querySelectorAll('[data-pick]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const which = btn.dataset.pick;
+      setTimeout(() => {
+        document.querySelectorAll('input[name="seminar"]').forEach(cb => {
+          if (cb.value === which) cb.checked = true;
+        });
+      }, 200);
+    });
+  });
+
+  // ----- Form submit -----
+  document.getElementById('signupForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const form = e.target;
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    // TODO: POST to backend / Patrick's lead inbox
+    const data = Object.fromEntries(new FormData(form).entries());
+    console.log('Lead submitted:', data);
+    document.getElementById('formContent').style.display = 'none';
+    document.getElementById('success').classList.add('show');
+    document.getElementById('success').scrollIntoView({behavior:'smooth', block:'center'});
+  });
+</script>
+
+</body>
+</html>
