@@ -235,6 +235,34 @@
   }
   .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
 
+  /* Hero salary callout */
+  .hero-salary {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-left: 4px solid var(--ki-red);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 18px 22px;
+    border-radius: 10px;
+    margin-bottom: 32px;
+    max-width: 580px;
+  }
+  .hero-salary .hsal-line {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px;
+    color: #fff; font-size: 16px; font-weight: 600;
+  }
+  .hero-salary .hsal-pre { color: rgba(255,255,255,0.7); font-weight: 500; font-size: 14px; }
+  .hero-salary .hsal-old {
+    color: rgba(255,255,255,0.6); text-decoration: line-through;
+    font-size: 16px;
+  }
+  .hero-salary .hsal-arrow { color: var(--ki-red); font-weight: 800; font-size: 18px; }
+  .hero-salary .hsal-new { color: #fff; font-weight: 800; font-size: 19px; }
+  .hero-salary .hsal-sub {
+    margin-top: 8px; color: rgba(255,255,255,0.85); font-size: 14px;
+  }
+  .hero-salary .hsal-sub strong { color: #fff; font-weight: 800; }
+
   /* Next-Steps card sitting in the hero */
   .next-card {
     margin-top: -56px;
@@ -289,6 +317,8 @@
 
   /* ---------- Tracks ---------- */
   .tracks { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .tracks.tracks-3 { grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  @media (max-width: 1000px) { .tracks.tracks-3 { grid-template-columns: 1fr; } }
   @media (max-width: 800px) { .tracks { grid-template-columns: 1fr; } }
   .track {
     background: #fff;
@@ -326,7 +356,53 @@
   }
   .track .pick-row { margin-top: 28px; }
 
-  /* ---------- 3-Step Roadmap ---------- */
+  /* ---------- Pilotprojekt Timeline ---------- */
+  .timeline {
+    position: relative; max-width: 860px; margin: 0 auto;
+    padding-left: 24px;
+  }
+  .timeline::before {
+    content: ""; position: absolute; left: 6px; top: 12px; bottom: 12px;
+    width: 2px; background: var(--ki-border);
+  }
+  .tl-item {
+    display: grid; grid-template-columns: 130px 24px 1fr; gap: 16px;
+    align-items: flex-start; padding: 14px 0;
+    margin-left: -24px;
+  }
+  .tl-date {
+    text-align: right; font-weight: 700; color: var(--ki-text);
+    font-size: 14px; letter-spacing: 0.02em; padding-top: 14px;
+  }
+  .tl-fix {
+    display: inline-block; background: var(--ki-red); color: #fff;
+    border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 800;
+    letter-spacing: 0.06em; margin-left: 4px;
+  }
+  .tl-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--ki-border);
+    margin-top: 18px; z-index: 1; position: relative;
+  }
+  .tl-item.tl-now .tl-dot { border-color: var(--ki-red); background: var(--ki-red); box-shadow: 0 0 0 6px rgba(227,6,19,0.15); }
+  .tl-item.tl-done .tl-dot { border-color: var(--ki-text-muted); background: var(--ki-text-muted); }
+  .tl-card {
+    background: #fff; border: 1px solid var(--ki-border);
+    border-radius: 12px; padding: 16px 20px;
+  }
+  .tl-item.tl-now .tl-card { border-color: var(--ki-red); border-width: 2px; }
+  .tl-h { font-weight: 700; color: var(--ki-text); font-size: 16px; margin-bottom: 4px; }
+  .tl-b { color: var(--ki-text-muted); font-size: 14px; line-height: 1.6; }
+  @media (max-width: 700px) {
+    .timeline { padding-left: 8px; }
+    .timeline::before { left: 6px; }
+    .tl-item { grid-template-columns: 24px 1fr; gap: 14px; margin-left: 0; }
+    .tl-date { grid-column: 2 / 3; text-align: left; padding-top: 0; padding-bottom: 4px; font-size: 13px; color: var(--ki-red); }
+    .tl-card { grid-column: 2 / 3; }
+    .tl-dot { grid-row: 1 / 3; margin-top: 6px; }
+  }
+
+  /* ---------- 3-Step Roadmap (legacy, behalten) ---------- */
   .roadmap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; position: relative; }
   @media (max-width: 800px) { .roadmap { grid-template-columns: 1fr; } }
   .step {
@@ -375,6 +451,60 @@
   .mod-icon svg { width: 24px; height: 24px; }
   .mod h4 { font-size: 17px; font-weight: 700; margin-bottom: 6px; color: var(--ki-text); }
   .mod p { font-size: 14px; color: var(--ki-text-muted); line-height: 1.55; }
+
+  /* ---------- Salary compare ---------- */
+  .salary-compare {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 24px; align-items: stretch;
+    max-width: 980px; margin: 0 auto;
+  }
+  .sal-card {
+    background: #fff; border: 1.5px solid var(--ki-border);
+    border-radius: 14px; padding: 28px 28px 24px;
+  }
+  .sal-card.sal-before { border-color: var(--ki-border); }
+  .sal-card.sal-after {
+    border-color: var(--ki-red);
+    background: linear-gradient(180deg, #fff 0%, var(--ki-red-soft) 100%);
+  }
+  .sal-label {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ki-text-muted); margin-bottom: 6px;
+  }
+  .sal-card.sal-after .sal-label { color: var(--ki-red); }
+  .sal-role { font-size: 22px; font-weight: 800; color: var(--ki-text); margin-bottom: 10px; }
+  .sal-amount {
+    font-size: 18px; color: var(--ki-text-muted); margin-bottom: 4px;
+  }
+  .sal-amount strong {
+    font-size: 30px; color: var(--ki-text); font-weight: 800; letter-spacing: -0.01em;
+  }
+  .sal-card.sal-after .sal-amount strong { color: var(--ki-red); }
+  .sal-note { font-size: 13px; color: var(--ki-text-muted); margin-bottom: 18px; }
+  .sal-branches {
+    border-top: 1px solid var(--ki-border); padding-top: 14px;
+    display: grid; gap: 8px;
+  }
+  .sal-branch {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 14px;
+  }
+  .sb-name { color: var(--ki-text); font-weight: 600; }
+  .sb-num { color: var(--ki-red); font-weight: 700; }
+  .sal-arrow {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 800; color: var(--ki-red);
+  }
+  .salary-foot {
+    text-align: center; max-width: 720px; margin: 28px auto 0;
+    color: var(--ki-text-muted); font-size: 15px; line-height: 1.6;
+  }
+  .salary-foot strong { color: var(--ki-text); font-weight: 700; }
+  @media (max-width: 800px) {
+    .salary-compare { grid-template-columns: 1fr; gap: 12px; }
+    .sal-arrow { transform: rotate(90deg); padding: 8px 0; }
+  }
 
   /* ---------- Stats Strip ---------- */
   .stats-strip {
@@ -572,9 +702,9 @@
     </div>
 
     <nav class="main">
-      <a href="#tracks">Seminare</a>
-      <a href="#themen">Themen</a>
-      <a href="#warum">Warum wir</a>
+      <a href="#tracks">3 Steps</a>
+      <a href="#timeline">Pilotprojekt</a>
+      <a href="#gehalt">Gehalt</a>
       <a href="#faq">FAQ</a>
     </nav>
 
@@ -592,15 +722,26 @@
   <div class="hero-content">
     <div class="container">
       <div class="hero-inner">
-        <span class="meta-tag"><span class="dot"></span>Exklusiv für die MvdR Schule Aachen</span>
+        <span class="meta-tag"><span class="dot"></span>Exklusiv für die MvdR Schule Aachen · Pilotprojekt 2026</span>
         <h1>Vom Techniker zum<br><span class="accent">Karriereprofi.</span></h1>
         <p class="lead">
-          Bewerbung, Gehaltsverhandlung, Soft Skills und Finanzen — alles, was du für deinen
-          Statuswechsel nach der Technikerschule brauchst. Kompakt, praxisnah, kostenfrei.
+          Top-Fit durch den Bewerbungsprozess. Souveräner Statuswechsel von Halle ins Büro.
+          Mehr Netto vom Brutto. Kompakt, praxisnah, kostenfrei für MvdR-Schüler.
         </p>
+
+        <div class="hero-salary">
+          <div class="hsal-line">
+            <span class="hsal-pre">Dein Gehaltssprung:</span>
+            <span class="hsal-old">unter 3.500 €</span>
+            <span class="hsal-arrow">→</span>
+            <span class="hsal-new">bis 4.800 € brutto/Monat</span>
+          </div>
+          <div class="hsal-sub">+1.300 € im Monat = bis zu <strong>+15.600 € im Jahr</strong></div>
+        </div>
+
         <div class="hero-ctas">
           <a href="#anmeldung" class="btn-pill lg">Platz sichern →</a>
-          <a href="#tracks" class="btn-pill lg outline" style="background:rgba(255,255,255,0.08); color:#fff; border-color:rgba(255,255,255,0.6);">Programm entdecken</a>
+          <a href="#tracks" class="btn-pill lg outline" style="background:rgba(255,255,255,0.08); color:#fff; border-color:rgba(255,255,255,0.6);">3 Steps ansehen</a>
         </div>
       </div>
     </div>
@@ -642,159 +783,144 @@
   </div>
 </div>
 
-<!-- ============== Tracks ============== -->
+<!-- ============== 3 Steps (Patrick's Konzept) ============== -->
 <section id="tracks">
   <div class="container">
     <div class="sec-head">
-      <span class="eyebrow">Zwei Wege</span>
-      <h2>Welcher Weg <span class="underline">passt zu dir?</span></h2>
-      <p>Egal, ob du gerade einen neuen Job suchst oder schon festangestellt bist — wir haben das passende Format für deinen nächsten Karriereschritt.</p>
+      <span class="eyebrow">Pilotprojekt 2026</span>
+      <h2>Drei Steps zu mehr <span class="underline">Karriere &amp; Gehalt.</span></h2>
+      <p>Vom ersten Vorstellungsgespräch bis zur Steueroptimierung — wir begleiten dich vom Tag deines Abschlusses an.</p>
     </div>
 
-    <div class="tracks">
+    <div class="tracks tracks-3">
       <div class="track">
-        <span class="track-tag">Für Jobsuchende</span>
-        <h3>Karriereseminar</h3>
-        <p class="who">Du suchst aktuell einen neuen Job oder willst nach dem Abschluss durchstarten.</p>
+        <span class="track-tag">Step 1</span>
+        <h3>Karriere-Seminar</h3>
+        <p class="who"><strong>Top-Fit durch den Bewerbungsprozess</strong></p>
         <ul>
-          <li>Bewerbungsstrategie &amp; CV-Optimierung speziell für Techniker</li>
-          <li>Wie du dich vom „Handwerker" zum gefragten Spezialisten positionierst</li>
-          <li>Vorstellungsgespräch: Souverän auftreten und überzeugen</li>
-          <li>Grundlagen Finanzen: Steuern, Brutto/Netto, erste Gehaltsschritte</li>
+          <li>Anschreiben, das geöffnet und gelesen wird</li>
+          <li>Lebenslauf, der speziell für Techniker auffällt</li>
+          <li>Vorstellungsgespräch souverän führen</li>
         </ul>
         <div class="pick-row">
-          <a href="#anmeldung" class="btn-pill" data-pick="karriere">Diesen Weg wählen</a>
+          <a href="#anmeldung" class="btn-pill" data-pick="karriere">Step 1 wählen</a>
         </div>
       </div>
 
       <div class="track">
-        <span class="track-tag">Für Festangestellte</span>
-        <h3>Technikerseminar</h3>
-        <p class="who">Du bist bereits im Job und willst den Bildungsaufstieg nutzen.</p>
+        <span class="track-tag">Step 2</span>
+        <h3>Techniker-Seminar</h3>
+        <p class="who"><strong>Statuswechsel Halle → Büro</strong></p>
         <ul>
-          <li>Statuswechsel: Vom Handwerk zu kommunikativen &amp; Software-Aufgaben</li>
-          <li>Gehaltsverhandlung: Was dein neuer Abschluss wirklich wert ist</li>
-          <li>Soft Skills für Führungs- &amp; Kommunikationsrollen</li>
-          <li>Weiche Gehaltsfaktoren: bAV, Dienstwagen, Vermögensaufbau, Steuern</li>
+          <li>Erfolgreich im neuen Umfeld Karriere machen</li>
+          <li>Kommunikation intern &amp; extern (Fachabteilungen, Ansprechpartner, Kunden)</li>
+          <li>Netzwerken mit externen Partnern</li>
+          <li>Außer-Haus-Arbeiten zuverlässig erledigen</li>
         </ul>
         <div class="pick-row">
-          <a href="#anmeldung" class="btn-pill" data-pick="techniker">Diesen Weg wählen</a>
+          <a href="#anmeldung" class="btn-pill" data-pick="techniker">Step 2 wählen</a>
+        </div>
+      </div>
+
+      <div class="track">
+        <span class="track-tag">Step 3</span>
+        <h3>Persönliche Beratung</h3>
+        <p class="who"><strong>Mehr Netto vom Brutto</strong></p>
+        <ul>
+          <li>Staatliche Förderungen optimal nutzen</li>
+          <li>Altersvorsorge — maximal vom Arbeitgeber unterstützt</li>
+          <li>Steueroptimierter Vermögensaufbau</li>
+        </ul>
+        <div class="pick-row">
+          <a href="#anmeldung" class="btn-pill" data-pick="beratung">Step 3 wählen</a>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============== 3-Step Roadmap ============== -->
-<section style="background: var(--ki-bg-soft);">
+<!-- ============== Pilotprojekt-Timeline ============== -->
+<section id="timeline" style="background: var(--ki-bg-soft);">
   <div class="container">
     <div class="sec-head">
-      <span class="eyebrow">Deine Roadmap</span>
-      <h2>Drei Schritte zur <span class="underline">nächsten Stufe.</span></h2>
-      <p>Ein klarer Weg, den du in deinem Tempo gehst — vom Grundlagenseminar bis zum 1:1-Coaching.</p>
+      <span class="eyebrow">Kooperation 2026</span>
+      <h2>Die <span class="underline">Pilotprojekt-Timeline.</span></h2>
+      <p>Von der Vorstellung in der Schule bis zum spezialisierten Berufseinstiegs-Seminar — vier feste Etappen mit den MvdR-Technikern.</p>
     </div>
-    <div class="roadmap">
-      <div class="step">
-        <div class="num-circle">1</div>
-        <h3>Karriereseminar</h3>
-        <p>Grundlagen zu Bewerbung, Karrierestrategie und ersten Finanzthemen — der perfekte Einstieg.</p>
+
+    <div class="timeline">
+      <div class="tl-item tl-done">
+        <div class="tl-date">18.02.26</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-h">Kennenlernen in Teams</div>
+          <div class="tl-b">Erste Abstimmung zwischen MYVI/Karriere-Institut und der MvdR Schule.</div>
+        </div>
       </div>
-      <div class="step">
-        <div class="num-circle">2</div>
-        <h3>Technikerseminar</h3>
-        <p>Statuswechsel meistern, Soft Skills aufbauen und Gehaltsverhandlung lernen.</p>
+
+      <div class="tl-item tl-now">
+        <div class="tl-date">07.05.26 <span class="tl-fix">FIX</span></div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-h">Vorstellung vor Ort an der MvdR Schule</div>
+          <div class="tl-b">30-Minuten-Vortrag in zwei Slots: <strong>12:00 Uhr Vollzeitschüler</strong> · <strong>17:40 Uhr Abendschüler</strong></div>
+        </div>
       </div>
-      <div class="step">
-        <div class="num-circle">3</div>
-        <h3>1:1 Coaching</h3>
-        <p>Individuelle Karriere- und Finanzberatung — dein persönlicher Sparringpartner.</p>
+
+      <div class="tl-item">
+        <div class="tl-date">Mitte/Ende Mai</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-h">Karriere-Grundlagen-Seminar Online</div>
+          <div class="tl-b">1–2 Online-Sessions exklusiv für angemeldete MvdR-Techniker.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">Juni 2026</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-h">Spezielles Techniker-Berufseinstiegs-Seminar</div>
+          <div class="tl-b">Vor Ort an der MvdR Aachen — exklusiv für die Abschlussklasse 2026.</div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============== Modules ============== -->
-<section id="themen">
+<!-- ============== Gehaltsvergleich ============== -->
+<section id="gehalt">
   <div class="container">
-    <div class="sec-head">
-      <span class="eyebrow">Inhalte</span>
-      <h2>Themen, die <span class="underline">wirklich zählen.</span></h2>
-      <p>Praxisnahe Module — abgestimmt auf das, was Techniker in den ersten Berufsjahren wirklich brauchen.</p>
+    <div class="sec-head center">
+      <span class="eyebrow">Was sich ändert</span>
+      <h2>Gehaltsvergleich: <span class="underline">Vorher vs. Nachher.</span></h2>
+      <p>Mit dem Techniker-Abschluss steigst du nicht nur in der Position auf — auch dein Gehalt macht einen messbaren Sprung.</p>
     </div>
-    <div class="modules">
-      <div class="mod">
-        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-        <h4>Bewerbung &amp; CV</h4>
-        <p>Lebenslauf, Anschreiben und LinkedIn-Profil, das überzeugt.</p>
-      </div>
-      <div class="mod">
-        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-        <h4>Gehaltsverhandlung</h4>
-        <p>Wie du selbstbewusst mehr forderst — und auch bekommst.</p>
-      </div>
-      <div class="mod">
-        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.13a4 4 0 0 1 0 7.75M22 21v-2a4 4 0 0 0-3-3.85"/></svg></div>
-        <h4>Soft Skills</h4>
-        <p>Kommunikation, Führung und Konfliktlösung im Tech-Umfeld.</p>
-      </div>
-      <div class="mod">
-        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
-        <h4>Finanzplanung</h4>
-        <p>Vom Brutto zum Netto: Wie du mehr aus deinem Gehalt machst.</p>
-      </div>
-      <div class="mod">
-        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg></div>
-        <h4>Altersvorsorge</h4>
-        <p>bAV, Riester, ETF — die richtige Mischung für deinen Start.</p>
-      </div>
-      <div class="mod">
-        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg></div>
-        <h4>Statuswechsel</h4>
-        <p>Vom Handwerk zur Spezialisten- oder Führungsrolle wachsen.</p>
-      </div>
-      <div class="mod">
-        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg></div>
-        <h4>Steueroptimierung</h4>
-        <p>Was du absetzen kannst und wie du legal Steuern sparst.</p>
-      </div>
-      <div class="mod">
-        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
-        <h4>Dienstwagen &amp; Co.</h4>
-        <p>Weiche Gehaltsfaktoren clever verhandeln und nutzen.</p>
-      </div>
-      <div class="mod">
-        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5L17 22l-5-3-5 3 1.5-8.5"/></svg></div>
-        <h4>Vermögensaufbau</h4>
-        <p>Langfristig denken: ETF, Immobilie, Liquiditätsplanung.</p>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- ============== Stats Strip (rote Bande) ============== -->
-<section id="warum" class="stats-strip" style="padding: 72px 0;">
-  <div class="container">
-    <div class="stats-grid">
-      <div class="stat-cell">
-        <div class="n">13</div>
-        <div class="l">Kompetenzfelder</div>
-        <p>Karriere · Kommunikation · Finanzen</p>
+    <div class="salary-compare">
+      <div class="sal-card sal-before">
+        <div class="sal-label">Vor dem Techniker</div>
+        <div class="sal-role">Facharbeiter</div>
+        <div class="sal-amount">unter <strong>3.500 €</strong></div>
+        <div class="sal-note">brutto/Monat — typischer Tariflohn</div>
       </div>
-      <div class="stat-cell">
-        <div class="n">52</div>
-        <div class="l">Lektionen</div>
-        <p>Praxisnah und jederzeit abrufbar</p>
+
+      <div class="sal-arrow">→</div>
+
+      <div class="sal-card sal-after">
+        <div class="sal-label">Nach dem Techniker</div>
+        <div class="sal-role">Einstieg</div>
+        <div class="sal-amount"><strong>3.200 – 3.800 €</strong></div>
+        <div class="sal-note">brutto/Monat — branchenübergreifend</div>
+        <div class="sal-branches">
+          <div class="sal-branch"><span class="sb-name">Maschinenbau</span><span class="sb-num">3.900 – 4.700 €</span></div>
+          <div class="sal-branch"><span class="sb-name">Elektrotechnik</span><span class="sb-num">4.100 – 4.800 €</span></div>
+        </div>
       </div>
-      <div class="stat-cell">
-        <div class="n">€40k+</div>
-        <div class="l">Marktwert-Potenzial</div>
-        <p>Möglicher Mehrwert über deine Karriere</p>
-      </div>
-      <div class="stat-cell">
-        <div class="n">1:1</div>
-        <div class="l">Persönliches Coaching</div>
-        <p>Dein Sparringpartner für die nächste Stufe</p>
-      </div>
+    </div>
+
+    <div class="salary-foot">
+      Plus weiche Gehaltsfaktoren: <strong>betriebliche Altersvorsorge</strong>, <strong>Dienstwagen</strong>, <strong>Steueroptimierung</strong> — gemeinsam besprechen wir, wie du das Maximum rausholst.
     </div>
   </div>
 </section>
@@ -826,58 +952,52 @@
             <input type="email" id="email" name="email" required autocomplete="email" />
           </div>
           <div class="field">
-            <label for="phone">Mobilnummer (optional)</label>
-            <input type="tel" id="phone" name="phone" autocomplete="tel" />
+            <label for="phone">Telefonnummer<span class="req">*</span></label>
+            <input type="tel" id="phone" name="phone" required autocomplete="tel" />
           </div>
         </div>
 
-        <div class="form-section-title">Deine Situation</div>
+        <div class="form-section-title">Dein Beruf</div>
         <div class="pills">
-          <label class="pill radio">
-            <input type="radio" name="status" value="jobsuche" required />
-            <span class="check r-dot"></span>
-            <span>Ich suche aktuell einen neuen Job</span>
-          </label>
-          <label class="pill radio">
-            <input type="radio" name="status" value="festangestellt" required />
-            <span class="check r-dot"></span>
-            <span>Ich bin festangestellt &amp; will den nächsten Schritt</span>
-          </label>
-          <label class="pill radio">
-            <input type="radio" name="status" value="unsicher" required />
-            <span class="check r-dot"></span>
-            <span>Noch unsicher</span>
-          </label>
+          <label class="pill"><input type="radio" name="beruf" value="mechatroniker" required /><span class="check r-dot"></span><span>Mechatroniker</span></label>
+          <label class="pill"><input type="radio" name="beruf" value="elektroniker" /><span class="check r-dot"></span><span>Elektroniker</span></label>
+          <label class="pill"><input type="radio" name="beruf" value="industriemechaniker" /><span class="check r-dot"></span><span>Industriemechaniker</span></label>
+          <label class="pill"><input type="radio" name="beruf" value="metallbauer" /><span class="check r-dot"></span><span>Metallbauer</span></label>
+          <label class="pill"><input type="radio" name="beruf" value="anlagenmechaniker" /><span class="check r-dot"></span><span>Anlagenmechaniker</span></label>
+          <label class="pill"><input type="radio" name="beruf" value="ka-techniker" /><span class="check r-dot"></span><span>Kfz-Techniker</span></label>
+          <label class="pill"><input type="radio" name="beruf" value="andere" /><span class="check r-dot"></span><span>Andere · siehe Freitext</span></label>
         </div>
 
-        <div class="form-section-title">Welches Seminar interessiert dich?</div>
+        <div class="form-section-title">Vollzeit- oder Abendschule?</div>
         <div class="pills">
-          <label class="pill"><input type="checkbox" name="seminar" value="karriere" /><span class="check"></span><span>Karriereseminar (Grundlagen)</span></label>
-          <label class="pill"><input type="checkbox" name="seminar" value="techniker" /><span class="check"></span><span>Technikerseminar (Aufstieg)</span></label>
-          <label class="pill"><input type="checkbox" name="seminar" value="masterclass" /><span class="check"></span><span>Masterclass Gehalt</span></label>
-          <label class="pill"><input type="checkbox" name="seminar" value="coaching" /><span class="check"></span><span>1:1 Coaching</span></label>
+          <label class="pill radio"><input type="radio" name="schulform" value="vollzeit" required /><span class="check r-dot"></span><span>Vollzeitschüler (12:00 Uhr Slot)</span></label>
+          <label class="pill radio"><input type="radio" name="schulform" value="abend" /><span class="check r-dot"></span><span>Abendschüler (17:40 Uhr Slot)</span></label>
         </div>
 
-        <div class="form-section-title">Welche Themen sollen wir vertiefen?</div>
+        <div class="form-section-title">Interesse an (mehrere möglich)</div>
         <div class="pills">
-          <label class="pill"><input type="checkbox" name="topics" value="bewerbung" /><span class="check"></span><span>Bewerbung &amp; CV</span></label>
-          <label class="pill"><input type="checkbox" name="topics" value="vorstellung" /><span class="check"></span><span>Vorstellungsgespräch</span></label>
-          <label class="pill"><input type="checkbox" name="topics" value="gehalt" /><span class="check"></span><span>Gehaltsverhandlung</span></label>
-          <label class="pill"><input type="checkbox" name="topics" value="softskills" /><span class="check"></span><span>Soft Skills</span></label>
-          <label class="pill"><input type="checkbox" name="topics" value="fuehrung" /><span class="check"></span><span>Führung &amp; Kommunikation</span></label>
-          <label class="pill"><input type="checkbox" name="topics" value="finanzen" /><span class="check"></span><span>Finanzplanung</span></label>
-          <label class="pill"><input type="checkbox" name="topics" value="steuern" /><span class="check"></span><span>Steueroptimierung</span></label>
-          <label class="pill"><input type="checkbox" name="topics" value="bav" /><span class="check"></span><span>Betriebliche Altersvorsorge</span></label>
-          <label class="pill"><input type="checkbox" name="topics" value="dienstwagen" /><span class="check"></span><span>Dienstwagen &amp; weiche Faktoren</span></label>
-          <label class="pill"><input type="checkbox" name="topics" value="vermoegen" /><span class="check"></span><span>Vermögensaufbau / ETF</span></label>
-          <label class="pill"><input type="checkbox" name="topics" value="immobilie" /><span class="check"></span><span>Immobilien</span></label>
-          <label class="pill"><input type="checkbox" name="topics" value="statuswechsel" /><span class="check"></span><span>Statuswechsel meistern</span></label>
+          <label class="pill"><input type="checkbox" name="seminar" value="karriere" /><span class="check"></span><span>Step 1 · Karriere-Seminar (Bewerbung)</span></label>
+          <label class="pill"><input type="checkbox" name="seminar" value="techniker" /><span class="check"></span><span>Step 2 · Techniker-Seminar (Statuswechsel)</span></label>
+          <label class="pill"><input type="checkbox" name="seminar" value="beratung" /><span class="check"></span><span>Step 3 · Persönliche Beratung (Mehr Netto)</span></label>
         </div>
 
-        <div class="form-section-title">Noch etwas, was wir wissen sollten?</div>
+        <div class="form-section-title">Wünsche fürs Techniker-Seminar (mehrere möglich)</div>
+        <div class="pills">
+          <label class="pill"><input type="checkbox" name="topics" value="gehalt" /><span class="check"></span><span>Strategien für die Gehaltsverhandlung</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="souveraen" /><span class="check"></span><span>Souveränes Auftreten im neuen Umfeld</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="vorstellung" /><span class="check"></span><span>Erstes Vorstellungsgespräch nach dem Techniker</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="fuehrung" /><span class="check"></span><span>Umgang mit Führungskräften &amp; Kunden</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="karrierepfade" /><span class="check"></span><span>Karriere-Pfade (Master, Bachelor Professional)</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="linkedin" /><span class="check"></span><span>Selbstvermarktung auf LinkedIn</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="benefits" /><span class="check"></span><span>Benefits verhandeln (Dienstwagen, Homeoffice, bAV)</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="konflikt" /><span class="check"></span><span>Konfliktmanagement im neuen Team</span></label>
+          <label class="pill"><input type="checkbox" name="topics" value="netzwerk" /><span class="check"></span><span>Netzwerken mit externen Partnern</span></label>
+        </div>
+
+        <div class="form-section-title">Eigene Wünsche &amp; Fragen</div>
         <div class="field full">
-          <label for="freitext">Eigene Themenwünsche, Fragen oder Hinweise (optional)</label>
-          <textarea id="freitext" name="freitext" placeholder="z. B. „Ich würde gerne wissen, wie ich meine Weiterbildung steuerlich absetzen kann." rows="4"></textarea>
+          <label for="freitext">Was sollen wir noch berücksichtigen? (optional)</label>
+          <textarea id="freitext" name="freitext" placeholder="z. B. „Ich möchte wissen, wie ich neben dem Techniker noch berufsbegleitend studieren kann." rows="4"></textarea>
         </div>
 
         <div class="submit-row">
@@ -892,7 +1012,7 @@
       <div class="success" id="success">
         <div class="check-big">✓</div>
         <h3>Danke! Du bist auf der Liste.</h3>
-        <p>Wir melden uns in den nächsten Tagen mit allen Details zum Event am 7. Mai.</p>
+        <p>Wir melden uns in den nächsten Tagen mit allen Details zu deinem gewählten Step.</p>
       </div>
     </form>
   </div>
@@ -908,23 +1028,31 @@
     <div class="faq">
       <details class="faq-item">
         <summary>Was kostet die Teilnahme?</summary>
-        <div class="faq-body">Für Schüler der Mies van der Rohe Schule ist die Teilnahme am Erst-Seminar kostenfrei. Weiterführende Module (z. B. Masterclass Gehalt, 1:1 Coaching) sind optional und werden separat besprochen.</div>
+        <div class="faq-body">Für Schüler der Mies van der Rohe Schule sind alle drei Steps des Pilotprojekts <strong>kostenfrei</strong>. Wir agieren als Partner der Schule, nicht als Verkäufer.</div>
       </details>
       <details class="faq-item">
-        <summary>Muss ich mich für beide Seminare entscheiden?</summary>
-        <div class="faq-body">Nein. Du kannst dich nur für das Karriereseminar, nur für das Technikerseminar oder für beide anmelden — je nachdem, was zu deiner Situation passt. Im Anmeldeformular kannst du beides auswählen.</div>
+        <summary>Muss ich alle drei Steps machen?</summary>
+        <div class="faq-body">Nein. Du wählst beim Anmelden, was dich interessiert — nur das Karriere-Seminar, nur das Techniker-Seminar, nur die persönliche Beratung oder alle drei. Wir richten uns nach deinem Bedarf.</div>
       </details>
       <details class="faq-item">
-        <summary>Wann und wo findet das Event statt?</summary>
-        <div class="faq-body">Das Kennenlern-Event findet am <strong>7. Mai 2026</strong> direkt an der Mies van der Rohe Schule in Aachen statt. Die genaue Uhrzeit und den Raum bekommst du nach deiner Anmeldung per E-Mail.</div>
+        <summary>Wann finden die Seminare statt?</summary>
+        <div class="faq-body">
+          <strong>7. Mai 2026:</strong> Vorstellung vor Ort an der MvdR (12:00 Vollzeit / 17:40 Abend)<br/>
+          <strong>Mitte/Ende Mai:</strong> Karriere-Grundlagen-Seminar online<br/>
+          <strong>Juni 2026:</strong> Spezielles Techniker-Berufseinstiegs-Seminar vor Ort an der MvdR Aachen
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Bietet ihr aktive Jobvermittlung an?</summary>
+        <div class="faq-body">Aktuell vermitteln wir Stellen für Ingenieure und Master-Absolventen. Wenn das Pilotprojekt erfolgreich läuft, weiten wir die Vermittlung auch auf Techniker aus. Bis dahin geben wir dir alle Tools an die Hand, damit du selbst die richtige Stelle findest.</div>
       </details>
       <details class="faq-item">
         <summary>Was passiert mit meinen Daten?</summary>
-        <div class="faq-body">Deine Daten werden ausschließlich für die Organisation der Seminare genutzt und nicht an Dritte weitergegeben. Du kannst deine Einwilligung jederzeit per E-Mail widerrufen.</div>
+        <div class="faq-body">Deine Daten werden ausschließlich für die Organisation der Seminare und Beratungen genutzt und nicht an Dritte weitergegeben. Du kannst deine Einwilligung jederzeit per E-Mail an digitalmarketing@myvi.de widerrufen.</div>
       </details>
       <details class="faq-item">
-        <summary>Wer steht hinter dem Karriere-Institut?</summary>
-        <div class="faq-body">Wir sind ein Team aus Karriere- und Finanzcoaches, das Fach- und Führungskräfte beim nächsten Schritt begleitet — Analyse, Masterclass und Coaching aus einer Hand. Beim Event lernst du das Team persönlich kennen.</div>
+        <summary>Wer steht hinter dem Pilotprojekt?</summary>
+        <div class="faq-body">Das Pilotprojekt ist eine Kooperation aus <strong>MYVI</strong>, dem <strong>Karriere-Institut</strong>, <strong>mitNorm</strong> und der <strong>Fachschule für Technik der Mies van der Rohe Schule Aachen</strong>. Beim Vortrag am 7. Mai lernst du das Team persönlich kennen.</div>
       </details>
     </div>
   </div>
@@ -940,14 +1068,15 @@
           <span class="x-foot">×</span>
           <img src="/mvdr/mvdr-schule-logo.svg" alt="Mies van der Rohe Schule" class="logo-mvdr-foot" />
         </div>
-        <p style="max-width: 380px; margin-top: 8px;">In Kooperation mit der Mies van der Rohe Schule Aachen — exklusive Karriere- und Finanzseminare für Techniker.</p>
+        <p style="max-width: 420px; margin-top: 8px;">Pilotprojekt 2026 — eine Kooperation aus <strong style="color:#fff;">MYVI</strong>, <strong style="color:#fff;">Karriere-Institut</strong>, <strong style="color:#fff;">mitNorm</strong> und der <strong style="color:#fff;">Mies van der Rohe Schule Aachen</strong>.</p>
       </div>
       <div>
-        <h5>Programm</h5>
+        <h5>Pilotprojekt</h5>
         <ul>
-          <li><a href="#tracks">Karriereseminar</a></li>
-          <li><a href="#tracks">Technikerseminar</a></li>
-          <li><a href="#themen">Themen</a></li>
+          <li><a href="#tracks">Step 1 · Karriere</a></li>
+          <li><a href="#tracks">Step 2 · Techniker</a></li>
+          <li><a href="#tracks">Step 3 · Beratung</a></li>
+          <li><a href="#timeline">Timeline 2026</a></li>
           <li><a href="#anmeldung">Anmeldung</a></li>
         </ul>
       </div>
