@@ -2,6 +2,47 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { analyzeCVForFair, extractTextFromImageAI } from '@/lib/ai-provider';
 
 /**
+ * Fallback: send PDF directly to Claude (Vision) when pdf-parse fails.
+ * Returns extracted text or null.
+ */
+async function extractPdfViaClaudeVision(buffer) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return null;
+  try {
+    const base64 = buffer.toString('base64');
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'pdfs-2024-09-25',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+            { type: 'text', text: 'Extrahiere den kompletten Text aus diesem Lebenslauf-PDF. Nur den Text, keine Kommentare.' },
+          ],
+        }],
+      }),
+    });
+    if (!response.ok) {
+      console.error('[cv-analysis] Claude PDF vision error:', response.status, await response.text());
+      return null;
+    }
+    const data = await response.json();
+    return data.content?.[0]?.text || null;
+  } catch (e) {
+    console.error('[cv-analysis] Claude PDF vision exception:', e);
+    return null;
+  }
+}
+
+/**
  * Extracts text + runs AI analysis for a CV document.
  * Updates cv_documents.extraction_status and cv_feedback.ai_analysis.
  * Can be called from anywhere server-side (upload route, review page, retrigger endpoint).
@@ -68,9 +109,22 @@ export async function runCVAnalysis({ documentId, feedbackId, targetPosition }) 
 
   try {
     if (doc.file_type === 'pdf') {
-      const pdfParse = (await import('pdf-parse')).default;
-      const pdfData = await pdfParse(buffer);
-      extractedText = pdfData.text;
+      try {
+        const pdfParse = (await import('pdf-parse')).default;
+        const pdfData = await pdfParse(buffer);
+        extractedText = pdfData.text;
+      } catch (pdfErr) {
+        console.warn('[cv-analysis] pdf-parse failed, trying Claude Vision fallback:', pdfErr.message);
+      }
+      // If pdf-parse yielded too little, try Claude Vision fallback (scanned PDFs)
+      if (!extractedText || extractedText.trim().length < 20) {
+        console.log('[cv-analysis] Attempting Claude Vision PDF fallback');
+        const visionText = await extractPdfViaClaudeVision(buffer);
+        if (visionText && visionText.trim().length >= 20) {
+          extractedText = visionText;
+          console.log('[cv-analysis] Vision fallback succeeded, length:', visionText.length);
+        }
+      }
     } else if (doc.file_type === 'docx') {
       const mammoth = await import('mammoth');
       const result = await mammoth.extractRawText({ buffer });
@@ -89,7 +143,7 @@ export async function runCVAnalysis({ documentId, feedbackId, targetPosition }) 
       extraction_status: 'failed',
       extracted_text: extractedText || null,
     }).eq('id', documentId);
-    return { error: 'Zu wenig Text extrahiert' };
+    return { error: 'Zu wenig Text extrahiert — bitte Bild-Scan statt PDF hochladen oder KI-Analyse erneut starten' };
   }
 
   // Text speichern
