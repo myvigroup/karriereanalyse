@@ -11,6 +11,7 @@ const NAV_GROUPS = [
       { label: 'Karriere-Analyse',  path: '/analyse',      icon: '◎' },
       { label: 'Masterclass',       path: '/masterclass',  icon: '▶' },
       { label: 'Lebenslauf-Check',  path: '/cv-check',     icon: '📋' },
+      { label: 'Coach',             path: '/coach',        icon: '◉' },
     ],
   },
 ];
