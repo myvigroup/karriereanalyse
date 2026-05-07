@@ -40,21 +40,113 @@ const ANALYSE_TOOLS = [
 
 // ─── Hardcoded Seminare ───────────────────────────────────────────────────────
 const SEMINARE = [
-  { id: 'sem-typgerecht', icon: '🧠', title: 'Typgerechtes Lernen', subtitle: 'Finde deinen Weg zum Wissen', description: 'Warum lernen, denken und vergessen wir unterschiedlich? Was motiviert uns zum Lernen?', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: '2026-04-18' },
-  { id: 'sem-worklife', icon: '⚖️', title: 'Work-Life-Balance', subtitle: 'Gesundheit trifft Leistung', description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: '2026-05-09' },
-  { id: 'sem-leadership', icon: '👑', title: 'Personal Leadership', subtitle: 'Authentisch führen, wirksam bleiben', description: 'Wie du aus Wünschen echte Ziele machst und diese erreichen kannst.', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: '2026-06-13' },
-  { id: 'sem-speedreading', icon: '📖', title: 'Speedreading', subtitle: 'Geschwindigkeit trifft Verständnis', description: 'Grundlagen des überdurchschnittlich schnellen Lesens mit hohem Textverständnis.', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: '2026-07-11' },
-  { id: 'sem-achtsamkeit', icon: '🧘', title: 'Achtsamkeit', subtitle: 'Gelassenheit ist trainierbar', description: 'Nur selten nimmt man sich neben dem Beruf und reizüberfluteten Alltag Zeit für sich und die eigenen Bedürfnisse.', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: '2026-08-08' },
-  { id: 'sem-rhetorik', icon: '🎤', title: 'Rhetorik, Dialektik, Kinesik', subtitle: 'Überzeugen mit Worten und Wirkung', description: 'Wirkungsvoll, passend und adressatengerecht kommunizieren in jeder Situation.', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: '2026-09-12' },
-  { id: 'sem-motivation', icon: '🔥', title: 'Selbstmotivation', subtitle: 'Dein Warum, dein Motor', description: 'Wie du dich effektiv motivierst, langfristig und diszipliniert an eigenen Zielen arbeitest.', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: '2026-10-10' },
-  { id: 'sem-kommunikation', icon: '💬', title: 'Kommunikation', subtitle: 'Verständigung als Schlüssel zum Erfolg', description: 'Effektive Kommunikation mit Kollegen und Geschäftspartnern.', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: '2026-11-14' },
-  { id: 'sem-konflikt', icon: '🤜', title: 'Konfliktmanagement', subtitle: 'Aus Krisen Chancen machen', description: 'Strategien und Techniken zur erfolgreichen Konfliktbewältigung.', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: '2026-12-12' },
-  { id: 'sem-homeoffice', icon: '🏠', title: 'Arbeiten aus dem Home Office', subtitle: 'Effizient arbeiten, flexibel leben', description: 'Strategien und Impulse, um auch von zu Hause aus ausgeglichen und effektiv deiner Arbeit nachzugehen.', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: null },
-  { id: 'sem-knigge', icon: '👔', title: 'Business Knigge', subtitle: 'Der erste Eindruck zählt, der zweite bleibt', description: 'Die richtigen Formen und Kommunikationsfähigkeiten im Berufs- und Geschäftsumfeld.', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: null },
-  { id: 'sem-networking', icon: '🤝', title: 'Networking', subtitle: 'Kontakte knüpfen, Vertrauen aufbauen', description: 'Fähigkeiten im Aufbau und der Pflege von beruflichen Beziehungen verbessern.', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: null },
-  { id: 'sem-prioritaeten', icon: '🎯', title: 'Prioritätenmanagement', subtitle: 'Nicht alles gleichzeitig, sondern das Richtige zuerst', description: 'Bewusster Umgang mit unserer Zeit als Schlüssel zum beruflichen Erfolg.', teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER', next_date: null },
+  {
+    id: 'sem-typgerecht', icon: '🧠',
+    title: 'Typgerechtes Lernen',
+    subtitle: 'Finde deinen Weg zum Wissen',
+    description: 'Warum lernen, denken und vergessen wir unterschiedlich? Was motiviert uns zum Lernen?',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: '2026-04-18',
+  },
+  {
+    id: 'sem-worklife', icon: '⚖️',
+    title: 'Work-Life-Balance',
+    subtitle: 'Gesundheit trifft Leistung',
+    description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: '2026-05-09',
+  },
+  {
+    id: 'sem-leadership', icon: '👑',
+    title: 'Personal Leadership',
+    subtitle: 'Authentisch führen, wirksam bleiben',
+    description: 'Wie du aus Wünschen echte Ziele machst und diese erreichen kannst.',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: '2026-06-13',
+  },
+  {
+    id: 'sem-speedreading', icon: '📖',
+    title: 'Speedreading',
+    subtitle: 'Geschwindigkeit trifft Verständnis',
+    description: 'Grundlagen des überdurchschnittlich schnellen Lesens mit hohem Textverständnis.',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: '2026-07-11',
+  },
+  {
+    id: 'sem-achtsamkeit', icon: '🧘',
+    title: 'Achtsamkeit',
+    subtitle: 'Gelassenheit ist trainierbar',
+    description: 'Nur selten nimmt man sich neben dem Beruf und reizüberfluteten Alltag Zeit für sich und die eigenen Bedürfnisse.',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: '2026-08-08',
+  },
+  {
+    id: 'sem-rhetorik', icon: '🎤',
+    title: 'Rhetorik, Dialektik, Kinesik',
+    subtitle: 'Überzeugen mit Worten und Wirkung',
+    description: 'Wirkungsvoll, passend und adressatengerecht kommunizieren in jeder Situation.',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: '2026-09-12',
+  },
+  {
+    id: 'sem-motivation', icon: '🔥',
+    title: 'Selbstmotivation',
+    subtitle: 'Dein Warum, dein Motor',
+    description: 'Wie du dich effektiv motivierst, langfristig und diszipliniert an eigenen Zielen arbeitest.',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: '2026-10-10',
+  },
+  {
+    id: 'sem-kommunikation', icon: '💬',
+    title: 'Kommunikation',
+    subtitle: 'Verständigung als Schlüssel zum Erfolg',
+    description: 'Effektive Kommunikation mit Kollegen und Geschäftspartnern.',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: '2026-11-14',
+  },
+  {
+    id: 'sem-konflikt', icon: '🤜',
+    title: 'Konfliktmanagement',
+    subtitle: 'Aus Krisen Chancen machen',
+    description: 'Strategien und Techniken zur erfolgreichen Konfliktbewältigung.',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: '2026-12-12',
+  },
+  {
+    id: 'sem-homeoffice', icon: '🏠',
+    title: 'Arbeiten aus dem Home Office',
+    subtitle: 'Effizient arbeiten, flexibel leben',
+    description: 'Strategien und Impulse, um auch von zu Hause aus ausgeglichen und effektiv deiner Arbeit nachzugehen.',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: null,
+  },
+  {
+    id: 'sem-knigge', icon: '👔',
+    title: 'Business Knigge',
+    subtitle: 'Der erste Eindruck zählt, der zweite bleibt',
+    description: 'Die richtigen Formen und Kommunikationsfähigkeiten im Berufs- und Geschäftsumfeld.',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: null,
+  },
+  {
+    id: 'sem-networking', icon: '🤝',
+    title: 'Networking',
+    subtitle: 'Kontakte knüpfen, Vertrauen aufbauen',
+    description: 'Fähigkeiten im Aufbau und der Pflege von beruflichen Beziehungen verbessern.',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: null,
+  },
+  {
+    id: 'sem-prioritaeten', icon: '🎯',
+    title: 'Prioritätenmanagement',
+    subtitle: 'Nicht alles gleichzeitig, sondern das Richtige zuerst',
+    description: 'Bewusster Umgang mit unserer Zeit als Schlüssel zum beruflichen Erfolg.',
+    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
+    next_date: null,
+  },
 ];
 
+// ─── Seminar Kalender Helper ──────────────────────────────────────────────────
 function groupByMonth(seminare) {
   const groups = {};
   seminare.forEach(s => {
@@ -67,6 +159,7 @@ function groupByMonth(seminare) {
   return groups;
 }
 
+// ─── MS Teams Live helper ─────────────────────────────────────────────────────
 function isSeminarLive(nextDate) {
   if (!nextDate) return false;
   const now = new Date();
@@ -76,6 +169,7 @@ function isSeminarLive(nextDate) {
   return isSameDay && hour >= 9 && (hour < 12 || (hour === 12 && now.getMinutes() <= 30));
 }
 
+// ─── Milestone helper ─────────────────────────────────────────────────────────
 function getMilestone(completed) {
   if (completed >= 6) return { label: 'Gold 🥇', next: null };
   if (completed >= 3) return { label: 'Silber 🥈', next: 6 };
@@ -83,120 +177,78 @@ function getMilestone(completed) {
   return { label: null, next: 1 };
 }
 
-// ─── Course Card ──────────────────────────────────────────────────────────────
-function CourseCard({ course, i }) {
-  const badgeLabel = course.pct === 100 ? 'Fertig' : course.pct > 0 ? 'Laufend' : 'Neu';
-  const badgeColor = course.pct === 100
-    ? { background: 'var(--ki-success)', color: '#fff' }
-    : course.pct > 0
-      ? { background: 'rgba(204,20,38,0.1)', color: 'var(--ki-red)' }
-      : { background: 'var(--grey-6)', color: 'var(--ki-text-secondary)' };
-
+// ─── Course Card ─────────────────────────────────────────────────────────────
+function CourseCard({ course, i, hasAnalyseData }) {
   return (
     <a
       href={`/masterclass/${course.id}`}
-      className="animate-in"
+      className="card animate-in"
       style={{
-        textDecoration: 'none', color: 'inherit',
-        background: 'var(--ki-card)',
-        borderRadius: 'var(--r-lg)',
-        border: '1px solid var(--ki-border)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-        overflow: 'hidden',
-        display: 'flex', flexDirection: 'column',
-        transition: 'transform 200ms var(--ease-apple), box-shadow 200ms var(--ease-apple)',
-        animationDelay: `${i * 0.05}s`,
+        textDecoration: 'none', color: 'inherit', position: 'relative', overflow: 'hidden',
+        cursor: 'pointer', animationDelay: `${(i || 0) * 0.05}s`, display: 'flex', flexDirection: 'column',
       }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'; }}
     >
-      {/* Cover */}
+      {/* Thumbnail area */}
       <div style={{
-        position: 'relative', aspectRatio: '16/10', overflow: 'hidden',
+        position: 'relative',
+        width: 'calc(100% + 48px)',
+        marginLeft: -24,
+        marginTop: -24,
+        marginBottom: 16,
+        height: 140,
+        overflow: 'hidden',
+        borderRadius: '12px 12px 0 0',
         background: course.thumbnail_url
           ? `url(${course.thumbnail_url}) center/cover no-repeat`
           : 'linear-gradient(135deg, #CC1426 0%, #8B0D1A 40%, #1a1a1a 100%)',
+        flexShrink: 0,
       }}>
+        {/* Subtle pattern overlay for fallback */}
         {!course.thumbnail_url && (
           <div style={{
-            position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <span style={{ fontSize: 40, opacity: 0.6 }}>{course.icon || '📘'}</span>
-          </div>
+            position: 'absolute', inset: 0,
+            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 40%)',
+          }} />
         )}
-        {/* Category pill top-left */}
-        {course.category && (
-          <span style={{
-            position: 'absolute', top: 10, left: 10, zIndex: 2,
-            fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase',
-            letterSpacing: '0.06em', padding: '3px 9px',
-            borderRadius: 'var(--r-pill)',
-            background: 'rgba(0,0,0,0.45)', color: 'rgba(255,255,255,0.95)',
-            backdropFilter: 'blur(6px)',
-          }}>
-            {course.category}
-          </span>
+        {/* Dark overlay for text readability on image thumbnails */}
+        {course.thumbnail_url && (
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)' }} />
         )}
-        {/* Status badge top-right */}
-        <span style={{
-          position: 'absolute', top: 10, right: 10, zIndex: 2,
-          fontSize: 10.5, fontWeight: 600,
-          padding: '3px 9px', borderRadius: 'var(--r-pill)',
-          ...badgeColor,
-        }}>
-          {course.isTopEmpfehlung ? '#1 Empfehlung' : badgeLabel}
-        </span>
-        {/* Progress bar on cover */}
-        {course.pct > 0 && (
-          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 3, background: 'rgba(0,0,0,0.15)', zIndex: 3 }}>
-            <div style={{
-              height: '100%',
-              width: `${course.pct}%`,
-              background: course.pct === 100 ? 'var(--ki-success)' : 'var(--ki-red)',
-              transition: 'width 0.3s ease',
-            }} />
-          </div>
-        )}
-      </div>
-
-      {/* Body */}
-      <div style={{ padding: '14px 16px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.25, color: 'var(--ki-text)' }}>{course.title}</div>
-        {course.description && (
-          <div style={{
-            fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.45, flex: 1,
-            overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-          }}>
-            {course.description}
-          </div>
-        )}
-        <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginTop: 4 }}>
-          {(course.modules || []).length} Module · {course.total} Lektionen
-          {course.isPrio ? ' · 2× XP' : ''}
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div style={{
-        padding: '10px 16px', borderTop: '1px solid var(--ki-border)',
-        background: 'var(--ki-bg-alt)',
-        display: 'flex', alignItems: 'center', gap: 8,
-      }}>
+        {/* Emoji + play button */}
         <div style={{
-          width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
-          background: 'linear-gradient(135deg, var(--ki-red), #8B0D1A)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 9, fontWeight: 700, color: '#fff',
-          overflow: 'hidden',
+          position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
         }}>
-          {course.icon ? <span>{course.icon}</span> : null}
+          <span style={{ fontSize: 36, filter: course.thumbnail_url ? 'none' : 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }}>{course.icon || '📘'}</span>
+          <div style={{
+            width: 40, height: 40, borderRadius: '50%',
+            background: course.thumbnail_url ? '#CC1426' : 'rgba(255,255,255,0.15)',
+            backdropFilter: course.thumbnail_url ? 'none' : 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            boxShadow: course.thumbnail_url ? '0 2px 12px rgba(204,20,38,0.5)' : '0 2px 12px rgba(0,0,0,0.2)',
+            border: course.thumbnail_url ? 'none' : '1px solid rgba(255,255,255,0.2)',
+          }}>
+            <span style={{ fontSize: 14, marginLeft: 3, color: '#fff' }}>▶</span>
+          </div>
         </div>
-        <span style={{ fontSize: 12, color: 'var(--ki-text-secondary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {course.done}/{course.total} Lektionen
-        </span>
-        <span style={{ fontSize: 12, fontWeight: 700, color: course.pct === 100 ? 'var(--ki-success)' : 'var(--ki-text)' }}>
-          {course.pct === 100 ? '✓ Fertig' : course.pct === 0 ? 'Starten →' : `${course.pct} %`}
-        </span>
+        {/* Pill badge on thumbnail */}
+        {course.isTopEmpfehlung ? (
+          <span className="pill pill-red" style={{ position: 'absolute', top: 10, right: 10, fontSize: 11, fontWeight: 700 }}>#1 Empfehlung</span>
+        ) : course.isPrio ? (
+          <span className="pill pill-gold" style={{ position: 'absolute', top: 10, right: 10, fontSize: 11, fontWeight: 700 }}>2x XP</span>
+        ) : null}
+      </div>
+      <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.02em', marginBottom: 4 }}>{course.title}</div>
+      {course.description && <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginBottom: 10, lineHeight: 1.5, flex: 1 }}>{course.description}</div>}
+      {course.empfehlung && hasAnalyseData && <div style={{ fontSize: 11, color: 'var(--ki-text-secondary)', marginBottom: 8, lineHeight: 1.4, fontStyle: 'italic' }}>{course.empfehlung}</div>}
+      <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginBottom: 10 }}>
+        {(course.modules || []).length} Module &bull; {course.total} Lektionen{course.isPrio ? ' • 2x XP' : ''}
+      </div>
+      <div className="progress-bar" style={{ marginBottom: 4 }}>
+        <div className="progress-bar-fill" style={{ width: `${course.pct}%`, background: course.pct === 100 ? 'var(--ki-success)' : 'var(--ki-red)' }} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ki-text-secondary)' }}>
+        <span>{course.done}/{course.total}</span>
+        <span style={{ fontWeight: 600, color: course.pct === 100 ? 'var(--ki-success)' : 'var(--ki-text)' }}>{course.pct}%</span>
       </div>
     </a>
   );
@@ -206,10 +258,10 @@ function CourseCard({ course, i }) {
 export default function MasterclassClient({ courses, progress, analysisResults, profile, seminars: seminarsFromDB, seminarRegistrations }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('alle');
-  const [categoryFilter, setCategoryFilter] = useState('all');
 
+  // Use DB seminars if available, fallback to hardcoded
   const activeSeminars = (seminarsFromDB && seminarsFromDB.length > 0) ? seminarsFromDB : SEMINARE;
-  const [bookingLoading, setBookingLoading] = useState(null);
+  const [bookingLoading, setBookingLoading] = useState(null); // seminarId or null
   const [bookedSeminars, setBookedSeminars] = useState(
     () => new Set((seminarRegistrations || []).map(r => r.seminar_id))
   );
@@ -221,6 +273,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
     setBookingLoading(seminarId);
     try {
       if (hasSeminarAccess) {
+        // Premium oder SEMINAR gekauft → direkt registrieren
         const res = await fetch('/api/webinar/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -233,6 +286,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
           alert(data.error || 'Buchung fehlgeschlagen');
         }
       } else {
+        // Free → Stripe Checkout
         const res = await fetch('/api/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -246,16 +300,19 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
     finally { setBookingLoading(null); }
   }
 
+  // Build a Set of completed lesson IDs
   const completedSet = useMemo(
     () => new Set((progress || []).filter((p) => p.completed).map((p) => p.lesson_id)),
     [progress]
   );
 
+  // Personalisierung berechnen
   const personalisierung = useMemo(
     () => berechnePersonalisierung(analysisResults, profile?.phase),
     [analysisResults, profile?.phase]
   );
 
+  // Relevanz-Map: kursId → {relevanz, istSchwaeche, empfehlung, rang}
   const relevanzMap = useMemo(() => {
     const map = {};
     (personalisierung.empfohleneKurse || []).forEach((k, i) => {
@@ -264,84 +321,81 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
     return map;
   }, [personalisierung]);
 
+  // Enrich E-Learning courses with progress + Relevanz-Sortierung
   const eLearnings = useMemo(() => {
     return (courses || [])
       .filter((c) => !c.category || c.category === 'E-Learning' || c.category === 'e-learning')
       .map((c) => {
         const total = (c.modules || []).reduce((s, m) => s + (m.lessons || []).length, 0);
         const done = (c.modules || []).reduce(
-          (s, m) => s + (m.lessons || []).filter((l) => completedSet.has(l.id)).length, 0
+          (s, m) => s + (m.lessons || []).filter((l) => completedSet.has(l.id)).length,
+          0
         );
         const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
         const rel = relevanzMap[c.id];
         const isPrio = rel?.istSchwaeche || false;
         const isTopEmpfehlung = rel?.rang === 0 && analysisResults?.length > 0;
+
         return { ...c, total, done, pct, isPrio, isTopEmpfehlung, relevanz: rel?.relevanz ?? 0, empfehlung: rel?.empfehlung || '' };
       })
+      // Sortiere nach Relevanz (höchste zuerst), falls Analyse vorhanden
       .sort((a, b) => {
         if (!analysisResults || analysisResults.length === 0) return 0;
         return b.relevanz - a.relevanz;
       });
   }, [courses, completedSet, analysisResults, relevanzMap]);
 
+  // Find in-progress course for "Weiterlernen" banner
   const inProgressCourse = useMemo(
     () => eLearnings.find((c) => c.pct > 0 && c.pct < 100) || null,
     [eLearnings]
   );
 
+  // XP: each completed lesson = 10 XP
   const totalCompletedLessons = eLearnings.reduce((s, c) => s + c.done, 0);
   const completedCourses = eLearnings.filter((c) => c.pct === 100).length;
   const xp = totalCompletedLessons * 10;
-
-  const showELearnings = activeTab === 'alle' || activeTab === 'e-learnings';
-  const showSeminare = activeTab === 'alle' || activeTab === 'seminare';
+  const milestone = getMilestone(completedCourses);
 
   const tabs = [
-    { key: 'alle',        label: 'Alle' },
+    { key: 'alle', label: 'Alle' },
     { key: 'e-learnings', label: 'E-Learnings' },
-    { key: 'seminare',    label: 'Seminare' },
+    { key: 'seminare', label: 'Seminare' },
   ];
 
-  const hasAnalyseData = analysisResults && analysisResults.length > 0;
-
-  // Category chips derived from courses
-  const categories = useMemo(() => {
-    const cats = new Set(eLearnings.map(c => c.category).filter(Boolean));
-    return ['all', ...cats];
-  }, [eLearnings]);
-
-  const filteredCourses = useMemo(() => {
-    if (categoryFilter === 'all') return eLearnings;
-    return eLearnings.filter(c => c.category === categoryFilter);
-  }, [eLearnings, categoryFilter]);
+  const showELearnings = activeTab === 'alle' || activeTab === 'e-learnings';
+  const showAnalyse = false;
+  const showSeminare = activeTab === 'alle' || activeTab === 'seminare';
 
   return (
     <div className="page-container">
-
-      {/* ── Page Header ── */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <h1 className="page-title" style={{ marginBottom: 0 }}>Masterclass</h1>
-          <InfoTooltip moduleId="masterclass" profile={profile} />
-        </div>
+      {/* ── Title ── */}
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+        <h1 className="page-title" style={{ marginBottom: 0 }}>Masterclass</h1>
+        <InfoTooltip moduleId="masterclass" profile={profile} />
       </div>
-      <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)', marginBottom: 24, maxWidth: '60ch', lineHeight: 1.5 }}>
-        Lerne in deinem eigenen Tempo — E-Learnings &amp; Live-Seminare.
+      <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)', marginBottom: 28 }}>
+        Lerne in deinem eigenen Tempo — E-Learnings & Live-Seminare.
       </p>
 
       {/* ── Tabs ── */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 28, flexWrap: 'wrap' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: 8,
+          marginBottom: 32,
+          overflowX: 'auto',
+          paddingBottom: 4,
+          scrollbarWidth: 'none',
+        }}
+      >
         {tabs.map((t) => (
           <button
             key={t.key}
+            className={`btn ${activeTab === t.key ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ fontSize: 13, padding: '8px 18px', whiteSpace: 'nowrap', flexShrink: 0 }}
             onClick={() => setActiveTab(t.key)}
-            style={{
-              padding: '7px 16px', borderRadius: 'var(--r-pill)',
-              fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
-              transition: 'all var(--t-fast)',
-              background: activeTab === t.key ? 'var(--ki-text)' : 'var(--ki-bg-alt)',
-              color: activeTab === t.key ? '#fff' : 'var(--ki-text-secondary)',
-            }}
           >
             {t.label}
           </button>
@@ -349,208 +403,214 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
       </div>
 
       {/* ── No Analysis Banner ── */}
-      {!hasAnalyseData && (
-        <div className="card animate-in" style={{
-          marginBottom: 24, padding: '18px 20px',
-          display: 'flex', alignItems: 'center', gap: 16,
-          borderLeft: '3px solid var(--ki-warning)',
-        }}>
-          <div style={{ fontSize: 32 }}>🩸</div>
+      {!analysisResults || analysisResults.length === 0 ? (
+        <div
+          className="card animate-in"
+          style={{
+            marginBottom: 32,
+            padding: 24,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 20,
+            borderLeft: '3px solid var(--ki-warning)',
+          }}
+        >
+          <div style={{ fontSize: 36 }}>🩸</div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 3 }}>Mach zuerst dein Karriere-Blutbild</div>
-            <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>
-              Finde heraus, welche Kurse für dich wirklich Priorität haben — basierend auf deinen Kompetenz-Scores.
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>
+              Mach zuerst dein Karriere-Blutbild
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 12 }}>
+              Finde heraus, welche Kurse für dich wirklich Priorität haben — basierend auf deinen
+              Kompetenz-Scores.
+            </div>
+            <a href="/analyse" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 18px' }}>
+              Analyse starten →
+            </a>
+          </div>
+        </div>
+      ) : null}
+
+      {/* ── Weiterlernen Banner ── */}
+      {inProgressCourse && showELearnings && (
+        <div
+          className="card animate-in"
+          style={{
+            marginBottom: 32,
+            padding: 20,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 20,
+            background: 'var(--ki-bg-alt)',
+            border: '1px solid var(--ki-border)',
+          }}
+        >
+          <div style={{ fontSize: 40, flexShrink: 0 }}>{inProgressCourse.icon || '📚'}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', fontWeight: 500, marginBottom: 2 }}>
+              Weiterlernen
+            </div>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {inProgressCourse.title}
+            </div>
+            <div className="progress-bar" style={{ marginBottom: 4 }}>
+              <div
+                className="progress-bar-fill"
+                style={{ width: `${inProgressCourse.pct}%` }}
+              />
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>
+              {inProgressCourse.done} / {inProgressCourse.total} Lektionen &mdash; {inProgressCourse.pct}%
             </div>
           </div>
-          <a href="/analyse" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 18px', flexShrink: 0 }}>
-            Analyse starten →
+          <a
+            href={`/masterclass/${inProgressCourse.id}`}
+            className="btn btn-primary"
+            style={{ fontSize: 13, padding: '10px 20px', flexShrink: 0 }}
+          >
+            Fortfahren →
           </a>
         </div>
       )}
 
-      {/* ─────────────── E-LEARNINGS ─────────────── */}
-      {showELearnings && (
-        <>
-          {/* Active course hero */}
-          {inProgressCourse && (
-            <div className="animate-in" style={{
-              position: 'relative', borderRadius: 'var(--r-lg)',
-              background: 'linear-gradient(135deg, #1a0508 0%, #82031C 45%, #CC1426 100%)',
-              color: '#fff', overflow: 'hidden', marginBottom: 16, isolation: 'isolate',
-            }}>
-              {/* Grain */}
-              <div style={{
-                position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.35,
-                backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0)',
-                backgroundSize: '3px 3px',
-              }} />
-              {/* Glow */}
-              <div style={{
-                position: 'absolute', inset: 0, pointerEvents: 'none',
-                background: 'radial-gradient(ellipse at 90% 20%, rgba(255,255,255,0.12), transparent 55%), radial-gradient(ellipse at 10% 90%, rgba(255,80,100,0.15), transparent 50%)',
-              }} />
-              <div style={{ position: 'relative', zIndex: 1, padding: '28px 32px', display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: 260 }}>
-                  <div style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 7,
-                    fontSize: 11.5, fontWeight: 600, textTransform: 'uppercase',
-                    letterSpacing: '0.08em', color: 'rgba(255,255,255,0.7)',
-                    marginBottom: 12,
-                  }}>
-                    <span style={{
-                      width: 7, height: 7, borderRadius: '50%',
-                      background: '#30D158', boxShadow: '0 0 0 3px rgba(48,209,88,0.25)',
-                      animation: 'pulse 1.6s infinite',
-                    }} />
-                    Aktiver Kurs · weiterlernen
-                  </div>
-                  <h2 style={{ fontSize: 26, fontWeight: 700, color: '#fff', margin: '0 0 8px', lineHeight: 1.15 }}>
-                    {inProgressCourse.title}
-                  </h2>
-                  {inProgressCourse.description && (
-                    <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: '0 0 16px', lineHeight: 1.5, maxWidth: '50ch' }}>
-                      {inProgressCourse.description}
-                    </p>
-                  )}
-                  <div style={{
-                    display: 'flex', gap: 20, flexWrap: 'wrap',
-                    fontSize: 13, color: 'rgba(255,255,255,0.8)',
-                    marginBottom: 16, paddingBottom: 16,
-                    borderBottom: '1px solid rgba(255,255,255,0.12)',
-                  }}>
-                    <span><strong style={{ color: '#fff' }}>{(inProgressCourse.modules || []).length} Module</strong> · {inProgressCourse.total} Lektionen</span>
-                    <span><strong style={{ color: '#fff' }}>Zertifikat</strong> nach Abschluss</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <a href={`/masterclass/${inProgressCourse.id}`} style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 7,
-                      padding: '9px 20px', borderRadius: 'var(--r-pill)',
-                      background: '#fff', color: 'var(--ki-text)', fontWeight: 700, fontSize: 14,
-                      textDecoration: 'none',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
-                      transition: 'all var(--t-fast)',
-                    }}>▶ Weiterlernen</a>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 8 }}>
-                      <div style={{ width: 120, height: 4, borderRadius: 'var(--r-pill)', background: 'rgba(255,255,255,0.2)', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${inProgressCourse.pct}%`, background: '#fff', borderRadius: 'var(--r-pill)' }} />
-                      </div>
-                      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', fontVariantNumeric: 'tabular-nums' }}>
-                        {inProgressCourse.pct} % · {inProgressCourse.done} von {inProgressCourse.total}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                {inProgressCourse.thumbnail_url && (
-                  <div style={{
-                    width: 160, aspectRatio: '4/5', borderRadius: 12, overflow: 'hidden', flexShrink: 0,
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.35)',
-                  }}>
-                    <img src={inProgressCourse.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                )}
+      {/* ── E-Learnings Section (3 Kategorien) ── */}
+      {showELearnings && (() => {
+        const hasAnalyseData = analysisResults && analysisResults.length > 0;
+        // Kategorisiere: Fokus (Schwächen), Booster (mittel), Stärken (hoch)
+        const fokusKurse = hasAnalyseData ? eLearnings.filter(c => c.isPrio || c.isTopEmpfehlung) : [];
+        const staerkenKurse = hasAnalyseData ? eLearnings.filter(c => !c.isPrio && !c.isTopEmpfehlung && c.relevanz < 20) : [];
+        const boosterKurse = hasAnalyseData ? eLearnings.filter(c => !fokusKurse.includes(c) && !staerkenKurse.includes(c)) : eLearnings;
+
+        const CategorySection = ({ title, badge, badgeClass, description, items }) => {
+          if (items.length === 0) return null;
+          return (
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <h3 style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h3>
+                <span className={`pill ${badgeClass}`} style={{ fontSize: 11 }}>{badge}</span>
+              </div>
+              {description && <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>{description}</p>}
+              <div className="grid-3">
+                {items.map((course, i) => (
+                  <CourseCard key={course.id} course={course} i={i} hasAnalyseData={hasAnalyseData} />
+                ))}
               </div>
             </div>
-          )}
+          );
+        };
 
-          {/* Lern-Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
-            {[
-              { label: 'Abgeschlossene Kurse', value: completedCourses, unit: `/${eLearnings.length}` },
-              { label: 'Gesammelte XP', value: xp, unit: 'XP' },
-              { label: 'Lektionen fertig', value: totalCompletedLessons, unit: '' },
-            ].map((s, i) => (
-              <div key={i} className="card animate-in" style={{
-                padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14,
-                border: '1px solid var(--ki-border)', boxShadow: 'var(--sh-sm)',
-                animationDelay: `${i * 0.06}s`,
-              }}>
-                <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(204,20,38,0.08)', color: 'var(--ki-red)', display: 'grid', placeItems: 'center', fontSize: 16, flexShrink: 0 }}>
-                  {i === 0 ? '📚' : i === 1 ? '⚡' : '✓'}
-                </div>
-                <div>
-                  <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
-                    {s.value}<span style={{ fontSize: 13, color: 'var(--ki-text-secondary)', fontWeight: 500, marginLeft: 2 }}>{s.unit}</span>
+        return (
+          <section style={{ marginBottom: 48 }}>
+            <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+              📚 E-Learnings
+              <span className="pill pill-grey" style={{ fontSize: 12 }}>{eLearnings.length} Kurse</span>
+            </h2>
+
+            {eLearnings.length === 0 ? (
+              <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--ki-text-secondary)' }}>
+                Keine E-Learnings verfügbar.
+              </div>
+            ) : hasAnalyseData ? (
+              <>
+                <CategorySection title="Dein Fokus" badge="Höchste Relevanz" badgeClass="pill-red" description="Hier liegt dein größtes Wachstumspotenzial — 2x XP!" items={fokusKurse} />
+                <CategorySection title="Karriere-Booster" badge="Empfohlen" badgeClass="pill-gold" items={boosterKurse} />
+                <CategorySection title="Deine Stärken" badge="Solide" badgeClass="pill-green" description="Bereits gut — verfeinere dein Können." items={staerkenKurse} />
+              </>
+            ) : (
+              <div className="grid-3">
+                {eLearnings.map((course, i) => (
+                  <CourseCard key={course.id} course={course} i={i} hasAnalyseData={false} />
+                ))}
+              </div>
+            )}
+          </section>
+        );
+      })()}
+
+      {/* ── Analyse-Tools Section ── */}
+      {showAnalyse && (
+        <section style={{ marginBottom: 48 }}>
+          <h2
+            style={{
+              fontSize: 22,
+              fontWeight: 700,
+              letterSpacing: '-0.03em',
+              marginBottom: 16,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            🔍 Analyse-Tools
+            <span className="pill pill-gold" style={{ fontSize: 12 }}>
+              Premium
+            </span>
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {ANALYSE_TOOLS.map((tool, i) => (
+              <div
+                key={tool.id}
+                className="card animate-in"
+                style={{
+                  border: '1.5px solid rgba(212,160,23,0.3)',
+                  background: 'linear-gradient(135deg, var(--ki-card) 0%, rgba(212,160,23,0.03) 100%)',
+                  animationDelay: `${i * 0.08}s`,
+                  display: 'flex',
+                  gap: 24,
+                  alignItems: 'flex-start',
+                }}
+              >
+                {/* Icon */}
+                <div style={{ fontSize: 48, flexShrink: 0 }}>{tool.icon}</div>
+
+                {/* Content */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 700, fontSize: 20, letterSpacing: '-0.02em' }}>{tool.title}</span>
+                    <span className="pill pill-gold" style={{ fontSize: 12 }}>{tool.badge}</span>
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginTop: 3, fontWeight: 500 }}>{s.label}</div>
+                  <div style={{ fontSize: 15, color: 'var(--ki-text-secondary)', marginBottom: 4 }}>
+                    {tool.subtitle}
+                  </div>
+                  <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 16 }}>
+                    {tool.pricing}
+                  </div>
+
+                  {/* Features */}
+                  <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {tool.features.map((f, fi) => (
+                      <li key={fi} style={{ fontSize: 13, color: 'var(--ki-text-secondary)', display: 'flex', gap: 8 }}>
+                        <span style={{ color: 'var(--ki-warning)', flexShrink: 0 }}>✓</span>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* CTA */}
+                <div style={{ flexShrink: 0, alignSelf: 'center' }}>
+                  <a href={tool.link || '/angebote'} target={tool.link ? '_blank' : undefined} rel={tool.link ? 'noopener noreferrer' : undefined} className="btn btn-primary" style={{ fontSize: 13, padding: '10px 22px' }}>
+                    Mehr erfahren →
+                  </a>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Section heading + filter */}
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
-            <h2 style={{ fontSize: 20, fontWeight: 700 }}>
-              Alle Kurse <span style={{ color: 'var(--ki-text-tertiary)', fontWeight: 500, marginLeft: 4 }}>{eLearnings.length}</span>
-            </h2>
-          </div>
-
-          {/* Category filter chips */}
-          {categories.length > 1 && (
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-              {categories.map((cat) => (
-                <button key={cat} onClick={() => setCategoryFilter(cat)} style={{
-                  padding: '5px 12px', borderRadius: 'var(--r-pill)',
-                  fontSize: 12.5, fontWeight: 500, border: 'none', cursor: 'pointer',
-                  transition: 'all var(--t-fast)',
-                  background: categoryFilter === cat ? 'var(--ki-text)' : 'var(--ki-bg-alt)',
-                  color: categoryFilter === cat ? '#fff' : 'var(--ki-text-secondary)',
-                }}>
-                  {cat === 'all' ? 'Alle' : cat}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Course grid */}
-          {eLearnings.length === 0 ? (
-            <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--ki-text-secondary)' }}>
-              Keine E-Learnings verfügbar.
-            </div>
-          ) : (
-            <div className="grid-3" style={{ marginBottom: 32 }}>
-              {filteredCourses.map((course, i) => (
-                <CourseCard key={course.id} course={course} i={i} />
-              ))}
-            </div>
-          )}
-
-          {/* Progress footer */}
-          <div className="card animate-in" style={{
-            padding: '16px 20px', marginBottom: 32,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            gap: 16, flexWrap: 'wrap',
-            background: 'var(--ki-bg-alt)', border: '1px solid var(--ki-border)',
-          }}>
-            <span style={{ fontWeight: 600, fontSize: 14 }}>
-              {completedCourses}/{eLearnings.length || 6} Kurse abgeschlossen · +{xp} XP
-            </span>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {[
-                { label: '🥉 Bronze', threshold: 1 },
-                { label: '🥈 Silber', threshold: 3 },
-                { label: '🥇 Gold',   threshold: 6 },
-              ].map(({ label, threshold }) => (
-                <span key={label} className={`pill ${completedCourses >= threshold ? 'pill-gold' : 'pill-grey'}`} style={{ fontSize: 12 }}>
-                  {label}
-                </span>
-              ))}
-            </div>
-          </div>
-        </>
+        </section>
       )}
 
-      {/* ─────────────── SEMINARE ─────────────── */}
+      {/* ── Seminare Section ── */}
       {showSeminare && (
         <section style={{ marginBottom: 48 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-            Seminare
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+            🎓 Seminare
             <span className="pill pill-green" style={{ fontSize: 12 }}>Live</span>
           </h2>
 
-          {/* Membership CTA */}
+          {/* ── Mitgliedschaft CTA ── */}
           <div style={{
             background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-            borderRadius: 'var(--r-lg)', padding: '18px 24px', marginBottom: 20,
+            borderRadius: 'var(--r-lg)', padding: '20px 24px', marginBottom: 24,
             display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
           }}>
             <div style={{ flex: 1, minWidth: 200 }}>
@@ -562,55 +622,52 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
               </div>
             </div>
             <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
-              <a href="/angebote" className="btn btn-primary" style={{ fontSize: 13, padding: '9px 18px', background: '#CC1426' }}>
+              <a href="/angebote" className="btn btn-primary" style={{ fontSize: 13, padding: '10px 20px', background: '#CC1426' }}>
                 Mitgliedschaft starten →
               </a>
-              <a href="/angebote" style={{
-                fontSize: 13, padding: '9px 18px', borderRadius: 'var(--r-pill)',
-                border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)',
-                textDecoration: 'none', display: 'inline-flex', alignItems: 'center',
-              }}>
+              <a href="/angebote" style={{ fontSize: 13, padding: '10px 20px', borderRadius: 'var(--r-md)', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
                 Einzeln buchen
               </a>
             </div>
           </div>
 
-          {/* Calendar view */}
-          <div className="card" style={{ marginBottom: 20, padding: 0, overflow: 'hidden' }}>
-            <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--ki-border)', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 15 }}>📅</span>
+          {/* ── Kalenderansicht ── */}
+          <div className="card" style={{ marginBottom: 24, padding: '0', overflow: 'hidden' }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--ki-border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 16 }}>📅</span>
               <span style={{ fontSize: 14, fontWeight: 700 }}>Termine 2026</span>
               <span style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginLeft: 4 }}>Samstags · 09:30 – 12:00 Uhr · Online via Teams</span>
             </div>
             {Object.entries(groupByMonth(activeSeminars)).map(([month, sems]) => (
               <div key={month}>
-                <div style={{ padding: '8px 18px 5px', fontSize: 11, fontWeight: 700, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', background: 'var(--ki-bg-alt)', borderBottom: '1px solid var(--ki-border)' }}>
+                <div style={{ padding: '10px 20px 6px', fontSize: 11, fontWeight: 700, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', background: 'var(--ki-bg-alt)', borderBottom: '1px solid var(--ki-border)' }}>
                   {month}
                 </div>
-                {sems.map((s) => {
+                {sems.map((s, i) => {
                   const d = new Date(s.next_date);
                   const isLive = isSeminarLive(s.next_date);
                   return (
                     <div key={s.id} style={{
-                      display: 'flex', alignItems: 'center', gap: 14, padding: '11px 18px',
+                      display: 'flex', alignItems: 'center', gap: 16, padding: '12px 20px',
                       borderBottom: '1px solid var(--ki-border)',
                       background: isLive ? 'rgba(34,197,94,0.04)' : 'transparent',
                     }}>
-                      <div style={{ width: 40, textAlign: 'center', flexShrink: 0 }}>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase' }}>
+                      <div style={{ width: 44, textAlign: 'center', flexShrink: 0 }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase' }}>
                           {d.toLocaleDateString('de-DE', { weekday: 'short' })}
                         </div>
-                        <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--ki-text)', lineHeight: 1.2 }}>
+                        <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--ki-text)', lineHeight: 1.2 }}>
                           {d.getDate().toString().padStart(2, '0')}
                         </div>
                       </div>
-                      <span style={{ fontSize: 16, flexShrink: 0 }}>{s.icon}</span>
+                      <div style={{ fontSize: 18, flexShrink: 0 }}>{s.icon}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text)' }}>{s.title}</div>
                         <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)' }}>{s.subtitle}</div>
                       </div>
                       {isLive ? (
-                        <a href={s.teams_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>
+                        <a href={s.teams_link} target="_blank" rel="noopener noreferrer"
+                          style={{ fontSize: 12, fontWeight: 700, color: '#16a34a', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
                           🔴 Live →
                         </a>
                       ) : bookedSeminars.has(s.id) ? (
@@ -627,7 +684,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
             ))}
           </div>
 
-          {/* Seminar cards */}
+          {/* ── Seminar Cards ── */}
           <div className="grid-2">
             {activeSeminars.map((seminar, i) => {
               const isLive = isSeminarLive(seminar.next_date);
@@ -638,41 +695,50 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                 <div key={seminar.id} className="card animate-in" style={{ animationDelay: `${i * 0.04}s`, display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                      <span style={{ fontSize: 26 }}>{seminar.icon}</span>
+                      <span style={{ fontSize: 28 }}>{seminar.icon}</span>
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.3 }}>{seminar.title}</div>
+                        <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.02em', lineHeight: 1.3 }}>{seminar.title}</div>
                         <div style={{ fontSize: 12, color: 'var(--ki-red)', fontWeight: 500 }}>{seminar.subtitle}</div>
                       </div>
                     </div>
                     {isLive && <span className="pill pill-green" style={{ fontSize: 11, flexShrink: 0 }}>🔴 Live</span>}
                   </div>
+
                   <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.5, margin: 0 }}>{seminar.description}</p>
+
                   <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                     <span>📅 {dateStr}</span>
                     <span>· ⏰ 09:30 – 12:00</span>
                     <span>· Inkl. Zertifikat</span>
                   </div>
+
                   <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
                     {isLive ? (
-                      <a href={seminar.teams_link} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 16px', background: '#CC1426' }}>
+                      <a href={seminar.teams_link} target="_blank" rel="noopener noreferrer"
+                        className="btn btn-primary"
+                        style={{ fontSize: 13, padding: '9px 18px', background: '#CC1426', animation: 'pulse 1.5s ease-in-out infinite' }}>
                         🔴 JETZT LIVE — Teilnehmen
                       </a>
-                    ) : bookedSeminars.has(seminar.id) ? (
-                      <span className="btn" style={{ fontSize: 13, padding: '8px 16px', background: '#D1FAE5', color: '#059669', border: '1px solid #BBF7D0', fontWeight: 600 }}>
-                        Gebucht ✓
-                      </span>
-                    ) : hasSeminarAccess ? (
-                      <button onClick={() => bookSeminar(seminar.id)} disabled={bookingLoading === seminar.id} className="btn btn-primary" style={{ fontSize: 13, padding: '8px 16px' }}>
-                        {bookingLoading === seminar.id ? 'Wird gebucht...' : 'Kostenlos buchen'}
-                      </button>
                     ) : (
                       <>
-                        <button onClick={() => bookSeminar(seminar.id)} disabled={bookingLoading === seminar.id} className="btn btn-primary" style={{ fontSize: 13, padding: '8px 16px' }}>
-                          {bookingLoading === seminar.id ? 'Laden...' : 'Einzeln buchen · 99 €'}
-                        </button>
-                        <a href="/angebote" className="btn btn-secondary" style={{ fontSize: 13, padding: '8px 16px' }}>
-                          Mit Abo →
-                        </a>
+                        {bookedSeminars.has(seminar.id) ? (
+                          <span className="btn" style={{ fontSize: 13, padding: '9px 18px', background: '#D1FAE5', color: '#059669', border: '1px solid #BBF7D0', fontWeight: 600 }}>
+                            Gebucht ✓
+                          </span>
+                        ) : hasSeminarAccess ? (
+                          <button onClick={() => bookSeminar(seminar.id)} disabled={bookingLoading === seminar.id} className="btn btn-primary" style={{ fontSize: 13, padding: '9px 18px' }}>
+                            {bookingLoading === seminar.id ? 'Wird gebucht...' : 'Kostenlos buchen'}
+                          </button>
+                        ) : (
+                          <>
+                            <button onClick={() => bookSeminar(seminar.id)} disabled={bookingLoading === seminar.id} className="btn btn-primary" style={{ fontSize: 13, padding: '9px 18px' }}>
+                              {bookingLoading === seminar.id ? 'Laden...' : 'Einzeln buchen · 99 €'}
+                            </button>
+                            <a href="/angebote" className="btn btn-secondary" style={{ fontSize: 13, padding: '9px 18px' }}>
+                              Mit Abo →
+                            </a>
+                          </>
+                        )}
                       </>
                     )}
                   </div>
@@ -681,6 +747,52 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
             })}
           </div>
         </section>
+      )}
+
+      {/* ── Progress Footer ── */}
+      {showELearnings && (
+        <div
+          className="card"
+          style={{
+            padding: '20px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            flexWrap: 'wrap',
+            background: 'var(--ki-bg-alt)',
+            border: '1px solid var(--ki-border)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 600, fontSize: 15 }}>
+              E-Learnings: {completedCourses}/{eLearnings.length || 6} abgeschlossen
+            </span>
+            <span style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>
+              +{xp} XP gesammelt
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span
+              className={`pill ${completedCourses >= 1 ? 'pill-gold' : 'pill-grey'}`}
+              style={{ fontSize: 12 }}
+            >
+              🥉 1/6 Bronze
+            </span>
+            <span
+              className={`pill ${completedCourses >= 3 ? 'pill-gold' : 'pill-grey'}`}
+              style={{ fontSize: 12 }}
+            >
+              🥈 3/6 Silber
+            </span>
+            <span
+              className={`pill ${completedCourses >= 6 ? 'pill-gold' : 'pill-grey'}`}
+              style={{ fontSize: 12 }}
+            >
+              🥇 6/6 Gold
+            </span>
+          </div>
+        </div>
       )}
     </div>
   );
