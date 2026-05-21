@@ -60,11 +60,13 @@ function ScoreGauge({ rating }) {
   );
 }
 
-function CategoryCard({ label, icon, cat }) {
-  const items = cat?.presets || [];
-  const freetext = cat?.freetext;
+function CategoryCard({ label, icon, cat, aiCat }) {
+  const items = (cat?.presets && cat.presets.length) ? cat.presets : (aiCat?.selectedPresets || []);
+  const freetext = cat?.freetext || null;
+  const detail = aiCat?.detail || null;
   const total = items.length + (freetext ? 1 : 0);
   const positive = items.filter(isPositive).length;
+  const hasBody = total > 0 || !!detail;
 
   return (
     <div style={{
@@ -73,7 +75,7 @@ function CategoryCard({ label, icon, cat }) {
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 18px', borderBottom: total > 0 ? '1px solid #F3F4F6' : 'none',
+        padding: '14px 18px', borderBottom: hasBody ? '1px solid #F3F4F6' : 'none',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 18 }}>{icon}</span>
@@ -83,11 +85,16 @@ function CategoryCard({ label, icon, cat }) {
           fontSize: 12, fontWeight: 600, color: '#6B7280',
           background: '#F3F4F6', padding: '2px 8px', borderRadius: 980,
         }}>
-          {total > 0 ? `${positive}/${total} positiv` : 'Kein Feedback'}
+          {total > 0 ? `${positive}/${total} positiv` : (detail ? 'Analyse' : 'Kein Feedback')}
         </span>
       </div>
-      {total > 0 && (
+      {hasBody && (
         <div style={{ padding: '12px 18px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {detail && (
+            <p style={{ fontSize: 13.5, color: '#374151', lineHeight: 1.65, margin: 0 }}>
+              {detail}
+            </p>
+          )}
           {items.map((p, i) => {
             const pos = isPositive(p);
             return (
@@ -221,8 +228,15 @@ export default async function CVCheckPage() {
 
   const hasAnalysis = !!analysisSession;
 
+  // KI-Auswertung — ausführliche Texte + konkrete Verbesserungen
+  const ai = feedback?.ai_analysis || null;
+  const aiCategories = ai?.categories || {};
+  const improvements = Array.isArray(ai?.improvements) ? ai.improvements : [];
+  const displayRating = feedback?.overall_rating || ai?.overallRating || 0;
+  const displaySummary = feedback?.summary || ai?.summary || null;
+
   const fairName = lead?.fairs?.name;
-  const hasRating = feedback?.overall_rating > 0;
+  const hasRating = displayRating > 0;
 
   return (
     <div style={{
@@ -295,13 +309,13 @@ export default async function CVCheckPage() {
                 </span>
               </div>
             )}
-            <ScoreGauge rating={feedback.overall_rating} />
-            {feedback.summary && (
+            <ScoreGauge rating={displayRating} />
+            {displaySummary && (
               <p style={{
                 marginTop: 16, paddingTop: 16, borderTop: '1px solid #F3F4F6',
                 fontSize: 14, color: '#6B7280', lineHeight: 1.7, margin: '16px 0 0',
               }}>
-                {feedback.summary}
+                {displaySummary}
               </p>
             )}
           </div>
@@ -349,7 +363,7 @@ export default async function CVCheckPage() {
           {/* Right: Analysis Sidebar */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {CATEGORIES.map(({ key, label, icon }) => (
-              <CategoryCard key={key} label={label} icon={icon} cat={byCategory[key]} />
+              <CategoryCard key={key} label={label} icon={icon} cat={byCategory[key]} aiCat={aiCategories[key]} />
             ))}
 
             {/* CTA Card — Analyse abgeschlossen oder noch nicht */}
@@ -421,6 +435,61 @@ export default async function CVCheckPage() {
             )}
           </div>
         </div>
+
+        {/* Konkrete Verbesserungen */}
+        {improvements.length > 0 && (
+          <div style={{ marginTop: 32 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1A1A1A', margin: '0 0 4px' }}>
+              Deine konkreten Verbesserungen
+            </h2>
+            <p style={{ fontSize: 14, color: '#9CA3AF', margin: '0 0 16px' }}>
+              Setze diese Punkte um, um deinen Lebenslauf spürbar zu stärken.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {improvements.map((imp, i) => (
+                <div key={i} style={{
+                  background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1',
+                  padding: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: (imp.before || imp.after) ? 12 : 0 }}>
+                    <span style={{
+                      width: 24, height: 24, borderRadius: '50%', background: '#CC1426', color: '#fff',
+                      fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', flexShrink: 0,
+                    }}>{i + 1}</span>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>{imp.title}</span>
+                  </div>
+                  {imp.before && (
+                    <div style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 10,
+                      padding: '10px 12px', borderRadius: 10, marginBottom: 8,
+                      background: '#FFF5F5', border: '1px solid #FECACA',
+                    }}>
+                      <span style={{ fontSize: 13, flexShrink: 0, marginTop: 1 }}>✗</span>
+                      <div>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2 }}>Vorher</div>
+                        <div style={{ fontSize: 13, color: '#7F1D1D', lineHeight: 1.5 }}>{imp.before}</div>
+                      </div>
+                    </div>
+                  )}
+                  {imp.after && (
+                    <div style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 10,
+                      padding: '10px 12px', borderRadius: 10,
+                      background: '#F0FDF4', border: '1px solid #BBF7D0',
+                    }}>
+                      <span style={{ fontSize: 13, flexShrink: 0, marginTop: 1 }}>✓</span>
+                      <div>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: '#15803D', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2 }}>{imp.before ? 'Nachher' : 'Tipp'}</div>
+                        <div style={{ fontSize: 13, color: '#14532D', lineHeight: 1.5 }}>{imp.after}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Bottom Features */}
         <div style={{ marginTop: 40 }}>
