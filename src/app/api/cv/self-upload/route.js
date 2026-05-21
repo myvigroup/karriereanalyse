@@ -111,10 +111,12 @@ export async function POST(request) {
       cvText = result.value?.trim() || '';
     } else if (fileType === 'pdf') {
       try {
-        const pdfParse = (await import('pdf-parse')).default;
-        const pdfData = await pdfParse(buffer);
-        cvText = pdfData.text || '';
-      } catch {
+        const { extractText, getDocumentProxy } = await import('unpdf');
+        const pdf = await getDocumentProxy(new Uint8Array(buffer));
+        const extracted = await extractText(pdf, { mergePages: true });
+        cvText = extracted.text || '';
+      } catch (pdfErr) {
+        console.error('[cv/self-upload] PDF-Textextraktion fehlgeschlagen:', pdfErr);
         // PDF text extraction failed - will send raw to AI below
       }
     } else if (fileType === 'image') {
