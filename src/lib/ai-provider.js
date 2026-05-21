@@ -243,13 +243,23 @@ export async function extractTextFromImageAI(buffer, filename) {
           }],
         }),
       });
+      if (!response.ok) {
+        const errBody = await response.text();
+        console.error('[ai-provider] OpenAI vision HTTP', response.status, errBody);
+        return '';
+      }
       const data = await response.json();
-      return data.choices?.[0]?.message?.content || '';
+      const text = data.choices?.[0]?.message?.content || '';
+      if (!text) {
+        console.error('[ai-provider] OpenAI vision: leere Antwort', JSON.stringify(data).slice(0, 300));
+      }
+      return text;
     } catch (e) {
       console.error('[ai-provider] OpenAI vision error:', e);
     }
   }
 
+  console.warn('[ai-provider] extractTextFromImageAI: kein Vision-Provider verfügbar — OPENAI_API_KEY/ANTHROPIC_API_KEY prüfen');
   return '';
 }
 
