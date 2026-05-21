@@ -4,8 +4,8 @@ import { NextResponse } from 'next/server';
 export async function middleware(request) {
   let response = NextResponse.next({ request: { headers: request.headers } });
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key',
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         get(name) { return request.cookies.get(name)?.value; },
@@ -19,7 +19,7 @@ export async function middleware(request) {
   const isAuthPage = pathname.startsWith('/auth');
   const isBeraterAuthPage = pathname.startsWith('/berater/login') || pathname.startsWith('/berater/forgot-password');
   const isPublicUpload = pathname.startsWith('/upload');
-  const isPublicPage = pathname.startsWith('/agb') || pathname.startsWith('/datenschutz') || pathname.startsWith('/impressum') || pathname.startsWith('/widerruf') || pathname.startsWith('/angebote') || pathname.startsWith('/gehaltsverhandlung') || pathname.startsWith('/seminare') || pathname.startsWith('/scan') || pathname.startsWith('/mvdr') || pathname === '/qr-anleitung.html';
+  const isPublicPage = pathname.startsWith('/agb') || pathname.startsWith('/datenschutz') || pathname.startsWith('/impressum') || pathname.startsWith('/widerruf') || pathname.startsWith('/angebote') || pathname.startsWith('/gehaltsverhandlung') || pathname.startsWith('/seminare') || pathname.startsWith('/scan') || pathname === '/qr-anleitung.html';
   if (!user && !isAuthPage && !isBeraterAuthPage && !isPublicUpload && !isPublicPage) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
