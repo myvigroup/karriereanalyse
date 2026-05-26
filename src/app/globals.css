@@ -1946,12 +1946,44 @@ html[data-sb="collapsed"] .sb-version { display: none; }
   min-width: 0;
   display: flex; flex-direction: column; gap: 3px;
 }
+.masterclass-v2 .mc-seminar-titlerow {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+}
 .masterclass-v2 .mc-seminar-title {
   font-family: var(--sf);
   font-size: 15.5px; font-weight: 600;
   color: var(--label);
   letter-spacing: -0.015em;
   line-height: 1.25;
+}
+.masterclass-v2 .mc-seminar-topic {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px;
+  background: var(--fill);
+  border: 0.5px solid var(--line);
+  border-radius: 980px;
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--label-3);
+  white-space: nowrap;
+  line-height: 1;
+}
+.masterclass-v2 .mc-modal-eyebrow {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+}
+.masterclass-v2 .mc-modal-topic {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px;
+  background: rgba(204,20,38,0.08);
+  border: 0.5px solid rgba(204,20,38,0.2);
+  border-radius: 980px;
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--ki-red-dark);
+  white-space: nowrap;
+  line-height: 1;
 }
 .masterclass-v2 .mc-seminar-subtitle {
   font-size: 12.5px;
@@ -2032,6 +2064,180 @@ html[data-sb="collapsed"] .sb-version { display: none; }
     justify-content: space-between;
     align-items: center;
   }
+}
+
+/* ── Seminar Detail Modal ─────────────────────────────────────────────── */
+.masterclass-v2 .mc-modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px) saturate(140%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  animation: mcModalFadeIn 0.18s ease-out;
+}
+@keyframes mcModalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.masterclass-v2 .mc-modal {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  width: 100%;
+  max-width: 640px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  box-shadow: 0 30px 90px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.15);
+  animation: mcModalSlideUp 0.22s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes mcModalSlideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.masterclass-v2 .mc-modal-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--fill-2); border: 0;
+  color: var(--label-3); font-size: 16px;
+  cursor: pointer; display: grid; place-items: center;
+  font-family: inherit;
+  transition: background 0.12s ease, color 0.12s ease;
+  z-index: 2;
+}
+.masterclass-v2 .mc-modal-close:hover {
+  background: var(--line-2); color: var(--label);
+}
+
+.masterclass-v2 .mc-modal-header {
+  display: flex; align-items: flex-start; gap: 18px;
+  padding: 32px 32px 20px;
+}
+.masterclass-v2 .mc-modal-icon {
+  width: 64px; height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  display: grid; place-items: center;
+  font-size: 30px;
+  flex-shrink: 0;
+}
+.masterclass-v2 .mc-modal-header-text { min-width: 0; flex: 1; padding-right: 32px; }
+.masterclass-v2 .mc-modal-eyebrow {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ki-red-dark);
+}
+.masterclass-v2 .mc-modal-title {
+  font-family: var(--sf);
+  font-size: 24px; font-weight: 600;
+  letter-spacing: -0.025em; line-height: 1.15;
+  color: var(--label);
+  margin: 4px 0 4px;
+}
+.masterclass-v2 .mc-modal-subtitle {
+  font-size: 14px; color: var(--ki-red-dark); font-weight: 600;
+}
+
+.masterclass-v2 .mc-modal-meta {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px 18px;
+  padding: 18px 32px;
+  background: var(--fill);
+  border-top: 0.5px solid var(--line-2);
+  border-bottom: 0.5px solid var(--line-2);
+}
+.masterclass-v2 .mc-modal-meta-item {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.masterclass-v2 .mc-modal-meta-item .lbl {
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--label-4);
+}
+.masterclass-v2 .mc-modal-meta-item .val {
+  font-size: 13.5px; font-weight: 500;
+  color: var(--label);
+}
+
+.masterclass-v2 .mc-modal-body {
+  padding: 24px 32px;
+}
+.masterclass-v2 .mc-modal-lead {
+  font-size: 15px; line-height: 1.6;
+  color: var(--label);
+  margin: 0 0 16px;
+}
+.masterclass-v2 .mc-modal-long {
+  font-size: 14px; line-height: 1.65;
+  color: var(--label-2);
+}
+.masterclass-v2 .mc-modal-long p { margin: 0 0 12px; }
+.masterclass-v2 .mc-modal-long ul {
+  margin: 8px 0 16px; padding-left: 20px;
+}
+.masterclass-v2 .mc-modal-long li { margin-bottom: 6px; }
+.masterclass-v2 .mc-modal-long h3, .masterclass-v2 .mc-modal-long h4 {
+  font-family: var(--sf); font-size: 15px; font-weight: 600;
+  color: var(--label); margin: 18px 0 8px;
+  letter-spacing: -0.015em;
+}
+.masterclass-v2 .mc-modal-long h3:first-child,
+.masterclass-v2 .mc-modal-long h4:first-child { margin-top: 0; }
+.masterclass-v2 .mc-modal-long strong { color: var(--label); font-weight: 600; }
+.masterclass-v2 .mc-modal-long blockquote {
+  margin: 14px 0;
+  padding: 12px 16px;
+  border-left: 3px solid var(--ki-red);
+  background: var(--fill);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--label);
+}
+.masterclass-v2 .mc-modal-placeholder {
+  padding: 14px 16px;
+  background: var(--fill);
+  border-radius: var(--r-md);
+  border: 0.5px dashed var(--line);
+  font-size: 13px; color: var(--label-3);
+  font-style: italic;
+}
+
+.masterclass-v2 .mc-modal-actions {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 20px 32px 32px;
+  border-top: 0.5px solid var(--line-2);
+}
+.masterclass-v2 .mc-modal-cta-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 13px 22px; border-radius: 980px;
+  background: var(--ki-red); color: #fff !important;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  text-decoration: none;
+  border: 0; cursor: pointer;
+  box-shadow: 0 1px 2px rgba(204,20,38,0.25), inset 0 0.5px 0 rgba(255,255,255,0.2);
+  transition: background 0.12s ease;
+}
+.masterclass-v2 .mc-modal-cta-primary:hover { background: var(--ki-red-dark); opacity: 1; }
+.masterclass-v2 .mc-modal-cta-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  padding: 12px 18px; border-radius: 980px;
+  background: transparent; color: var(--label-2);
+  border: 0.5px solid var(--line);
+  font-family: inherit; font-size: 13.5px; font-weight: 500;
+  text-decoration: none;
+  transition: background 0.12s ease;
+}
+.masterclass-v2 .mc-modal-cta-secondary:hover { background: var(--fill); }
+
+@media (max-width: 560px) {
+  .masterclass-v2 .mc-modal-overlay { padding: 0; align-items: flex-end; }
+  .masterclass-v2 .mc-modal {
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+  }
+  .masterclass-v2 .mc-modal-header,
+  .masterclass-v2 .mc-modal-meta,
+  .masterclass-v2 .mc-modal-body,
+  .masterclass-v2 .mc-modal-actions { padding-left: 20px; padding-right: 20px; }
+  .masterclass-v2 .mc-modal-meta { grid-template-columns: 1fr; }
+  .masterclass-v2 .mc-modal-title { font-size: 20px; }
 }
 
 /* ── Premium-Analyse-Tools grid (2-col, richer cards) ───────────── */

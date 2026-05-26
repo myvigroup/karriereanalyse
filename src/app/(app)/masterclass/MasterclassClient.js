@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 // ─── Hardcoded Inhalte (preserved from previous version) ─────────────────────
@@ -84,16 +84,239 @@ const COMING_SOON_MASTERCLASSES = [
 ];
 
 const SEMINARE = [
-  { id: 'sem-typgerecht', icon: '🧠', title: 'Typgerechtes Lernen', subtitle: 'Finde deinen Weg zum Wissen', description: 'Warum lernen, denken und vergessen wir unterschiedlich?', next_date: '2026-04-18' },
-  { id: 'sem-worklife', icon: '⚖️', title: 'Work-Life-Balance', subtitle: 'Gesundheit trifft Leistung', description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.', next_date: '2026-05-09' },
-  { id: 'sem-leadership', icon: '👑', title: 'Personal Leadership', subtitle: 'Authentisch führen, wirksam bleiben', description: 'Wie du aus Wünschen echte Ziele machst und sie erreichst.', next_date: '2026-06-13' },
-  { id: 'sem-speedreading', icon: '📖', title: 'Speedreading', subtitle: 'Geschwindigkeit trifft Verständnis', description: 'Grundlagen des überdurchschnittlich schnellen Lesens mit hohem Textverständnis.', next_date: '2026-07-11' },
-  { id: 'sem-achtsamkeit', icon: '🧘', title: 'Achtsamkeit', subtitle: 'Gelassenheit ist trainierbar', description: 'Zeit für dich und die eigenen Bedürfnisse — neben Beruf und reizüberflutetem Alltag.', next_date: '2026-08-08' },
-  { id: 'sem-rhetorik', icon: '🎤', title: 'Rhetorik & Dialektik', subtitle: 'Überzeugen mit Worten und Wirkung', description: 'Wirkungsvoll, passend und adressatengerecht kommunizieren in jeder Situation.', next_date: '2026-09-12' },
-  { id: 'sem-motivation', icon: '🔥', title: 'Selbstmotivation', subtitle: 'Dein Warum, dein Motor', description: 'Wie du dich effektiv motivierst und langfristig diszipliniert an deinen Zielen arbeitest.', next_date: '2026-10-10' },
-  { id: 'sem-kommunikation', icon: '💬', title: 'Kommunikation', subtitle: 'Verständigung als Schlüssel zum Erfolg', description: 'Effektive Kommunikation mit Kollegen und Geschäftspartnern.', next_date: '2026-11-14' },
-  { id: 'sem-konflikt', icon: '🤜', title: 'Konfliktmanagement', subtitle: 'Aus Krisen Chancen machen', description: 'Strategien und Techniken zur erfolgreichen Konfliktbewältigung.', next_date: '2026-12-12' },
-  { id: 'sem-homeoffice', icon: '🏠', title: 'Arbeiten im Home Office', subtitle: 'Effizient arbeiten, flexibel leben', description: 'Ausgeglichen und effektiv arbeiten — auch von zu Hause.', next_date: '2027-01-09' },
+  { id: 'sem-typgerecht', icon: '🧠', topic: 'Typgerechtes Lernen', title: 'Lern dich smart', subtitle: 'So funktioniert dein Gehirn wirklich', description: 'Warum lernen, denken und vergessen wir unterschiedlich?', next_date: '2026-04-18' },
+  { id: 'sem-worklife', icon: '⚖️', topic: 'Work-Life-Balance', title: 'Leistung ohne Burnout', subtitle: 'Karriere machen, ohne dabei kaputtzugehen', description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.', next_date: '2026-05-09' },
+  {
+    id: 'sem-leadership',
+    icon: '👑',
+    topic: 'Personal Leadership',
+    title: 'Endlich tun, was du dir vornimmst',
+    subtitle: 'Selbstführung — vom Wollen zum Wirken',
+    description: 'Wie du aus Wünschen echte Ziele machst und sie erreichst.',
+    next_date: '2026-06-13',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/personal-leadership-authentisch-f%C3%BChren-wirksam-bleiben-26?c=811',
+    rating: '4.9',
+    ratingCount: 36,
+    bookableUntil: 'Fr. 12. Juni 2026, 21:59',
+    longDescription: `
+      <h4>Führe dich selbst, bevor du andere führst</h4>
+      <p>Das Seminar <strong>„Personal Leadership“</strong> richtet sich an <strong>Studenten, Berufseinsteiger und Berufstätige</strong>, die ihre Fähigkeit zur <strong>Selbstführung</strong> auf ein neues Level bringen wollen. Denn wahre Führung beginnt nicht mit einem Titel — sondern mit dem <strong>klaren Umgang mit den eigenen Zielen, Entscheidungen und Gewohnheiten</strong>.</p>
+
+      <h4>🚀 Was dich im Seminar erwartet</h4>
+      <p>Unsere erfahrenen Referenten zeigen dir, <strong>wie aus Zielen ECHTE Ziele werden</strong> — konkret, erreichbar und motivierend. Du lernst, wie du:</p>
+      <ul>
+        <li>deine <strong>Ziele richtig formulierst</strong>, sodass sie wirklich motivieren</li>
+        <li><strong>getroffene Maßnahmen konsequent umsetzt</strong></li>
+        <li>neue Gewohnheiten <strong>nachhaltig in deinen Alltag integrierst</strong></li>
+        <li>dein <strong>Zeit- und Selbstmanagement</strong> effektiv steuerst — statt dich selbst auszubremsen</li>
+      </ul>
+      <p>Du bekommst nicht nur theoretische Impulse, sondern vor allem <strong>praxisnahe Tools und Übungen</strong>, mit denen du sofort ins Umsetzen kommst.</p>
+
+      <h4>🎯 Dein Ziel nach dem Seminar</h4>
+      <p>Du wirst lernen, wie du <strong>Verantwortung für dich selbst übernimmst</strong>, klare Prioritäten setzt und aus deinen guten Vorsätzen <strong>konkrete Ergebnisse</strong> machst.</p>
+      <blockquote>Personal Leadership heißt: bewusste Entscheidungen treffen — jeden Tag.</blockquote>
+
+      <h4>📋 Voraussetzungen</h4>
+      <p>Bitte wähle dich <strong>5–10 Minuten vor Beginn</strong> ein und mache einen kurzen <strong>Technik-Check</strong> (Audio, Kamera, Internetverbindung). Während des Seminars bitten wir dich, deine Kamera aktiv zu halten und dich mit Wortbeiträgen einzubringen — die Interaktion mit Referenten und Teilnehmenden ist zentraler Bestandteil und entscheidend für den Praxistransfer.</p>
+    `,
+  },
+  {
+    id: 'sem-speedreading',
+    icon: '📖',
+    topic: 'Speedreading',
+    title: 'Lies doppelt so schnell',
+    subtitle: 'Mehr Wissen in halber Zeit — ohne Verständnis-Verlust',
+    description: 'Grundlagen des überdurchschnittlich schnellen Lesens mit hohem Textverständnis.',
+    next_date: '2026-07-11',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/speedreading-geschwindigkeit-trifft-verst%C3%A4ndnis-34?c=812',
+    rating: '5.0',
+    ratingCount: 4,
+    bookableUntil: 'Fr. 10. Juli 2026, 21:59',
+    longDescription: `
+      <h4>Schnelllesen leicht gemacht</h4>
+      <p>In einer Welt, die von Informationen überflutet wird, ist die Fähigkeit, <strong>effizient und schnell zu lesen</strong>, unschätzbar wertvoll. Dieses Seminar bringt dir Techniken und Strategien bei, mit denen du deine <strong>Lesegeschwindigkeit verdoppeln oder verdreifachen</strong> kannst — ohne das Verständnis zu opfern.</p>
+
+      <h4>🚀 Was dich erwartet</h4>
+      <ul>
+        <li><strong>Grundlagen des Speedreadings</strong> — wissenschaftliche Hintergründe und Vorteile</li>
+        <li><strong>Augenbewegung & visuelle Wahrnehmung</strong> gezielt verbessern</li>
+        <li><strong>Wörter gruppieren</strong> — mehrere Wörter auf einmal erfassen</li>
+        <li><strong>Interaktive Lesetests</strong> zur Fortschrittsmessung</li>
+        <li>Konzentration und <strong>Textverständnis</strong> nachhaltig steigern</li>
+      </ul>
+
+      <h4>🎯 Dein Nutzen</h4>
+      <ul>
+        <li><strong>Zeitersparnis</strong> — mehr in kürzerer Zeit lesen, höhere Produktivität</li>
+        <li><strong>Karrierevorteil</strong> — große Informationsmengen schnell verarbeiten</li>
+        <li><strong>Lebenslange Lernfähigkeit</strong> — kontinuierlich neues Wissen aufnehmen</li>
+      </ul>
+      <blockquote>Starte jetzt und entdecke, wie Speedreading deine Effizienz und Produktivität steigern kann.</blockquote>
+
+      <h4>📋 Voraussetzungen</h4>
+      <p>Grundlegende Lesefähigkeiten, ein digitales Gerät mit Internetzugang sowie <strong>Motivation und Offenheit</strong> für neue Techniken. Der Kurs ist für Anfänger und Fortgeschrittene gleichermaßen geeignet.</p>
+    `,
+  },
+  {
+    id: 'sem-achtsamkeit',
+    icon: '🧘',
+    topic: 'Achtsamkeit',
+    title: 'Raus aus dem Kopfkarussell',
+    subtitle: 'Innere Ruhe, die im Alltag wirklich hält',
+    description: 'Zeit für dich und die eigenen Bedürfnisse — neben Beruf und reizüberflutetem Alltag.',
+    next_date: '2026-08-08',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/achtsamkeit-gelassenheit-ist-trainierbar-48',
+    bookableUntil: 'Fr. 7. August 2026, 21:59',
+    longDescription: `
+      <h4>Achtsamkeit beginnt im Moment</h4>
+      <p>Im Seminar <strong>„Achtsamkeit"</strong> entdeckst du, wie wohltuend es sein kann, <strong>bewusst innezuhalten</strong> und den Moment wirklich wahrzunehmen.</p>
+      <p>Gemeinsam erlernen wir wirkungsvolle Techniken wie <strong>Atemübungen, Meditation und Körperwahrnehmung</strong>, um mit mehr Ruhe, Klarheit und Präsenz durch den Alltag zu gehen.</p>
+
+      <h4>🎯 Ziel des Seminars</h4>
+      <p>Achtsamkeit nicht nur als kurzfristige Entspannung erleben, sondern <strong>nachhaltig in den eigenen Alltag integrieren</strong> — sei es im Beruf, in Beziehungen oder im Umgang mit sich selbst. Du lernst, <strong>bewusst Zeit für dich selbst zu schaffen</strong>, Körper, Geist und Emotionen in Einklang zu bringen und besser mit Stress und innerer Anspannung umzugehen.</p>
+
+      <h4>✨ Die Vorteile</h4>
+      <p><strong>Weniger Stress. Mehr Fokus. Mehr Lebensfreude.</strong></p>
+      <blockquote>Wer regelmäßig Achtsamkeit praktiziert, schafft Raum für echte Veränderung — hin zu einem achtsameren, gesünderen und erfüllteren Leben.</blockquote>
+
+      <h4>📋 Voraussetzungen</h4>
+      <p>5–10 Minuten vor Beginn einwählen, Technik-Check (Audio, Kamera, Internet), Kamera aktiv halten und sich mit Wortbeiträgen einbringen. Die Interaktion mit Referenten und Teilnehmenden ist zentral für den Praxistransfer.</p>
+    `,
+  },
+  {
+    id: 'sem-rhetorik',
+    icon: '🎤',
+    topic: 'Rhetorik · Dialektik · Kinesik',
+    title: 'Wenn du sprichst, hören alle zu',
+    subtitle: 'Souverän reden · klar argumentieren · sicher wirken',
+    description: 'Wirkungsvoll, passend und adressatengerecht kommunizieren in jeder Situation.',
+    next_date: '2026-09-12',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/rhetorik-dialektik-kinesik-%C3%BCberzeugen-mit-worten-und-wirkung-30',
+    rating: '4.9',
+    ratingCount: 19,
+    bookableUntil: 'Fr. 11. September 2026, 21:59',
+    longDescription: `
+      <h4>Souverän auftreten, überzeugend kommunizieren</h4>
+      <p>Du möchtest in Gesprächen <strong>sicherer auftreten</strong>, deine <strong>Sprache gezielter einsetzen</strong> und mit deiner <strong>Körpersprache bewusst wirken</strong>? Dieses Seminar richtet sich speziell an <strong>Studenten und Berufseinsteiger</strong>, die ihre mündlichen Kommunikationsfähigkeiten verbessern und ihre Wirkung auf andere gezielt stärken möchten.</p>
+
+      <h4>📌 Das erwartet dich</h4>
+      <ul>
+        <li><strong>Grundlagen der Rhetorik</strong> — klar sprechen, stark argumentieren, gezielt überzeugen</li>
+        <li><strong>Einführung in die Dialektik</strong> — souverän argumentieren, Einwände entkräften, Gespräche führen statt verlieren</li>
+        <li><strong>Kinesik verstehen und nutzen</strong> — Körpersprache erkennen, bewusst einsetzen, Wirkung steigern</li>
+        <li>Tipps & Techniken für <strong>Vorstellungsgespräch, Smalltalk, Konflikt und Präsentation</strong></li>
+        <li><strong>Praktische Übungen & individuelles Feedback</strong> — direkt anwenden, direkt verbessern</li>
+      </ul>
+
+      <h4>🎯 Dein Ziel</h4>
+      <p>Du lernst, wie <strong>Sprache, Argumentation und Körpersprache</strong> zusammenspielen — und wie du diese drei Elemente in unterschiedlichen Situationen gezielt einsetzt, um mehr Wirkung zu erzielen.</p>
+      <blockquote>Kommunikation ist kein Talent — sondern ein Handwerk. Und du kannst es lernen.</blockquote>
+
+      <h4>📋 Voraussetzungen</h4>
+      <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen — entscheidend für den Praxistransfer.</p>
+    `,
+  },
+  {
+    id: 'sem-motivation',
+    icon: '🔥',
+    topic: 'Selbstmotivation',
+    title: 'Wenn der innere Schweinehund verliert',
+    subtitle: 'Antrieb, der bleibt — auch an Montagen',
+    description: 'Wie du dich effektiv motivierst und langfristig diszipliniert an deinen Zielen arbeitest.',
+    next_date: '2026-10-10',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/selbstmotivation-dein-warum-dein-motor-55',
+    rating: '4.7',
+    ratingCount: 17,
+    bookableUntil: 'Fr. 9. Oktober 2026, 21:59',
+    longDescription: `
+      <h4>Dein Schlüssel zu mehr Antrieb und Leistung</h4>
+      <p>In diesem inspirierenden Seminar lernst du, wie du deine <strong>innere Kraftquelle aktivierst</strong> und dich selbst immer wieder neu motivierst — ganz ohne äußeren Druck. Du entdeckst, wie du deine <strong>Leistungsfähigkeit nachhaltig steigerst</strong> und selbst in anspruchsvollen Zeiten <strong>fokussiert und energiegeladen</strong> bleibst.</p>
+      <p>Wir stellen dir <strong>wirkungsvolle Methoden und Motivationstechniken</strong> vor, die du direkt im Alltag anwenden kannst. Mit praktischen Übungen stärkst du dein Bewusstsein für deine eigenen Motive und findest neue Wege, dich selbst ins Handeln zu bringen.</p>
+
+      <h4>🔍 Diese Themen erwarten dich</h4>
+      <ul>
+        <li>Die <strong>Grundlagen der Motivation</strong> — was Menschen wirklich antreibt</li>
+        <li><strong>Motivationstheorien</strong> praktisch erklärt und angewendet</li>
+        <li>Eigene <strong>Bedürfnisse und innere Motive</strong> besser verstehen</li>
+        <li><strong>Konkrete Werkzeuge</strong>, um Motivation gezielt zu aktivieren</li>
+        <li>Strategien zum Umgang mit <strong>Motivationskillern und inneren Widerständen</strong></li>
+      </ul>
+
+      <h4>🎯 Dein Ziel</h4>
+      <p>Schluss mit <strong>Aufschieberitis und Selbstzweifeln</strong> — entwickle eine Motivation, die von innen kommt. Für mehr <strong>Klarheit, Energie und Selbstbestimmung</strong>.</p>
+      <blockquote>Selbstmotivation ist kein Zufall — sie ist erlernbar.</blockquote>
+
+      <h4>📋 Voraussetzungen</h4>
+      <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen.</p>
+    `,
+  },
+  {
+    id: 'sem-kommunikation',
+    icon: '💬',
+    topic: 'Kommunikation',
+    title: 'Sag, was du meinst — werd verstanden',
+    subtitle: 'Klartext, der wirkt — ohne zu verletzen',
+    description: 'Effektive Kommunikation mit Kollegen und Geschäftspartnern.',
+    next_date: '2026-11-14',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/kommunikation-verst%C3%A4ndigung-als-schl%C3%BCssel-zum-erfolg-21',
+    rating: '4.6',
+    ratingCount: 10,
+    bookableUntil: 'Fr. 13. November 2026, 22:59',
+    longDescription: `
+      <h4>Klar, empathisch und wirkungsvoll kommunizieren</h4>
+      <p>Dieses Seminar richtet sich an <strong>Fach- und Führungskräfte</strong>, die ihre Kommunikationsfähigkeiten gezielt weiterentwickeln möchten, um im Berufsalltag <strong>klarer, empathischer und überzeugender</strong> zu kommunizieren — ob im Team, mit Kunden oder Geschäftspartnern.</p>
+      <p>Du lernst die Grundlagen erfolgreicher Kommunikation kennen und erfährst, wie du <strong>Missverständnisse vermeidest</strong>, Gespräche zielgerichtet führst und eine <strong>vertrauensvolle Zusammenarbeit</strong> förderst.</p>
+
+      <h4>📌 Im Fokus</h4>
+      <ul>
+        <li><strong>Aktives Zuhören</strong> und klare Botschaften</li>
+        <li><strong>Wertschätzendes Feedback</strong> geben und empfangen</li>
+        <li>Konstruktiver Umgang mit <strong>Konflikten und Spannungen</strong></li>
+        <li>Bewusste Gesprächsführung und nonverbale Signale richtig deuten</li>
+      </ul>
+
+      <h4>🎯 Dein Ziel</h4>
+      <p>Du erhältst praxisnahe Werkzeuge, mit denen du in jeder Situation <strong>sicher, klar und empathisch kommunizieren</strong> kannst. Ob in Mitarbeitergesprächen, Kundenkontakten oder Team-Meetings — deine Kommunikation wird wirksamer, klarer und verbindlicher.</p>
+      <blockquote>Für mehr Klarheit, Vertrauen und Erfolg im Berufsalltag.</blockquote>
+
+      <h4>📋 Voraussetzungen</h4>
+      <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen.</p>
+    `,
+  },
+  {
+    id: 'sem-konflikt',
+    icon: '🤜',
+    topic: 'Konfliktmanagement',
+    title: 'Wenn’s knallt, bleibst du cool',
+    subtitle: 'Streit deeskalieren, statt davor zu zittern',
+    description: 'Strategien und Techniken zur erfolgreichen Konfliktbewältigung.',
+    next_date: '2026-12-12',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/konfliktmanagement-aus-krisen-chancen-machen-52',
+    rating: '5.0',
+    ratingCount: 6,
+    bookableUntil: 'Fr. 11. Dezember 2026, 22:59',
+    longDescription: `
+      <h4>Souverän und lösungsorientiert mit Konflikten umgehen</h4>
+      <p>Konflikte gehören zum Berufsleben — entscheidend ist, <strong>wie du mit ihnen umgehst</strong>. In diesem Seminar lernst du die wichtigsten <strong>Strategien und Techniken zur erfolgreichen Konfliktbewältigung</strong> — von der frühzeitigen Vermeidung bis zur professionellen Lösung bereits entstandener Konflikte.</p>
+      <p>Du erfährst, wie du <strong>Konfliktsituationen richtig analysierst</strong>, konstruktiv kommunizierst und <strong>Konfliktgespräche zielgerichtet und deeskalierend führst</strong>.</p>
+
+      <h4>📌 Besonderer Fokus</h4>
+      <ul>
+        <li><strong>Reflexion eigener Konflikterfahrungen</strong> — beruflich wie privat</li>
+        <li>Entwicklung <strong>praxisnaher, individueller Lösungsansätze</strong></li>
+        <li>Mit <strong>emotionalen Situationen ruhig und empathisch</strong> umgehen</li>
+        <li>Auch in schwierigen Momenten eine <strong>konstruktive Haltung</strong> bewahren</li>
+      </ul>
+
+      <h4>🎯 Dein Ziel</h4>
+      <p>Du wirst befähigt, <strong>Konflikte frühzeitig zu erkennen</strong>, souverän zu handeln und Spannungen aktiv in <strong>produktive Lösungen zu verwandeln</strong>. So stärkst du deine persönliche Konfliktkompetenz und trägst aktiv zu einem besseren Miteinander im Arbeitsalltag bei.</p>
+      <blockquote>Werde zum sicheren und lösungsorientierten Konfliktmanager in deinem beruflichen Umfeld.</blockquote>
+
+      <h4>📋 Voraussetzungen</h4>
+      <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen.</p>
+    `,
+  },
+  { id: 'sem-homeoffice', icon: '🏠', topic: 'Arbeiten im Home Office', title: 'Home-Office-Profi statt Pyjama-Falle', subtitle: 'Fokus & Struktur — auch ohne Chef im Nacken', description: 'Ausgeglichen und effektiv arbeiten — auch von zu Hause.', next_date: '2027-01-09' },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -153,6 +376,27 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
     () => activeCat === 'alle' ? eLearningCourses : eLearningCourses.filter(c => (c.category || 'e-learning') === activeCat),
     [eLearningCourses, activeCat]
   );
+
+  // Seminar-Modal-State + automatische Filterung vergangener Termine
+  const [openSeminar, setOpenSeminar] = useState(null);
+  const upcomingSeminars = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return SEMINARE.filter(s => new Date(s.next_date) >= today);
+  }, []);
+
+  // ESC schließt Modal + Scroll-Lock
+  useEffect(() => {
+    if (!openSeminar) return;
+    const onKey = (e) => { if (e.key === 'Escape') setOpenSeminar(null); };
+    document.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [openSeminar]);
 
   return (
     <div className="masterclass-v2">
@@ -307,19 +551,19 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
         ))}
       </div>
 
-      {/* Section: Live-Seminare */}
+      {/* Section: Live-Seminare (nur kommende Termine — vergangene werden automatisch ausgeblendet) */}
       <div className="mc-secthead" style={{ marginTop: 'calc(var(--gap) * 1.5)' }}>
-        <h3>Live-Seminare <span className="count">{SEMINARE.length}</span></h3>
+        <h3>Live-Seminare <span className="count">{upcomingSeminars.length}</span></h3>
         <span className="link">monatlich · 90 Min · interaktiv</span>
       </div>
       <div className="mc-seminar-list">
-        {SEMINARE.map(s => {
+        {upcomingSeminars.map(s => {
           const registered = registeredSeminarIds.has(s.id);
           const nextDate = new Date(s.next_date);
           const dateStr = nextDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' });
           const weekday = nextDate.toLocaleDateString('de-DE', { weekday: 'short' });
           return (
-            <div key={s.id} className="mc-seminar-row" onClick={() => router.push('/seminare')} role="button" tabIndex={0}>
+            <div key={s.id} className="mc-seminar-row" onClick={() => setOpenSeminar(s)} role="button" tabIndex={0}>
               <div className="mc-seminar-date">
                 <span className="mc-seminar-date-day">{nextDate.getDate()}</span>
                 <span className="mc-seminar-date-month">{nextDate.toLocaleDateString('de-DE', { month: 'short' })}</span>
@@ -327,7 +571,10 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
               </div>
               <div className="mc-seminar-icon">{s.icon}</div>
               <div className="mc-seminar-body">
-                <div className="mc-seminar-title">{s.title}</div>
+                <div className="mc-seminar-titlerow">
+                  <div className="mc-seminar-title">{s.title}</div>
+                  {s.topic && <span className="mc-seminar-topic">{s.topic}</span>}
+                </div>
                 <div className="mc-seminar-subtitle">{s.subtitle}</div>
                 <div className="mc-seminar-desc">{s.description}</div>
               </div>
@@ -346,6 +593,94 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
           );
         })}
       </div>
+
+      {/* Seminar Detail Modal */}
+      {openSeminar && (() => {
+        const sem = openSeminar;
+        const registered = registeredSeminarIds.has(sem.id);
+        const nextDate = new Date(sem.next_date);
+        const dateStr = nextDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+        return (
+          <div className="mc-modal-overlay" onClick={() => setOpenSeminar(null)}>
+            <div className="mc-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={sem.title}>
+              <button className="mc-modal-close" onClick={() => setOpenSeminar(null)} aria-label="Schließen">✕</button>
+
+              <div className="mc-modal-header">
+                <div className="mc-modal-icon">{sem.icon}</div>
+                <div className="mc-modal-header-text">
+                  <div className="mc-modal-eyebrow">
+                    Live-Seminar
+                    {sem.topic && <span className="mc-modal-topic">{sem.topic}</span>}
+                  </div>
+                  <h2 className="mc-modal-title">{sem.title}</h2>
+                  <div className="mc-modal-subtitle">{sem.subtitle}</div>
+                </div>
+              </div>
+
+              <div className="mc-modal-meta">
+                <div className="mc-modal-meta-item">
+                  <span className="lbl">Nächster Termin</span>
+                  <span className="val">{dateStr}</span>
+                </div>
+                <div className="mc-modal-meta-item">
+                  <span className="lbl">Dauer</span>
+                  <span className="val">90 Minuten</span>
+                </div>
+                <div className="mc-modal-meta-item">
+                  <span className="lbl">Format</span>
+                  <span className="val">Microsoft Teams · interaktiv</span>
+                </div>
+                <div className="mc-modal-meta-item">
+                  <span className="lbl">{sem.rating ? 'Bewertung' : 'Zertifikat'}</span>
+                  <span className="val">
+                    {sem.rating
+                      ? `★ ${sem.rating}/5 · ${sem.ratingCount} Bewertungen`
+                      : 'nach Teilnahme'}
+                  </span>
+                </div>
+                {sem.bookableUntil && (
+                  <div className="mc-modal-meta-item" style={{ gridColumn: '1 / -1' }}>
+                    <span className="lbl">Buchbar bis</span>
+                    <span className="val">{sem.bookableUntil}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="mc-modal-body">
+                <p className="mc-modal-lead">{sem.description}</p>
+                {sem.longDescription && (
+                  <div className="mc-modal-long" dangerouslySetInnerHTML={{ __html: sem.longDescription }} />
+                )}
+                {!sem.longDescription && (
+                  <p className="mc-modal-placeholder">
+                    Ausführliche Beschreibung folgt — die Detail-Inhalte werden gerade aus den bestehenden Seminar-Seiten übernommen.
+                  </p>
+                )}
+              </div>
+
+              <div className="mc-modal-actions">
+                {registered ? (
+                  <span className="mc-seminar-badge done" style={{ padding: '10px 16px', fontSize: 13 }}>✓ Bereits angemeldet</span>
+                ) : !isPremium ? (
+                  <>
+                    <a href="/angebote" className="mc-modal-cta-primary">Premium starten · ab 15 €/Monat</a>
+                    <a href="/seminare" className="mc-modal-cta-secondary">Einzeln buchen · 99 €</a>
+                  </>
+                ) : (
+                  <a href={sem.linkUrl || '/seminare'} className="mc-modal-cta-primary" target={sem.linkUrl ? '_blank' : undefined} rel={sem.linkUrl ? 'noopener noreferrer' : undefined}>
+                    Jetzt anmelden →
+                  </a>
+                )}
+                {sem.linkUrl && (
+                  <a href={sem.linkUrl} target="_blank" rel="noopener noreferrer" className="mc-modal-cta-secondary">
+                    Vollständige Beschreibung öffnen →
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Section: Premium-Analyse-Tools */}
       <div className="mc-secthead" style={{ marginTop: 'calc(var(--gap) * 1.5)' }}>
