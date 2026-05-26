@@ -84,14 +84,13 @@ const COMING_SOON_MASTERCLASSES = [
 ];
 
 const SEMINARE = [
-  { id: 'sem-typgerecht', icon: '🧠', topic: 'Typgerechtes Lernen', title: 'Lern dich smart', subtitle: 'So funktioniert dein Gehirn wirklich', description: 'Warum lernen, denken und vergessen wir unterschiedlich?', next_date: '2026-04-18' },
-  { id: 'sem-worklife', icon: '⚖️', topic: 'Work-Life-Balance', title: 'Leistung ohne Burnout', subtitle: 'Karriere machen, ohne dabei kaputtzugehen', description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.', next_date: '2026-05-09' },
+  { id: 'sem-typgerecht', icon: '🧠', title: 'Typgerechtes Lernen', subtitle: 'Lern dich smart — so funktioniert dein Gehirn wirklich', description: 'Warum lernen, denken und vergessen wir unterschiedlich?', next_date: '2026-04-18' },
+  { id: 'sem-worklife', icon: '⚖️', title: 'Work-Life-Balance', subtitle: 'Leistung ohne Burnout — Karriere ohne kaputtzugehen', description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.', next_date: '2026-05-09' },
   {
     id: 'sem-leadership',
     icon: '👑',
-    topic: 'Personal Leadership',
-    title: 'Endlich tun, was du dir vornimmst',
-    subtitle: 'Selbstführung — vom Wollen zum Wirken',
+    title: 'Personal Leadership',
+    subtitle: 'Endlich tun, was du dir vornimmst',
     description: 'Wie du aus Wünschen echte Ziele machst und sie erreichst.',
     next_date: '2026-06-13',
     linkUrl: 'https://www.daskarriereinstitut.de/de/e/personal-leadership-authentisch-f%C3%BChren-wirksam-bleiben-26?c=811',
@@ -123,9 +122,8 @@ const SEMINARE = [
   {
     id: 'sem-speedreading',
     icon: '📖',
-    topic: 'Speedreading',
-    title: 'Lies doppelt so schnell',
-    subtitle: 'Mehr Wissen in halber Zeit — ohne Verständnis-Verlust',
+    title: 'Speedreading',
+    subtitle: 'Lies doppelt so schnell — ohne Verständnis-Verlust',
     description: 'Grundlagen des überdurchschnittlich schnellen Lesens mit hohem Textverständnis.',
     next_date: '2026-07-11',
     linkUrl: 'https://www.daskarriereinstitut.de/de/e/speedreading-geschwindigkeit-trifft-verst%C3%A4ndnis-34?c=812',
@@ -160,9 +158,8 @@ const SEMINARE = [
   {
     id: 'sem-achtsamkeit',
     icon: '🧘',
-    topic: 'Achtsamkeit',
-    title: 'Raus aus dem Kopfkarussell',
-    subtitle: 'Innere Ruhe, die im Alltag wirklich hält',
+    title: 'Achtsamkeit',
+    subtitle: 'Raus aus dem Kopfkarussell — innere Ruhe, die hält',
     description: 'Zeit für dich und die eigenen Bedürfnisse — neben Beruf und reizüberflutetem Alltag.',
     next_date: '2026-08-08',
     linkUrl: 'https://www.daskarriereinstitut.de/de/e/achtsamkeit-gelassenheit-ist-trainierbar-48',
@@ -186,9 +183,8 @@ const SEMINARE = [
   {
     id: 'sem-rhetorik',
     icon: '🎤',
-    topic: 'Rhetorik · Dialektik · Kinesik',
-    title: 'Wenn du sprichst, hören alle zu',
-    subtitle: 'Souverän reden · klar argumentieren · sicher wirken',
+    title: 'Rhetorik, Dialektik, Kinesik',
+    subtitle: 'Wenn du sprichst, hören alle zu',
     description: 'Wirkungsvoll, passend und adressatengerecht kommunizieren in jeder Situation.',
     next_date: '2026-09-12',
     linkUrl: 'https://www.daskarriereinstitut.de/de/e/rhetorik-dialektik-kinesik-%C3%BCberzeugen-mit-worten-und-wirkung-30',
@@ -219,9 +215,8 @@ const SEMINARE = [
   {
     id: 'sem-motivation',
     icon: '🔥',
-    topic: 'Selbstmotivation',
-    title: 'Wenn der innere Schweinehund verliert',
-    subtitle: 'Antrieb, der bleibt — auch an Montagen',
+    title: 'Selbstmotivation',
+    subtitle: 'Wenn der innere Schweinehund verliert',
     description: 'Wie du dich effektiv motivierst und langfristig diszipliniert an deinen Zielen arbeitest.',
     next_date: '2026-10-10',
     linkUrl: 'https://www.daskarriereinstitut.de/de/e/selbstmotivation-dein-warum-dein-motor-55',
@@ -253,9 +248,8 @@ const SEMINARE = [
   {
     id: 'sem-kommunikation',
     icon: '💬',
-    topic: 'Kommunikation',
-    title: 'Sag, was du meinst — werd verstanden',
-    subtitle: 'Klartext, der wirkt — ohne zu verletzen',
+    title: 'Kommunikation',
+    subtitle: 'Sag, was du meinst — werd verstanden',
     description: 'Effektive Kommunikation mit Kollegen und Geschäftspartnern.',
     next_date: '2026-11-14',
     linkUrl: 'https://www.daskarriereinstitut.de/de/e/kommunikation-verst%C3%A4ndigung-als-schl%C3%BCssel-zum-erfolg-21',
@@ -286,9 +280,8 @@ const SEMINARE = [
   {
     id: 'sem-konflikt',
     icon: '🤜',
-    topic: 'Konfliktmanagement',
-    title: 'Wenn’s knallt, bleibst du cool',
-    subtitle: 'Streit deeskalieren, statt davor zu zittern',
+    title: 'Konfliktmanagement',
+    subtitle: 'Wenn’s knallt, bleibst du cool',
     description: 'Strategien und Techniken zur erfolgreichen Konfliktbewältigung.',
     next_date: '2026-12-12',
     linkUrl: 'https://www.daskarriereinstitut.de/de/e/konfliktmanagement-aus-krisen-chancen-machen-52',
@@ -316,7 +309,7 @@ const SEMINARE = [
       <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen.</p>
     `,
   },
-  { id: 'sem-homeoffice', icon: '🏠', topic: 'Arbeiten im Home Office', title: 'Home-Office-Profi statt Pyjama-Falle', subtitle: 'Fokus & Struktur — auch ohne Chef im Nacken', description: 'Ausgeglichen und effektiv arbeiten — auch von zu Hause.', next_date: '2027-01-09' },
+  { id: 'sem-homeoffice', icon: '🏠', title: 'Arbeiten im Home Office', subtitle: 'Home-Office-Profi statt Pyjama-Falle', description: 'Ausgeglichen und effektiv arbeiten — auch von zu Hause.', next_date: '2027-01-09' },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -571,10 +564,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
               </div>
               <div className="mc-seminar-icon">{s.icon}</div>
               <div className="mc-seminar-body">
-                <div className="mc-seminar-titlerow">
-                  <div className="mc-seminar-title">{s.title}</div>
-                  {s.topic && <span className="mc-seminar-topic">{s.topic}</span>}
-                </div>
+                <div className="mc-seminar-title">{s.title}</div>
                 <div className="mc-seminar-subtitle">{s.subtitle}</div>
                 <div className="mc-seminar-desc">{s.description}</div>
               </div>
@@ -608,10 +598,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
               <div className="mc-modal-header">
                 <div className="mc-modal-icon">{sem.icon}</div>
                 <div className="mc-modal-header-text">
-                  <div className="mc-modal-eyebrow">
-                    Live-Seminar
-                    {sem.topic && <span className="mc-modal-topic">{sem.topic}</span>}
-                  </div>
+                  <div className="mc-modal-eyebrow">Live-Seminar</div>
                   <h2 className="mc-modal-title">{sem.title}</h2>
                   <div className="mc-modal-subtitle">{sem.subtitle}</div>
                 </div>
