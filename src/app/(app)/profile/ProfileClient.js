@@ -1,326 +1,506 @@
 'use client';
-
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { getLevel, getLevelProgress } from '@/lib/career-logic';
-import InfoTooltip from '@/components/ui/InfoTooltip';
-import { KARRIERE_PHASEN_AUSWAHL } from '@/lib/elearning/zielgruppen-config';
 
-export default function ProfileClient({ profile: initialProfile, userBadges, allBadges, analysisSession, lessonsCompleted, certificates, userId }) {
+// ─── Icons ───────────────────────────────────────────────────────────────────
+function Icon({ name, size = 14, stroke = 1.7 }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
+              stroke: 'currentColor', strokeWidth: stroke,
+              strokeLinecap: 'round', strokeLinejoin: 'round' };
+  switch (name) {
+    case 'user':     return (<svg {...p}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>);
+    case 'mail':     return (<svg {...p}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>);
+    case 'phone':    return (<svg {...p}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>);
+    case 'brief':    return (<svg {...p}><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>);
+    case 'pin':      return (<svg {...p}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>);
+    case 'globe':    return (<svg {...p}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>);
+    case 'target':   return (<svg {...p}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>);
+    case 'wallet':   return (<svg {...p}><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"/></svg>);
+    case 'trend':    return (<svg {...p}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>);
+    case 'spark':    return (<svg {...p}><path d="M5 3v4M3 5h4M19 17v4M17 19h4M12 2l2.4 5.1L20 9l-5.1 2.4L12 16l-2.4-5L4 9l5.4-2L12 2z"/></svg>);
+    case 'flame':    return (<svg {...p}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>);
+    case 'cal':      return (<svg {...p}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>);
+    case 'edit':     return (<svg {...p}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>);
+    case 'check':    return (<svg {...p}><polyline points="20 6 9 17 4 12"/></svg>);
+    case 'lock':     return (<svg {...p}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
+    case 'shield':   return (<svg {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>);
+    case 'eye':      return (<svg {...p}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>);
+    case 'logout':   return (<svg {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>);
+    case 'camera':   return (<svg {...p}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>);
+    case 'star':     return (<svg {...p}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>);
+    case 'doc':      return (<svg {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>);
+    default: return null;
+  }
+}
+
+export default function ProfileClient({ profile, userBadges, allBadges, analysisSession, lessonsCompleted, certificates, userId }) {
+  const router = useRouter();
   const supabase = createClient();
-  const [profile, setProfile] = useState(initialProfile);
+
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    name: profile?.name || '',
+    first_name: profile?.first_name || '',
+    last_name: profile?.last_name || '',
+    phone: profile?.phone || '',
     company: profile?.company || '',
     position: profile?.position || '',
-    current_salary: profile?.current_salary || '',
-    target_salary: profile?.target_salary || '',
+    industry: profile?.industry || '',
+    experience_years: profile?.experience_years ?? '',
     career_goal: profile?.career_goal || '',
+    current_salary: profile?.current_salary ?? '',
+    target_salary: profile?.target_salary ?? '',
   });
 
-  const [currentPhase, setCurrentPhase] = useState(profile?.phase || 'berufseinsteiger');
-  const [phaseSaving, setPhaseSaving] = useState(false);
+  const [prefs, setPrefs] = useState({
+    community_visible: !!profile?.community_visible,
+    email_notifications: profile?.email_notifications !== false,
+    share_achievements: !!profile?.share_achievements,
+  });
 
-  async function changePhase(newPhase) {
-    setPhaseSaving(true);
-    await supabase.from('profiles').update({ phase: newPhase }).eq('id', userId);
-    setCurrentPhase(newPhase);
-    setProfile(prev => ({ ...prev, phase: newPhase }));
-    setPhaseSaving(false);
+  const fullName = useMemo(() => {
+    const parts = [profile?.first_name, profile?.last_name].filter(Boolean);
+    return parts.length > 0 ? parts.join(' ') : (profile?.name || 'Mitglied');
+  }, [profile]);
+
+  const initials = useMemo(() => {
+    if (profile?.avatar_initials) return profile.avatar_initials;
+    const f = profile?.first_name?.[0] || '';
+    const l = profile?.last_name?.[0] || '';
+    return (f + l).toUpperCase() || (profile?.name?.[0] || '?').toUpperCase();
+  }, [profile]);
+
+  const plan = (profile?.subscription_plan || 'FREE').toUpperCase();
+  const isPremium = plan !== 'FREE';
+  const planLabel = isPremium ? 'Premium' : 'Free';
+
+  const memberSince = profile?.created_at ? new Date(profile.created_at) : null;
+  const memberSinceLabel = memberSince
+    ? memberSince.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
+    : '—';
+  const memberSinceYear = memberSince ? memberSince.getFullYear() : '—';
+  const memberSinceMonths = memberSince
+    ? Math.max(1, Math.round((Date.now() - memberSince.getTime()) / (1000 * 60 * 60 * 24 * 30)))
+    : 0;
+
+  const completeness = useMemo(() => {
+    const fields = ['first_name', 'last_name', 'email', 'phone', 'company', 'position',
+                    'industry', 'career_goal', 'current_salary', 'target_salary'];
+    const filled = fields.filter(f => !!profile?.[f]).length;
+    return Math.round((filled / fields.length) * 100);
+  }, [profile]);
+
+  function update(key) {
+    return (e) => setForm(prev => ({ ...prev, [key]: e.target.value }));
   }
 
-  const earnedBadgeIds = new Set((userBadges || []).map(ub => ub.badge_id));
-  const level = getLevel(profile?.xp || 0);
-  const { next, progress: levelProgress } = getLevelProgress(profile?.xp || 0);
-  const initials = (profile?.name || '??').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-
-  async function saveProfile() {
+  async function onSave() {
     setSaving(true);
-    const updateData = {
-      name: form.name,
-      company: form.company,
-      position: form.position,
-      current_salary: form.current_salary ? parseInt(form.current_salary) : null,
-      target_salary: form.target_salary ? parseInt(form.target_salary) : null,
-      career_goal: form.career_goal,
-    };
-    await supabase.from('profiles').update(updateData).eq('id', userId);
-    setProfile(prev => ({ ...prev, ...updateData }));
+    try {
+      const payload = { ...form };
+      if (payload.experience_years !== '') payload.experience_years = parseInt(payload.experience_years, 10) || null;
+      if (payload.current_salary !== '') payload.current_salary = parseFloat(payload.current_salary) || null;
+      if (payload.target_salary !== '') payload.target_salary = parseFloat(payload.target_salary) || null;
+      await supabase.from('profiles').update(payload).eq('id', userId);
+      setEditing(false);
+      router.refresh();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function onCancel() {
+    setForm({
+      first_name: profile?.first_name || '',
+      last_name: profile?.last_name || '',
+      phone: profile?.phone || '',
+      company: profile?.company || '',
+      position: profile?.position || '',
+      industry: profile?.industry || '',
+      experience_years: profile?.experience_years ?? '',
+      career_goal: profile?.career_goal || '',
+      current_salary: profile?.current_salary ?? '',
+      target_salary: profile?.target_salary ?? '',
+    });
     setEditing(false);
-    setSaving(false);
+  }
+
+  async function togglePref(key) {
+    const next = !prefs[key];
+    setPrefs(p => ({ ...p, [key]: next }));
+    try {
+      await supabase.from('profiles').update({ [key]: next }).eq('id', userId);
+    } catch {
+      setPrefs(p => ({ ...p, [key]: !next }));
+    }
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    window.location.href = '/auth/login';
   }
 
   return (
-    <div className="page-container animate-in">
-      <div style={{ marginBottom: 32 }}>
-        <h1 className="page-title">Mein Profil<InfoTooltip moduleId="profile" profile={profile} /></h1>
-        <p className="page-subtitle">Einstellungen, Badges & Statistiken</p>
+    <div className="profile-v2">
+      <div className="title-kicker">
+        <span className="pulse" />
+        Mitglied seit {memberSinceLabel} · {planLabel} aktiv
       </div>
+      <h1 className="page-title">
+        Mein Profil.{' '}
+        <span className="faded">Deine Daten und Einstellungen.</span>
+      </h1>
+      <p className="page-sub">
+        Halte deine Angaben aktuell — sie helfen uns beim Matching und sorgen für persönlichere Coaching-Empfehlungen.
+      </p>
 
-      {/* Profile Header */}
-      <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 24 }}>
-        <div style={{
-          width: 80, height: 80, borderRadius: '50%', background: 'var(--ki-red)',
-          color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 28, fontWeight: 700, flexShrink: 0,
-        }}>
+      <section className="profile-hero">
+        <div className="profile-hero-avatar">
           {initials}
+          <button type="button" className="profile-hero-edit" title="Foto ändern" onClick={() => alert('Foto-Upload kommt bald')}>
+            <Icon name="camera" size={14} stroke={1.8} />
+          </button>
         </div>
-        <div style={{ flex: 1 }}>
-          {editing ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div className="grid-2" style={{ gap: 12 }}>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', display: 'block', marginBottom: 4 }}>Name</label>
-                  <input className="input" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', display: 'block', marginBottom: 4 }}>Position</label>
-                  <input className="input" value={form.position} onChange={e => setForm(p => ({ ...p, position: e.target.value }))} />
-                </div>
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', display: 'block', marginBottom: 4 }}>Unternehmen</label>
-                <input className="input" value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))} />
-              </div>
-              <div className="grid-3" style={{ gap: 12 }}>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', display: 'block', marginBottom: 4 }}>Aktuelles Gehalt €</label>
-                  <input className="input" type="number" value={form.current_salary} onChange={e => setForm(p => ({ ...p, current_salary: e.target.value }))} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', display: 'block', marginBottom: 4 }}>Zielgehalt €</label>
-                  <input className="input" type="number" value={form.target_salary} onChange={e => setForm(p => ({ ...p, target_salary: e.target.value }))} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', display: 'block', marginBottom: 4 }}>Karriereziel</label>
-                  <input className="input" value={form.career_goal} onChange={e => setForm(p => ({ ...p, career_goal: e.target.value }))} placeholder="z.B. Teamleitung" />
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={saveProfile} className="btn btn-primary" style={{ fontSize: 13 }} disabled={saving}>
-                  {saving ? 'Speichert...' : 'Speichern'}
-                </button>
-                <button onClick={() => setEditing(false)} className="btn btn-ghost" style={{ fontSize: 13 }}>Abbrechen</button>
-              </div>
+        <div className="profile-hero-body">
+          <span className="profile-hero-eyebrow">
+            <span className="star">★</span> {planLabel}-Mitglied{profile?.phase ? ` · Phase ${profile.phase}` : ''}
+          </span>
+          <h2 className="profile-hero-name">{fullName}</h2>
+          {(profile?.position || profile?.company) && (
+            <div className="profile-hero-role">
+              {profile.position || '—'}{profile.company ? ` @ ${profile.company}` : ''}
             </div>
-          ) : (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em' }}>{profile?.name || 'Kein Name'}</h2>
-                <button onClick={() => setEditing(true)} className="btn btn-ghost" style={{ fontSize: 12, padding: '4px 12px' }}>✎ Bearbeiten</button>
-              </div>
-              <div style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginTop: 4 }}>
-                {profile?.position && <span>{profile.position}</span>}
-                {profile?.company && <span> bei {profile.company}</span>}
-              </div>
-              <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginTop: 2 }}>{profile?.email}</div>
-              {(profile?.current_salary || profile?.target_salary) && (
-                <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginTop: 4 }}>
-                  {profile.current_salary && <span>Gehalt: €{profile.current_salary.toLocaleString('de-DE')}</span>}
-                  {profile.target_salary && <span> → Ziel: €{profile.target_salary.toLocaleString('de-DE')}</span>}
-                </div>
-              )}
-            </>
           )}
-        </div>
-      </div>
-
-      {/* Stat Grid */}
-      <div className="grid-4" style={{ marginBottom: 32 }}>
-        <div className="card animate-in delay-1" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>KI-Points</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--ki-red)', letterSpacing: '-0.04em' }}>{profile?.xp || 0}</div>
-        </div>
-        <div className="card animate-in delay-2" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Level</div>
-          <div style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.04em' }}>{level.icon}</div>
-          <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 4 }}>{level.title}</div>
-        </div>
-        <div className="card animate-in delay-3" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Lektionen</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--ki-success)', letterSpacing: '-0.04em' }}>{lessonsCompleted}</div>
-          <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 4 }}>abgeschlossen</div>
-        </div>
-        <div className="card animate-in delay-4" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Zertifikate</div>
-          <div style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.04em' }}>{certificates.length}</div>
-        </div>
-      </div>
-
-      {/* Karrierephase */}
-      <div className="card" style={{ marginBottom: 32 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 700 }}>Deine Karrierephase</div>
-            <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 2 }}>
-              Alle E-Learnings passen sich an deine Phase an
-            </div>
+          <div className="profile-hero-meta">
+            {profile?.industry && (
+              <span className="profile-hero-chip"><Icon name="brief" size={12} /> {profile.industry}</span>
+            )}
+            {profile?.experience_years != null && (
+              <span className="profile-hero-chip"><Icon name="trend" size={12} /> {profile.experience_years} Jahre Erfahrung</span>
+            )}
+            <span className="profile-hero-chip"><Icon name="cal" size={12} /> Mitglied seit {memberSinceLabel}</span>
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8 }}>
-          {KARRIERE_PHASEN_AUSWAHL.map(p => {
-            const isActive = currentPhase === p.id;
-            return (
-              <button
-                key={p.id}
-                onClick={() => !isActive && changePhase(p.id)}
-                disabled={phaseSaving}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '12px 14px', borderRadius: 'var(--r-md)',
-                  background: isActive ? 'rgba(204,20,38,0.05)' : 'var(--ki-bg-alt)',
-                  border: isActive ? '2px solid var(--ki-red)' : '1px solid var(--ki-border)',
-                  cursor: isActive ? 'default' : 'pointer',
-                  textAlign: 'left', transition: 'all 0.15s',
-                  opacity: phaseSaving ? 0.6 : 1,
-                }}
-              >
-                <span style={{ fontSize: 22 }}>{p.label.split(' ')[0]}</span>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: isActive ? 700 : 500, color: isActive ? 'var(--ki-red)' : 'var(--ki-text)' }}>
-                    {p.label.slice(p.label.indexOf(' ') + 1)}
-                  </div>
-                  <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)' }}>{p.desc}</div>
+        <div className="profile-hero-actions">
+          {!editing && (
+            <button type="button" className="btn btn-on-dark" onClick={() => setEditing(true)}>
+              <Icon name="edit" size={13} stroke={2} /> Profil bearbeiten
+            </button>
+          )}
+        </div>
+      </section>
+
+      <div className="stats">
+        <div className="stat">
+          <div className="stat-label"><span className="sl-ic"><Icon name="spark" size={11} stroke={2} /></span> Total XP</div>
+          <div className="stat-value">{profile?.total_points || 0}<span className="unit">XP</span></div>
+          <div className="stat-sub">{lessonsCompleted} Lektionen abgeschlossen</div>
+        </div>
+        <div className="stat">
+          <div className="stat-label"><span className="sl-ic"><Icon name="flame" size={11} stroke={2} /></span> Streak</div>
+          <div className="stat-value">{profile?.streak_count || 0}<span className="unit">Tage</span></div>
+          <div className="stat-sub">
+            {profile?.last_streak_date ? `Zuletzt aktiv: ${new Date(profile.last_streak_date).toLocaleDateString('de-DE')}` : 'Noch nicht gestartet'}
+          </div>
+        </div>
+        <div className="stat">
+          <div className="stat-label"><span className="sl-ic"><Icon name="star" size={11} stroke={2} /></span> Karriere-Score</div>
+          <div className="stat-value">
+            {analysisSession?.overall_score != null ? analysisSession.overall_score : '—'}
+            <span className="unit">/100</span>
+          </div>
+          <div className="stat-sub">{analysisSession?.overall_score != null ? 'Aus Karriere-Analyse' : 'Analyse noch nicht abgeschlossen'}</div>
+        </div>
+        <div className="stat">
+          <div className="stat-label"><span className="sl-ic"><Icon name="cal" size={11} stroke={2} /></span> Dabei seit</div>
+          <div className="stat-value">{memberSinceYear}</div>
+          <div className="stat-sub">{memberSinceMonths} {memberSinceMonths === 1 ? 'Monat' : 'Monate'} dabei</div>
+        </div>
+      </div>
+
+      <section className="card">
+        <div className="card-head">
+          <h3 className="card-title">
+            Persönliche Daten
+            <span className="kicker">Nur für dich sichtbar</span>
+          </h3>
+          {!editing && (
+            <button type="button" className="card-link" onClick={() => setEditing(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit' }}>Bearbeiten →</button>
+          )}
+        </div>
+
+        {!editing ? (
+          <div className="info-list">
+            {[
+              { ic: 'user',  label: 'Name',       value: fullName },
+              { ic: 'mail',  label: 'E-Mail',     value: profile?.email || '—' },
+              { ic: 'phone', label: 'Telefon',    value: profile?.phone || '—' },
+              { ic: 'brief', label: 'Position',   value: profile?.position || '—' },
+              { ic: 'pin',   label: 'Unternehmen',value: profile?.company || '—' },
+              { ic: 'globe', label: 'Branche',    value: profile?.industry || '—' },
+            ].map((r, i) => (
+              <div className="info-row" key={i}>
+                <span className="info-ic"><Icon name={r.ic} size={14} /></span>
+                <div className="info-block">
+                  <div className="info-label">{r.label}</div>
+                  <div className="info-value">{r.value}</div>
                 </div>
-                {isActive && <span style={{ marginLeft: 'auto', fontSize: 14, color: 'var(--ki-red)' }}>✓</span>}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="field-grid">
+            <div className="field">
+              <label className="field-label">Vorname</label>
+              <input className="input" value={form.first_name} onChange={update('first_name')} />
+            </div>
+            <div className="field">
+              <label className="field-label">Nachname</label>
+              <input className="input" value={form.last_name} onChange={update('last_name')} />
+            </div>
+            <div className="field">
+              <label className="field-label">Telefon</label>
+              <input className="input" type="tel" value={form.phone} onChange={update('phone')} />
+            </div>
+            <div className="field">
+              <label className="field-label">Position</label>
+              <input className="input" value={form.position} onChange={update('position')} />
+            </div>
+            <div className="field">
+              <label className="field-label">Unternehmen</label>
+              <input className="input" value={form.company} onChange={update('company')} />
+            </div>
+            <div className="field">
+              <label className="field-label">Branche</label>
+              <input className="input" value={form.industry} onChange={update('industry')} />
+            </div>
+            <div className="field">
+              <label className="field-label">Erfahrung (Jahre)</label>
+              <input className="input" type="number" min="0" value={form.experience_years} onChange={update('experience_years')} />
+            </div>
+            <div className="form-actions" style={{ gridColumn: '1 / -1' }}>
+              <button type="button" className="btn-cancel" onClick={onCancel}>Abbrechen</button>
+              <button type="button" className="btn-save" onClick={onSave} disabled={saving}>
+                {saving ? 'Speichert…' : 'Speichern'}
               </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Level Progress */}
-      {next && (
-        <div className="card" style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <div style={{ fontSize: 14, fontWeight: 600 }}>Fortschritt zu {next.icon} {next.title}</div>
-            <span className="pill pill-grey">{levelProgress}%</span>
-          </div>
-          <div className="progress-bar">
-            <div className="progress-bar-fill" style={{ width: `${levelProgress}%` }} />
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginTop: 8 }}>
-            {profile?.xp || 0} / {next.minXP} KI-Points
-          </div>
-        </div>
-      )}
-
-      {/* Badge Showcase */}
-      <div style={{ marginBottom: 32 }}>
-        <h3 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 16 }}>Badges</h3>
-        <div className="grid-4">
-          {(allBadges || []).map(badge => {
-            const earned = earnedBadgeIds.has(badge.id);
-            const userBadge = (userBadges || []).find(ub => ub.badge_id === badge.id);
-            return (
-              <div
-                key={badge.id}
-                className="card"
-                style={{
-                  textAlign: 'center', padding: '24px 16px',
-                  opacity: earned ? 1 : 0.45,
-                  filter: earned ? 'none' : 'grayscale(1)',
-                  transition: 'all var(--t-med)',
-                  position: 'relative',
-                }}
-                title={!earned ? `Bedingung: ${badge.condition_type || 'Unbekannt'}` : ''}
-              >
-                <div style={{ fontSize: 36, marginBottom: 8 }}>{badge.icon || '🏅'}</div>
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{badge.title}</div>
-                <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>{badge.description}</div>
-                {earned && userBadge?.earned_at && (
-                  <div style={{ fontSize: 11, color: 'var(--ki-success)', marginTop: 8 }}>
-                    ✓ {new Date(userBadge.earned_at).toLocaleDateString('de-DE')}
-                  </div>
-                )}
-                {!earned && (
-                  <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginTop: 8 }}>Noch nicht verdient</div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Abo & Billing */}
-      <div className="card" style={{ marginTop: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Mein Abo & Rechnungen</h3>
-        <div style={{ display: 'flex', gap: 24, marginBottom: 16, flexWrap: 'wrap' }}>
-          <div>
-            <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Aktueller Plan</div>
-            <div style={{ fontSize: 18, fontWeight: 700 }}>{profile?.subscription_plan || 'FREE'}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Status</div>
-            <span className={`pill ${profile?.subscription_status === 'active' || profile?.subscription_status === 'trialing' ? 'pill-green' : profile?.subscription_status === 'past_due' ? 'pill-gold' : 'pill-grey'}`}>
-              {profile?.subscription_status === 'active' ? 'Aktiv' : profile?.subscription_status === 'trialing' ? 'Testphase' : profile?.subscription_status === 'past_due' ? '\u00DCberf\u00E4llig' : profile?.subscription_status === 'canceled' ? 'Gek\u00FCndigt' : 'Inaktiv'}
-            </span>
-          </div>
-          {profile?.subscription_ends_at && (
-            <div>
-              <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>L\u00E4uft bis</div>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{new Date(profile.subscription_ends_at).toLocaleDateString('de-DE')}</div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+      </section>
 
-        {profile?.subscription_status === 'trialing' && (
-          <div style={{ padding: '10px 16px', background: 'rgba(212,160,23,0.08)', borderRadius: 'var(--r-md)', marginBottom: 12, fontSize: 13, color: 'var(--ki-warning)' }}>
-            {'\u26A0\uFE0F'} Deine Testphase endet am {profile?.subscription_ends_at ? new Date(profile.subscription_ends_at).toLocaleDateString('de-DE') : 'bald'}.
+      <section className="card">
+        <div className="card-head">
+          <h3 className="card-title">
+            Karriere-Profil
+            <span className="kicker">Beeinflusst Empfehlungen</span>
+          </h3>
+          <a className="card-link" href="/analyse">Karriere-Analyse →</a>
+        </div>
+        {!editing ? (
+          <div className="info-list">
+            <div className="info-row">
+              <span className="info-ic"><Icon name="target" size={14} /></span>
+              <div className="info-block">
+                <div className="info-label">Karriereziel</div>
+                <div className="info-value">{profile?.career_goal || '—'}</div>
+              </div>
+            </div>
+            <div className="info-row">
+              <span className="info-ic"><Icon name="wallet" size={14} /></span>
+              <div className="info-block">
+                <div className="info-label">Aktuelles Gehalt</div>
+                <div className="info-value">{profile?.current_salary ? `${profile.current_salary} €` : '—'}</div>
+              </div>
+            </div>
+            <div className="info-row">
+              <span className="info-ic"><Icon name="trend" size={14} /></span>
+              <div className="info-block">
+                <div className="info-label">Zielgehalt</div>
+                <div className="info-value">{profile?.target_salary ? `${profile.target_salary} €` : '—'}</div>
+              </div>
+            </div>
+            <div className="info-row">
+              <span className="info-ic"><Icon name="user" size={14} /></span>
+              <div className="info-block">
+                <div className="info-label">Karriere-Phase</div>
+                <div className="info-value">{profile?.phase || '—'}</div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="field-grid">
+            <div className="field" style={{ gridColumn: '1 / -1' }}>
+              <label className="field-label">Karriereziel</label>
+              <input className="input" value={form.career_goal} onChange={update('career_goal')} placeholder="z. B. Senior Product Manager in 3 Jahren" />
+            </div>
+            <div className="field">
+              <label className="field-label">Aktuelles Gehalt (€)</label>
+              <input className="input" type="number" min="0" value={form.current_salary} onChange={update('current_salary')} />
+            </div>
+            <div className="field">
+              <label className="field-label">Zielgehalt (€)</label>
+              <input className="input" type="number" min="0" value={form.target_salary} onChange={update('target_salary')} />
+            </div>
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {profile?.stripe_customer_id && (
-            <button className="btn btn-secondary" style={{ fontSize: 13 }} onClick={async () => {
-              const res = await fetch('/api/billing-portal', { method: 'POST' });
-              const data = await res.json();
-              if (data.url) window.location.href = data.url;
-            }}>
-              Abo verwalten / Rechnungen
-            </button>
-          )}
-          {(!profile?.subscription_plan || profile?.subscription_plan === 'FREE') && (
-            <a href="/angebote" className="btn btn-primary" style={{ fontSize: 13 }}>Upgrade</a>
-          )}
+        <div className="goal-meter">
+          <div className="goal-meter-head">
+            <div className="info-label">Profil-Vollständigkeit</div>
+            <div className="goal-meter-value">{completeness}%</div>
+          </div>
+          <div className="goal-bar">
+            <div className="goal-bar-fill" style={{ width: `${completeness}%` }} />
+          </div>
+          <div className="goal-text">
+            <span>
+              {completeness === 100
+                ? 'Profil vollständig — top!'
+                : `Noch ${10 - Math.round(completeness / 10)} Felder bis zum vollständigen Profil`}
+            </span>
+            {completeness < 100 && !editing && (
+              <a href="#" onClick={(e) => { e.preventDefault(); setEditing(true); }}>Vervollständigen →</a>
+            )}
+          </div>
         </div>
+      </section>
+
+      <section className="card">
+        <div className="card-head">
+          <h3 className="card-title">Mitgliedschaft</h3>
+        </div>
+        <div className="plan-card">
+          <div>
+            <span className={`plan-badge ${!isPremium ? 'free' : ''}`}>
+              <Icon name="star" size={11} stroke={2} /> {planLabel}
+            </span>
+            <div className="plan-title">{isPremium ? 'Premium-Mitgliedschaft' : 'Free-Mitgliedschaft'}</div>
+            <div className="plan-sub">
+              {isPremium
+                ? 'Alle Kurse, Seminare und Premium-Tools freigeschaltet.'
+                : 'Basis-Zugriff. Premium für Vollzugriff aktivieren.'}
+            </div>
+            {!isPremium && (
+              <div className="plan-features">
+                {['Alle E-Learning-Kurse', '1 Seminar / Monat (Wert 99 €)', 'Gehalts-Masterclass', 'Persönliches CV-Feedback'].map((f, i) => (
+                  <div key={i} className="plan-feat">
+                    <span className="ic"><Icon name="check" size={10} stroke={3} /></span>{f}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="plan-meta">
+            {!isPremium ? (
+              <>
+                <div className="plan-billing">15 €<span className="per"> / Monat</span></div>
+                <div className="plan-renew">jederzeit kündbar</div>
+                <a href="/angebote" className="btn-save" style={{ textDecoration: 'none' }}>Premium starten</a>
+              </>
+            ) : (
+              <>
+                <div className="plan-billing">Aktiv</div>
+                <div className="plan-renew">{(profile?.purchased_products || []).length} Produkt(e) freigeschaltet</div>
+                <a href="/angebote" className="btn-cancel" style={{ textDecoration: 'none' }}>Mitgliedschaft verwalten</a>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <div className="grid-2">
+        <section className="card">
+          <div className="card-head">
+            <h3 className="card-title">Privatsphäre</h3>
+          </div>
+          <div className="pref-row">
+            <span className="pref-ic"><Icon name="eye" size={14} /></span>
+            <div>
+              <div className="pref-title">In der Community sichtbar</div>
+              <div className="pref-sub">Andere Mitglieder sehen deinen Namen und deine Phase</div>
+            </div>
+            <button
+              type="button"
+              className={`switch ${prefs.community_visible ? 'on' : ''}`}
+              onClick={() => togglePref('community_visible')}
+              aria-pressed={prefs.community_visible}
+            />
+          </div>
+          <div className="pref-row">
+            <span className="pref-ic"><Icon name="mail" size={14} /></span>
+            <div>
+              <div className="pref-title">E-Mail-Benachrichtigungen</div>
+              <div className="pref-sub">Karriere-Tipps, Erinnerungen und Neuerungen</div>
+            </div>
+            <button
+              type="button"
+              className={`switch ${prefs.email_notifications ? 'on' : ''}`}
+              onClick={() => togglePref('email_notifications')}
+              aria-pressed={prefs.email_notifications}
+            />
+          </div>
+          <div className="pref-row">
+            <span className="pref-ic"><Icon name="star" size={14} /></span>
+            <div>
+              <div className="pref-title">Achievements teilen</div>
+              <div className="pref-sub">Badges und Streaks in der Community zeigen</div>
+            </div>
+            <button
+              type="button"
+              className={`switch ${prefs.share_achievements ? 'on' : ''}`}
+              onClick={() => togglePref('share_achievements')}
+              aria-pressed={prefs.share_achievements}
+            />
+          </div>
+        </section>
+
+        <section className="card">
+          <div className="card-head">
+            <h3 className="card-title">Sicherheit</h3>
+          </div>
+          <div className="pref-row">
+            <span className="pref-ic"><Icon name="lock" size={14} /></span>
+            <div>
+              <div className="pref-title">Passwort ändern</div>
+              <div className="pref-sub">Neues Passwort setzen oder zurücksetzen</div>
+            </div>
+            <a href="/auth/set-password" className="btn-cancel" style={{ textDecoration: 'none' }}>Ändern</a>
+          </div>
+          <div className="pref-row">
+            <span className="pref-ic"><Icon name="shield" size={14} /></span>
+            <div>
+              <div className="pref-title">Account-E-Mail</div>
+              <div className="pref-sub" style={{ fontFamily: 'var(--mono)', fontSize: 12 }}>{profile?.email || '—'}</div>
+            </div>
+          </div>
+        </section>
       </div>
 
-      {/* Einstellungen */}
-      <div className="card" style={{ marginTop: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Einstellungen</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <button
-            className="btn btn-secondary"
-            style={{ justifyContent: 'flex-start', fontSize: 13 }}
-            onClick={async () => {
-              await supabase.from('profiles').update({ tour_completed: false, tour_step: 0 }).eq('id', userId);
-              window.location.reload();
-            }}
-          >
-            {'\u{1F3AF}'} Tour nochmal starten
-          </button>
-          <a href="/api/data-export" className="btn btn-secondary" style={{ justifyContent: 'flex-start', fontSize: 13, textDecoration: 'none', color: 'inherit' }}>
-            {'\u{1F4E5}'} Meine Daten herunterladen (DSGVO)
-          </a>
-          <button
-            className="btn btn-ghost"
-            style={{ justifyContent: 'flex-start', fontSize: 13, color: 'var(--ki-error)' }}
-            onClick={async () => {
-              if (!confirm('Bist du sicher? Alle deine Daten werden unwiderruflich gel\u00F6scht.')) return;
-              if (!confirm('Letzte Warnung: Dies kann NICHT r\u00FCckg\u00E4ngig gemacht werden.')) return;
-              await supabase.rpc('delete_user_data', { target_user_id: userId });
-              await supabase.auth.signOut();
-              window.location.href = '/auth/login';
-            }}
-          >
-            {'\u{1F5D1}\uFE0F'} Konto und alle Daten l\u00F6schen
+      <section className="card">
+        <div className="card-head">
+          <h3 className="card-title">Account</h3>
+        </div>
+        <div className="pref-row">
+          <span className="pref-ic"><Icon name="doc" size={14} /></span>
+          <div>
+            <div className="pref-title">Abmelden</div>
+            <div className="pref-sub">Beendet diese Session und kehrt zur Login-Seite zurück</div>
+          </div>
+          <button type="button" className="btn-cancel" onClick={handleLogout}>
+            <Icon name="logout" size={12} stroke={2} /> Abmelden
           </button>
         </div>
-      </div>
+        <div className="danger-zone">
+          <div>
+            <div className="pref-title danger">Account löschen</div>
+            <div className="danger-zone-text">Lösche dauerhaft alle deine Daten. Diese Aktion kann nicht rückgängig gemacht werden.</div>
+          </div>
+          <a href="mailto:support@daskarriereinstitut.de?subject=Account%20l%C3%B6schen" className="btn-danger" style={{ textDecoration: 'none' }}>
+            Support kontaktieren
+          </a>
+        </div>
+      </section>
     </div>
   );
 }
