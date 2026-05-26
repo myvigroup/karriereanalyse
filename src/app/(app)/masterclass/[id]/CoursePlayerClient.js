@@ -2229,14 +2229,9 @@ function SkippedLessonCard({ reason, alternativeText }) {
 // Completed badge for already-done prio lessons
 function CompletedBadge({ text }) {
   return (
-    <div className="card" style={{
-      padding: '24px 32px',
-      textAlign: 'center',
-      background: 'rgba(34,197,94,0.05)',
-      border: '1px solid rgba(34,197,94,0.2)',
-    }}>
-      <span style={{ fontSize: 32, display: 'block', marginBottom: 8 }}>✅</span>
-      <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>{text}</span>
+    <div className="course-completed-badge">
+      <span className="course-completed-check">✓</span>
+      <span className="course-completed-text">{text}</span>
     </div>
   );
 }
@@ -2288,61 +2283,30 @@ function VideoLesson({ lesson, isCompleted, onMarkComplete, saving }) {
 
   return (
     <div>
-      {/* Video */}
-      <div style={{
-        borderRadius: 'var(--r-lg)',
-        overflow: 'hidden',
-        aspectRatio: '16/9',
-        marginBottom: 24,
-        background: '#000',
-      }}>
+      <div className="course-video-frame">
         {lesson.vimeoId ? (
           <iframe
             src={`https://player.vimeo.com/video/${lesson.vimeoId}?title=0&byline=0&portrait=0&badge=0&logo=0&share=0&dnt=1`}
-            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
             allow="autoplay; fullscreen; picture-in-picture"
             allowFullScreen
             title={lesson.title}
           />
         ) : (
-          <div style={{
-            width: '100%', height: '100%',
-            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexDirection: 'column', gap: 16,
-          }}>
-            <div style={{
-              width: 72, height: 72, borderRadius: '50%',
-              background: 'rgba(204,20,38,0.2)', border: '2px solid rgba(204,20,38,0.4)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
-            }}>▶</div>
-            <div style={{ color: 'white', fontSize: 16, fontWeight: 600 }}>Video wird vorbereitet</div>
-            <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>Inhalt folgt in Kürze</div>
+          <div className="course-video-placeholder">
+            <div className="course-video-play-circle">▶</div>
+            <div className="course-video-placeholder-title">Video wird vorbereitet</div>
+            <div className="course-video-placeholder-sub">Inhalt folgt in Kürze</div>
           </div>
         )}
       </div>
 
-      {/* Weiter-Button direkt unter dem Video */}
-      <div style={{ marginBottom: 24 }}>
-        {!isCompleted ? (
-          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ width: '100%', fontSize: 15, padding: '14px' }}>
-            {saving ? 'Speichert...' : 'Weiter →'}
-          </button>
-        ) : (
-          <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +30 XP</span>
-        )}
-      </div>
-
-      {/* Key takeaways */}
-      <div className="card" style={{ marginBottom: 24, background: 'var(--ki-bg-alt)', border: 'none' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>
-          Key Takeaways
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className="course-takeaways">
+        <div className="course-takeaways-label">Key Takeaways</div>
+        <div className="course-takeaways-list">
           {takeaways.map((t, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6 }}>
-              <span style={{ color: 'var(--ki-red)', fontWeight: 700, flexShrink: 0, marginTop: 1 }}>✓</span>
-              <span style={{ color: 'var(--ki-text-secondary)' }}>{t}</span>
+            <div key={i} className="course-takeaway-item">
+              <span className="course-takeaway-check">✓</span>
+              <span>{t}</span>
             </div>
           ))}
         </div>
@@ -2382,78 +2346,36 @@ function InteractiveLesson({ lesson, isCompleted, onMarkComplete, saving }) {
 
   return (
     <div>
-      <div className="card" style={{ marginBottom: 24, border: '1px solid rgba(204,20,38,0.15)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-          <span style={{ fontSize: 22 }}>🎮</span>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>Interaktive Übung</span>
+      <div className="course-widget-card">
+        <div className="course-widget-head">
+          <span className="course-widget-icon">🎮</span>
+          <span className="course-widget-title">Interaktive Übung</span>
         </div>
-        <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', marginBottom: 20, lineHeight: 1.6 }}>
+        <p className="course-widget-desc">
           Bringe die folgenden Aussagen in die Reihenfolge, die für dich am sinnvollsten ist (1 = höchste Priorität). Klicke auf ↑ / ↓ um die Reihenfolge zu ändern.
         </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="course-rank-list">
           {ranking.map((stmtIdx, pos) => (
-            <div
-              key={stmtIdx}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: '12px 14px',
-                borderRadius: 'var(--r-md)',
-                background: confirmed ? 'rgba(34,197,94,0.07)' : 'var(--ki-bg-alt)',
-                border: confirmed ? '1px solid rgba(34,197,94,0.25)' : '1px solid var(--ki-border)',
-                transition: 'all 0.15s',
-              }}
-            >
-              <span style={{
-                width: 26,
-                height: 26,
-                borderRadius: '50%',
-                background: confirmed ? 'var(--ki-success)' : 'var(--ki-red)',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 12,
-                fontWeight: 700,
-                flexShrink: 0,
-              }}>{pos + 1}</span>
-              <span style={{ flex: 1, fontSize: 14, lineHeight: 1.5 }}>{statements[stmtIdx]}</span>
+            <div key={stmtIdx} className={`course-rank-item${confirmed ? ' confirmed' : ''}`}>
+              <span className={`course-rank-num${confirmed ? ' done' : ''}`}>{pos + 1}</span>
+              <span className="course-rank-text">{statements[stmtIdx]}</span>
               {!confirmed && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <button
-                    onClick={() => pos > 0 && moveItem(pos, pos - 1)}
-                    disabled={pos === 0}
-                    style={{ background: 'none', border: 'none', cursor: pos === 0 ? 'default' : 'pointer', opacity: pos === 0 ? 0.3 : 1, fontSize: 14, padding: '2px 6px', color: 'var(--ki-text-secondary)' }}
-                  >↑</button>
-                  <button
-                    onClick={() => pos < ranking.length - 1 && moveItem(pos, pos + 1)}
-                    disabled={pos === ranking.length - 1}
-                    style={{ background: 'none', border: 'none', cursor: pos === ranking.length - 1 ? 'default' : 'pointer', opacity: pos === ranking.length - 1 ? 0.3 : 1, fontSize: 14, padding: '2px 6px', color: 'var(--ki-text-secondary)' }}
-                  >↓</button>
+                <div className="course-rank-arrows">
+                  <button onClick={() => pos > 0 && moveItem(pos, pos - 1)} disabled={pos === 0}>↑</button>
+                  <button onClick={() => pos < ranking.length - 1 && moveItem(pos, pos + 1)} disabled={pos === ranking.length - 1}>↓</button>
                 </div>
               )}
             </div>
           ))}
         </div>
         {!confirmed ? (
-          <button onClick={handleConfirm} className="btn btn-primary" style={{ marginTop: 16 }}>
-            Bestätigen (+20 XP Bonus)
+          <button onClick={handleConfirm} className="course-btn-primary" style={{ marginTop: 18 }}>
+            Bestätigen · +20 XP Bonus
           </button>
         ) : (
-          <div style={{ marginTop: 14, padding: '10px 14px', borderRadius: 'var(--r-md)', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', fontSize: 13, color: '#16a34a', fontWeight: 600 }}>
-            ✅ Reihenfolge bestätigt! +20 XP
-          </div>
+          <div className="course-success-banner">✓ Reihenfolge bestätigt · +20 XP</div>
         )}
       </div>
-
-      {!isCompleted ? (
-        <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving}>
-          {saving ? 'Speichert...' : '✅ Als erledigt markieren'}
-        </button>
-      ) : (
-        <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen</span>
-      )}
     </div>
   );
 }
@@ -2468,54 +2390,32 @@ function ExerciseLesson({ lesson, isCompleted, onMarkComplete, saving }) {
 
   return (
     <div>
-      <div className="card" style={{ marginBottom: 24, border: '1px solid rgba(204,20,38,0.12)', background: 'rgba(204,20,38,0.02)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-          <span style={{ fontSize: 22 }}>🏋️</span>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>Praxisübung</span>
+      <div className="course-widget-card">
+        <div className="course-widget-head">
+          <span className="course-widget-icon">🏋️</span>
+          <span className="course-widget-title">Praxisübung</span>
         </div>
-        <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', lineHeight: 1.7, marginBottom: 18 }}>
-          {prompt}
-        </p>
+        <p className="course-widget-desc">{prompt}</p>
         <textarea
-          className="input"
+          className="course-widget-textarea"
           value={text}
           onChange={e => setText(e.target.value)}
-          placeholder="Schreibe hier deine Antwort... (mindestens 100 Zeichen)"
+          placeholder="Schreibe hier deine Antwort … (mindestens 100 Zeichen)"
           rows={6}
-          style={{ resize: 'vertical', marginBottom: 8 }}
           disabled={isCompleted}
         />
-        <div style={{ fontSize: 12, color: isReady ? 'var(--ki-success)' : 'var(--ki-text-tertiary)', marginBottom: 16 }}>
-          {charCount}/100 Zeichen {isReady ? '✓' : ''}
+        <div className={`course-widget-counter${isReady ? ' ready' : ''}`}>
+          {charCount} / 100 Zeichen {isReady && '✓'}
         </div>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <button
-            onClick={() => setAiFeedback(true)}
-            className="btn btn-secondary"
-            style={{ fontSize: 13 }}
-          >
+        <div className="course-widget-actions">
+          <button onClick={() => setAiFeedback(true)} className="course-btn-ghost">
             🤖 KI-Feedback
           </button>
           {aiFeedback && (
-            <div style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--r-md)', background: 'var(--ki-bg-alt)', border: '1px solid var(--ki-border)', fontSize: 13, color: 'var(--ki-text-secondary)' }}>
-              Feature kommt bald 🚀
-            </div>
+            <div className="course-widget-info">Feature kommt bald 🚀</div>
           )}
         </div>
       </div>
-
-      {!isCompleted ? (
-        <button
-          onClick={onMarkComplete}
-          className="btn btn-primary"
-          disabled={saving || !isReady}
-          style={{ opacity: isReady ? 1 : 0.5 }}
-        >
-          {saving ? 'Speichert...' : '✅ Als erledigt markieren (+40 XP)'}
-        </button>
-      ) : (
-        <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen +40 XP</span>
-      )}
     </div>
   );
 }
@@ -2581,34 +2481,25 @@ function QuizLesson({ lesson, courseTitle, isCompleted, onMarkComplete, saving, 
 
   if (questions.length === 0) {
     return (
-      <div className="card" style={{ marginBottom: 24 }}>
-        <p style={{ color: 'var(--ki-text-secondary)', fontSize: 14 }}>Keine Quiz-Fragen für diesen Kurs gefunden.</p>
-        {!isCompleted ? (
-          <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving} style={{ marginTop: 16 }}>
-            {saving ? 'Speichert...' : '✅ Als erledigt markieren'}
-          </button>
-        ) : (
-          <span className="pill pill-green" style={{ marginTop: 16, display: 'inline-block', fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen</span>
-        )}
+      <div className="course-widget-card">
+        <p className="course-widget-desc">Keine Quiz-Fragen für diesen Kurs gefunden.</p>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="card" style={{ marginBottom: 24, border: '1px solid rgba(204,20,38,0.15)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-          <span style={{ fontSize: 22 }}>📝</span>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>Quiz</span>
-          <span style={{ marginLeft: 'auto', fontSize: 13, color: 'var(--ki-text-tertiary)' }}>
-            {correctCount}/{questions.length} richtig
-          </span>
+      <div className="course-widget-card">
+        <div className="course-widget-head">
+          <span className="course-widget-icon">📝</span>
+          <span className="course-widget-title">Quiz</span>
+          <span className="course-widget-meta">{correctCount} / {questions.length} richtig</span>
         </div>
-        <p style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 20 }}>
+        <p className="course-widget-desc">
           Beantworte alle Fragen. Bei falscher Antwort kannst du es erneut versuchen.
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+        <div className="course-quiz-list">
           {questions.map((q, qi) => {
             const result = results[qi];
             const selected = answers[qi];
@@ -2617,77 +2508,37 @@ function QuizLesson({ lesson, courseTitle, isCompleted, onMarkComplete, saving, 
             const showXp = xpPills[qi];
             const showConfetti = confettiQ === qi;
             return (
-              <div key={qi} style={{ position: 'relative' }}>
+              <div key={qi} className="course-quiz-question">
                 {showConfetti && <ConfettiParticles count={16} />}
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, lineHeight: 1.5 }}>
+                <div className="course-quiz-q-text">
                   {qi + 1}. {q.question}
-                  {showXp && (
-                    <span style={{
-                      marginLeft: 10,
-                      fontSize: 12,
-                      fontWeight: 700,
-                      background: 'var(--ki-success)',
-                      color: 'white',
-                      padding: '2px 10px',
-                      borderRadius: 20,
-                      animation: 'optPulse 0.4s ease',
-                    }}>+XP 🎉</span>
-                  )}
+                  {showXp && <span className="course-quiz-xp-pop">+XP 🎉</span>}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="course-quiz-options">
                   {q.options.map((opt, oi) => {
                     const isThisCorrect = oi === q.correct;
                     const isSelected = selected === oi;
-                    let bg = 'var(--ki-bg-alt)';
-                    let border = '1px solid var(--ki-border)';
-                    let color = 'var(--ki-text)';
-                    if (isCorrect && isThisCorrect) { bg = 'rgba(34,197,94,0.1)'; border = '1px solid rgba(34,197,94,0.4)'; color = '#16a34a'; }
-                    else if (isWrong && isSelected) { bg = 'rgba(239,68,68,0.08)'; border = '1px solid rgba(239,68,68,0.4)'; color = '#dc2626'; }
+                    const cls = isCorrect && isThisCorrect ? ' correct'
+                              : isWrong && isSelected ? ' wrong'
+                              : '';
                     return (
                       <button
                         key={oi}
                         onClick={() => handleAnswer(qi, oi)}
                         disabled={isCorrect}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 10,
-                          padding: '10px 14px',
-                          borderRadius: 'var(--r-md)',
-                          background: bg,
-                          border,
-                          color,
-                          cursor: isCorrect ? 'default' : 'pointer',
-                          textAlign: 'left',
-                          fontSize: 14,
-                          fontWeight: isSelected ? 600 : 400,
-                          transition: 'all 0.15s',
-                          animation: (isWrong && isSelected) ? 'optPulse 0.35s ease' : 'none',
-                        }}
+                        className={`course-quiz-option${cls}`}
                       >
-                        <span style={{
-                          width: 22,
-                          height: 22,
-                          borderRadius: '50%',
-                          flexShrink: 0,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: 11,
-                          fontWeight: 700,
-                          background: isCorrect && isThisCorrect ? 'rgba(34,197,94,0.2)' : isWrong && isSelected ? 'rgba(239,68,68,0.2)' : 'var(--ki-card)',
-                          border: '1px solid currentColor',
-                        }}>
+                        <span className="course-quiz-letter">
                           {isCorrect && isThisCorrect ? '✓' : isWrong && isSelected ? '✗' : String.fromCharCode(65 + oi)}
                         </span>
-                        {opt}
+                        <span className="course-quiz-opt-text">{opt}</span>
                       </button>
                     );
                   })}
                 </div>
                 {isWrong && (
-                  <div style={{ marginTop: 8, padding: '8px 12px', borderRadius: 'var(--r-sm)', background: 'rgba(239,68,68,0.06)', fontSize: 13, color: '#dc2626' }}>
-                    Nicht ganz richtig – schau dir den Lerninhalt nochmal an und versuche es erneut.
+                  <div className="course-quiz-hint">
+                    Nicht ganz richtig — schau dir den Lerninhalt nochmal an und versuche es erneut.
                   </div>
                 )}
               </div>
@@ -2696,24 +2547,14 @@ function QuizLesson({ lesson, courseTitle, isCompleted, onMarkComplete, saving, 
         </div>
 
         {quizDone && (
-          <div style={{ marginTop: 24, padding: '16px 18px', borderRadius: 'var(--r-md)', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#16a34a', marginBottom: 4 }}>
-              🎉 Quiz abgeschlossen! Score: {score}%
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>
+          <div className="course-quiz-done">
+            <div className="course-quiz-done-title">🎉 Quiz abgeschlossen · Score: {score}%</div>
+            <div className="course-quiz-done-sub">
               {score === 100 ? '+100 XP für perfektes Ergebnis!' : '+50 XP für Quiz-Abschluss!'}
             </div>
           </div>
         )}
       </div>
-
-      {!isCompleted ? (
-        <button onClick={onMarkComplete} className="btn btn-primary" disabled={saving}>
-          {saving ? 'Speichert...' : '✅ Als erledigt markieren'}
-        </button>
-      ) : (
-        <span className="pill pill-green" style={{ fontSize: 14, padding: '8px 18px' }}>✅ Abgeschlossen</span>
-      )}
     </div>
   );
 }
