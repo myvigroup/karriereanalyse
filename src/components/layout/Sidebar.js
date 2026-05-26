@@ -3,48 +3,122 @@ import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
+// ─── Nav configuration ───────────────────────────────────────────────────────
 const NAV_GROUPS = [
   {
-    label: null,
+    label: 'Lernen',
     items: [
-      { label: 'Dashboard',         path: '/dashboard',    icon: '◻' },
-      { label: 'Karriere-Analyse',  path: '/analyse',      icon: '◎' },
-      { label: 'Masterclass',       path: '/masterclass',  icon: '▶' },
-      { label: 'Lebenslauf-Check',  path: '/cv-check',     icon: '📋' },
+      { label: 'Übersicht',         path: '/dashboard',    icon: 'grid',     tour: 'dashboard' },
+      { label: 'Karriere-Analyse',  path: '/analyse',      icon: 'target',   tour: 'analyse' },
+      { label: 'Masterclass',       path: '/masterclass',  icon: 'play' },
+      { label: 'Lebenslauf-Check',  path: '/cv-check',     icon: 'doc' },
+      { label: 'Coach',             path: '/coach',        icon: 'chat' },
+    ],
+  },
+  {
+    label: 'Karriere',
+    items: [
+      { label: 'Bewerbungen', path: '/applications', icon: 'briefcase' },
+      { label: 'Community',   path: '/community',    icon: 'users' },
     ],
   },
 ];
 
-const NAV_ITEMS = NAV_GROUPS.flatMap(g => g.items);
-
 const ADMIN_ITEMS = [
-  { label: 'Userverwaltung',    path: '/admin/users',     icon: '👤' },
-  { label: 'Kursverwaltung',    path: '/admin/courses',   icon: '📚' },
-  { label: 'Seminarverwaltung', path: '/admin/content',   icon: '🎓' },
-  { label: 'Badges',            path: '/admin/coaching',  icon: '🏅' },
-  { label: 'Analytics',         path: '/admin/analytics', icon: '📈' },
-  { label: 'FK Dashboard',      path: '/coach-dashboard', icon: '📋' },
+  { label: 'Userverwaltung',    path: '/admin/users',     icon: 'user' },
+  { label: 'Kursverwaltung',    path: '/admin/courses',   icon: 'books' },
+  { label: 'Seminarverwaltung', path: '/admin/content',   icon: 'cap' },
+  { label: 'Badges',            path: '/admin/coaching',  icon: 'badge' },
+  { label: 'Analytics',         path: '/admin/analytics', icon: 'chart' },
+  { label: 'FK Dashboard',      path: '/coach-dashboard', icon: 'doc' },
 ];
 
+// ─── Inline icons (Lucide-style, 16px) ───────────────────────────────────────
+function Icon({ name }) {
+  const p = { width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none',
+              stroke: 'currentColor', strokeWidth: 1.7,
+              strokeLinecap: 'round', strokeLinejoin: 'round' };
+  switch (name) {
+    case 'grid':      return (<svg {...p}><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>);
+    case 'target':    return (<svg {...p}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>);
+    case 'play':      return (<svg {...p}><polygon points="6 3 20 12 6 21 6 3"/></svg>);
+    case 'doc':       return (<svg {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>);
+    case 'chat':      return (<svg {...p}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>);
+    case 'briefcase': return (<svg {...p}><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>);
+    case 'users':     return (<svg {...p}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>);
+    case 'bell':      return (<svg {...p}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>);
+    case 'search':    return (<svg {...p}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>);
+    case 'logout':    return (<svg {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>);
+    case 'chevron':   return (<svg {...p}><polyline points="15 18 9 12 15 6"/></svg>);
+    case 'user':      return (<svg {...p}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>);
+    case 'books':     return (<svg {...p}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>);
+    case 'cap':       return (<svg {...p}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>);
+    case 'badge':     return (<svg {...p}><circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>);
+    case 'chart':     return (<svg {...p}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>);
+    default:          return (<span aria-hidden>•</span>);
+  }
+}
+
+// ─── Sidebar ─────────────────────────────────────────────────────────────────
 export default function Sidebar({ profile, analysisResults }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
   const isAdmin = profile?.role === 'admin' || profile?.role === 'coach';
 
+  const [collapsed, setCollapsed] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifs, setShowNotifs] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  // Load persisted collapse state
+  useEffect(() => {
+    try { if (typeof localStorage !== 'undefined' && localStorage.getItem('ki-sb-collapsed') === '1') setCollapsed(true); } catch {}
+  }, []);
+
+  // Mirror collapse to <html> for CSS grid + sidebar rules
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-sb', collapsed ? 'collapsed' : 'expanded');
+    }
+  }, [collapsed]);
+
+  // ⌘B to toggle
+  useEffect(() => {
+    function onKey(e) {
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        setCollapsed(c => {
+          const next = !c;
+          try { localStorage.setItem('ki-sb-collapsed', next ? '1' : '0'); } catch {}
+          return next;
+        });
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  function toggleCollapsed() {
+    setCollapsed(c => {
+      const next = !c;
+      try { localStorage.setItem('ki-sb-collapsed', next ? '1' : '0'); } catch {}
+      return next;
+    });
+  }
+
+  // Load notifications
   useEffect(() => {
     if (!profile?.id) return;
-    supabase.from('notifications').select('*').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(20)
+    supabase
+      .from('notifications').select('*').eq('user_id', profile.id)
+      .order('created_at', { ascending: false }).limit(20)
       .then(({ data }) => setNotifications(data || []));
   }, [profile?.id]);
 
-  // Close mobile menu on route change
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
+  // Close popovers on route change
+  useEffect(() => { setMobileOpen(false); setShowNotifs(false); }, [pathname]);
 
   async function markAllRead() {
     const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
@@ -67,210 +141,190 @@ export default function Sidebar({ profile, analysisResults }) {
     window.location.href = '/auth/login';
   }
 
-  const linkStyle = (path) => ({
-    display: 'flex', alignItems: 'center', gap: 12,
-    padding: '10px 16px', borderRadius: 'var(--r-md)',
-    fontSize: 14, fontWeight: pathname === path ? 600 : 400,
-    color: pathname === path ? 'var(--ki-red)' : 'var(--ki-text-secondary)',
-    background: pathname === path ? 'rgba(204,20,38,0.06)' : 'transparent',
-    cursor: 'pointer', transition: 'all var(--t-fast)',
-    textDecoration: 'none',
-  });
+  function openSearch() {
+    if (typeof window === 'undefined') return;
+    try {
+      // Trigger existing GlobalSearch (listens for ⌘K)
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }));
+    } catch {}
+  }
 
-  const sidebarContent = (
+  function isActive(path) {
+    if (!pathname) return false;
+    if (path === '/dashboard') return pathname === '/dashboard';
+    return pathname === path || pathname.startsWith(path + '/');
+  }
+
+  function NavItem({ item }) {
+    const active = isActive(item.path);
+    const tourAttr = item.tour === 'dashboard' ? { 'data-tour-dashboard': '' }
+      : item.tour === 'analyse' ? { 'data-tour-analyse': '' } : {};
+    return (
+      <a
+        href={item.path}
+        className={`sb-item${active ? ' active' : ''}`}
+        title={collapsed ? item.label : undefined}
+        {...tourAttr}
+      >
+        <span className="sb-i"><Icon name={item.icon} /></span>
+        <span className="label-text">{item.label}</span>
+      </a>
+    );
+  }
+
+  // ─── User block content ────────────────────────────────────────────────
+  const userInitials = (
+    profile?.avatar_initials ||
+    [profile?.first_name, profile?.last_name].filter(Boolean).map(s => s[0]).join('').toUpperCase() ||
+    (profile?.name?.[0] || '?').toUpperCase()
+  );
+  const userDisplayName = (
+    profile?.name ||
+    [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') ||
+    'User'
+  );
+  const userMeta = isAdmin ? 'Admin' : 'Mitglieder-Portal';
+
+  // ─── Shared content (used in desktop + mobile drawer) ──────────────────
+  const sidebarBody = (
     <>
-      {/* Logo + Notifications */}
-      <div style={{ padding: '0 16px 24px', borderBottom: '1px solid var(--ki-border)', marginBottom: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', color: 'var(--ki-red)', textTransform: 'uppercase' }}>Karriere-Institut</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ position: 'relative' }}>
-              <button
-                data-tour-notifications=""
-                onClick={() => setShowNotifs(!showNotifs)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--ki-text-secondary)', position: 'relative', padding: 4 }}
-              >
-                🔔
-                {unreadCount > 0 && (
-                  <span style={{
-                    position: 'absolute', top: 0, right: 0, width: 16, height: 16, borderRadius: '50%',
-                    background: 'var(--ki-red)', color: 'white', fontSize: 10, fontWeight: 700,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>{unreadCount}</span>
-                )}
-              </button>
-              {showNotifs && (
-                <div style={{
-                  position: 'absolute', top: '100%', right: -12, width: 300, background: 'var(--ki-card)',
-                  borderRadius: 'var(--r-lg)', boxShadow: 'var(--sh-xl)', zIndex: 1000, marginTop: 8,
-                  maxHeight: 400, overflow: 'auto', border: '1px solid var(--ki-border)',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--ki-border)' }}>
-                    <span style={{ fontSize: 13, fontWeight: 600 }}>Benachrichtigungen</span>
-                    {unreadCount > 0 && (
-                      <button onClick={markAllRead} style={{ fontSize: 12, color: 'var(--ki-red)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>
-                        Alle gelesen
-                      </button>
-                    )}
-                  </div>
-                  {notifications.length === 0 ? (
-                    <div style={{ padding: 24, textAlign: 'center', color: 'var(--ki-text-tertiary)', fontSize: 13 }}>Keine Benachrichtigungen</div>
-                  ) : (
-                    notifications.map(n => (
-                      <div key={n.id} onClick={() => handleNotifClick(n)} style={{
-                        padding: '10px 16px', cursor: 'pointer', borderBottom: '1px solid var(--ki-border)',
-                        background: n.read ? 'transparent' : 'rgba(204,20,38,0.03)',
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{ fontSize: 14 }}>
-                            {n.type === 'coaching_impulse' ? '💡' : n.type === 'badge' ? '🏅' : n.type === 'achievement' ? '🏆' : '📌'}
-                          </span>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 13, fontWeight: n.read ? 400 : 600 }}>{n.title}</div>
-                            {n.content && <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginTop: 2 }}>{n.content}</div>}
-                          </div>
-                          {!n.read && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--ki-red)', flexShrink: 0 }} />}
-                        </div>
-                        <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginTop: 4, paddingLeft: 22 }}>
-                          {new Date(n.created_at).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+      <div className="sb-brand">
+        <div className="sb-logo">K</div>
+        <div className="sb-brand-text">
+          <div className="sb-brand-title">Karriere-Institut</div>
+          <div className="sb-brand-sub">{isAdmin ? 'Admin-Portal' : 'Mitglieder-Portal'}</div>
         </div>
-        <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginTop: 2 }}>{profile?.name || 'Lädt...'}</div>
       </div>
 
-      {/* Navigation */}
-      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
+      <button className="sb-search" onClick={openSearch} type="button" title="Suchen (⌘K)">
+        <span className="sb-i"><Icon name="search" /></span>
+        <span className="label-text">Suchen</span>
+        <span className="shortcut">⌘K</span>
+      </button>
+
+      <nav className="sb-nav">
         {NAV_GROUPS.map((group, gi) => (
-          <div key={gi}>
-            {group.label && (
-              <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--ki-text-tertiary)', padding: gi === 0 ? '4px 16px 6px' : '16px 16px 6px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                {group.label}
-              </div>
-            )}
-            {group.items.map(item => {
-              const tourAttr = item.path === '/dashboard' ? { 'data-tour-dashboard': '' }
-                : item.path === '/analyse' ? { 'data-tour-analyse': '' } : {};
-              return (
-                <a key={item.path} href={item.path} style={linkStyle(item.path)} {...tourAttr}>
-                  <span style={{ fontSize: 15, width: 20, textAlign: 'center' }}>{item.icon}</span>
-                  <span style={{ flex: 1, fontSize: 13 }}>{item.label}</span>
-                </a>
-              );
-            })}
+          <div key={gi} className="sb-section">
+            {group.label && <div className="sb-section-label">{group.label}</div>}
+            {group.items.map(item => (<NavItem key={item.path} item={item} />))}
           </div>
         ))}
 
         {isAdmin && (
-          <>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ki-text-tertiary)', padding: '16px 16px 8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              Admin
-            </div>
-            {ADMIN_ITEMS.map(item => (
-              <a key={item.path} href={item.path} style={linkStyle(item.path)}>
-                <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>{item.icon}</span>
-                {item.label}
-              </a>
-            ))}
-          </>
+          <div className="sb-section">
+            <div className="sb-section-label">Admin</div>
+            {ADMIN_ITEMS.map(item => (<NavItem key={item.path} item={item} />))}
+          </div>
         )}
       </nav>
 
-      {/* Profil + Logout */}
-      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 2, borderTop: '1px solid var(--ki-border)', paddingTop: 12 }}>
-        <a href="/profile" style={linkStyle('/profile')} data-tour-profile="">
-          <span style={{ fontSize: 15, width: 20, textAlign: 'center' }}>○</span>
-          <span style={{ flex: 1, fontSize: 13 }}>Profil</span>
+      <div className="sb-user-wrap">
+        <a href="/profile" className="sb-user" data-tour-profile="" title={collapsed ? userDisplayName : undefined}>
+          <span className="avatar">{userInitials}</span>
+          <span className="sb-user-info">
+            <span className="sb-user-name">{userDisplayName}</span>
+            <span className="sb-user-meta">{userMeta}</span>
+          </span>
         </a>
-        <button onClick={handleLogout} style={{ ...linkStyle('/logout'), color: 'var(--ki-text-tertiary)', background: 'transparent', border: 'none', width: '100%' }}>
-          <span style={{ fontSize: 15, width: 20, textAlign: 'center' }}>⏻</span>
-          <span style={{ fontSize: 13 }}>Abmelden</span>
+        <button className="sb-logout" onClick={handleLogout} type="button" title="Abmelden" aria-label="Abmelden">
+          <Icon name="logout" />
         </button>
       </div>
     </>
   );
 
+  // ─── Render ────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Desktop Sidebar */}
-      <aside data-tour-sidebar="" className="sidebar" style={{
-        width: 240, height: '100vh', background: 'var(--ki-card)',
-        borderRight: '1px solid var(--ki-border)', display: 'flex', flexDirection: 'column',
-        padding: '24px 12px', position: 'fixed', left: 0, top: 0, overflowY: 'auto', zIndex: 100,
-      }}>
-        {sidebarContent}
+      {/* Desktop sidebar */}
+      <aside className="sb" data-tour-sidebar="" aria-label="Hauptmenü">
+        <button className="sb-toggle" onClick={toggleCollapsed} type="button" aria-label="Sidebar umschalten">
+          <Icon name="chevron" />
+        </button>
+
+        <button
+          className="sb-bell"
+          data-tour-notifications=""
+          onClick={() => setShowNotifs(v => !v)}
+          type="button"
+          aria-label="Benachrichtigungen"
+          title="Benachrichtigungen"
+        >
+          <Icon name="bell" />
+          {unreadCount > 0 && <span className="sb-bell-dot">{unreadCount}</span>}
+        </button>
+
+        {sidebarBody}
+
+        {showNotifs && (
+          <div className="sb-notifs" role="dialog" aria-label="Benachrichtigungen">
+            <div className="sb-notifs-head">
+              <span>Benachrichtigungen</span>
+              {unreadCount > 0 && (
+                <button type="button" onClick={markAllRead}>Alle gelesen</button>
+              )}
+            </div>
+            {notifications.length === 0 ? (
+              <div className="sb-notifs-empty">Keine Benachrichtigungen</div>
+            ) : (
+              notifications.map(n => (
+                <button
+                  key={n.id}
+                  type="button"
+                  onClick={() => handleNotifClick(n)}
+                  className={`sb-notif${n.read ? '' : ' unread'}`}
+                >
+                  <span className="sb-notif-emoji">
+                    {n.type === 'coaching_impulse' ? '💡' : n.type === 'badge' ? '🏅' : n.type === 'achievement' ? '🏆' : '📌'}
+                  </span>
+                  <div className="sb-notif-body">
+                    <div className="sb-notif-title">{n.title}</div>
+                    {n.content && <div className="sb-notif-content">{n.content}</div>}
+                    <div className="sb-notif-time">
+                      {new Date(n.created_at).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                  {!n.read && <span className="sb-notif-dot" />}
+                </button>
+              ))
+            )}
+          </div>
+        )}
       </aside>
 
-      {/* Mobile Top Bar */}
-      <div className="mobile-nav" style={{
-        display: 'none', position: 'fixed', top: 0, left: 0, right: 0, height: 56,
-        background: 'var(--ki-card)', borderBottom: '1px solid var(--ki-border)',
-        alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 16px', zIndex: 200,
-      }}>
-        <button onClick={() => setMobileOpen(true)} style={{
-          background: 'none', border: 'none', cursor: 'pointer', padding: 8,
-          display: 'flex', flexDirection: 'column', gap: 5,
-        }}>
-          <span style={{ display: 'block', width: 22, height: 2, background: 'var(--ki-text)', borderRadius: 2 }} />
-          <span style={{ display: 'block', width: 22, height: 2, background: 'var(--ki-text)', borderRadius: 2 }} />
-          <span style={{ display: 'block', width: 22, height: 2, background: 'var(--ki-text)', borderRadius: 2 }} />
+      {/* Mobile top bar */}
+      <div className="sb-mobile-bar">
+        <button
+          className="sb-mobile-burger"
+          onClick={() => setMobileOpen(true)}
+          type="button"
+          aria-label="Menü öffnen"
+        >
+          <span /><span /><span />
         </button>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'var(--ki-red)', textTransform: 'uppercase' }}>
-          Karriere-Institut
-        </div>
-        <button onClick={() => setShowNotifs(!showNotifs)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, position: 'relative', padding: 8 }}>
-          🔔
-          {unreadCount > 0 && (
-            <span style={{
-              position: 'absolute', top: 4, right: 4, width: 16, height: 16, borderRadius: '50%',
-              background: 'var(--ki-red)', color: 'white', fontSize: 10, fontWeight: 700,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>{unreadCount}</span>
-          )}
+        <div className="sb-mobile-brand">Karriere-Institut</div>
+        <button
+          className="sb-mobile-bell"
+          onClick={() => setShowNotifs(v => !v)}
+          type="button"
+          aria-label="Benachrichtigungen"
+        >
+          <Icon name="bell" />
+          {unreadCount > 0 && <span className="sb-bell-dot">{unreadCount}</span>}
         </button>
       </div>
 
-      {/* Mobile Drawer Overlay */}
-      {mobileOpen && (
-        <div
-          onClick={() => setMobileOpen(false)}
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 300,
-          }}
-        />
-      )}
+      {/* Mobile drawer overlay */}
+      {mobileOpen && <div className="sb-mobile-overlay" onClick={() => setMobileOpen(false)} />}
 
-      {/* Mobile Drawer */}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, bottom: 0, width: 280,
-        background: 'var(--ki-card)', zIndex: 400, padding: '16px 12px',
-        display: 'flex', flexDirection: 'column',
-        transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
-        transition: 'transform 0.25s ease',
-        overflowY: 'auto',
-      }}>
-        {/* Close button header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, padding: '0 8px' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'var(--ki-red)', textTransform: 'uppercase' }}>Menü</div>
-          <button
-            onClick={() => setMobileOpen(false)}
-            style={{
-              background: 'var(--ki-bg-alt)', border: 'none', cursor: 'pointer',
-              width: 36, height: 36, borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 18, color: 'var(--ki-text)', fontWeight: 400,
-            }}
-          >✕</button>
+      {/* Mobile drawer */}
+      <aside className={`sb-drawer${mobileOpen ? ' open' : ''}`} aria-label="Menü">
+        <div className="sb-drawer-head">
+          <div className="sb-mobile-brand">Menü</div>
+          <button onClick={() => setMobileOpen(false)} type="button" aria-label="Schließen">✕</button>
         </div>
-        {sidebarContent}
-      </div>
+        {sidebarBody}
+      </aside>
     </>
   );
 }

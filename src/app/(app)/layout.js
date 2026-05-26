@@ -51,9 +51,9 @@ export default async function AppLayout({ children }) {
   }));
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div className="app-shell">
       <Sidebar profile={profile} analysisResults={formattedResults} />
-      <main style={{ flex: 1, marginLeft: 240, background: 'var(--ki-bg)', minHeight: '100vh' }}>
+      <main className="app-main">
         <AnalyseGateWrapper hasAnalysis={hasCompletedAnalysis}>
           {children}
         </AnalyseGateWrapper>
