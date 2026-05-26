@@ -4,123 +4,53 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 const CATEGORIES = [
-  { key: 'struktur', label: 'Struktur-Analyse', icon: '📐' },
-  { key: 'inhalt',   label: 'Inhalts-Analyse',  icon: '📝' },
-  { key: 'design',   label: 'Design-Analyse',   icon: '🎨' },
-  { key: 'wirkung',  label: 'Wirkungs-Analyse', icon: '✨' },
+  { key: 'struktur', label: 'Struktur' },
+  { key: 'inhalt',   label: 'Inhalt' },
+  { key: 'design',   label: 'Design' },
+  { key: 'wirkung',  label: 'Wirkung' },
 ];
 
-const POSITIVE_KEYWORDS = ['Guter', 'Gut ', 'Klarer', 'Übersichtlich', 'Vollständig', 'Professionell', 'Stark', 'Konsistent', 'Angemessen', 'Motivierend', 'Persönlichkeit', 'Messbar', 'Relevante', 'Kompetenzen klar'];
-const isPositive = (label) => POSITIVE_KEYWORDS.some(k => label.includes(k));
+const POSITIVE_KEYWORDS = [
+  'Guter', 'Gut ', 'Klarer', 'Übersichtlich', 'Vollständig',
+  'Professionell', 'Stark', 'Konsistent', 'Angemessen',
+  'Motivierend', 'Persönlichkeit', 'Messbar', 'Relevante', 'Kompetenzen klar',
+];
+const isPositive = (label) => POSITIVE_KEYWORDS.some(k => (label || '').includes(k));
 
-function ScoreGauge({ rating }) {
-  const score = Math.round((rating / 5) * 100);
-  const color = score >= 70 ? '#22C55E' : score >= 50 ? '#F59E0B' : '#EF4444';
-  const label = score >= 70 ? 'Stark' : score >= 50 ? 'Gut' : 'Ausbaufähig';
-
-  // SVG arc gauge
-  const r = 52;
-  const cx = 70, cy = 70;
-  const circumference = Math.PI * r; // half circle
-  const dash = (score / 100) * circumference;
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-      <div style={{ position: 'relative', width: 140, height: 80, flexShrink: 0 }}>
-        <svg width="140" height="80" viewBox="0 0 140 80">
-          {/* Track */}
-          <path
-            d={`M 18 70 A ${r} ${r} 0 0 1 122 70`}
-            fill="none" stroke="#E5E7EB" strokeWidth="12" strokeLinecap="round"
-          />
-          {/* Fill */}
-          <path
-            d={`M 18 70 A ${r} ${r} 0 0 1 122 70`}
-            fill="none" stroke={color} strokeWidth="12" strokeLinecap="round"
-            strokeDasharray={`${dash} ${circumference}`}
-          />
-        </svg>
-        <div style={{
-          position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-          textAlign: 'center', lineHeight: 1,
-        }}>
-          <div style={{ fontSize: 26, fontWeight: 800, color }}>{score}%</div>
-          <div style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 600, marginTop: 2 }}>{label}</div>
-        </div>
-      </div>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 20, fontWeight: 800, color: '#1A1A1A', marginBottom: 4 }}>
-          Dein Lebenslauf-Score
-        </div>
-        <div style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.5 }}>
-          Basierend auf Struktur, Inhalt, Design und Wirkung — bewertet von deinem Karriere-Coach.
-        </div>
-      </div>
-    </div>
-  );
+// ─── Icons ───────────────────────────────────────────────────────────────
+function Icon({ name, size = 16, stroke = 1.7 }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
+              stroke: 'currentColor', strokeWidth: stroke,
+              strokeLinecap: 'round', strokeLinejoin: 'round' };
+  switch (name) {
+    case 'doc':    return (<svg {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>);
+    case 'check':  return (<svg {...p}><polyline points="20 6 9 17 4 12"/></svg>);
+    case 'target': return (<svg {...p}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>);
+    case 'play':   return (<svg {...p}><polygon points="6 3 20 12 6 21 6 3"/></svg>);
+    case 'chat':   return (<svg {...p}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>);
+    case 'dl':     return (<svg {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>);
+    default: return null;
+  }
 }
 
-function CategoryCard({ label, icon, cat, aiCat }) {
-  const items = (cat?.presets && cat.presets.length) ? cat.presets : (aiCat?.selectedPresets || []);
-  const freetext = cat?.freetext || null;
-  const detail = aiCat?.detail || null;
-  const total = items.length + (freetext ? 1 : 0);
-  const positive = items.filter(isPositive).length;
-  const hasBody = total > 0 || !!detail;
-
+function ScoreRing({ score100, size = 180 }) {
+  const r = (size - 24) / 2;
+  const c = 2 * Math.PI * r;
+  const val = Math.max(0, Math.min(100, score100));
+  const offset = c - (val / 100) * c;
   return (
-    <div style={{
-      background: '#fff', borderRadius: 16,
-      border: '1px solid #E8E6E1', overflow: 'hidden',
-    }}>
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 18px', borderBottom: hasBody ? '1px solid #F3F4F6' : 'none',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 18 }}>{icon}</span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>{label}</span>
+    <div className="cvc-ring" style={{ width: size, height: size }}>
+      <svg viewBox={`0 0 ${size} ${size}`}>
+        <circle className="track" cx={size / 2} cy={size / 2} r={r} />
+        <circle className="prog" cx={size / 2} cy={size / 2} r={r}
+                strokeDasharray={c} strokeDashoffset={offset} />
+      </svg>
+      <div className="label">
+        <div>
+          <div className="v">{val}</div>
+          <div className="o">von 100</div>
         </div>
-        <span style={{
-          fontSize: 12, fontWeight: 600, color: '#6B7280',
-          background: '#F3F4F6', padding: '2px 8px', borderRadius: 980,
-        }}>
-          {total > 0 ? `${positive}/${total} positiv` : (detail ? 'Analyse' : 'Kein Feedback')}
-        </span>
       </div>
-      {hasBody && (
-        <div style={{ padding: '12px 18px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {detail && (
-            <p style={{ fontSize: 13.5, color: '#374151', lineHeight: 1.65, margin: 0 }}>
-              {detail}
-            </p>
-          )}
-          {items.map((p, i) => {
-            const pos = isPositive(p);
-            return (
-              <div key={i} style={{
-                display: 'flex', alignItems: 'flex-start', gap: 10,
-                padding: '10px 12px', borderRadius: 10,
-                background: pos ? '#F0FDF4' : '#FFF5F5',
-                border: `1px solid ${pos ? '#BBF7D0' : '#FECACA'}`,
-              }}>
-                <span style={{ fontSize: 13, flexShrink: 0, marginTop: 1 }}>{pos ? '✓' : '✗'}</span>
-                <span style={{ fontSize: 13, color: pos ? '#15803D' : '#DC2626', fontWeight: 500 }}>{p}</span>
-              </div>
-            );
-          })}
-          {freetext && (
-            <div style={{
-              padding: '10px 12px', borderRadius: 10,
-              background: '#F8FAFC', border: '1px solid #E2E8F0',
-            }}>
-              <p style={{ fontSize: 13, color: '#475569', margin: 0, lineHeight: 1.6, fontStyle: 'italic' }}>
-                &ldquo;{freetext}&rdquo;
-              </p>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -133,7 +63,7 @@ export default async function CVCheckPage() {
 
   const needsPasswordSetup = user.user_metadata?.needs_password_setup === true;
 
-  // CV-Dokument laden — versuche zuerst mit is_current, dann ohne
+  // CV-Dokument laden
   let doc = null;
   const { data: currentDoc } = await admin
     .from('cv_documents')
@@ -143,7 +73,6 @@ export default async function CVCheckPage() {
     .limit(1)
     .maybeSingle();
   doc = currentDoc;
-
   if (!doc) redirect('/dashboard');
 
   // Feedback laden — zuerst via fair_leads, dann direkt über cv_document_id
@@ -156,52 +85,37 @@ export default async function CVCheckPage() {
     .maybeSingle();
 
   let feedback = null;
-
-  // 1. Versuch: via fair_lead (Berater-Flow)
   if (lead) {
     const { data: fb } = await admin
-      .from('cv_feedback')
-      .select('*')
-      .eq('fair_lead_id', lead.id)
-      .maybeSingle();
+      .from('cv_feedback').select('*').eq('fair_lead_id', lead.id).maybeSingle();
     feedback = fb;
   }
-
-  // 2. Fallback: direkt über cv_document_id (Self-Upload-Flow)
   if (!feedback && doc) {
     const { data: fb } = await admin
-      .from('cv_feedback')
-      .select('*')
-      .eq('cv_document_id', doc.id)
-      .maybeSingle();
+      .from('cv_feedback').select('*').eq('cv_document_id', doc.id).maybeSingle();
     feedback = fb;
   }
 
   const { data: rawItems } = feedback
     ? await admin
-        .from('cv_feedback_items')
-        .select('*')
-        .eq('cv_feedback_id', feedback.id)
-        .order('sort_order')
+        .from('cv_feedback_items').select('*').eq('cv_feedback_id', feedback.id).order('sort_order')
     : { data: [] };
-
   const items = rawItems || [];
 
-  // Signed URL
+  // Signed URL für Preview
   let previewUrl = null;
   const { data: urlData } = await admin.storage
     .from('cv-documents')
     .createSignedUrl(doc.storage_path || doc.file_path, 3600);
   previewUrl = urlData?.signedUrl;
 
-  // Analytics (fire-and-forget)
   admin.from('analytics_events').insert({
     user_id: user.id,
     event_name: 'cv_check_viewed',
     metadata: { source: 'magic_link' },
   }).then(() => {}).catch(() => {});
 
-  // Items nach Kategorie gruppieren
+  // Items gruppieren (manuelles Berater-Feedback hat Vorrang vor KI)
   const byCategory = {};
   items.forEach(item => {
     if (!item.content) return;
@@ -216,7 +130,7 @@ export default async function CVCheckPage() {
     }
   });
 
-  // Karriere-Analyse Status laden
+  // Karriere-Analyse Status
   const { data: analysisSession } = await supabase
     .from('analysis_sessions')
     .select('overall_score, completed_at')
@@ -225,311 +139,327 @@ export default async function CVCheckPage() {
     .order('completed_at', { ascending: false })
     .limit(1)
     .maybeSingle();
-
   const hasAnalysis = !!analysisSession;
 
-  // KI-Auswertung — ausführliche Texte + konkrete Verbesserungen
+  // KI-Auswertung
   const ai = feedback?.ai_analysis || null;
   const aiCategories = ai?.categories || {};
   const improvements = Array.isArray(ai?.improvements) ? ai.improvements : [];
   const displayRating = feedback?.overall_rating || ai?.overallRating || 0;
   const displaySummary = feedback?.summary || ai?.summary || null;
-
   const fairName = lead?.fairs?.name;
   const hasRating = displayRating > 0;
 
+  // 1-5 → 0-100
+  const score100 = Math.round((displayRating / 5) * 100);
+  const scoreHeadline = score100 >= 85 ? 'Top-Liga. Halte das Niveau.'
+    : score100 >= 70 ? 'Solide Basis. Drei Hebel für den Sprung.'
+    : score100 >= 50 ? 'Solider Stand mit klaren Stellschrauben.'
+    : score100 > 0 ? 'Da geht mehr — wir zeigen dir genau wo.'
+    : 'Deine Auswertung wird gerade vorbereitet.';
+
+  const dateStr = lead?.fairs?.start_date
+    ? new Date(lead.fairs.start_date).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
+    : null;
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(160deg, #f5f3ee 0%, #faf8f4 50%, #f0f4f0 100%)',
-      paddingBottom: 64,
-    }}>
-      <div className="page-container" style={{ paddingTop: 32, maxWidth: 1100, margin: '0 auto' }}>
-
-        {/* Passwort-Setup Banner */}
-        {needsPasswordSetup && (
-          <div style={{
-            background: 'linear-gradient(135deg, #FFF7ED, #FEF3C7)',
-            border: '1px solid #FCD34D',
-            borderRadius: 16, padding: '16px 20px',
-            marginBottom: 20,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            gap: 16, flexWrap: 'wrap',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 24 }}>🔑</span>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#92400E' }}>Eigenes Passwort setzen</div>
-                <div style={{ fontSize: 13, color: '#78350F', lineHeight: 1.4 }}>
-                  Du hast ein temporäres Passwort. Bitte ändere es jetzt, um deinen Account zu sichern.
-                </div>
-              </div>
-            </div>
-            <Link
-              href="/auth/set-password?returnTo=/cv-check"
-              style={{
-                padding: '10px 18px', background: '#D97706', color: '#fff',
-                borderRadius: 980, textDecoration: 'none', fontWeight: 600, fontSize: 13,
-                whiteSpace: 'nowrap', flexShrink: 0,
-              }}
-            >
-              Passwort ändern →
-            </Link>
-          </div>
-        )}
-
-        {/* Header */}
-        <div style={{ marginBottom: 24 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#1A1A1A', margin: '0 0 4px' }}>
-            Analyse-Ergebnisse
-          </h1>
-          {fairName && (
-            <p style={{ fontSize: 14, color: '#9CA3AF', margin: 0 }}>
-              {fairName}{lead?.fairs?.start_date ? ` · ${new Date(lead.fairs.start_date).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}` : ''}
-            </p>
-          )}
-        </div>
-
-        {/* Score Banner */}
-        {hasRating && (
-          <div style={{
-            background: '#fff', borderRadius: 20, padding: '24px 32px',
-            border: '1px solid #E8E6E1', marginBottom: 24,
-            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-          }}>
-            {lead?.target_position && (
-              <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 13, color: '#9CA3AF' }}>Analysiert für:</span>
-                <span style={{
-                  fontSize: 14, fontWeight: 700, color: '#CC1426',
-                  background: '#FFF0F1', padding: '3px 12px', borderRadius: 980,
-                  border: '1px solid #FECDD3',
-                }}>
-                  🎯 {lead.target_position}
-                </span>
-              </div>
-            )}
-            <ScoreGauge rating={displayRating} />
-            {displaySummary && (
-              <p style={{
-                marginTop: 16, paddingTop: 16, borderTop: '1px solid #F3F4F6',
-                fontSize: 14, color: '#6B7280', lineHeight: 1.7, margin: '16px 0 0',
-              }}>
-                {displaySummary}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Two-column */}
-        <div className="cv-check-layout">
-
-          {/* Left: CV Preview */}
-          <div style={{
-            background: '#fff', borderRadius: 20,
-            border: '1px solid #E8E6E1', overflow: 'hidden',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-          }}>
-            <div style={{
-              padding: '12px 20px', borderBottom: '1px solid #F3F4F6',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#6B7280' }}>{doc.file_name}</span>
-              {previewUrl && (
-                <a href={previewUrl} download style={{ fontSize: 12, color: '#CC1426', fontWeight: 600, textDecoration: 'none' }}>
-                  ↓ Download
-                </a>
-              )}
-            </div>
+    <div className="cvcheck-v2">
+      {/* Passwort-Setup Banner */}
+      {needsPasswordSetup && (
+        <div style={{
+          background: 'linear-gradient(135deg, #FFF7ED, #FEF3C7)',
+          border: '1px solid #FCD34D',
+          borderRadius: 14, padding: '14px 18px',
+          marginBottom: 18,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: 14, flexWrap: 'wrap',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 22 }}>🔑</span>
             <div>
-              {doc.file_type === 'pdf' && previewUrl ? (
-                <iframe src={previewUrl} style={{ width: '100%', height: 620, border: 'none', display: 'block' }} title="CV" />
-              ) : doc.file_type === 'image' && previewUrl ? (
-                <div style={{ padding: 20 }}>
-                  <img src={previewUrl} alt="CV" style={{ maxWidth: '100%', borderRadius: 12 }} />
-                </div>
-              ) : (
-                <div style={{ padding: 48, textAlign: 'center', color: '#9CA3AF' }}>
-                  <div style={{ fontSize: 48, marginBottom: 12 }}>📄</div>
-                  <p style={{ margin: '0 0 16px' }}>Vorschau nicht verfügbar</p>
-                  {previewUrl && (
-                    <a href={previewUrl} download style={{ color: '#CC1426', fontWeight: 600 }}>Datei herunterladen</a>
-                  )}
-                </div>
-              )}
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: '#92400E' }}>Eigenes Passwort setzen</div>
+              <div style={{ fontSize: 12.5, color: '#78350F', lineHeight: 1.4 }}>
+                Du hast ein temporäres Passwort. Bitte ändere es jetzt, um deinen Account zu sichern.
+              </div>
             </div>
           </div>
-
-          {/* Right: Analysis Sidebar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {CATEGORIES.map(({ key, label, icon }) => (
-              <CategoryCard key={key} label={label} icon={icon} cat={byCategory[key]} aiCat={aiCategories[key]} />
-            ))}
-
-            {/* CTA Card — Analyse abgeschlossen oder noch nicht */}
-            {hasAnalysis ? (
-              <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid #E8E6E1', background: '#fff' }}>
-                {/* Completed header */}
-                <div style={{
-                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                  padding: '18px 20px', color: '#fff',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                    <span style={{ fontSize: 20 }}>✅</span>
-                    <span style={{ fontSize: 15, fontWeight: 800 }}>Karriere-Analyse abgeschlossen</span>
-                  </div>
-                  <div style={{ fontSize: 13, opacity: 0.9, lineHeight: 1.4 }}>
-                    Dein Karriere-Blutbild wurde erstellt — Gesamtscore:{' '}
-                    <strong>{analysisSession.overall_score}%</strong>
-                  </div>
-                </div>
-                {/* Next steps */}
-                <div style={{ padding: '14px 16px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>
-                    Deine nächsten Schritte
-                  </div>
-                  {[
-                    { icon: '📊', title: 'Analyse-Ergebnisse ansehen', desc: 'Deine 12 Kompetenzscores im Detail', href: '/analyse', primary: true },
-                    { icon: '🎓', title: 'Empfohlene Masterclass', desc: 'Dein schwächstes Feld gezielt stärken', href: '/masterclass' },
-                    { icon: '🤖', title: 'KI-Coach fragen', desc: 'Persönliche Karrieretipps auf Basis deiner Analyse', href: '/coach' },
-                  ].map((step, i) => (
-                    <Link key={i} href={step.href} style={{ textDecoration: 'none' }}>
-                      <div style={{
-                        display: 'flex', alignItems: 'center', gap: 12,
-                        padding: '10px 12px', borderRadius: 10, marginBottom: 6,
-                        background: step.primary ? '#F0FDF4' : '#F9FAFB',
-                        border: `1px solid ${step.primary ? '#BBF7D0' : '#F3F4F6'}`,
-                        transition: 'opacity 0.15s',
-                      }}>
-                        <span style={{ fontSize: 18, flexShrink: 0 }}>{step.icon}</span>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: step.primary ? '#065F46' : '#1A1A1A' }}>{step.title}</div>
-                          <div style={{ fontSize: 11, color: '#6B7280', lineHeight: 1.3 }}>{step.desc}</div>
-                        </div>
-                        <span style={{ fontSize: 14, color: step.primary ? '#059669' : '#9CA3AF', flexShrink: 0 }}>→</span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div style={{
-                background: 'linear-gradient(135deg, #CC1426 0%, #a01020 100%)',
-                borderRadius: 16, padding: 24, color: '#fff', textAlign: 'center',
-              }}>
-                <div style={{ fontSize: 32, marginBottom: 12 }}>🚀</div>
-                <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 8px' }}>
-                  Karriereanalyse starten
-                </h3>
-                <p style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.5, margin: '0 0 16px' }}>
-                  Entdecke in 12 Kompetenzfeldern, was wirklich in dir steckt.
-                </p>
-                <Link href="/analyse" style={{
-                  display: 'block', padding: '12px', background: '#fff',
-                  color: '#CC1426', borderRadius: 980, textDecoration: 'none',
-                  fontWeight: 700, fontSize: 14,
-                }}>
-                  Jetzt kostenlos starten →
-                </Link>
-              </div>
-            )}
-          </div>
+          <Link href="/auth/set-password?returnTo=/cv-check" style={{
+            padding: '8px 14px', background: '#D97706', color: '#fff',
+            borderRadius: 980, textDecoration: 'none', fontWeight: 600, fontSize: 12.5,
+            whiteSpace: 'nowrap', flexShrink: 0,
+          }}>
+            Passwort ändern →
+          </Link>
         </div>
+      )}
 
-        {/* Konkrete Verbesserungen */}
-        {improvements.length > 0 && (
-          <div style={{ marginTop: 32 }}>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1A1A1A', margin: '0 0 4px' }}>
-              Deine konkreten Verbesserungen
-            </h2>
-            <p style={{ fontSize: 14, color: '#9CA3AF', margin: '0 0 16px' }}>
-              Setze diese Punkte um, um deinen Lebenslauf spürbar zu stärken.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {improvements.map((imp, i) => (
-                <div key={i} style={{
-                  background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1',
-                  padding: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: (imp.before || imp.after) ? 12 : 0 }}>
-                    <span style={{
-                      width: 24, height: 24, borderRadius: '50%', background: '#CC1426', color: '#fff',
-                      fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center',
-                      justifyContent: 'center', flexShrink: 0,
-                    }}>{i + 1}</span>
-                    <span style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>{imp.title}</span>
-                  </div>
-                  {imp.before && (
-                    <div style={{
-                      display: 'flex', alignItems: 'flex-start', gap: 10,
-                      padding: '10px 12px', borderRadius: 10, marginBottom: 8,
-                      background: '#FFF5F5', border: '1px solid #FECACA',
-                    }}>
-                      <span style={{ fontSize: 13, flexShrink: 0, marginTop: 1 }}>✗</span>
-                      <div>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2 }}>Vorher</div>
-                        <div style={{ fontSize: 13, color: '#7F1D1D', lineHeight: 1.5 }}>{imp.before}</div>
-                      </div>
-                    </div>
-                  )}
-                  {imp.after && (
-                    <div style={{
-                      display: 'flex', alignItems: 'flex-start', gap: 10,
-                      padding: '10px 12px', borderRadius: 10,
-                      background: '#F0FDF4', border: '1px solid #BBF7D0',
-                    }}>
-                      <span style={{ fontSize: 13, flexShrink: 0, marginTop: 1 }}>✓</span>
-                      <div>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: '#15803D', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2 }}>{imp.before ? 'Nachher' : 'Tipp'}</div>
-                        <div style={{ fontSize: 13, color: '#14532D', lineHeight: 1.5 }}>{imp.after}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Title block */}
+      <div className="title-kicker">
+        <span className="pulse" />
+        {fairName ? `${fairName}${dateStr ? ` · ${dateStr}` : ''}` : 'Lebenslauf-Check'}
+      </div>
+      <h1 className="page-title">
+        Lebenslauf-Check.{' '}
+        <span className="faded">Was wirklich beim Recruiter ankommt.</span>
+      </h1>
+      <p className="page-sub">
+        Eine ehrliche, datenbasierte Analyse mit konkreten Hebeln für mehr Wirkung.
+      </p>
+
+      {/* Headbar */}
+      <div className="cvc-headbar">
+        {lead?.target_position && (
+          <span className="cvc-jobmatch-tag">🎯 {lead.target_position}</span>
         )}
-
-        {/* Bottom Features */}
-        <div style={{ marginTop: 40 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1A1A1A', marginBottom: 20, textAlign: 'center' }}>
-            Das steckt noch in deinem Portal
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-            {[
-              { icon: '🎓', title: 'Masterclass', desc: 'Expertenwissen in kompakten E-Learning-Modulen.', link: '/masterclass', cta: 'Module entdecken' },
-              { icon: '🤖', title: 'KI-Coach', desc: 'Dein persönlicher Karriere-Assistent – 24/7.', link: '/coach', cta: 'Coach starten' },
-              { icon: '🎯', title: 'Karriereanalyse', desc: '12 Kompetenzfelder – dein persönlicher Score.', link: '/analyse', cta: hasAnalysis ? 'Ergebnisse ansehen' : 'Analyse starten' },
-            ].map((item, i) => (
-              <Link key={i} href={item.link} style={{ textDecoration: 'none' }}>
-                <div style={{
-                  background: '#fff', borderRadius: 16, padding: 24,
-                  border: '1px solid #E8E6E1', height: '100%',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                }}>
-                  <div style={{ fontSize: 28, marginBottom: 10 }}>{item.icon}</div>
-                  <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 6px', color: '#1A1A1A' }}>{item.title}</h3>
-                  <p style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.5, margin: '0 0 14px' }}>{item.desc}</p>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#CC1426' }}>{item.cta} →</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-
+        <span className="cvc-version">{doc.file_name}</span>
+        <span className="cvc-spacer" />
+        {previewUrl && (
+          <a className="btn btn-ghost" href={previewUrl} download
+             style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Icon name="dl" size={14} /> Download
+          </a>
+        )}
       </div>
 
-      <style>{`
-        @media (max-width: 960px) {
-          .page-container > div[style*="gridTemplateColumns: 1fr 380px"] {
-            grid-template-columns: 1fr !important;
-          }
-          .page-container > div[style*="gridTemplateColumns: repeat(3"] {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
+      {/* Top grid: Score Hero (left) + Categories (right) */}
+      <div className="cvc-grid">
+        <div className="cvc-col-left">
+          <div className="cvc-score-hero">
+            <div className="hero-grain" />
+            <div className="cvc-score-grid">
+              {hasRating ? (
+                <ScoreRing score100={score100} />
+              ) : (
+                <div className="cvc-ring">
+                  <svg viewBox="0 0 180 180">
+                    <circle className="track" cx="90" cy="90" r="78" />
+                  </svg>
+                  <div className="label">
+                    <div>
+                      <div className="v" style={{ fontSize: 38 }}>—</div>
+                      <div className="o">in Arbeit</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="cvc-score-meta">
+                <div className="eyebrow">Dein CV-Score</div>
+                <h2>{scoreHeadline}</h2>
+                {displaySummary && <p>{displaySummary}</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Categories */}
+        <div className="card">
+          <div className="card-head">
+            <h3 className="card-title">
+              Kategorien
+              <span className="kicker">4 Bereiche</span>
+            </h3>
+          </div>
+          <div className="cvc-cats">
+            {CATEGORIES.map(cat => {
+              const aiCat = aiCategories?.[cat.key] || {};
+              const localCat = byCategory[cat.key];
+              const rawRating = aiCat.rating || localCat?.rating || 0;
+              const s100 = rawRating * 20;
+              const tier = s100 >= 80 ? 'good' : s100 >= 60 ? 'mid' : s100 > 0 ? 'low' : 'mid';
+              const tierLabel = tier === 'good' ? 'Stark' : tier === 'mid' ? 'Mittel' : 'Schwach';
+              const presets = (localCat?.presets?.length ? localCat.presets : (aiCat.selectedPresets || []));
+              const freetext = localCat?.freetext;
+              const comment = aiCat.comment;
+              const detail = aiCat.detail;
+              const hasAnyContent = presets.length > 0 || !!comment || !!detail || !!freetext;
+              return (
+                <div className="cvc-cat" key={cat.key}>
+                  <span className="cvc-cat-name">{cat.label}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+                    {rawRating > 0 && <span className={`cvc-cat-tag t-${tier}`}>{tierLabel}</span>}
+                    {rawRating > 0 && (
+                      <span className="cvc-cat-score">
+                        {rawRating}<span className="of">/5</span>
+                      </span>
+                    )}
+                  </span>
+                  <div className={`cvc-cat-bar s-${tier}`}>
+                    <div style={{ width: `${s100}%` }} />
+                  </div>
+                  {hasAnyContent && (
+                    <div className="cvc-cat-detail" style={{ gridColumn: '1 / -1' }}>
+                      {detail && <div>{detail}</div>}
+                      {presets.length > 0 && (
+                        <ul className="cvc-presets">
+                          {presets.map((p, i) => {
+                            const pos = isPositive(p);
+                            return (
+                              <li key={i} className={`cvc-preset ${pos ? 'pos' : 'neg'}`}>
+                                <span className="cvc-preset-dot" />
+                                <span>{p}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                      {comment && <div className="cvc-cat-comment">„{comment}"</div>}
+                      {freetext && <div className="cvc-cat-comment">„{freetext}"</div>}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* CV Preview (full width below) */}
+      <div className="card cvc-doc-card" style={{ marginBottom: 'var(--gap)' }}>
+        <div className="cvc-doc-toolbar">
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--label-2)' }}>
+            {doc.file_name}
+          </span>
+          <div className="right">
+            {previewUrl && (
+              <a href={previewUrl} download style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                background: 'var(--fill)', padding: '4px 10px', borderRadius: 6,
+                fontSize: 12, fontWeight: 500, color: 'var(--label-2)',
+                textDecoration: 'none',
+              }}>
+                <Icon name="dl" size={12} /> Download
+              </a>
+            )}
+          </div>
+        </div>
+        <div className="cvc-doc-stage">
+          {doc.file_type === 'pdf' && previewUrl ? (
+            <iframe className="cvc-doc-frame" src={previewUrl} title="CV" />
+          ) : doc.file_type === 'image' && previewUrl ? (
+            <img className="cvc-doc-img" src={previewUrl} alt="CV" />
+          ) : (
+            <div className="cvc-doc-empty">
+              <div className="ic"><Icon name="doc" size={24} /></div>
+              <div className="ttl">Vorschau nicht verfügbar</div>
+              <div className="sub">
+                Für diese Datei ist keine Inline-Vorschau möglich. Lade die Datei herunter oder erstelle eine neue Version als PDF.
+              </div>
+              {previewUrl && (
+                <a className="btn btn-ghost" href={previewUrl} download>Datei herunterladen</a>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Verbesserungen */}
+      {improvements.length > 0 && (
+        <div className="card" style={{ marginBottom: 'var(--gap)' }}>
+          <div className="card-head">
+            <h3 className="card-title">
+              Verbesserungen
+              <span className="kicker">{improvements.length} Hebel</span>
+            </h3>
+          </div>
+          <div className="cvc-improvements">
+            {improvements.map((imp, i) => (
+              <div className="cvc-imp" key={i}>
+                <div className="cvc-imp-num">{i + 1}</div>
+                <div className="cvc-imp-body">
+                  <div className="cvc-imp-head">
+                    {imp.category && <span className="cvc-imp-cat">{imp.category}</span>}
+                    <span className="cvc-imp-title">{imp.title}</span>
+                  </div>
+                  {(imp.before || imp.after) && (
+                    <div className="cvc-imp-ba">
+                      {imp.before ? (
+                        <div className="cvc-imp-side before">
+                          <span className="lbl">Vorher</span>
+                          {imp.before}
+                        </div>
+                      ) : <div style={{ display: 'none' }} />}
+                      {imp.after && (
+                        <div className="cvc-imp-side after">
+                          <span className="lbl">{imp.before ? 'Nachher' : 'Tipp'}</span>
+                          {imp.after}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Karriere-Analyse Status */}
+      {hasAnalysis && (
+        <div className="card" style={{
+          marginBottom: 'var(--gap)',
+          background: 'linear-gradient(135deg, var(--green-soft), #DFF5E5)',
+          border: '0.5px solid #C7E8CC',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <div style={{
+              width: 38, height: 38, borderRadius: 10,
+              background: '#fff', color: 'var(--green-dark)',
+              display: 'grid', placeItems: 'center', flexShrink: 0,
+            }}>
+              <Icon name="check" size={20} stroke={2.5} />
+            </div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--green-dark)', letterSpacing: '-0.01em' }}>
+                Karriere-Analyse abgeschlossen
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--label-2)', lineHeight: 1.5, marginTop: 2 }}>
+                Dein Karriere-Score: <strong>{analysisSession.overall_score}%</strong> — sieh dir die 12 Kompetenzfelder im Detail an.
+              </div>
+            </div>
+            <Link href="/analyse" className="btn btn-tinted" style={{ textDecoration: 'none' }}>
+              Analyse ansehen →
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom CTAs */}
+      <div className="cvc-ctas">
+        {[
+          {
+            eyebrow: 'Karriere-Analyse',
+            title: '12 Kompetenzfelder kennen',
+            sub: 'Entdecke, wo du wirklich stehst und welche Module dich am schnellsten weiterbringen.',
+            href: '/analyse',
+            cta: hasAnalysis ? 'Ergebnisse ansehen' : 'Analyse starten',
+            icon: 'target',
+          },
+          {
+            eyebrow: 'Masterclass',
+            title: 'Expertenwissen in Modulen',
+            sub: 'Kompakte E-Learning Kurse mit konkreten Techniken für Bewerbung, Gehalt und Karriere.',
+            href: '/masterclass',
+            cta: 'Module entdecken',
+            icon: 'play',
+          },
+          {
+            eyebrow: 'KI-Coach',
+            title: 'Deine 24/7-Begleitung',
+            sub: 'Stell deine Fragen, lass dich auf Gespräche vorbereiten, hol dir individuelle Tipps.',
+            href: '/coach',
+            cta: 'Coach starten',
+            icon: 'chat',
+          },
+        ].map((c, i) => (
+          <a key={i} className="cvc-cta" href={c.href}>
+            <div className="cvc-cta-ic"><Icon name={c.icon} size={18} /></div>
+            <div className="cvc-cta-eyebrow">{c.eyebrow}</div>
+            <div className="cvc-cta-title">{c.title}</div>
+            <div className="cvc-cta-sub">{c.sub}</div>
+            <span className="cvc-cta-link">{c.cta} →</span>
+          </a>
+        ))}
+      </div>
     </div>
   );
 }
