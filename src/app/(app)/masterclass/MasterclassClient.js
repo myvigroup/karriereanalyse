@@ -34,6 +34,55 @@ const ANALYSE_TOOLS = [
   },
 ];
 
+// ─── Geplante Masterclasses (Coming Soon — zur Kauf-Anregung) ────────────────
+const COMING_SOON_MASTERCLASSES = [
+  {
+    id: 'soon-verhandlung-advanced',
+    title: 'Verhandlungskompetenz Advanced',
+    subtitle: 'Vom Bittsteller zum Verhandlungspartner auf Augenhöhe',
+    description: 'Komplexe Verhandlungsstrategien jenseits von Gehalt: Verträge, Konflikte, Boni-Pakete. Mit Praxis-Simulationen aus echten Cases.',
+    launch: 'August 2026',
+    letter: 'V',
+    gradient: 'linear-gradient(135deg, #5d3a91 0%, #3a2266 100%)',
+  },
+  {
+    id: 'soon-personal-branding',
+    title: 'Personal Branding 360°',
+    subtitle: 'Mach dich sichtbar — online wie offline',
+    description: 'LinkedIn, Speaking, Networking, eigene Website. Wie du dich als Marke positionierst und Recruiter auf dich aufmerksam werden statt umgekehrt.',
+    launch: 'September 2026',
+    letter: 'P',
+    gradient: 'linear-gradient(135deg, #1d4e89 0%, #0f2e4f 100%)',
+  },
+  {
+    id: 'soon-fuehrung-hybrid',
+    title: 'Führung im Hybrid-Office',
+    subtitle: 'Distanz-Teams, die liefern',
+    description: 'Remote-First-Führung, asynchrone Kommunikation, Vertrauenskultur. Für alle, die zum ersten Mal ein verteiltes Team übernehmen.',
+    launch: 'Oktober 2026',
+    letter: 'F',
+    gradient: 'linear-gradient(135deg, #1d4d2e 0%, #0e2818 100%)',
+  },
+  {
+    id: 'soon-ai-fuer-berufstaetige',
+    title: 'AI für Berufstätige',
+    subtitle: 'Werde 10× produktiver — ohne Tech-Background',
+    description: 'Konkrete Workflows mit ChatGPT, Claude und Notion AI für Office, Analyse, Schreiben. Mit fertigen Prompt-Templates für deinen Arbeitsalltag.',
+    launch: 'November 2026',
+    letter: 'A',
+    gradient: 'linear-gradient(135deg, #8a4a14 0%, #4d2906 100%)',
+  },
+  {
+    id: 'soon-karriere-pivot',
+    title: 'Karriere-Pivots & Quereinstieg',
+    subtitle: 'Branche wechseln, ohne von vorne anzufangen',
+    description: 'Wie du Übertragbarkeit deiner Skills argumentierst, das richtige Narrativ baust und in den ersten 90 Tagen im neuen Feld liefern kannst.',
+    launch: 'Januar 2027',
+    letter: 'K',
+    gradient: 'linear-gradient(135deg, #4a0a14 0%, #2a0508 100%)',
+  },
+];
+
 const SEMINARE = [
   { id: 'sem-typgerecht', icon: '🧠', title: 'Typgerechtes Lernen', subtitle: 'Finde deinen Weg zum Wissen', description: 'Warum lernen, denken und vergessen wir unterschiedlich?', next_date: '2026-04-18' },
   { id: 'sem-worklife', icon: '⚖️', title: 'Work-Life-Balance', subtitle: 'Gesundheit trifft Leistung', description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.', next_date: '2026-05-09' },
@@ -225,6 +274,37 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
             );
           })
         )}
+      </div>
+
+      {/* Section: Bald verfügbar (Coming Soon — Kauf-Anregung) */}
+      <div className="mc-secthead" style={{ marginTop: 'calc(var(--gap) * 1.5)' }}>
+        <h3>Bald verfügbar <span className="count">{COMING_SOON_MASTERCLASSES.length}</span></h3>
+        <span className="link">Vormerken — du bekommst eine Mail beim Launch</span>
+      </div>
+      <div className="mc-courses">
+        {COMING_SOON_MASTERCLASSES.map(c => (
+          <div key={c.id} className="mc-course mc-upcoming"
+               onClick={() => alert(`„${c.title}" startet ${c.launch}. Du wirst per Mail benachrichtigt sobald die Masterclass live ist.`)}
+               role="button" tabIndex={0}>
+            <div className="mc-course-cover" style={{ background: c.gradient }}>
+              <span className="cat">Coming Soon</span>
+              <span className="badge upcoming">{c.launch}</span>
+              <span className="mc-letter">{c.letter}</span>
+            </div>
+            <div className="mc-course-body">
+              <div className="mc-course-title">{c.title}</div>
+              <div className="mc-course-sub">{c.description}</div>
+              <div className="mc-course-meta">
+                <Icon name="cal" size={11} />
+                <span>Start: {c.launch}</span>
+              </div>
+            </div>
+            <div className="mc-course-foot">
+              <span className="coach-name">{c.subtitle}</span>
+              <span className="progress upcoming-cta">+ Vormerken</span>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Section: Live-Seminare */}

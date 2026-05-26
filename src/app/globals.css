@@ -1852,6 +1852,33 @@ html[data-sb="collapsed"] .sb-version { display: none; }
   font-size: 13.5px;
 }
 
+/* Coming Soon variant — subtle "future drop" feel */
+.masterclass-v2 .mc-course.mc-upcoming {
+  border-style: dashed;
+  border-color: var(--line);
+}
+.masterclass-v2 .mc-course.mc-upcoming .mc-course-cover {
+  filter: saturate(0.85) brightness(0.92);
+}
+.masterclass-v2 .mc-course-cover .badge.upcoming {
+  background: linear-gradient(135deg, #5856D6, #3634a3);
+  color: #fff;
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.04em;
+}
+.masterclass-v2 .mc-course-cover .cat {
+  /* Coming-Soon cat tag stays default */
+}
+.masterclass-v2 .mc-course.mc-upcoming:hover {
+  border-color: #5856D6;
+  border-style: solid;
+}
+.masterclass-v2 .mc-course-foot .progress.upcoming-cta {
+  color: #3634a3; font-weight: 600;
+  background: rgba(88,86,214,0.08);
+  padding: 4px 10px; border-radius: 980px;
+}
+
 /* ── Premium-Analyse-Tools grid (2-col, richer cards) ───────────── */
 .masterclass-v2 .mc-tools-grid {
   display: grid;
