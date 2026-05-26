@@ -44,8 +44,8 @@ export default async function DashboardPage() {
   let cvFeedback = null;
   if (cvDoc) {
     const { data: fb } = await admin
-      .from('cv_feedback').select('overall_rating, summary')
-      .eq('cv_document_id', cvDoc.id).eq('status', 'completed').maybeSingle();
+      .from('cv_feedback').select('overall_rating, summary, ai_analysis')
+      .eq('cv_document_id', cvDoc.id).maybeSingle();
     cvFeedback = fb || null;
   }
 

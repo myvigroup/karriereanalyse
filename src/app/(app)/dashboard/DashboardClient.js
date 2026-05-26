@@ -176,8 +176,8 @@ function WebinarHero({ userEmail, userName }) {
 // ─── CV Banner ───────────────────────────────────────────────────────────────
 function CvBanner({ cvFeedback, hasCvDoc }) {
   if (hasCvDoc) {
-    const rating = cvFeedback?.overall_rating || 0;
-    const summary = cvFeedback?.summary || 'Deine ausführliche Auswertung ist bereit.';
+    const rating = cvFeedback?.overall_rating || cvFeedback?.ai_analysis?.overallRating || 0;
+    const summary = cvFeedback?.summary || cvFeedback?.ai_analysis?.summary || 'Deine ausführliche Auswertung ist bereit.';
     return (
       <a href="/cv-check" style={{ textDecoration: 'none', color: 'inherit' }}>
         <div className="cv-banner">
@@ -428,7 +428,7 @@ export default function DashboardClient({ profile, analysisSession, analysisResu
   );
   const lernPct = totalLessons > 0 ? Math.round((doneLessons / totalLessons) * 100) : 0;
 
-  const cvRating = cvFeedback?.overall_rating || 0;
+  const cvRating = cvFeedback?.overall_rating || cvFeedback?.ai_analysis?.overallRating || 0;
 
   // Build NextSteps list (top-priority first, with one .primary)
   const steps = useMemo(() => {
