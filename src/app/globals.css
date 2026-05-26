@@ -4543,9 +4543,220 @@ body:has(.course-v2) .sos-button {
   font-size: 13.5px; color: var(--label-2);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   COACH / COACHES — Tab-Wrapper + Coach-Profile-Karten
+   /coach Seite enthält Tabs: "KI-Coach" + "Unsere Live-Coaches"
+   ═══════════════════════════════════════════════════════════════════ */
 
+.coach-wrap { display: flex; flex-direction: column; }
 
+.coach-tabs {
+  display: flex; gap: 8px;
+  padding: 0 0 20px;
+  border-bottom: 0.5px solid var(--line-2);
+  margin-bottom: 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.coach-tabs::-webkit-scrollbar { display: none; }
 
+.coach-tab {
+  display: flex; flex-direction: column;
+  align-items: flex-start; gap: 2px;
+  padding: 10px 16px;
+  background: transparent;
+  border: 0.5px solid var(--line);
+  border-radius: var(--r-md);
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  color: var(--label-2);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  white-space: nowrap;
+}
+.coach-tab:hover {
+  background: var(--fill);
+  color: var(--label);
+}
+.coach-tab.on {
+  background: var(--ki-red);
+  border-color: var(--ki-red);
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(204,20,38,0.2), inset 0 0.5px 0 rgba(255,255,255,0.2);
+}
+.coach-tab-sub {
+  font-size: 10.5px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+.coach-tab.on .coach-tab-sub { opacity: 0.92; }
+
+/* Coach Profile Cards (sowohl im Tab "Live-Coaches" wie auf eigener Seite) */
+.coaches-v2 { display: flex; flex-direction: column; }
+
+.coaches-v2 .coaches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 18px;
+  margin-top: 32px;
+}
+
+.coaches-v2 .coach-card {
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 22px 22px 18px;
+  display: flex; flex-direction: column; gap: 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.coaches-v2 .coach-card:hover {
+  border-color: var(--line-2);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+}
+
+.coaches-v2 .coach-card-head {
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.coaches-v2 .coach-card-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: #fff;
+  font-family: var(--sf); font-size: 22px; font-weight: 600;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+  box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.15);
+}
+.coaches-v2 .coach-card-headinfo { min-width: 0; flex: 1; }
+.coaches-v2 .coach-card-name {
+  font-family: var(--sf);
+  font-size: 19px; font-weight: 600;
+  letter-spacing: -0.02em; line-height: 1.2;
+  color: var(--label);
+  margin: 0 0 2px;
+}
+.coaches-v2 .coach-card-title {
+  font-size: 12.5px; font-weight: 600;
+  color: var(--ki-red-dark);
+}
+.coaches-v2 .coach-card-since {
+  font-size: 11px; font-weight: 500;
+  color: var(--label-4);
+  margin-top: 2px;
+}
+
+.coaches-v2 .coach-card-bio {
+  font-size: 13.5px; line-height: 1.55;
+  color: var(--label-2);
+  margin: 0;
+}
+
+.coaches-v2 .coach-card-section { display: flex; flex-direction: column; gap: 6px; }
+.coaches-v2 .coach-card-section-label {
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--label-4);
+}
+.coaches-v2 .coach-card-chips {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.coaches-v2 .coach-card-chip {
+  display: inline-flex; align-items: center;
+  padding: 4px 10px;
+  background: var(--fill);
+  border: 0.5px solid var(--line);
+  border-radius: 980px;
+  font-size: 11.5px; font-weight: 500;
+  color: var(--label-2);
+}
+
+.coaches-v2 .coach-card-seminars {
+  margin: 0; padding: 0;
+  list-style: none;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.coaches-v2 .coach-card-seminars li {
+  font-size: 13px;
+}
+.coaches-v2 .coach-card-seminars a {
+  color: var(--label);
+  text-decoration: none;
+  padding: 5px 9px;
+  background: var(--fill);
+  border-radius: var(--r-sm);
+  display: inline-block;
+  transition: background 0.12s ease;
+}
+.coaches-v2 .coach-card-seminars a:hover {
+  background: rgba(204,20,38,0.08);
+  color: var(--ki-red-dark);
+}
+
+.coaches-v2 .coaches-empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--label-3);
+  font-size: 14px;
+  background: var(--fill);
+  border-radius: var(--r-md);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Coach-Sektion innerhalb des Seminar-Modals
+   ═══════════════════════════════════════════════════════════════════ */
+.masterclass-v2 .mc-modal-coaches {
+  margin-top: 24px;
+  padding: 18px;
+  background: var(--fill);
+  border-radius: var(--r-md);
+  border: 0.5px solid var(--line-2);
+}
+.masterclass-v2 .mc-modal-coaches-label {
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--label-4);
+  margin-bottom: 12px;
+}
+.masterclass-v2 .mc-modal-coaches-list {
+  display: flex; flex-direction: column; gap: 14px;
+}
+.masterclass-v2 .mc-modal-coach {
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.masterclass-v2 .mc-modal-coach-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: #fff;
+  font-family: var(--sf); font-size: 15px; font-weight: 600;
+  flex-shrink: 0;
+  box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.15);
+}
+.masterclass-v2 .mc-modal-coach-info { min-width: 0; flex: 1; }
+.masterclass-v2 .mc-modal-coach-name {
+  font-family: var(--sf);
+  font-size: 14.5px; font-weight: 600;
+  color: var(--label);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.masterclass-v2 .mc-modal-coach-title {
+  font-size: 11.5px; font-weight: 600;
+  color: var(--ki-red-dark);
+  margin-top: 1px;
+}
+.masterclass-v2 .mc-modal-coach-short {
+  font-size: 12.5px; line-height: 1.45;
+  color: var(--label-2);
+  margin-top: 4px;
+}
+.masterclass-v2 .mc-modal-coaches-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 12px; font-weight: 600;
+  color: var(--ki-red-dark);
+  text-decoration: none;
+}
+.masterclass-v2 .mc-modal-coaches-link:hover { text-decoration: underline; }
 
 
 

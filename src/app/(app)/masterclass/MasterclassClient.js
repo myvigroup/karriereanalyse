@@ -1,6 +1,7 @@
 'use client';
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { getCoachesForSeminar } from '@/lib/coaches';
 
 // ─── Hardcoded Inhalte (preserved from previous version) ─────────────────────
 const ANALYSE_TOOLS = [
@@ -643,6 +644,33 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                     Ausführliche Beschreibung folgt — die Detail-Inhalte werden gerade aus den bestehenden Seminar-Seiten übernommen.
                   </p>
                 )}
+
+                {(() => {
+                  const coaches = getCoachesForSeminar(sem.id);
+                  if (!coaches.length) return null;
+                  return (
+                    <div className="mc-modal-coaches">
+                      <div className="mc-modal-coaches-label">
+                        {coaches.length > 1 ? 'Deine Trainer:innen' : 'Deine Trainerin / dein Trainer'}
+                      </div>
+                      <div className="mc-modal-coaches-list">
+                        {coaches.map(c => (
+                          <div key={c.id} className="mc-modal-coach">
+                            <div className="mc-modal-coach-avatar" style={{ background: c.gradient }}>
+                              {c.initials}
+                            </div>
+                            <div className="mc-modal-coach-info">
+                              <div className="mc-modal-coach-name">{c.name}</div>
+                              <div className="mc-modal-coach-title">{c.title}</div>
+                              <div className="mc-modal-coach-short">{c.short}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <a href="/coaches" className="mc-modal-coaches-link">Alle Coaches kennenlernen →</a>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="mc-modal-actions">
