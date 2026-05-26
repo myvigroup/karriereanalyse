@@ -3219,7 +3219,8 @@ html[data-sb="collapsed"] .sb-version { display: none; }
 
 /* ── Field preview grid (Phase 1) ────────────────────────────────────── */
 .analyse-v2 .ana-field-preview-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px; margin-bottom: var(--gap);
 }
 .analyse-v2 .ana-field-preview {
@@ -3228,6 +3229,10 @@ html[data-sb="collapsed"] .sb-version { display: none; }
   border-radius: var(--r-md);
   padding: 14px 16px;
   display: flex; align-items: center; gap: 12px;
+  min-width: 0;
+}
+.analyse-v2 .ana-field-preview > div:last-child {
+  min-width: 0; flex: 1;
 }
 .analyse-v2 .ana-field-preview-icon {
   width: 38px; height: 38px; border-radius: 10px;
@@ -3237,11 +3242,13 @@ html[data-sb="collapsed"] .sb-version { display: none; }
 .analyse-v2 .ana-field-preview-name {
   font-family: var(--sf); font-size: 14px; font-weight: 600;
   color: var(--label); letter-spacing: -0.015em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .analyse-v2 .ana-field-preview-sub {
   font-size: 12px; color: var(--label-3);
   margin-top: 2px; line-height: 1.35;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
 
 /* ── Progress bar (Phase 2) ──────────────────────────────────────────── */
