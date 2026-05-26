@@ -50,9 +50,12 @@ export default async function AppLayout({ children }) {
     field_title: r.competency_fields?.title,
   }));
 
+  const buildVersion = (process.env.VERCEL_GIT_COMMIT_SHA || 'dev').slice(0, 7);
+  const buildEnv = process.env.VERCEL_ENV || null;
+
   return (
     <div className="app-shell">
-      <Sidebar profile={profile} analysisResults={formattedResults} />
+      <Sidebar profile={profile} analysisResults={formattedResults} version={buildVersion} env={buildEnv} />
       <main className="app-main">
         <AnalyseGateWrapper hasAnalysis={hasCompletedAnalysis}>
           {children}

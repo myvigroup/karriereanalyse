@@ -60,7 +60,7 @@ function Icon({ name }) {
 }
 
 // ─── Sidebar ─────────────────────────────────────────────────────────────────
-export default function Sidebar({ profile, analysisResults }) {
+export default function Sidebar({ profile, analysisResults, version, env }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -230,6 +230,12 @@ export default function Sidebar({ profile, analysisResults }) {
           <Icon name="logout" />
         </button>
       </div>
+
+      {version && (
+        <div className="sb-version" title={`Build ${version}${env ? ` · ${env}` : ''}`}>
+          v{version}{env && env !== 'production' ? ` · ${env}` : ''}
+        </div>
+      )}
     </>
   );
 
