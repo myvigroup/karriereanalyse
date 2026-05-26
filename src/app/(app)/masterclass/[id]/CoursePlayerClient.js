@@ -2880,34 +2880,25 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
   const quizScore = quizLesson ? (progressMap[quizLesson.id]?.quiz_score ?? null) : null;
 
   return (
-    <div className="page-container animate-in" style={{ maxWidth: 1400 }}>
+    <div className="course-v2">
       <style>{`
         @keyframes optPulse { 0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)} }
         @keyframes confFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(200px) rotate(720deg);opacity:0} }
       `}</style>
 
-      {/* Back link */}
-      <a
-        href="/masterclass"
-        style={{ fontSize: 13, color: 'var(--ki-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 20, textDecoration: 'none' }}
-      >
-        ← Zurück
-      </a>
+      <a href="/masterclass" className="course-back">← Zurück zur Masterclass</a>
 
-      {/* Course Header */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10, flexWrap: 'wrap' }}>
-          <h1 className="page-title" style={{ margin: 0 }}>{course.title}</h1>
-          <span className="pill pill-grey" style={{ fontSize: 13 }}>
-            Modul {currentIndex + 1}/{totalCount}
-          </span>
+      <div className="course-header">
+        <div className="course-header-top">
+          <h1 className="course-title">{course.title}</h1>
+          <span className="course-modul-pill">Modul {currentIndex + 1} von {totalCount}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div className="progress-bar" style={{ flex: 1, maxWidth: 320 }}>
-            <div className="progress-bar-fill" style={{ width: `${progressPct}%` }} />
+        <div className="course-progress-row">
+          <div className="course-progress-bar">
+            <div className="course-progress-bar-fill" style={{ width: `${progressPct}%` }} />
           </div>
-          <span style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', flexShrink: 0 }}>
-            {completedCount}/{totalCount} abgeschlossen
+          <span className="course-progress-text">
+            {completedCount} von {totalCount} abgeschlossen
           </span>
         </div>
 
@@ -2944,18 +2935,15 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
           <div>
             {currentLesson && (
               <>
-                {/* Lesson header */}
-                <div style={{ marginBottom: 20 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
-                    <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', margin: 0 }}>{currentLesson.title}</h2>
+                <div className="course-lesson-header">
+                  <div className="course-lesson-header-top">
+                    <h2 className="course-lesson-h2">{currentLesson.title}</h2>
                     {currentLesson.duration_minutes && (
-                      <span style={{ fontSize: 13, color: 'var(--ki-text-tertiary)' }}>{currentLesson.duration_minutes} Min.</span>
+                      <span className="course-lesson-duration-pill">{currentLesson.duration_minutes} Min.</span>
                     )}
                   </div>
                   {currentLesson.description && (
-                    <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', lineHeight: 1.7, margin: 0 }}>
-                      {currentLesson.description}
-                    </p>
+                    <p className="course-lesson-desc">{currentLesson.description}</p>
                   )}
                 </div>
 
@@ -3113,156 +3101,79 @@ export default function CoursePlayerClient({ course, progress, analysisResults, 
             <div style={{ height: 76 }} />
           </div>
 
-          {/* ── Sticky Bottom Nav Bar (position:fixed, outside grid flow) ── */}
-          <div style={{
-            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
-            background: 'rgba(255,255,255,0.95)',
-            backdropFilter: 'blur(12px)',
-            borderTop: '1px solid var(--ki-border)',
-            padding: '12px 24px',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-          }}>
-            {/* Left: lesson info */}
-            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <span style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', fontWeight: 600 }}>
-                Lektion {currentIndex + 1}/{totalCount}
-              </span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 280 }}>
-                {currentLesson.title}
-              </span>
+          <div className="course-stickybar">
+            <div className="course-stickybar-info">
+              <span className="course-stickybar-label">Lektion {currentIndex + 1} / {totalCount}</span>
+              <span className="course-stickybar-title">{currentLesson.title}</span>
             </div>
-
-            {/* Right: action buttons */}
-            <div style={{ display: 'flex', gap: 10, flexShrink: 0, alignItems: 'center' }}>
+            <div className="course-stickybar-actions">
               {currentIndex > 0 && (
-                <button
-                  onClick={() => navigateTo(currentIndex - 1)}
-                  className="btn btn-secondary"
-                  style={{ padding: '9px 16px', fontSize: 13 }}
-                >
+                <button onClick={() => navigateTo(currentIndex - 1)} className="course-btn-ghost">
                   ← Zurück
                 </button>
               )}
               {!isCompleted ? (
                 <button
                   onClick={() => markComplete(getXpForType(lessonType))}
-                  className="btn btn-primary"
+                  className="course-btn-primary"
                   disabled={saving}
-                  style={{ padding: '9px 20px', fontSize: 14, fontWeight: 700 }}
                 >
-                  {saving ? 'Speichert…' : currentIndex >= totalCount - 1 ? '✅ Kurs abschließen' : 'Lektion abschließen & Weiter →'}
+                  {saving ? 'Speichert…' : currentIndex >= totalCount - 1 ? '✓ Kurs abschließen' : 'Lektion abschließen →'}
                 </button>
               ) : currentIndex < totalCount - 1 ? (
-                <button
-                  onClick={() => navigateTo(currentIndex + 1)}
-                  className="btn btn-primary"
-                  style={{ padding: '9px 20px', fontSize: 14, fontWeight: 700 }}
-                >
-                  Weiter zur nächsten Lektion →
+                <button onClick={() => navigateTo(currentIndex + 1)} className="course-btn-primary">
+                  Weiter →
                 </button>
               ) : (
-                <span className="pill pill-green" style={{ fontSize: 13, padding: '8px 16px' }}>
-                  ✅ Kurs abgeschlossen!
-                </span>
+                <span className="course-done-pill">✓ Kurs abgeschlossen</span>
               )}
             </div>
           </div>
           {/* RIGHT: Module Sidebar */}
-          <div style={{ position: 'sticky', top: 24 }}>
-            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-              <div style={{ padding: '18px 18px 14px' }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text-tertiary)', marginBottom: 10 }}>
-                  Kurs-Inhalt
-                </div>
-                {/* Phase Banner */}
-                {(() => {
-                  const pLabel = course?.id ? getPhaseLabel(course.id, userPhase) : null;
-                  return pLabel ? (
-                    <div style={{
-                      padding: '8px 12px', background: 'rgba(37,99,235,0.05)',
-                      borderRadius: 8, border: '1px solid rgba(37,99,235,0.1)',
-                      marginBottom: 8, fontSize: 11, color: 'var(--ki-text-secondary)',
-                      display: 'flex', alignItems: 'center', gap: 4,
-                    }}>
-                      <span>🎯</span> {pLabel}
-                    </div>
-                  ) : null;
-                })()}
-              </div>
-              <div style={{ maxHeight: 'calc(100vh - 260px)', overflowY: 'auto' }}>
-                {filteredLessons.map((lesson, idx) => {
-                  const isActive = idx === currentIndex;
-                  const isDone = !!progressMap[lesson.id]?.completed;
-                  const locked = !isUnlocked(idx);
-                  const type = lesson.lesson_type || lesson.type || 'video';
-                  const highlighted = isLessonHighlighted(course.id, lesson.title, userPhase);
-                  let statusIcon = locked ? '🔒' : isDone ? '✅' : isActive ? '▶' : '○';
-                  // Show module header for multi-module courses
-                  const showModuleHeader = isEnhancedCourse && (idx === 0 || lesson._moduleSortOrder !== filteredLessons[idx - 1]?._moduleSortOrder);
-                  return (
-                    <div key={lesson.id}>
-                      {showModuleHeader && (
-                        <div style={{
-                          padding: '10px 18px 4px',
-                          fontSize: 11,
-                          fontWeight: 700,
-                          color: 'var(--ki-red)',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          borderTop: idx > 0 ? '1px solid var(--ki-border)' : 'none',
-                          marginTop: idx > 0 ? 4 : 0,
-                        }}>
-                          {lesson._moduleTitle}
-                        </div>
-                      )}
-                      <button
-                        onClick={() => !locked && navigateTo(idx)}
-                        disabled={locked}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 10,
-                          width: '100%',
-                          padding: '10px 18px',
-                          border: 'none',
-                          background: isActive ? 'rgba(204,20,38,0.06)' : 'transparent',
-                          cursor: locked ? 'not-allowed' : 'pointer',
-                          textAlign: 'left',
-                          transition: 'background 0.15s',
-                          borderLeft: isActive ? '3px solid var(--ki-red)' : '3px solid transparent',
-                          opacity: locked ? 0.5 : 1,
-                        }}
-                      >
-                        <span style={{ fontSize: 14, flexShrink: 0 }}>{statusIcon}</span>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{
-                            fontSize: 13,
-                            fontWeight: isActive ? 600 : 400,
-                            color: isActive ? 'var(--ki-text)' : 'var(--ki-text-secondary)',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}>
-                            {lesson.title}
-                            {highlighted && (
-                              <span style={{
-                                fontSize: 9, fontWeight: 700, color: '#CC1426',
-                                background: 'rgba(204,20,38,0.08)', padding: '1px 5px',
-                                borderRadius: 99, marginLeft: 4, whiteSpace: 'nowrap',
-                              }}>⭐</span>
-                            )}
-                          </div>
-                          {lesson.duration_minutes && (
-                            <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)' }}>{lesson.duration_minutes} Min.</div>
-                          )}
-                        </div>
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
+          <aside className="course-sidebar">
+            <div className="course-sidebar-head">
+              <div className="course-sidebar-label">Kurs-Inhalt</div>
+              {(() => {
+                const pLabel = course?.id ? getPhaseLabel(course.id, userPhase) : null;
+                return pLabel ? (
+                  <div className="course-sidebar-phase"><span>🎯</span> {pLabel}</div>
+                ) : null;
+              })()}
             </div>
-          </div>
+            <div className="course-sidebar-list">
+              {filteredLessons.map((lesson, idx) => {
+                const isActive = idx === currentIndex;
+                const isDone = !!progressMap[lesson.id]?.completed;
+                const locked = !isUnlocked(idx);
+                const highlighted = isLessonHighlighted(course.id, lesson.title, userPhase);
+                const statusIcon = locked ? '🔒' : isDone ? '✓' : isActive ? '▶' : '○';
+                const showModuleHeader = isEnhancedCourse && (idx === 0 || lesson._moduleSortOrder !== filteredLessons[idx - 1]?._moduleSortOrder);
+                return (
+                  <div key={lesson.id}>
+                    {showModuleHeader && (
+                      <div className="course-sidebar-module">{lesson._moduleTitle}</div>
+                    )}
+                    <button
+                      onClick={() => !locked && navigateTo(idx)}
+                      disabled={locked}
+                      className={`course-lesson-item${isActive ? ' active' : ''}${isDone ? ' done' : ''}${locked ? ' locked' : ''}`}
+                    >
+                      <span className="course-lesson-status">{statusIcon}</span>
+                      <div className="course-lesson-body">
+                        <div className="course-lesson-title-row">
+                          <span className="course-lesson-name">{lesson.title}</span>
+                          {highlighted && <span className="course-lesson-star">⭐</span>}
+                        </div>
+                        {lesson.duration_minutes && (
+                          <div className="course-lesson-duration">{lesson.duration_minutes} Min.</div>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </aside>
         </div>
       )}
     </div>
