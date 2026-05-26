@@ -312,30 +312,35 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
         <h3>Live-Seminare <span className="count">{SEMINARE.length}</span></h3>
         <span className="link">monatlich · 90 Min · interaktiv</span>
       </div>
-      <div className="mc-courses">
+      <div className="mc-seminar-list">
         {SEMINARE.map(s => {
           const registered = registeredSeminarIds.has(s.id);
           const nextDate = new Date(s.next_date);
-          const dateStr = nextDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+          const dateStr = nextDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' });
+          const weekday = nextDate.toLocaleDateString('de-DE', { weekday: 'short' });
           return (
-            <div key={s.id} className="mc-course" onClick={() => router.push('/seminare')} role="button" tabIndex={0}>
-              <div className="mc-course-cover" style={{ background: 'linear-gradient(135deg, #1a1a2e, #16213e)' }}>
-                <span className="cat">Seminar</span>
-                {registered && <span className="badge done">✓ Angemeldet</span>}
-                {!registered && !isPremium && <span className="badge premium">Premium</span>}
-                <span className="mc-letter" style={{ fontSize: 44 }}>{s.icon}</span>
+            <div key={s.id} className="mc-seminar-row" onClick={() => router.push('/seminare')} role="button" tabIndex={0}>
+              <div className="mc-seminar-date">
+                <span className="mc-seminar-date-day">{nextDate.getDate()}</span>
+                <span className="mc-seminar-date-month">{nextDate.toLocaleDateString('de-DE', { month: 'short' })}</span>
+                <span className="mc-seminar-date-weekday">{weekday}</span>
               </div>
-              <div className="mc-course-body">
-                <div className="mc-course-title">{s.title}</div>
-                <div className="mc-course-sub">{s.description}</div>
-                <div className="mc-course-meta">
-                  <Icon name="cal" size={11} />
-                  <span>Nächster Termin: {dateStr}</span>
-                </div>
+              <div className="mc-seminar-icon">{s.icon}</div>
+              <div className="mc-seminar-body">
+                <div className="mc-seminar-title">{s.title}</div>
+                <div className="mc-seminar-subtitle">{s.subtitle}</div>
+                <div className="mc-seminar-desc">{s.description}</div>
               </div>
-              <div className="mc-course-foot">
-                <span className="coach-name">{s.subtitle}</span>
-                <span className="progress">{registered ? '✓ Angemeldet' : 'Details →'}</span>
+              <div className="mc-seminar-side">
+                {registered ? (
+                  <span className="mc-seminar-badge done">✓ Angemeldet</span>
+                ) : !isPremium ? (
+                  <span className="mc-seminar-badge premium">Premium</span>
+                ) : (
+                  <span className="mc-seminar-badge open">Anmelden</span>
+                )}
+                <span className="mc-seminar-meta">90 Min · interaktiv</span>
+                <span className="mc-seminar-cta">Details →</span>
               </div>
             </div>
           );

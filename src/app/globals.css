@@ -1879,6 +1879,161 @@ html[data-sb="collapsed"] .sb-version { display: none; }
   padding: 4px 10px; border-radius: 980px;
 }
 
+/* ── Live-Seminare als kompakte Listenansicht (statt Kachel-Grid) ────────── */
+.masterclass-v2 .mc-seminar-list {
+  display: flex; flex-direction: column;
+  gap: 8px;
+}
+.masterclass-v2 .mc-seminar-row {
+  display: grid;
+  grid-template-columns: 72px 56px 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 0.5px solid var(--line-2);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+}
+.masterclass-v2 .mc-seminar-row:hover {
+  background: var(--fill);
+  border-color: var(--line);
+  transform: translateX(2px);
+}
+
+/* Date block (left) */
+.masterclass-v2 .mc-seminar-date {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 0;
+  border-right: 0.5px solid var(--line-2);
+  font-family: var(--sf);
+  line-height: 1.1;
+}
+.masterclass-v2 .mc-seminar-date-day {
+  font-size: 24px; font-weight: 700;
+  color: var(--ki-red);
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+}
+.masterclass-v2 .mc-seminar-date-month {
+  font-size: 11px; font-weight: 600;
+  color: var(--label-2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+.masterclass-v2 .mc-seminar-date-weekday {
+  font-size: 10px;
+  color: var(--label-4);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Icon (emoji) */
+.masterclass-v2 .mc-seminar-icon {
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  display: grid; place-items: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+/* Body (title + subtitle + desc) */
+.masterclass-v2 .mc-seminar-body {
+  min-width: 0;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.masterclass-v2 .mc-seminar-title {
+  font-family: var(--sf);
+  font-size: 15.5px; font-weight: 600;
+  color: var(--label);
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+.masterclass-v2 .mc-seminar-subtitle {
+  font-size: 12.5px;
+  color: var(--ki-red-dark);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.masterclass-v2 .mc-seminar-desc {
+  font-size: 13px;
+  color: var(--label-3);
+  line-height: 1.45;
+  margin-top: 2px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+/* Side (badge + meta + cta) */
+.masterclass-v2 .mc-seminar-side {
+  display: flex; flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.masterclass-v2 .mc-seminar-badge {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 980px;
+  letter-spacing: 0.02em;
+}
+.masterclass-v2 .mc-seminar-badge.done {
+  background: var(--green-soft);
+  color: var(--green-dark);
+}
+.masterclass-v2 .mc-seminar-badge.premium {
+  background: linear-gradient(135deg, #FFD700, #C9A227);
+  color: #1d1d1f;
+}
+.masterclass-v2 .mc-seminar-badge.open {
+  background: var(--accent-soft);
+  color: var(--ki-red-dark);
+}
+.masterclass-v2 .mc-seminar-meta {
+  font-size: 11px;
+  color: var(--label-4);
+  font-family: var(--mono);
+}
+.masterclass-v2 .mc-seminar-cta {
+  font-size: 12.5px;
+  color: var(--ki-red-dark);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .masterclass-v2 .mc-seminar-row {
+    grid-template-columns: 56px 1fr;
+    gap: 12px;
+  }
+  .masterclass-v2 .mc-seminar-date {
+    grid-row: 1; grid-column: 1;
+    border-right: 0;
+    border-bottom: 0.5px solid var(--line-2);
+    padding: 4px 0 8px;
+  }
+  .masterclass-v2 .mc-seminar-icon {
+    grid-row: 1; grid-column: 2;
+    width: 48px; height: 48px; font-size: 24px;
+    justify-self: end;
+  }
+  .masterclass-v2 .mc-seminar-body {
+    grid-column: 1 / -1; grid-row: 2;
+  }
+  .masterclass-v2 .mc-seminar-side {
+    grid-column: 1 / -1; grid-row: 3;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
 /* ── Premium-Analyse-Tools grid (2-col, richer cards) ───────────── */
 .masterclass-v2 .mc-tools-grid {
   display: grid;
