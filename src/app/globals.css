@@ -3846,6 +3846,12 @@ html[data-sb="collapsed"] .course-v2 .course-stickybar { left: 64px; }
   .course-v2 .course-stickybar-title { max-width: 180px; }
 }
 
+/* Push the floating SOS button up when the course-player sticky bar is active,
+   so it doesn't overlap the "Weiter" / "Lektion abschließen" CTA. */
+body:has(.course-v2) .sos-button {
+  bottom: 86px !important;
+}
+
 
 
 
