@@ -3150,6 +3150,49 @@ html[data-sb="collapsed"] .sb-version { display: none; }
 .analyse-v2 .ana-w-actions {
   display: flex; gap: 10px; flex-wrap: wrap;
 }
+
+/* Solo welcome variant (no existing session — no ring needed) */
+.analyse-v2 .ana-welcome-solo {
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+}
+.analyse-v2 .ana-welcome-solo .ana-w-title {
+  font-size: 38px;
+  max-width: 18ch;
+}
+.analyse-v2 .ana-welcome-solo .ana-w-sub {
+  max-width: 56ch;
+  margin: 0 0 24px;
+}
+.analyse-v2 .ana-welcome-solo .ana-w-actions {
+  justify-content: center; margin-bottom: 32px;
+}
+.analyse-v2 .ana-w-stats {
+  display: flex; align-items: center; gap: 24px;
+  padding-top: 24px;
+  border-top: 0.5px solid rgba(255,255,255,0.18);
+  width: 100%; justify-content: center;
+}
+.analyse-v2 .ana-w-stat {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.analyse-v2 .ana-w-stat .v {
+  font-family: var(--sf); font-size: 26px; font-weight: 600;
+  letter-spacing: -0.02em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.analyse-v2 .ana-w-stat .l {
+  font-size: 11px; color: rgba(255,255,255,0.7);
+  text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
+}
+.analyse-v2 .ana-w-stat-sep {
+  width: 1px; height: 28px; background: rgba(255,255,255,0.15);
+}
+@media (max-width: 560px) {
+  .analyse-v2 .ana-welcome-solo .ana-w-title { font-size: 28px; }
+  .analyse-v2 .ana-w-stats { gap: 16px; }
+  .analyse-v2 .ana-w-stat .v { font-size: 22px; }
+}
 .analyse-v2 .ana-welcome-card .ana-btn-primary {
   background: #fff; color: var(--ki-red);
   box-shadow: 0 1px 2px rgba(0,0,0,0.15), inset 0 0.5px 0 rgba(255,255,255,0.5);

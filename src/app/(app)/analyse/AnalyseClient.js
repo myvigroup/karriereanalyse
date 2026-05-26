@@ -328,40 +328,42 @@ export default function AnalyseClient({ profile, existingSession, userId, hasFul
       {/* ── PHASE 1 ─────────────────────────────────────────── */}
       {phase === 1 && (
         <>
-          <div className="ana-welcome-card">
-            <div className="ana-welcome-grid">
-              <ScoreRing score={existingSession?.overall_score || 0} size={140} />
-              <div>
-                {existingSession?.status === 'in_progress' ? (
-                  <>
-                    <div className="ana-w-eyebrow">Vorherige Session gefunden</div>
-                    <h2 className="ana-w-title">
-                      Du hast {existingSession.current_field + 1} von {totalFields} Feldern abgeschlossen.
-                    </h2>
-                    <p className="ana-w-sub">Mach dort weiter wo du aufgehört hast — oder starte komplett neu.</p>
-                    <div className="ana-w-actions">
-                      <button type="button" className="ana-btn-primary" onClick={handleResume}>Weitermachen →</button>
-                      <button type="button" className="ana-btn-ghost" onClick={handleStart}>Neu starten</button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="ana-w-eyebrow">Dein Karriere-Blutbild</div>
-                    <h2 className="ana-w-title">
-                      12 Felder. 48 Fragen.{' '}
-                      <span className="faded">Etwa 10 Minuten ehrliche Selbsteinschätzung.</span>
-                    </h2>
-                    <p className="ana-w-sub">
-                      Danach bekommst du deinen Karriere-Score, eine Karte deiner Stärken und drei klare Wachstumsfelder mit passender Masterclass.
-                    </p>
-                    <div className="ana-w-actions">
-                      <button type="button" className="ana-btn-primary" onClick={handleStart}>Analyse starten →</button>
-                    </div>
-                  </>
-                )}
+          {existingSession?.status === 'in_progress' ? (
+            <div className="ana-welcome-card">
+              <div className="ana-welcome-grid">
+                <ScoreRing score={existingSession.overall_score || 0} size={140} />
+                <div>
+                  <div className="ana-w-eyebrow">Vorherige Session gefunden</div>
+                  <h2 className="ana-w-title">
+                    Du hast {existingSession.current_field + 1} von {totalFields} Feldern abgeschlossen.
+                  </h2>
+                  <p className="ana-w-sub">Mach dort weiter wo du aufgehört hast — oder starte komplett neu.</p>
+                  <div className="ana-w-actions">
+                    <button type="button" className="ana-btn-primary" onClick={handleResume}>Weitermachen →</button>
+                    <button type="button" className="ana-btn-ghost" onClick={handleStart}>Neu starten</button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="ana-welcome-card ana-welcome-solo">
+              <div className="ana-w-eyebrow">Dein Karriere-Blutbild</div>
+              <h2 className="ana-w-title">Wo stehst du wirklich?</h2>
+              <p className="ana-w-sub">
+                12 Felder · 48 Fragen · etwa 10 Minuten ehrliche Selbsteinschätzung. Danach bekommst du deinen Karriere-Score, eine Karte deiner Stärken und drei klare Wachstumsfelder mit passender Masterclass.
+              </p>
+              <div className="ana-w-actions">
+                <button type="button" className="ana-btn-primary" onClick={handleStart}>Analyse starten →</button>
+              </div>
+              <div className="ana-w-stats">
+                <div className="ana-w-stat"><span className="v">12</span><span className="l">Felder</span></div>
+                <div className="ana-w-stat-sep" />
+                <div className="ana-w-stat"><span className="v">48</span><span className="l">Fragen</span></div>
+                <div className="ana-w-stat-sep" />
+                <div className="ana-w-stat"><span className="v">~10</span><span className="l">Minuten</span></div>
+              </div>
+            </div>
+          )}
 
           <div className="ana-section-head">
             <h3>Diese 12 Felder werden analysiert</h3>
