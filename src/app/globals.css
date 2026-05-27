@@ -348,10 +348,10 @@ html[data-sb="collapsed"] .sb { padding: 18px 8px; }
 
 /* Collapse toggle */
 .sb-toggle {
-  position: absolute;
+  position: fixed;
   top: 28px;
-  right: -14px;
-  z-index: 60;
+  left: calc(240px - 14px);  /* halb außerhalb der Sidebar */
+  z-index: 100;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -362,9 +362,10 @@ html[data-sb="collapsed"] .sb { padding: 18px 8px; }
   box-shadow: 0 2px 6px rgba(0,0,0,0.08), 0 4px 14px rgba(0,0,0,0.06);
   color: var(--label-2);
   cursor: pointer;
-  transition: transform 0.2s ease, color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  transition: left 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.2s ease, color 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   padding: 0;
 }
+html[data-sb="collapsed"] .sb-toggle { left: calc(64px - 14px); }
 .sb-toggle svg {
   width: 14px; height: 14px;
   stroke-width: 2;
@@ -378,6 +379,11 @@ html[data-sb="collapsed"] .sb { padding: 18px 8px; }
   box-shadow: 0 2px 8px rgba(204,20,38,0.3), 0 4px 14px rgba(0,0,0,0.08);
 }
 html[data-sb="collapsed"] .sb-toggle svg { transform: rotate(180deg); }
+
+/* Auf Mobile (Burger-Menu sichtbar) verbergen */
+@media (max-width: 720px) {
+  .sb-toggle { display: none; }
+}
 
 /* Notification bell (anchored top-right of sidebar) */
 .sb-bell {
