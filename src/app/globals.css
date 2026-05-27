@@ -4550,45 +4550,47 @@ body:has(.course-v2) .sos-button {
 
 .coach-wrap { display: flex; flex-direction: column; }
 
-.coach-tabs {
-  display: flex; gap: 8px;
-  padding: 0 0 20px;
-  border-bottom: 0.5px solid var(--line-2);
-  margin-bottom: 24px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.coach-tabs::-webkit-scrollbar { display: none; }
-
-.coach-tab {
-  display: flex; flex-direction: column;
-  align-items: flex-start; gap: 2px;
-  padding: 10px 16px;
-  background: transparent;
-  border: 0.5px solid var(--line);
-  border-radius: var(--r-md);
-  font-family: inherit; font-size: 14px; font-weight: 600;
-  color: var(--label-2);
-  cursor: pointer;
-  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
-  white-space: nowrap;
-}
-.coach-tab:hover {
+/* Apple-style Segmented Control für Tab-Auswahl */
+.coach-segctrl {
+  display: inline-flex;
+  padding: 3px;
   background: var(--fill);
+  border-radius: 980px;
+  border: 0.5px solid var(--line);
+  margin-bottom: 18px;
+  align-self: flex-start;
+  gap: 2px;
+}
+.coach-seg {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 16px;
+  background: transparent;
+  border: 0;
+  border-radius: 980px;
+  font-family: inherit;
+  font-size: 13px; font-weight: 600;
+  color: var(--label-3);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+  letter-spacing: -0.005em;
+}
+.coach-seg:hover:not(.on) { color: var(--label); }
+.coach-seg.on {
+  background: var(--surface);
   color: var(--label);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 0 0 0.5px var(--line);
 }
-.coach-tab.on {
-  background: var(--ki-red);
-  border-color: var(--ki-red);
-  color: #fff;
-  box-shadow: 0 1px 2px rgba(204,20,38,0.2), inset 0 0.5px 0 rgba(255,255,255,0.2);
+.coach-seg-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.18);
+  flex-shrink: 0;
 }
-.coach-tab-sub {
-  font-size: 10.5px; font-weight: 500;
-  text-transform: uppercase; letter-spacing: 0.05em;
-  opacity: 0.8;
-}
-.coach-tab.on .coach-tab-sub { opacity: 0.92; }
+.coach-seg.on .coach-seg-dot { background: #16a34a; }
+
+.coach-tabpanel { display: flex; flex-direction: column; }
 
 /* Coach Profile Cards (sowohl im Tab "Live-Coaches" wie auf eigener Seite) */
 .coaches-v2 { display: flex; flex-direction: column; }
