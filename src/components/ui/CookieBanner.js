@@ -3,40 +3,52 @@ import { useState, useEffect } from 'react';
 
 export default function CookieBanner() {
   const [show, setShow] = useState(false);
+  const [closing, setClosing] = useState(false);
 
   useEffect(() => {
     const consent = localStorage.getItem('ki_cookie_consent');
-    if (!consent) setShow(true);
+    if (!consent) {
+      // Kurze Verzögerung für sanften Auftritt nach Page-Render
+      const t = setTimeout(() => setShow(true), 600);
+      return () => clearTimeout(t);
+    }
   }, []);
 
-  const accept = (all) => {
+  function accept(all) {
     localStorage.setItem('ki_cookie_consent', all ? 'all' : 'necessary');
     localStorage.setItem('ki_cookie_consent_date', new Date().toISOString());
-    setShow(false);
-  };
+    setClosing(true);
+    setTimeout(() => setShow(false), 220);
+  }
 
   if (!show) return null;
 
   return (
-    <div style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9998,
-      background: 'var(--ki-card)', borderTop: '1px solid var(--ki-border)',
-      boxShadow: 'var(--sh-xl)', padding: '20px 24px',
-      animation: 'fadeIn 0.3s ease both',
-    }}>
-      <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 280 }}>
-          <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Wir verwenden Cookies</p>
-          <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.5 }}>
-            Für die Funktionalität der Plattform nutzen wir notwendige Cookies. Optionale Cookies helfen uns, das Erlebnis zu verbessern.{' '}
-            <a href="/datenschutz" style={{ color: 'var(--ki-red)' }}>Mehr erfahren</a>
+    <div className={`cookie-banner ${closing ? 'closing' : ''}`}>
+      <div className="cookie-banner-inner">
+        <div className="cookie-banner-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" strokeWidth="1.7"
+               strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/>
+            <circle cx="8.5" cy="8.5" r=".5" fill="currentColor"/>
+            <circle cx="15.5" cy="13.5" r=".5" fill="currentColor"/>
+            <circle cx="9.5" cy="16" r=".5" fill="currentColor"/>
+          </svg>
+        </div>
+        <div className="cookie-banner-text">
+          <div className="cookie-banner-title">Cookies & Privatsphäre</div>
+          <p>
+            Wir nutzen notwendige Cookies für die Funktionalität.
+            Optionale Cookies helfen uns, dein Erlebnis zu verbessern.{' '}
+            <a href="/datenschutz">Datenschutz</a>
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-secondary" onClick={() => accept(false)} style={{ fontSize: 13, padding: '10px 16px' }}>
+        <div className="cookie-banner-actions">
+          <button type="button" onClick={() => accept(false)} className="cookie-btn-secondary">
             Nur notwendige
           </button>
-          <button className="btn btn-primary" onClick={() => accept(true)} style={{ fontSize: 13, padding: '10px 16px' }}>
+          <button type="button" onClick={() => accept(true)} className="cookie-btn-primary">
             Alle akzeptieren
           </button>
         </div>
