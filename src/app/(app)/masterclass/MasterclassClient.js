@@ -2,6 +2,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getCoachesForSeminar } from '@/lib/coaches';
+// `coaches` wird vom Page-Wrapper als prop reingereicht (geladen aus Supabase).
 
 // ─── Hardcoded Inhalte (preserved from previous version) ─────────────────────
 const ANALYSE_TOOLS = [
@@ -366,7 +367,7 @@ function Icon({ name, size = 16, stroke = 1.7 }) {
 }
 
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
-export default function MasterclassClient({ courses, progress, analysisResults, profile, seminars, seminarRegistrations }) {
+export default function MasterclassClient({ courses, progress, analysisResults, profile, seminars, seminarRegistrations, coaches = [] }) {
   const router = useRouter();
 
   const plan = profile?.subscription_plan || 'FREE';
@@ -669,15 +670,15 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                 )}
 
                 {(() => {
-                  const coaches = getCoachesForSeminar(sem.id);
-                  if (!coaches.length) return null;
+                  const semCoaches = getCoachesForSeminar(coaches, sem.id);
+                  if (!semCoaches.length) return null;
                   return (
                     <div className="mc-modal-coaches">
                       <div className="mc-modal-coaches-label">
-                        {coaches.length > 1 ? 'Deine Trainer:innen' : 'Deine Trainerin / dein Trainer'}
+                        {semCoaches.length > 1 ? 'Deine Trainer:innen' : 'Deine Trainerin / dein Trainer'}
                       </div>
                       <div className="mc-modal-coaches-list">
-                        {coaches.map(c => (
+                        {semCoaches.map(c => (
                           <div key={c.id} className="mc-modal-coach">
                             <div className="mc-modal-coach-avatar" style={{ background: c.gradient }}>
                               {c.initials}

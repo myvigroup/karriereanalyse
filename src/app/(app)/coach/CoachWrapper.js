@@ -3,7 +3,7 @@ import { useState } from 'react';
 import CoachClient from './CoachClient';
 import CoachesPanel from './CoachesPanel';
 
-export default function CoachWrapper({ chats, userId, profile }) {
+export default function CoachWrapper({ chats, userId, profile, coaches = [] }) {
   const [tab, setTab] = useState('coaches');
 
   return (
@@ -31,7 +31,7 @@ export default function CoachWrapper({ chats, userId, profile }) {
 
       <div className="coach-tabpanel" role="tabpanel">
         {tab === 'chat' && <CoachClient chats={chats} userId={userId} profile={profile} />}
-        {tab === 'coaches' && <CoachesPanel />}
+        {tab === 'coaches' && <CoachesPanel coaches={coaches} />}
       </div>
     </div>
   );

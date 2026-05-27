@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import AppIcon from '@/components/ui/Icon';
+import { loadCoaches } from '@/lib/coaches-server';
 
 const CATEGORIES = [
   { key: 'struktur', label: 'Struktur' },
@@ -201,10 +202,17 @@ export default async function CVCheckPage() {
   const jobMatchPct = ai?.jobMatchScore || score100;
   const missingSkills = ai?.missingSkills || [];
 
-  // Coach-Vorschlag (passend zur Position — default Alexander Zill für Leadership/Senior, Maximilian für Bewerbung)
-  const suggestedCoach = (jobPosition.toLowerCase().includes('lead') || jobPosition.toLowerCase().includes('senior'))
-    ? { name: 'Alexander Zill', role: 'Leadership-Coach', initials: 'AZ', gradient: 'linear-gradient(135deg, #1d4d2e 0%, #0e2818 100%)', years: '30+ Jahre' }
-    : { name: 'Maximilian Wimmer', role: 'Bewerbungsstratege', initials: 'MW', gradient: 'linear-gradient(135deg, #1d4e89 0%, #0f2e4f 100%)', years: '4+ Jahre' };
+  // Coach-Vorschlag aus DB picken — passend zur Position
+  const allCoaches = await loadCoaches();
+  const jobLow = jobPosition.toLowerCase();
+  const isLeadership = jobLow.includes('lead') || jobLow.includes('senior') || jobLow.includes('manager') || jobLow.includes('führung');
+  const isFinance = jobLow.includes('finanz') || jobLow.includes('controll') || jobLow.includes('audit');
+  const suggestedCoach =
+    (isLeadership && allCoaches.find(c => c.id === 'alexander-zill')) ||
+    (isFinance && allCoaches.find(c => c.id === 'florian-fritsch')) ||
+    allCoaches.find(c => c.id === 'florian-fritsch') ||
+    allCoaches[0] ||
+    { name: 'Karriere-Coach', role: 'Verfügbar', initials: '?', gradient: 'linear-gradient(135deg, #4a0a14 0%, #2a0508 100%)', experience: '' };
 
   return (
     <div className="cvcheck-v2">
@@ -389,7 +397,7 @@ export default async function CVCheckPage() {
         </div>
         <div className="cvc-coach-info">
           <div className="cvc-coach-name">{suggestedCoach.name}</div>
-          <div className="cvc-coach-role">{suggestedCoach.role} · {suggestedCoach.years} Erfahrung</div>
+          <div className="cvc-coach-role">{suggestedCoach.role}{suggestedCoach.experience ? ` · ${suggestedCoach.experience}` : ''}</div>
         </div>
         <div className="cvc-coach-actions">
           <Link href="/coach" className="cvc-coach-cta-primary">CV-Termin buchen · 30 Min</Link>

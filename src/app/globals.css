@@ -4728,6 +4728,340 @@ body:has(.course-v2) .sos-button {
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════════════
+   ADMIN-BEREICH (Hub + Coaches CRUD + gemeinsame Form-Komponenten)
+   ═══════════════════════════════════════════════════════════════════ */
+.admin-hub, .admin-coaches {
+  padding: 40px 48px 80px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+@media (max-width: 720px) {
+  .admin-hub, .admin-coaches { padding: 24px 16px 80px; }
+}
+
+/* Admin-Hub Sektionen + Tiles */
+.admin-hub .admin-hub-section { margin-top: 36px; }
+.admin-hub .admin-hub-secthead { margin-bottom: 16px; }
+.admin-hub .admin-hub-secthead h3 {
+  font-family: var(--sf);
+  font-size: 14px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--label-3);
+  margin: 0;
+}
+.admin-hub .admin-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+.admin-hub .admin-hub-tile {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 20px 22px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.admin-hub .admin-hub-tile:hover {
+  border-color: var(--line-2);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  transform: translateY(-1px);
+}
+.admin-hub .admin-hub-tile-icon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  background: var(--fill);
+  color: var(--ki-red);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.admin-hub .admin-hub-tile-body { flex: 1; min-width: 0; }
+.admin-hub .admin-hub-tile-titlerow {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 2px;
+}
+.admin-hub .admin-hub-tile-title {
+  font-family: var(--sf);
+  font-size: 15px; font-weight: 600;
+  color: var(--label);
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+.admin-hub .admin-hub-tile-count {
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px;
+  background: var(--fill);
+  border-radius: 980px;
+  color: var(--label-3);
+}
+.admin-hub .admin-hub-tile-desc {
+  font-size: 12.5px; line-height: 1.45;
+  color: var(--label-3);
+  margin: 0;
+}
+.admin-hub .admin-hub-tile-arrow {
+  color: var(--label-4);
+  flex-shrink: 0;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+.admin-hub .admin-hub-tile:hover .admin-hub-tile-arrow {
+  color: var(--ki-red);
+  transform: translateX(2px);
+}
+
+/* Admin-Coaches Page */
+.admin-coaches .admin-pageheader {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 18px; flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.admin-coaches .admin-pageheader .page-title .faded {
+  font-size: 0.6em; color: var(--label-3); margin-left: 8px;
+}
+
+.admin-cta-primary {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px;
+  background: var(--ki-red);
+  color: #fff;
+  border: 0;
+  border-radius: 980px;
+  font-family: inherit; font-size: 13.5px; font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(204,20,38,0.25), inset 0 0.5px 0 rgba(255,255,255,0.2);
+  transition: background 0.12s ease;
+}
+.admin-cta-primary:hover { background: var(--ki-red-dark); }
+.admin-cta-primary:disabled { opacity: 0.5; cursor: wait; }
+
+.admin-action-btn {
+  padding: 8px 16px;
+  background: var(--surface);
+  color: var(--label-2);
+  border: 0.5px solid var(--line);
+  border-radius: 980px;
+  font-family: inherit; font-size: 12.5px; font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.admin-action-btn:hover { background: var(--fill); color: var(--label); border-color: var(--line-2); }
+
+.admin-icon-btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  color: var(--label-3);
+  display: grid; place-items: center;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.admin-icon-btn:hover { background: var(--fill); color: var(--label); border-color: var(--line-2); }
+.admin-icon-btn.danger:hover { background: rgba(204,20,38,0.08); color: var(--ki-red); border-color: rgba(204,20,38,0.3); }
+
+/* Admin-Coach Liste */
+.admin-coaches-grid {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.admin-coach-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: var(--r-md);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.admin-coach-row:hover { border-color: var(--line-2); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.admin-coach-row.inactive { opacity: 0.55; }
+
+.admin-coach-avatar {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: #fff;
+  font-family: var(--sf); font-size: 16px; font-weight: 600;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.admin-coach-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.admin-coach-info { flex: 1; min-width: 0; }
+.admin-coach-name {
+  font-family: var(--sf);
+  font-size: 14.5px; font-weight: 600;
+  color: var(--label);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 1px;
+}
+.admin-coach-badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px;
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  border-radius: 980px;
+}
+.admin-coach-badge.inactive { background: var(--fill); color: var(--label-3); }
+.admin-coach-badge.ext { background: rgba(45,93,58,0.12); color: #2d5d3a; }
+.admin-coach-role { font-size: 12.5px; color: var(--label-3); margin-bottom: 4px; }
+.admin-coach-meta {
+  font-size: 11.5px; color: var(--label-4);
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.admin-coach-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* Admin-Modal (für Edit-Form) */
+.admin-modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  animation: coachModalFadeIn 0.18s ease;
+}
+.admin-modal {
+  background: var(--surface);
+  border-radius: 18px;
+  max-width: 760px; width: 100%;
+  max-height: 90vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+  animation: coachModalIn 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  overflow: hidden;
+}
+.admin-modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 0.5px solid var(--line-2);
+}
+.admin-modal-head h2 {
+  font-family: var(--sf);
+  font-size: 18px; font-weight: 600;
+  color: var(--label);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.admin-modal-close {
+  background: transparent; border: 0;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  color: var(--label-3);
+  cursor: pointer;
+  display: grid; place-items: center;
+}
+.admin-modal-close:hover { background: var(--fill); color: var(--label); }
+.admin-modal-body {
+  flex: 1; overflow-y: auto;
+  padding: 4px 24px 16px;
+}
+.admin-modal-foot {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 16px 24px;
+  border-top: 0.5px solid var(--line-2);
+  background: var(--fill);
+}
+
+/* Form-Sektionen + Felder */
+.admin-form-section { margin-top: 24px; }
+.admin-form-section:first-child { margin-top: 12px; }
+.admin-form-section h3 {
+  font-family: var(--sf);
+  font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--label-3);
+  margin: 0 0 12px;
+}
+.admin-form-section-body { display: flex; flex-direction: column; gap: 12px; }
+.admin-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.admin-form-field { display: flex; flex-direction: column; gap: 4px; }
+.admin-form-label {
+  font-size: 11.5px; font-weight: 600;
+  color: var(--label-2);
+}
+.admin-form-hint {
+  font-size: 11px; color: var(--label-4); margin-top: 2px;
+}
+.admin-form-field input[type="text"],
+.admin-form-field input[type="number"],
+.admin-form-field input:not([type]),
+.admin-form-field select,
+.admin-form-field textarea {
+  font-family: inherit;
+  font-size: 13.5px;
+  padding: 9px 12px;
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: 8px;
+  color: var(--label);
+  outline: none;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.admin-form-field input:focus,
+.admin-form-field select:focus,
+.admin-form-field textarea:focus {
+  border-color: var(--ki-red);
+  box-shadow: 0 0 0 3px rgba(204,20,38,0.1);
+}
+.admin-form-field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.admin-form-field input:disabled { background: var(--fill); color: var(--label-3); cursor: not-allowed; }
+
+/* Gradient-Picker */
+.admin-gradient-picker {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.admin-gradient-swatch {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+  box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.15);
+}
+.admin-gradient-swatch:hover { transform: scale(1.08); }
+.admin-gradient-swatch.on {
+  border-color: var(--ki-red);
+  transform: scale(1.08);
+}
+
+/* Checkbox-Grid */
+.admin-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 4px 12px;
+}
+.admin-checkbox {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--label-2);
+  cursor: pointer;
+  padding: 4px 0;
+}
+.admin-checkbox input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: var(--ki-red);
+  cursor: pointer;
+}
+
+/* Toast */
+.admin-toast {
+  position: fixed; bottom: 24px; right: 24px;
+  z-index: 1100;
+  padding: 12px 18px;
+  background: var(--label);
+  color: var(--bg);
+  border-radius: 12px;
+  font-size: 13px; font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  animation: coachModalFadeIn 0.18s ease;
+}
+.admin-toast.error { background: var(--ki-red); color: #fff; }
+
+/* ═══════════════════════════════════════════════════════════════════
    Analyse-Gate Banner (Soft-CTA — Karriere-Analyse nachholen)
    ═══════════════════════════════════════════════════════════════════ */
 .analyse-gate-banner {

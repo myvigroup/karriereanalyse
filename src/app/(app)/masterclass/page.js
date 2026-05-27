@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import MasterclassClient from './MasterclassClient';
+import { loadCoaches } from '@/lib/coaches-server';
 
 export default async function MasterclassPage() {
   const supabase = createClient();
@@ -57,6 +58,8 @@ export default async function MasterclassPage() {
     .select('seminar_id')
     .eq('user_id', user.id);
 
+  const coaches = await loadCoaches();
+
   return <MasterclassClient
     courses={courses || []}
     progress={progress || []}
@@ -64,5 +67,6 @@ export default async function MasterclassPage() {
     profile={profile}
     seminars={seminars || []}
     seminarRegistrations={seminarRegistrations || []}
+    coaches={coaches}
   />;
 }

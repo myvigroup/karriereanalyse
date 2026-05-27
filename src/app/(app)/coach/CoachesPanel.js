@@ -1,6 +1,6 @@
 'use client';
 import { useState, useMemo, useEffect } from 'react';
-import { getActiveCoaches, getActiveSpecialtyGroups, getCoachesByGroup } from '@/lib/coaches';
+import { getActiveCoaches, getActiveSpecialtyGroups, filterCoachesByGroup } from '@/lib/coaches';
 
 const SEMINAR_TITLES = {
   'sem-typgerecht': 'Typgerechtes Lernen',
@@ -15,16 +15,16 @@ const SEMINAR_TITLES = {
   'sem-homeoffice': 'Arbeiten im Home Office',
 };
 
-export default function CoachesPanel() {
-  const allCoaches = useMemo(() => getActiveCoaches(), []);
-  const filterGroups = useMemo(() => getActiveSpecialtyGroups(), []);
+export default function CoachesPanel({ coaches = [] }) {
+  const allCoaches = useMemo(() => getActiveCoaches(coaches), [coaches]);
+  const filterGroups = useMemo(() => getActiveSpecialtyGroups(coaches), [coaches]);
   const [filter, setFilter] = useState('alle');
   const [openCoach, setOpenCoach] = useState(null);
 
   const filteredCoaches = useMemo(() => {
     if (filter === 'alle') return allCoaches;
-    return getCoachesByGroup(filter);
-  }, [allCoaches, filter]);
+    return filterCoachesByGroup(coaches, filter);
+  }, [allCoaches, coaches, filter]);
 
   // Wenn der aktive Filter durch Gruppen-Änderung ungültig wird, zurück auf 'alle'
   useEffect(() => {

@@ -25,9 +25,11 @@ const NAV_GROUPS = [
 ];
 
 const ADMIN_ITEMS = [
-  { label: 'Userverwaltung',    path: '/admin/users',     icon: 'user' },
-  { label: 'Kursverwaltung',    path: '/admin/courses',   icon: 'books' },
-  { label: 'Seminarverwaltung', path: '/admin/content',   icon: 'cap' },
+  { label: 'Admin-Hub',         path: '/admin',           icon: 'grid' },
+  { label: 'Mitglieder',        path: '/admin/users',     icon: 'user' },
+  { label: 'Coaches',           path: '/admin/coaches',   icon: 'users' },
+  { label: 'Masterclasses',     path: '/admin/courses',   icon: 'books' },
+  { label: 'Live-Seminare',     path: '/admin/content',   icon: 'cap' },
   { label: 'Badges',            path: '/admin/coaching',  icon: 'badge' },
   { label: 'Analytics',         path: '/admin/analytics', icon: 'chart' },
   { label: 'FK Dashboard',      path: '/coach-dashboard', icon: 'doc' },
