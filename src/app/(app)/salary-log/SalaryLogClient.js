@@ -3,27 +3,28 @@ import { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { awardPoints } from '@/lib/gamification';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import Icon from '@/components/ui/Icon';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
 const EVENT_TYPES = [
-  { key: 'annual_review', label: 'Jahresgespräch', icon: '📅' },
-  { key: 'promotion', label: 'Beförderung', icon: '⬆' },
-  { key: 'offer', label: 'Externes Angebot', icon: '✉' },
-  { key: 'counter_offer', label: 'Gegenangebot', icon: '↩' },
-  { key: 'raise', label: 'Gehaltserhöhung', icon: '💰' },
-  { key: 'bonus', label: 'Bonus/Sonderzahlung', icon: '🎁' },
+  { key: 'annual_review', label: 'Jahresgespräch',     iconName: 'calendar' },
+  { key: 'promotion',     label: 'Beförderung',        iconName: 'trending-up' },
+  { key: 'offer',         label: 'Externes Angebot',   iconName: 'mail' },
+  { key: 'counter_offer', label: 'Gegenangebot',       iconName: 'refresh' },
+  { key: 'raise',         label: 'Gehaltserhöhung',    iconName: 'money' },
+  { key: 'bonus',         label: 'Bonus/Sonderzahlung',iconName: 'gift' },
 ];
 
 const WIN_CATEGORIES = [
-  { key: 'project',    label: 'Projekt',  icon: '🏆', color: 'pill-green' },
-  { key: 'feedback',   label: 'Feedback', icon: '💬', color: 'pill-gold'  },
-  { key: 'revenue',    label: 'Umsatz',   icon: '💰', color: 'pill-red'   },
-  { key: 'skill',      label: 'Skill',    icon: '🧠', color: 'pill-grey'  },
-  { key: 'leadership', label: 'Führung',  icon: '👥', color: 'pill-red'   },
-  { key: 'general',    label: 'Sonstiges',icon: '⭐', color: 'pill-grey'  },
+  { key: 'project',    label: 'Projekt',   iconName: 'trophy',  color: 'pill-green' },
+  { key: 'feedback',   label: 'Feedback',  iconName: 'speech',  color: 'pill-gold'  },
+  { key: 'revenue',    label: 'Umsatz',    iconName: 'money',   color: 'pill-red'   },
+  { key: 'skill',      label: 'Skill',     iconName: 'brain',   color: 'pill-grey'  },
+  { key: 'leadership', label: 'Führung',   iconName: 'users',   color: 'pill-red'   },
+  { key: 'general',    label: 'Sonstiges', iconName: 'star',    color: 'pill-grey'  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -106,7 +107,7 @@ function CategoryPill({ cat, selected, onClick }) {
         fontWeight: selected ? 700 : 400,
       }}
     >
-      {cat.icon} {cat.label}
+      <Icon name={cat.iconName} size={12} stroke={1.8} /> {cat.label}
     </button>
   );
 }
@@ -274,10 +275,10 @@ function WinTimeline({ wins }) {
             return (
               <div key={w.id} className="card animate-in" style={{ marginBottom: 10, padding: '14px 18px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{ fontSize: 26, lineHeight: 1 }}>{cat.icon}</div>
+                  <div style={{ color: 'var(--ki-red)', display: 'flex' }}><Icon name={cat.iconName} size={24} stroke={1.6} /></div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-                      <span className={`pill ${cat.color}`} style={{ fontSize: 11 }}>{cat.icon} {cat.label}</span>
+                      <span className={`pill ${cat.color}`} style={{ fontSize: 11 }}><Icon name={cat.iconName} size={12} stroke={1.8} /> {cat.label}</span>
                       <span style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>
                         {d.toLocaleDateString('de-DE')}
                       </span>
@@ -345,7 +346,7 @@ function SalaryTimeline({ entries }) {
             return (
               <div key={e.id} className="card animate-in" style={{ marginBottom: 8, padding: 16 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ fontSize: 24 }}>{type.icon}</span>
+                  <span style={{ color: 'var(--label-2)', display: 'flex' }}><Icon name={type.iconName} size={22} stroke={1.6} /></span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600 }}>{type.label}{e.company ? ` — ${e.company}` : ''}</div>
                     <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -365,7 +366,7 @@ function SalaryTimeline({ entries }) {
                   </div>
                 )}
                 {e.notes && <div style={{ marginTop: 8, paddingLeft: 36, fontSize: 13, color: 'var(--ki-text-secondary)' }}>{e.notes}</div>}
-                {e.lessons_learned && <div style={{ marginTop: 8, paddingLeft: 36, fontSize: 13, color: 'var(--ki-text-secondary)', fontStyle: 'italic' }}>💡 {e.lessons_learned}</div>}
+                {e.lessons_learned && <div style={{ marginTop: 8, paddingLeft: 36, fontSize: 13, color: 'var(--ki-text-secondary)', fontStyle: 'italic', display: 'flex', alignItems: 'flex-start', gap: 6 }}><Icon name="bulb" size={14} stroke={1.7} /> {e.lessons_learned}</div>}
               </div>
             );
           })}
@@ -407,7 +408,7 @@ function WinModal({ onClose, onSave }) {
       <div className="card" style={{ width: 500, maxWidth: '92vw', maxHeight: '90vh', overflowY: 'auto', padding: 28 }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h3 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>🏆 Win des Tages</h3>
+          <h3 style={{ fontSize: 20, fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}><Icon name="trophy" size={20} stroke={1.7} /> Win des Tages</h3>
           <button className="btn btn-ghost" onClick={onClose} style={{ fontSize: 22, padding: '2px 8px', lineHeight: 1 }}>×</button>
         </div>
 
@@ -461,7 +462,7 @@ function WinModal({ onClose, onSave }) {
             disabled={!canSave || saving}
             style={{ flex: 2, background: 'var(--ki-red)', opacity: !canSave ? 0.5 : 1 }}
           >
-            {saving ? 'Wird gespeichert…' : '💾 Win speichern (+40 XP)'}
+            {saving ? 'Wird gespeichert…' : 'Win speichern (+40 XP)'}
           </button>
         </div>
       </div>
@@ -504,7 +505,7 @@ function SalaryModal({ onClose, onSave }) {
         <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Verhandlung dokumentieren</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <select className="input" value={form.event_type} onChange={e => setForm(p => ({ ...p, event_type: e.target.value }))}>
-            {EVENT_TYPES.map(t => <option key={t.key} value={t.key}>{t.icon} {t.label}</option>)}
+            {EVENT_TYPES.map(t => <option key={t.key} value={t.key}>{t.label}</option>)}
           </select>
 
           <div>
@@ -684,7 +685,7 @@ export default function SalaryLogClient({ entries: initial, userId }) {
       {/* Weekly Win Reminder Banner */}
       {showWinReminder && (
         <div className="card animate-in" style={{ marginBottom: 16, padding: 16, display: 'flex', alignItems: 'center', gap: 12, borderLeft: '4px solid var(--ki-success)' }}>
-          <span style={{ fontSize: 28 }}>🏆</span>
+          <span style={{ color: 'var(--ki-red)', display: 'flex' }}><Icon name="trophy" size={26} stroke={1.6} /></span>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, fontSize: 15 }}>Montag ist Win-Tag!</div>
             <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>Trage deinen wichtigsten Erfolg der letzten Woche ein — kleine Wins zählen auch.</div>
@@ -704,7 +705,7 @@ export default function SalaryLogClient({ entries: initial, userId }) {
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button className="btn btn-secondary" onClick={handleExport}>
-            📊 Verhandlungs-Dossier erstellen
+            Verhandlungs-Dossier erstellen
           </button>
           <button className="btn btn-secondary" onClick={() => setShowSalaryModal(true)}>
             + Verhandlung
@@ -758,7 +759,7 @@ export default function SalaryLogClient({ entries: initial, userId }) {
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 20, borderBottom: '1px solid var(--ki-border)', paddingBottom: 0 }}>
         {[
-          { key: 'wins', label: '🏆 Win-Timeline' },
+          { key: 'wins', label: 'Win-Timeline' },
           { key: 'heatmap', label: '📅 Heatmap' },
           { key: 'salary', label: '💰 Gehalts-Logbuch' },
         ].map(tab => (
@@ -786,7 +787,7 @@ export default function SalaryLogClient({ entries: initial, userId }) {
           : wins.length === 0
             ? (
               <div className="card" style={{ padding: 48, textAlign: 'center' }}>
-                <div style={{ fontSize: 52, marginBottom: 12 }}>🏆</div>
+                <div style={{ marginBottom: 12, color: 'var(--label-3)', display: 'flex', justifyContent: 'center' }}><Icon name="trophy" size={52} stroke={1.4} /></div>
                 <p style={{ color: 'var(--ki-text-secondary)', marginBottom: 16, fontSize: 14 }}>
                   Noch keine Wins eingetragen. Dein erster Erfolg wartet darauf, dokumentiert zu werden!
                 </p>
@@ -855,7 +856,7 @@ export default function SalaryLogClient({ entries: initial, userId }) {
         onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,0,0,0.3)'; }}
         onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 18px rgba(0,0,0,0.25)'; }}
       >
-        🏆
+<Icon name="trophy" size={18} stroke={1.7} />
       </button>
     </div>
   );

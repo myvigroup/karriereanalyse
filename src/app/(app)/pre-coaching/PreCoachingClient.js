@@ -3,12 +3,13 @@ import { useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { awardPoints } from '@/lib/gamification';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import Icon from '@/components/ui/Icon';
 
 const STATUS_CONFIG = {
   missing: { label: 'Fehlt', color: 'var(--grey-4)', bg: 'var(--ki-bg-alt)', icon: '○' },
   pending: { label: 'Wird geprüft', color: 'var(--ki-warning)', bg: 'rgba(212,160,23,0.06)', icon: '◐' },
-  accepted: { label: 'Akzeptiert', color: 'var(--ki-success)', bg: 'rgba(45,106,79,0.06)', icon: '✓' },
-  rejected: { label: 'Abgelehnt', color: 'var(--ki-red)', bg: 'rgba(204,20,38,0.06)', icon: '✕' },
+  accepted: { label: 'Akzeptiert', color: 'var(--ki-success)', bg: 'rgba(45,106,79,0.06)', iconName: 'check' },
+  rejected: { label: 'Abgelehnt', color: 'var(--ki-red)', bg: 'rgba(204,20,38,0.06)', iconName: 'x' },
   feedback: { label: 'KI-Feedback', color: '#5856D6', bg: 'rgba(88,86,214,0.06)', icon: '◎' },
 };
 
@@ -97,11 +98,11 @@ export default function PreCoachingClient({ documents: initial, userId }) {
   };
 
   const DOC_TYPE_FILTERS = [
-    { key: 'cv',          label: 'Lebenslauf',  icon: '📄' },
-    { key: 'certificate', label: 'Zeugnisse',   icon: '📜' },
-    { key: 'zertifikat',  label: 'Zertifikate', icon: '🎓' },
-    { key: 'reference',   label: 'Referenzen',  icon: '📋' },
-    { key: 'cover_letter',label: 'Anschreiben', icon: '📝' },
+    { key: 'cv',          label: 'Lebenslauf',  iconName: 'file-text' },
+    { key: 'certificate', label: 'Zeugnisse',   iconName: 'scroll' },
+    { key: 'zertifikat',  label: 'Zertifikate', iconName: 'gradcap' },
+    { key: 'reference',   label: 'Referenzen',  iconName: 'clipboard' },
+    { key: 'cover_letter',label: 'Anschreiben', iconName: 'pen' },
   ];
 
   const filteredDocs = activeFilter ? docs.filter(d => d.doc_type === activeFilter) : docs;
@@ -150,7 +151,7 @@ export default function PreCoachingClient({ documents: initial, userId }) {
           if (target) dropZoneRef.current?.querySelector('input[type="file"]')?.click();
         }}
       >
-        <div style={{ fontSize: 32 }}>📂</div>
+        <div style={{ color: 'var(--ki-red)', display: 'flex' }}><Icon name="folder" size={30} stroke={1.5} /></div>
         <div style={{ fontWeight: 600, fontSize: 15 }}>Datei hier ablegen oder klicken</div>
         <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>PDF, JPG, PNG, DOC/DOCX · Wird dem ersten offenen Slot zugewiesen</div>
         <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style={{ display: 'none' }}
@@ -195,7 +196,7 @@ export default function PreCoachingClient({ documents: initial, userId }) {
         </div>
         {allDone && (
           <div style={{ marginTop: 12, padding: '10px 16px', background: 'rgba(45,106,79,0.06)', borderRadius: 'var(--r-md)', color: 'var(--ki-success)', fontSize: 14, fontWeight: 500, textAlign: 'center' }}>
-            ✓ Alle Pflichtdokumente eingereicht — dein Coach wird sie prüfen.
+            Alle Pflichtdokumente eingereicht — dein Coach wird sie prüfen.
           </div>
         )}
       </div>
@@ -238,7 +239,7 @@ export default function PreCoachingClient({ documents: initial, userId }) {
                     cursor: 'pointer', fontSize: 14, color: 'var(--ki-text-secondary)',
                     transition: 'all var(--t-fast)',
                   }}>
-                    {uploading === doc.id ? '⏳ Wird hochgeladen...' : '📎 Datei auswählen oder hierher ziehen'}
+                    {uploading === doc.id ? 'Wird hochgeladen...' : 'Datei auswählen oder hierher ziehen'}
                     <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style={{ display: 'none' }}
                       onChange={(e) => handleUpload(doc, e.target.files?.[0])} disabled={uploading === doc.id} />
                   </label>
@@ -250,7 +251,7 @@ export default function PreCoachingClient({ documents: initial, userId }) {
                 <div style={{ marginTop: 12 }}>
                   <button className="btn btn-secondary" onClick={() => hasAI ? setExpandedAI(expandedAI === doc.id ? null : doc.id) : handleAIAnalysis(doc)}
                     disabled={analyzing} style={{ width: '100%', fontSize: 13 }}>
-                    {analyzing ? '🤖 KI analysiert...' : hasAI ? `🤖 KI-Analyse ${expandedAI === doc.id ? 'ausblenden' : 'anzeigen'}` : '🤖 KI-Analyse starten'}
+                    {analyzing ? 'KI analysiert...' : hasAI ? `KI-Analyse ${expandedAI === doc.id ? 'ausblenden' : 'anzeigen'}` : 'KI-Analyse starten'}
                   </button>
                 </div>
               )}
@@ -260,19 +261,19 @@ export default function PreCoachingClient({ documents: initial, userId }) {
                 <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {doc.ai_analysis.strengths?.length > 0 && (
                     <div style={{ padding: 12, background: 'rgba(45,106,79,0.04)', borderRadius: 'var(--r-md)' }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-success)', marginBottom: 6 }}>✅ Stärken</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-success)', marginBottom: 6 }}>Stärken</div>
                       {doc.ai_analysis.strengths.map((s, i) => <div key={i} style={{ fontSize: 13, color: 'var(--ki-text-secondary)', padding: '2px 0' }}>• {s}</div>)}
                     </div>
                   )}
                   {doc.ai_analysis.improvements?.length > 0 && (
                     <div style={{ padding: 12, background: 'rgba(212,160,23,0.04)', borderRadius: 'var(--r-md)' }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-warning)', marginBottom: 6 }}>🔧 Optimierungspotenzial</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-warning)', marginBottom: 6 }}>Optimierungspotenzial</div>
                       {doc.ai_analysis.improvements.map((s, i) => <div key={i} style={{ fontSize: 13, color: 'var(--ki-text-secondary)', padding: '2px 0' }}>• {s}</div>)}
                     </div>
                   )}
                   {doc.ai_analysis.missingKeywords?.length > 0 && (
                     <div style={{ padding: 12, background: 'rgba(204,20,38,0.04)', borderRadius: 'var(--r-md)' }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-red)', marginBottom: 6 }}>🔑 Fehlende Keywords</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-red)', marginBottom: 6 }}>Fehlende Keywords</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {doc.ai_analysis.missingKeywords.map((k, i) => <span key={i} className="pill pill-red">{k}</span>)}
                       </div>
