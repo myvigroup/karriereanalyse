@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import AppFooter from '@/components/layout/AppFooter';
+import DemoBanner from '@/components/layout/DemoBanner';
 
 export default async function AdvisorLayout({ children }) {
   const supabase = createClient();
@@ -29,6 +30,7 @@ export default async function AdvisorLayout({ children }) {
 
   return (
     <div className="app-shell">
+      <DemoBanner />
       <Sidebar profile={profile} version={buildVersion} env={buildEnv} />
       <main className="app-main">
         {children}

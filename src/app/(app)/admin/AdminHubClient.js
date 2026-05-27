@@ -28,6 +28,12 @@ const TILES = [
       { href: '/coach-dashboard',    iconName: 'target',     title: 'FK-Dashboard',    desc: 'Berater-Dashboard für Kundensicht.' },
     ],
   },
+  {
+    section: 'Demo & Präsentation',
+    items: [
+      { href: '/admin/demo',         iconName: 'play',       title: 'Demo-Account',    desc: 'Bühnen-Demo: fiktive Leads, Auto-Login-Link, Reset-Knopf.' },
+    ],
+  },
 ];
 
 export default function AdminHubClient({ profile, stats }) {
