@@ -4706,15 +4706,15 @@ body:has(.course-v2) .sos-button {
    COACHES V3 — Marketplace-Layout mit Foto, Filter und Detail-Modal
    ═══════════════════════════════════════════════════════════════════ */
 
-.coaches-v3 { display: flex; flex-direction: column; gap: 24px; }
+.coaches-v3 { display: flex; flex-direction: column; gap: 36px; }
 
 /* Filter Section */
 .coaches-v3 .coaches-filterhead {
   background: var(--surface);
   border: 0.5px solid var(--line);
   border-radius: var(--r-lg);
-  padding: 22px 24px;
-  display: flex; flex-direction: column; gap: 14px;
+  padding: 28px 32px;
+  display: flex; flex-direction: column; gap: 18px;
 }
 .coaches-v3 .coaches-filterhead-title {
   font-family: var(--sf);
@@ -4723,7 +4723,7 @@ body:has(.course-v2) .sos-button {
   letter-spacing: -0.02em;
 }
 .coaches-v3 .coaches-pills {
-  display: flex; flex-wrap: wrap; gap: 8px;
+  display: flex; flex-wrap: wrap; gap: 10px;
 }
 .coaches-v3 .coaches-pill {
   padding: 7px 16px;
@@ -4771,8 +4771,9 @@ body:has(.course-v2) .sos-button {
 /* Grid */
 .coaches-v3 .coaches-grid-v3 {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 28px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 36px;
+  margin-top: 8px;
 }
 
 /* Cards */
@@ -4830,8 +4831,8 @@ body:has(.course-v2) .sos-button {
 
 /* Body */
 .coaches-v3 .coach-card-v3-body {
-  padding: 16px 18px 14px;
-  display: flex; flex-direction: column; gap: 8px;
+  padding: 22px 24px 18px;
+  display: flex; flex-direction: column; gap: 10px;
   flex: 1;
 }
 .coaches-v3 .coach-card-v3-name {
@@ -4871,7 +4872,7 @@ body:has(.course-v2) .sos-button {
 .coaches-v3 .coach-card-v3-foot {
   display: flex; align-items: center; justify-content: space-between;
   gap: 10px;
-  padding: 12px 18px 16px;
+  padding: 16px 24px 20px;
   border-top: 0.5px solid var(--line-2);
 }
 .coaches-v3 .coach-card-v3-rating {
