@@ -22,7 +22,7 @@ export default function AppFooter({ variant = 'default', showLogo = false }) {
       <div className="app-footer-inner">
         {showLogo && (
           <div className="app-footer-brand">
-            <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut" style={{ height: 24, width: 'auto' }} />
+            <img src="/logo-karriereinstitut.png" alt="Karriere-Institut" style={{ height: 24, width: 'auto' }} />
           </div>
         )}
         <div className="app-footer-links">

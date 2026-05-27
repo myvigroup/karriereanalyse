@@ -202,7 +202,7 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
   const sidebarBody = (
     <>
       <div className="sb-brand">
-        <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut"
+        <img src="/logo-karriereinstitut.png" alt="Karriere-Institut"
              width="72" height="28"
              className="sb-logo-img" style={{ display: 'block' }} />
         <div className="sb-brand-text">
@@ -282,7 +282,7 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
         >
           <span /><span /><span />
         </button>
-        <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut"
+        <img src="/logo-karriereinstitut.png" alt="Karriere-Institut"
              width="58" height="22"
              className="sb-mobile-logo" style={{ display: 'block' }} />
         <div style={{ width: 32 }} />
@@ -294,7 +294,7 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
       {/* Mobile drawer */}
       <aside className={`sb-drawer${mobileOpen ? ' open' : ''}`} aria-label="Menü">
         <div className="sb-drawer-head">
-          <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut"
+          <img src="/logo-karriereinstitut.png" alt="Karriere-Institut"
                width="58" height="22" style={{ display: 'block' }} />
           <button onClick={() => setMobileOpen(false)} type="button" aria-label="Schließen">✕</button>
         </div>
