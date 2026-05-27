@@ -1,6 +1,6 @@
 'use client';
-import Link from 'next/link';
-import { getActiveCoaches } from '@/lib/coaches';
+import { useState, useMemo, useEffect } from 'react';
+import { getActiveCoaches, getAllSpecialties } from '@/lib/coaches';
 
 const SEMINAR_TITLES = {
   'sem-typgerecht': 'Typgerechtes Lernen',
@@ -16,71 +16,255 @@ const SEMINAR_TITLES = {
 };
 
 export default function CoachesPanel() {
-  const coaches = getActiveCoaches();
+  const allCoaches = useMemo(() => getActiveCoaches(), []);
+  const allSpecialties = useMemo(() => getAllSpecialties(), []);
+  const [filter, setFilter] = useState('alle');
+  const [openCoach, setOpenCoach] = useState(null);
+
+  const filteredCoaches = useMemo(() => {
+    if (filter === 'alle') return allCoaches;
+    return allCoaches.filter(c => c.specialties.includes(filter));
+  }, [allCoaches, filter]);
+
+  // ESC schließt Modal + Scroll-Lock
+  useEffect(() => {
+    if (!openCoach) return;
+    const onKey = (e) => { if (e.key === 'Escape') setOpenCoach(null); };
+    document.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [openCoach]);
 
   return (
-    <div className="coaches-v2">
-      <div className="title-kicker">
-        <span className="pulse" />
-        Unsere Live-Coaches
+    <div className="coaches-v3">
+      {/* Filter-Sektion */}
+      <div className="coaches-filterhead">
+        <div className="coaches-filterhead-title">Wonach suchst du?</div>
+        <div className="coaches-pills">
+          <button
+            className={`coaches-pill ${filter === 'alle' ? 'on' : ''}`}
+            onClick={() => setFilter('alle')}
+            type="button"
+          >
+            Alle
+          </button>
+          {allSpecialties.map(s => (
+            <button
+              key={s}
+              className={`coaches-pill ${filter === s ? 'on' : ''}`}
+              onClick={() => setFilter(s)}
+              type="button"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
       </div>
-      <h1 className="page-title">
-        Die Menschen hinter{' '}
-        <span className="faded">deinem Coaching.</span>
-      </h1>
-      <p className="page-sub">
-        Lizenzierte Referent:innen mit eigener Karrierebiografie. Sie halten die Live-Seminare,
-        begleiten Einzelcoachings und entwickeln die Inhalte unserer Masterclasses.
-      </p>
 
-      <div className="coaches-grid">
-        {coaches.map(c => (
-          <article key={c.id} className="coach-card">
-            <header className="coach-card-head">
-              <div className="coach-card-avatar" style={{ background: c.gradient }}>
-                {c.initials}
-              </div>
-              <div className="coach-card-headinfo">
-                <h2 className="coach-card-name">{c.name}</h2>
-                <div className="coach-card-title">{c.title}</div>
-                <div className="coach-card-since">seit {c.sinceYear} am Karriere-Institut</div>
-              </div>
-            </header>
+      {/* Grid-Sektion */}
+      <div className="coaches-secthead">
+        <h3>
+          {filter === 'alle' ? 'Alle Coaches' : filter}
+          <span className="count">{filteredCoaches.length}</span>
+        </h3>
+      </div>
 
-            <p className="coach-card-bio">{c.bio}</p>
-
-            <div className="coach-card-section">
-              <div className="coach-card-section-label">Schwerpunkte</div>
-              <div className="coach-card-chips">
-                {c.specialties.map(s => (
-                  <span key={s} className="coach-card-chip">{s}</span>
+      <div className="coaches-grid-v3">
+        {filteredCoaches.map(c => (
+          <article
+            key={c.id}
+            className="coach-card-v3"
+            onClick={() => setOpenCoach(c)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenCoach(c); } }}
+          >
+            <div className="coach-card-v3-photo" style={{ background: c.gradient }}>
+              <span className={`coach-card-v3-status ${c.status}`}>
+                <span className="dot" /> {c.status === 'available' ? 'Verfügbar' : 'Beschäftigt'}
+              </span>
+              {c.photoUrl ? (
+                <img src={c.photoUrl} alt={c.name} />
+              ) : (
+                <span className="coach-card-v3-initials">{c.initials}</span>
+              )}
+            </div>
+            <div className="coach-card-v3-body">
+              <h4 className="coach-card-v3-name">{c.name}</h4>
+              <div className="coach-card-v3-role">{c.role}</div>
+              <p className="coach-card-v3-bio">{c.short}</p>
+              <div className="coach-card-v3-chips">
+                {c.specialties.slice(0, 4).map(s => (
+                  <span key={s} className="coach-card-v3-chip">{s}</span>
                 ))}
               </div>
             </div>
-
-            {c.seminarIds.length > 0 && (
-              <div className="coach-card-section">
-                <div className="coach-card-section-label">
-                  Hält {c.seminarIds.length === 1 ? 'das Seminar' : `${c.seminarIds.length} Seminare`}
-                </div>
-                <ul className="coach-card-seminars">
-                  {c.seminarIds.map(sid => (
-                    <li key={sid}>
-                      <Link href="/masterclass">{SEMINAR_TITLES[sid] || sid}</Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <div className="coach-card-v3-foot">
+              <span className="coach-card-v3-rating">
+                <span className="star">★</span> {c.rating.toFixed(1)} · {c.sessionCount}+ Sessions
+              </span>
+              <span className="coach-card-v3-cta">Termin buchen →</span>
+            </div>
           </article>
         ))}
       </div>
 
-      {coaches.length === 0 && (
-        <div className="coaches-empty">
-          Aktuell sind keine aktiven Coaches mit zugewiesenen Seminaren hinterlegt.
+      {filteredCoaches.length === 0 && (
+        <div className="coaches-empty-v3">
+          Keine Coaches für „{filter}" gefunden.
         </div>
       )}
+
+      {/* Coach-Detail-Modal */}
+      {openCoach && (() => {
+        const c = openCoach;
+        return (
+          <div className="coach-modal-overlay" onClick={() => setOpenCoach(null)}>
+            <div className="coach-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={c.name}>
+              <button
+                className="coach-modal-close"
+                onClick={() => setOpenCoach(null)}
+                aria-label="Schließen"
+                type="button"
+              >
+                ✕
+              </button>
+
+              {/* Header mit Foto/Avatar + Hauptinfos */}
+              <div className="coach-modal-header" style={{ background: c.gradient }}>
+                <div className="coach-modal-avatar">
+                  {c.photoUrl ? (
+                    <img src={c.photoUrl} alt={c.name} />
+                  ) : (
+                    <span>{c.initials}</span>
+                  )}
+                  <span className={`coach-modal-status-dot ${c.status}`} />
+                </div>
+                <div className="coach-modal-headinfo">
+                  <h2 className="coach-modal-name">{c.name}</h2>
+                  <div className="coach-modal-role">{c.role}</div>
+                  <div className="coach-modal-badges">
+                    <span className={`coach-modal-badge ${c.status}`}>
+                      <span className="dot" />
+                      {c.status === 'available' ? 'Online' : 'Beschäftigt'}
+                    </span>
+                    <span className="coach-modal-badge">{c.experience}</span>
+                    <span className="coach-modal-badge">★ {c.rating.toFixed(1)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bio */}
+              <div className="coach-modal-section">
+                <p className="coach-modal-bio">{c.bio}</p>
+              </div>
+
+              {/* Stats-Reihe */}
+              <div className="coach-modal-stats">
+                <div className="coach-modal-stat">
+                  <div className="value"><span className="star">★</span> {c.rating.toFixed(1)}</div>
+                  <div className="label">Coach-Bewertung</div>
+                </div>
+                <div className="coach-modal-stat">
+                  <div className="value">{c.sessionCount}+</div>
+                  <div className="label">Sessions</div>
+                </div>
+                <div className="coach-modal-stat">
+                  <div className="value">{c.sinceYear ? (new Date().getFullYear() - c.sinceYear) + '+' : '–'}</div>
+                  <div className="label">Jahre dabei</div>
+                </div>
+                <div className="coach-modal-stat">
+                  <div className="value">{c.responseTime}</div>
+                  <div className="label">Antwortzeit</div>
+                </div>
+              </div>
+
+              {/* Über */}
+              <div className="coach-modal-section">
+                <div className="coach-modal-section-label">Über</div>
+                <div className="coach-modal-meta-grid">
+                  <div className="coach-modal-meta">
+                    <span className="icon">📍</span>
+                    <span><strong>Standort:</strong> {c.location}</span>
+                  </div>
+                  <div className="coach-modal-meta">
+                    <span className="icon">🌐</span>
+                    <span><strong>Sprachen:</strong> {c.languages.join(', ')}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Schwerpunkte */}
+              <div className="coach-modal-section">
+                <div className="coach-modal-section-label">Schwerpunkte</div>
+                <div className="coach-modal-tags">
+                  {c.specialties.map(s => (
+                    <span key={s} className="coach-modal-tag">{s}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Branchen */}
+              {c.industries && c.industries.length > 0 && (
+                <div className="coach-modal-section">
+                  <div className="coach-modal-section-label">Branchen</div>
+                  <div className="coach-modal-tags">
+                    {c.industries.map(i => (
+                      <span key={i} className="coach-modal-tag">{i}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Hält folgende Seminare */}
+              {c.seminarIds.length > 0 && (
+                <div className="coach-modal-section">
+                  <div className="coach-modal-section-label">
+                    Hält {c.seminarIds.length === 1 ? 'das Seminar' : `${c.seminarIds.length} Seminare`}
+                  </div>
+                  <div className="coach-modal-tags">
+                    {c.seminarIds.map(sid => (
+                      <a key={sid} href="/masterclass" className="coach-modal-tag link">
+                        {SEMINAR_TITLES[sid] || sid}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Nächste freie Slots */}
+              {c.slots && c.slots.length > 0 && (
+                <div className="coach-modal-section">
+                  <div className="coach-modal-section-label">Nächste freie Slots</div>
+                  <div className="coach-modal-slots">
+                    {c.slots.map((slot, i) => (
+                      <button key={i} className="coach-modal-slot" type="button">
+                        <span className="day">{slot.day}</span>
+                        <span className="time">{slot.time}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Footer / Aktionen */}
+              <div className="coach-modal-footer">
+                <div className="coach-modal-hint">
+                  <span className="dot" /> Antwortet meist innerhalb {c.responseTime}
+                </div>
+                <div className="coach-modal-actions">
+                  <button type="button" className="coach-modal-action secondary">Nachricht</button>
+                  <button type="button" className="coach-modal-action primary">Slot buchen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
