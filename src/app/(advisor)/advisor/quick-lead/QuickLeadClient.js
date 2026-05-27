@@ -41,7 +41,7 @@ export default function QuickLeadClient({ initialLeads, advisorName, baseUrl }) 
       showToast('Fehler: ' + result.error, 'error');
       return;
     }
-    const uploadUrl = `${baseUrl}/upload/${result.leadId}`;
+    const uploadUrl = `${baseUrl}/cv-upload/${result.leadId}`;
     setCreated({
       leadId: result.leadId,
       uploadUrl,
@@ -186,7 +186,7 @@ ${advisorName}`;
         )}
         {leads.map(l => {
           const status = leadStatus(l);
-          const uploadUrl = `${baseUrl}/upload/${l.id}`;
+          const uploadUrl = `${baseUrl}/cv-upload/${l.id}`;
           return (
             <div key={l.id} className="admin-row">
               <div className="admin-avatar small">{(l.first_name?.[0] || '?').toUpperCase()}</div>

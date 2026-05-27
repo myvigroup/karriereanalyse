@@ -110,7 +110,7 @@ export default function UploadClient({ lead, advisorName }) {
         )}
 
         <div style={{ marginTop: 32, fontSize: 12, color: 'var(--label-4)', textAlign: 'center' }}>
-          🔒 Deine Daten bleiben bei dir und {advisorName}. Wir teilen nichts mit Dritten.
+          Deine Daten bleiben bei dir und {advisorName}. Wir teilen nichts mit Dritten.
         </div>
       </div>
     </div>
