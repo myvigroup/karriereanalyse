@@ -4548,7 +4548,16 @@ body:has(.course-v2) .sos-button {
    /coach Seite enthält Tabs: "KI-Coach" + "Unsere Live-Coaches"
    ═══════════════════════════════════════════════════════════════════ */
 
-.coach-wrap { display: flex; flex-direction: column; }
+.coach-wrap {
+  display: flex; flex-direction: column;
+  padding: 32px 48px 80px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+@media (max-width: 720px) {
+  .coach-wrap { padding: 20px 16px 80px; }
+}
 
 /* Apple-style Segmented Control für Tab-Auswahl */
 .coach-segctrl {
