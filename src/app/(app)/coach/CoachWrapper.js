@@ -4,7 +4,7 @@ import CoachClient from './CoachClient';
 import CoachesPanel from './CoachesPanel';
 
 export default function CoachWrapper({ chats, userId, profile }) {
-  const [tab, setTab] = useState('chat');
+  const [tab, setTab] = useState('coaches');
 
   return (
     <div className="coach-wrap">
