@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 // ─── Nav configuration ───────────────────────────────────────────────────────
 const NAV_GROUPS = [
@@ -202,9 +203,7 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
   const sidebarBody = (
     <>
       <div className="sb-brand">
-        <img src="/logo-karriereinstitut.png" alt="Karriere-Institut"
-             width="72" height="28"
-             className="sb-logo-img" style={{ display: 'block' }} />
+        <BrandLogo height={28} className="sb-logo-img" />
         <div className="sb-brand-text">
           <div className="sb-brand-sub">{isAdmin ? 'Admin-Portal' : 'Mitglieder-Portal'}</div>
         </div>
@@ -282,9 +281,7 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
         >
           <span /><span /><span />
         </button>
-        <img src="/logo-karriereinstitut.png" alt="Karriere-Institut"
-             width="58" height="22"
-             className="sb-mobile-logo" style={{ display: 'block' }} />
+        <BrandLogo height={22} className="sb-mobile-logo" />
         <div style={{ width: 32 }} />
       </div>
 
@@ -294,8 +291,7 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
       {/* Mobile drawer */}
       <aside className={`sb-drawer${mobileOpen ? ' open' : ''}`} aria-label="Menü">
         <div className="sb-drawer-head">
-          <img src="/logo-karriereinstitut.png" alt="Karriere-Institut"
-               width="58" height="22" style={{ display: 'block' }} />
+          <BrandLogo height={22} />
           <button onClick={() => setMobileOpen(false)} type="button" aria-label="Schließen">✕</button>
         </div>
         {sidebarBody}

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', company: '', position: '', password: '', confirm: '' });
@@ -37,7 +38,7 @@ export default function RegisterPage() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--ki-bg)', padding: 24 }}>
         <div style={{ maxWidth: 480, width: '100%', textAlign: 'center' }}>
-          <img src="/logo-karriereinstitut.png" alt="Karriere-Institut" style={{ height: 36, width: 'auto', margin: '0 auto 32px' }} />
+          <span style={{ display: 'block', margin: '0 auto 32px', width: 'fit-content' }}><BrandLogo height={36} /></span>
           <div style={{
             width: 72, height: 72, borderRadius: '50%',
             background: 'rgba(204,20,38,0.08)', border: '2px solid rgba(204,20,38,0.2)',
@@ -79,7 +80,7 @@ export default function RegisterPage() {
     <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', background: 'var(--ki-bg)', padding: '32px 16px' }}>
       <div style={{ maxWidth: 480, width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <img src="/logo-karriereinstitut.png" alt="Karriere-Institut" style={{ height: 32, width: 'auto', margin: '0 auto 16px' }} />
+          <span style={{ display: 'block', margin: '0 auto 16px', width: 'fit-content' }}><BrandLogo height={32} /></span>
           <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em' }}>Konto erstellen</h1>
           <p style={{ color: 'var(--ki-text-secondary)', marginTop: 8 }}>Starte jetzt deine Karriereanalyse.</p>
         </div>

@@ -3,6 +3,7 @@ import { useState, Suspense } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { trackEvent, EVENTS } from '@/lib/analytics';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 function LoginContent() {
   const [email, setEmail] = useState('');
@@ -68,14 +69,7 @@ function LoginContent() {
           padding: '28px 24px 24px',
           flexDirection: 'column',
         }}>
-          <div style={{
-            display: 'inline-block', padding: '6px 12px', marginBottom: 18,
-            background: '#fff', borderRadius: 10,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-          }}>
-            <img src="/logo-karriereinstitut.png" alt="Karriere-Institut"
-                 style={{ display: 'block', height: 26, width: 'auto' }} />
-          </div>
+          <BrandLogo height={28} variant="light" style={{ marginBottom: 18 }} />
           <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.15 }}>
             Dein Karriere-Betriebssystem.
           </div>
@@ -95,14 +89,7 @@ function LoginContent() {
           background: 'var(--ki-charcoal)', color: 'white', padding: '64px',
         }}>
           <div style={{ maxWidth: 400 }}>
-            <div style={{
-              display: 'inline-block', padding: '10px 16px', marginBottom: 24,
-              background: '#fff', borderRadius: 14,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.2)',
-            }}>
-              <img src="/logo-karriereinstitut.png" alt="Karriere-Institut"
-                   style={{ display: 'block', height: 40, width: 'auto' }} />
-            </div>
+            <BrandLogo height={44} variant="light" style={{ marginBottom: 24 }} />
             <h1 style={{ fontSize: 42, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 16 }}>
               Dein Karriere-Betriebssystem.
             </h1>
