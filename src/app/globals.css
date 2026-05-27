@@ -2114,9 +2114,10 @@ html[data-sb="collapsed"] .sb-version { display: none; }
   border-radius: 16px;
   background: linear-gradient(135deg, #1a1a2e, #16213e);
   display: grid; place-items: center;
-  font-size: 30px;
+  color: #fff;
   flex-shrink: 0;
 }
+.masterclass-v2 .mc-seminar-icon { color: var(--label); }
 .masterclass-v2 .mc-modal-header-text { min-width: 0; flex: 1; padding-right: 32px; }
 .masterclass-v2 .mc-modal-eyebrow {
   font-size: 11px; font-weight: 700;
@@ -4548,6 +4549,61 @@ body:has(.course-v2) .sos-button {
    /coach Seite enthält Tabs: "KI-Coach" + "Unsere Live-Coaches"
    ═══════════════════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════════════════
+   Analyse-Gate Banner (Soft-CTA — Karriere-Analyse nachholen)
+   ═══════════════════════════════════════════════════════════════════ */
+.analyse-gate-banner {
+  background: var(--surface);
+  border-bottom: 0.5px solid var(--line-2);
+}
+.analyse-gate-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 48px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.analyse-gate-icon {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(204,20,38,0.1);
+  color: var(--ki-red);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.analyse-gate-text { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 1px; }
+.analyse-gate-title {
+  font-family: var(--sf);
+  font-size: 13.5px; font-weight: 600;
+  color: var(--label);
+  letter-spacing: -0.01em;
+}
+.analyse-gate-sub {
+  font-size: 12.5px;
+  color: var(--label-3);
+}
+.analyse-gate-cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  background: var(--ki-red);
+  color: #fff;
+  border: 0;
+  border-radius: 980px;
+  font-family: inherit;
+  font-size: 12.5px; font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(204,20,38,0.25), inset 0 0.5px 0 rgba(255,255,255,0.2);
+  transition: background 0.12s ease;
+}
+.analyse-gate-cta:hover { background: var(--ki-red-dark); }
+@media (max-width: 720px) {
+  .analyse-gate-inner { padding: 12px 16px; gap: 12px; }
+}
+
+/* Coach-Wrap (Page-Container für /coach mit Tabs) */
 .coach-wrap {
   display: flex; flex-direction: column;
   padding: 32px 48px 80px;
@@ -5070,7 +5126,12 @@ body:has(.course-v2) .sos-button {
   font-size: 13.5px;
   color: var(--label-2);
 }
-.coach-modal-meta .icon { font-size: 14px; }
+.coach-modal-meta .icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px;
+  color: var(--label-3);
+  flex-shrink: 0;
+}
 .coach-modal-meta strong { color: var(--label); font-weight: 600; margin-right: 2px; }
 
 /* Tags */

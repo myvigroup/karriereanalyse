@@ -85,11 +85,11 @@ const COMING_SOON_MASTERCLASSES = [
 ];
 
 const SEMINARE = [
-  { id: 'sem-typgerecht', icon: '🧠', title: 'Typgerechtes Lernen', subtitle: 'Lern dich smart — so funktioniert dein Gehirn wirklich', description: 'Warum lernen, denken und vergessen wir unterschiedlich?', next_date: '2026-04-18' },
-  { id: 'sem-worklife', icon: '⚖️', title: 'Work-Life-Balance', subtitle: 'Leistung ohne Burnout — Karriere ohne kaputtzugehen', description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.', next_date: '2026-05-09' },
+  { id: 'sem-typgerecht', iconName: 'brain', title: 'Typgerechtes Lernen', subtitle: 'Lern dich smart — so funktioniert dein Gehirn wirklich', description: 'Warum lernen, denken und vergessen wir unterschiedlich?', next_date: '2026-04-18' },
+  { id: 'sem-worklife', iconName: 'scales', title: 'Work-Life-Balance', subtitle: 'Leistung ohne Burnout — Karriere ohne kaputtzugehen', description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.', next_date: '2026-05-09' },
   {
     id: 'sem-leadership',
-    icon: '👑',
+    iconName: 'crown',
     title: 'Personal Leadership',
     subtitle: 'Endlich tun, was du dir vornimmst',
     description: 'Wie du aus Wünschen echte Ziele machst und sie erreichst.',
@@ -102,7 +102,7 @@ const SEMINARE = [
       <h4>Führe dich selbst, bevor du andere führst</h4>
       <p>Das Seminar <strong>„Personal Leadership“</strong> richtet sich an <strong>Studenten, Berufseinsteiger und Berufstätige</strong>, die ihre Fähigkeit zur <strong>Selbstführung</strong> auf ein neues Level bringen wollen. Denn wahre Führung beginnt nicht mit einem Titel — sondern mit dem <strong>klaren Umgang mit den eigenen Zielen, Entscheidungen und Gewohnheiten</strong>.</p>
 
-      <h4>🚀 Was dich im Seminar erwartet</h4>
+      <h4>Was dich im Seminar erwartet</h4>
       <p>Unsere erfahrenen Referenten zeigen dir, <strong>wie aus Zielen ECHTE Ziele werden</strong> — konkret, erreichbar und motivierend. Du lernst, wie du:</p>
       <ul>
         <li>deine <strong>Ziele richtig formulierst</strong>, sodass sie wirklich motivieren</li>
@@ -112,17 +112,17 @@ const SEMINARE = [
       </ul>
       <p>Du bekommst nicht nur theoretische Impulse, sondern vor allem <strong>praxisnahe Tools und Übungen</strong>, mit denen du sofort ins Umsetzen kommst.</p>
 
-      <h4>🎯 Dein Ziel nach dem Seminar</h4>
+      <h4>Dein Ziel nach dem Seminar</h4>
       <p>Du wirst lernen, wie du <strong>Verantwortung für dich selbst übernimmst</strong>, klare Prioritäten setzt und aus deinen guten Vorsätzen <strong>konkrete Ergebnisse</strong> machst.</p>
       <blockquote>Personal Leadership heißt: bewusste Entscheidungen treffen — jeden Tag.</blockquote>
 
-      <h4>📋 Voraussetzungen</h4>
+      <h4>Voraussetzungen</h4>
       <p>Bitte wähle dich <strong>5–10 Minuten vor Beginn</strong> ein und mache einen kurzen <strong>Technik-Check</strong> (Audio, Kamera, Internetverbindung). Während des Seminars bitten wir dich, deine Kamera aktiv zu halten und dich mit Wortbeiträgen einzubringen — die Interaktion mit Referenten und Teilnehmenden ist zentraler Bestandteil und entscheidend für den Praxistransfer.</p>
     `,
   },
   {
     id: 'sem-speedreading',
-    icon: '📖',
+    iconName: 'book',
     title: 'Speedreading',
     subtitle: 'Lies doppelt so schnell — ohne Verständnis-Verlust',
     description: 'Grundlagen des überdurchschnittlich schnellen Lesens mit hohem Textverständnis.',
@@ -135,7 +135,7 @@ const SEMINARE = [
       <h4>Schnelllesen leicht gemacht</h4>
       <p>In einer Welt, die von Informationen überflutet wird, ist die Fähigkeit, <strong>effizient und schnell zu lesen</strong>, unschätzbar wertvoll. Dieses Seminar bringt dir Techniken und Strategien bei, mit denen du deine <strong>Lesegeschwindigkeit verdoppeln oder verdreifachen</strong> kannst — ohne das Verständnis zu opfern.</p>
 
-      <h4>🚀 Was dich erwartet</h4>
+      <h4>Was dich erwartet</h4>
       <ul>
         <li><strong>Grundlagen des Speedreadings</strong> — wissenschaftliche Hintergründe und Vorteile</li>
         <li><strong>Augenbewegung & visuelle Wahrnehmung</strong> gezielt verbessern</li>
@@ -144,7 +144,7 @@ const SEMINARE = [
         <li>Konzentration und <strong>Textverständnis</strong> nachhaltig steigern</li>
       </ul>
 
-      <h4>🎯 Dein Nutzen</h4>
+      <h4>Dein Nutzen</h4>
       <ul>
         <li><strong>Zeitersparnis</strong> — mehr in kürzerer Zeit lesen, höhere Produktivität</li>
         <li><strong>Karrierevorteil</strong> — große Informationsmengen schnell verarbeiten</li>
@@ -152,13 +152,13 @@ const SEMINARE = [
       </ul>
       <blockquote>Starte jetzt und entdecke, wie Speedreading deine Effizienz und Produktivität steigern kann.</blockquote>
 
-      <h4>📋 Voraussetzungen</h4>
+      <h4>Voraussetzungen</h4>
       <p>Grundlegende Lesefähigkeiten, ein digitales Gerät mit Internetzugang sowie <strong>Motivation und Offenheit</strong> für neue Techniken. Der Kurs ist für Anfänger und Fortgeschrittene gleichermaßen geeignet.</p>
     `,
   },
   {
     id: 'sem-achtsamkeit',
-    icon: '🧘',
+    iconName: 'leaf',
     title: 'Achtsamkeit',
     subtitle: 'Raus aus dem Kopfkarussell — innere Ruhe, die hält',
     description: 'Zeit für dich und die eigenen Bedürfnisse — neben Beruf und reizüberflutetem Alltag.',
@@ -170,20 +170,20 @@ const SEMINARE = [
       <p>Im Seminar <strong>„Achtsamkeit"</strong> entdeckst du, wie wohltuend es sein kann, <strong>bewusst innezuhalten</strong> und den Moment wirklich wahrzunehmen.</p>
       <p>Gemeinsam erlernen wir wirkungsvolle Techniken wie <strong>Atemübungen, Meditation und Körperwahrnehmung</strong>, um mit mehr Ruhe, Klarheit und Präsenz durch den Alltag zu gehen.</p>
 
-      <h4>🎯 Ziel des Seminars</h4>
+      <h4>Ziel des Seminars</h4>
       <p>Achtsamkeit nicht nur als kurzfristige Entspannung erleben, sondern <strong>nachhaltig in den eigenen Alltag integrieren</strong> — sei es im Beruf, in Beziehungen oder im Umgang mit sich selbst. Du lernst, <strong>bewusst Zeit für dich selbst zu schaffen</strong>, Körper, Geist und Emotionen in Einklang zu bringen und besser mit Stress und innerer Anspannung umzugehen.</p>
 
-      <h4>✨ Die Vorteile</h4>
+      <h4>Die Vorteile</h4>
       <p><strong>Weniger Stress. Mehr Fokus. Mehr Lebensfreude.</strong></p>
       <blockquote>Wer regelmäßig Achtsamkeit praktiziert, schafft Raum für echte Veränderung — hin zu einem achtsameren, gesünderen und erfüllteren Leben.</blockquote>
 
-      <h4>📋 Voraussetzungen</h4>
+      <h4>Voraussetzungen</h4>
       <p>5–10 Minuten vor Beginn einwählen, Technik-Check (Audio, Kamera, Internet), Kamera aktiv halten und sich mit Wortbeiträgen einbringen. Die Interaktion mit Referenten und Teilnehmenden ist zentral für den Praxistransfer.</p>
     `,
   },
   {
     id: 'sem-rhetorik',
-    icon: '🎤',
+    iconName: 'mic',
     title: 'Rhetorik, Dialektik, Kinesik',
     subtitle: 'Wenn du sprichst, hören alle zu',
     description: 'Wirkungsvoll, passend und adressatengerecht kommunizieren in jeder Situation.',
@@ -196,7 +196,7 @@ const SEMINARE = [
       <h4>Souverän auftreten, überzeugend kommunizieren</h4>
       <p>Du möchtest in Gesprächen <strong>sicherer auftreten</strong>, deine <strong>Sprache gezielter einsetzen</strong> und mit deiner <strong>Körpersprache bewusst wirken</strong>? Dieses Seminar richtet sich speziell an <strong>Studenten und Berufseinsteiger</strong>, die ihre mündlichen Kommunikationsfähigkeiten verbessern und ihre Wirkung auf andere gezielt stärken möchten.</p>
 
-      <h4>📌 Das erwartet dich</h4>
+      <h4>Das erwartet dich</h4>
       <ul>
         <li><strong>Grundlagen der Rhetorik</strong> — klar sprechen, stark argumentieren, gezielt überzeugen</li>
         <li><strong>Einführung in die Dialektik</strong> — souverän argumentieren, Einwände entkräften, Gespräche führen statt verlieren</li>
@@ -205,17 +205,17 @@ const SEMINARE = [
         <li><strong>Praktische Übungen & individuelles Feedback</strong> — direkt anwenden, direkt verbessern</li>
       </ul>
 
-      <h4>🎯 Dein Ziel</h4>
+      <h4>Dein Ziel</h4>
       <p>Du lernst, wie <strong>Sprache, Argumentation und Körpersprache</strong> zusammenspielen — und wie du diese drei Elemente in unterschiedlichen Situationen gezielt einsetzt, um mehr Wirkung zu erzielen.</p>
       <blockquote>Kommunikation ist kein Talent — sondern ein Handwerk. Und du kannst es lernen.</blockquote>
 
-      <h4>📋 Voraussetzungen</h4>
+      <h4>Voraussetzungen</h4>
       <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen — entscheidend für den Praxistransfer.</p>
     `,
   },
   {
     id: 'sem-motivation',
-    icon: '🔥',
+    iconName: 'flame',
     title: 'Selbstmotivation',
     subtitle: 'Wenn der innere Schweinehund verliert',
     description: 'Wie du dich effektiv motivierst und langfristig diszipliniert an deinen Zielen arbeitest.',
@@ -229,7 +229,7 @@ const SEMINARE = [
       <p>In diesem inspirierenden Seminar lernst du, wie du deine <strong>innere Kraftquelle aktivierst</strong> und dich selbst immer wieder neu motivierst — ganz ohne äußeren Druck. Du entdeckst, wie du deine <strong>Leistungsfähigkeit nachhaltig steigerst</strong> und selbst in anspruchsvollen Zeiten <strong>fokussiert und energiegeladen</strong> bleibst.</p>
       <p>Wir stellen dir <strong>wirkungsvolle Methoden und Motivationstechniken</strong> vor, die du direkt im Alltag anwenden kannst. Mit praktischen Übungen stärkst du dein Bewusstsein für deine eigenen Motive und findest neue Wege, dich selbst ins Handeln zu bringen.</p>
 
-      <h4>🔍 Diese Themen erwarten dich</h4>
+      <h4>Diese Themen erwarten dich</h4>
       <ul>
         <li>Die <strong>Grundlagen der Motivation</strong> — was Menschen wirklich antreibt</li>
         <li><strong>Motivationstheorien</strong> praktisch erklärt und angewendet</li>
@@ -238,17 +238,17 @@ const SEMINARE = [
         <li>Strategien zum Umgang mit <strong>Motivationskillern und inneren Widerständen</strong></li>
       </ul>
 
-      <h4>🎯 Dein Ziel</h4>
+      <h4>Dein Ziel</h4>
       <p>Schluss mit <strong>Aufschieberitis und Selbstzweifeln</strong> — entwickle eine Motivation, die von innen kommt. Für mehr <strong>Klarheit, Energie und Selbstbestimmung</strong>.</p>
       <blockquote>Selbstmotivation ist kein Zufall — sie ist erlernbar.</blockquote>
 
-      <h4>📋 Voraussetzungen</h4>
+      <h4>Voraussetzungen</h4>
       <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen.</p>
     `,
   },
   {
     id: 'sem-kommunikation',
-    icon: '💬',
+    iconName: 'speech',
     title: 'Kommunikation',
     subtitle: 'Sag, was du meinst — werd verstanden',
     description: 'Effektive Kommunikation mit Kollegen und Geschäftspartnern.',
@@ -262,7 +262,7 @@ const SEMINARE = [
       <p>Dieses Seminar richtet sich an <strong>Fach- und Führungskräfte</strong>, die ihre Kommunikationsfähigkeiten gezielt weiterentwickeln möchten, um im Berufsalltag <strong>klarer, empathischer und überzeugender</strong> zu kommunizieren — ob im Team, mit Kunden oder Geschäftspartnern.</p>
       <p>Du lernst die Grundlagen erfolgreicher Kommunikation kennen und erfährst, wie du <strong>Missverständnisse vermeidest</strong>, Gespräche zielgerichtet führst und eine <strong>vertrauensvolle Zusammenarbeit</strong> förderst.</p>
 
-      <h4>📌 Im Fokus</h4>
+      <h4>Im Fokus</h4>
       <ul>
         <li><strong>Aktives Zuhören</strong> und klare Botschaften</li>
         <li><strong>Wertschätzendes Feedback</strong> geben und empfangen</li>
@@ -270,17 +270,17 @@ const SEMINARE = [
         <li>Bewusste Gesprächsführung und nonverbale Signale richtig deuten</li>
       </ul>
 
-      <h4>🎯 Dein Ziel</h4>
+      <h4>Dein Ziel</h4>
       <p>Du erhältst praxisnahe Werkzeuge, mit denen du in jeder Situation <strong>sicher, klar und empathisch kommunizieren</strong> kannst. Ob in Mitarbeitergesprächen, Kundenkontakten oder Team-Meetings — deine Kommunikation wird wirksamer, klarer und verbindlicher.</p>
       <blockquote>Für mehr Klarheit, Vertrauen und Erfolg im Berufsalltag.</blockquote>
 
-      <h4>📋 Voraussetzungen</h4>
+      <h4>Voraussetzungen</h4>
       <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen.</p>
     `,
   },
   {
     id: 'sem-konflikt',
-    icon: '🤜',
+    iconName: 'shield',
     title: 'Konfliktmanagement',
     subtitle: 'Wenn’s knallt, bleibst du cool',
     description: 'Strategien und Techniken zur erfolgreichen Konfliktbewältigung.',
@@ -294,7 +294,7 @@ const SEMINARE = [
       <p>Konflikte gehören zum Berufsleben — entscheidend ist, <strong>wie du mit ihnen umgehst</strong>. In diesem Seminar lernst du die wichtigsten <strong>Strategien und Techniken zur erfolgreichen Konfliktbewältigung</strong> — von der frühzeitigen Vermeidung bis zur professionellen Lösung bereits entstandener Konflikte.</p>
       <p>Du erfährst, wie du <strong>Konfliktsituationen richtig analysierst</strong>, konstruktiv kommunizierst und <strong>Konfliktgespräche zielgerichtet und deeskalierend führst</strong>.</p>
 
-      <h4>📌 Besonderer Fokus</h4>
+      <h4>Besonderer Fokus</h4>
       <ul>
         <li><strong>Reflexion eigener Konflikterfahrungen</strong> — beruflich wie privat</li>
         <li>Entwicklung <strong>praxisnaher, individueller Lösungsansätze</strong></li>
@@ -302,15 +302,15 @@ const SEMINARE = [
         <li>Auch in schwierigen Momenten eine <strong>konstruktive Haltung</strong> bewahren</li>
       </ul>
 
-      <h4>🎯 Dein Ziel</h4>
+      <h4>Dein Ziel</h4>
       <p>Du wirst befähigt, <strong>Konflikte frühzeitig zu erkennen</strong>, souverän zu handeln und Spannungen aktiv in <strong>produktive Lösungen zu verwandeln</strong>. So stärkst du deine persönliche Konfliktkompetenz und trägst aktiv zu einem besseren Miteinander im Arbeitsalltag bei.</p>
       <blockquote>Werde zum sicheren und lösungsorientierten Konfliktmanager in deinem beruflichen Umfeld.</blockquote>
 
-      <h4>📋 Voraussetzungen</h4>
+      <h4>Voraussetzungen</h4>
       <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen.</p>
     `,
   },
-  { id: 'sem-homeoffice', icon: '🏠', title: 'Arbeiten im Home Office', subtitle: 'Home-Office-Profi statt Pyjama-Falle', description: 'Ausgeglichen und effektiv arbeiten — auch von zu Hause.', next_date: '2027-01-09' },
+  { id: 'sem-homeoffice', iconName: 'home', title: 'Arbeiten im Home Office', subtitle: 'Home-Office-Profi statt Pyjama-Falle', description: 'Ausgeglichen und effektiv arbeiten — auch von zu Hause.', next_date: '2027-01-09' },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -338,6 +338,16 @@ function Icon({ name, size = 16, stroke = 1.7 }) {
     case 'lock':    return (<svg {...p}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
     case 'check':   return (<svg {...p}><polyline points="20 6 9 17 4 12"/></svg>);
     case 'spark':   return (<svg {...p}><path d="M5 3v4M3 5h4M19 17v4M17 19h4M12 2l2.4 5.1L20 9l-5.1 2.4L12 16l-2.4-5L4 9l5.4-2L12 2z"/></svg>);
+    // Seminar-Icons (ersetzt frühere Emojis)
+    case 'brain':   return (<svg {...p}><path d="M9.5 2a3 3 0 0 0-3 3v0a3 3 0 0 0-2 5.2A3 3 0 0 0 6 16a3 3 0 0 0 3.5 3v3"/><path d="M14.5 2a3 3 0 0 1 3 3v0a3 3 0 0 1 2 5.2A3 3 0 0 1 18 16a3 3 0 0 1-3.5 3v3"/></svg>);
+    case 'scales':  return (<svg {...p}><line x1="12" y1="3" x2="12" y2="21"/><line x1="6" y1="3" x2="18" y2="3"/><path d="M6 3l-3 8h6z"/><path d="M18 3l-3 8h6z"/><path d="M3 11a3 3 0 0 0 6 0"/><path d="M15 11a3 3 0 0 0 6 0"/><line x1="8" y1="21" x2="16" y2="21"/></svg>);
+    case 'book':    return (<svg {...p}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>);
+    case 'leaf':    return (<svg {...p}><path d="M11 20A7 7 0 0 1 4 13a14 14 0 0 1 14-9 14 14 0 0 1-7 16Z"/><path d="M4 13c4-2 8-2 13-2"/></svg>);
+    case 'mic':     return (<svg {...p}><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>);
+    case 'flame':   return (<svg {...p}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 17c1.4 0 2.5-1.1 2.5-2.5 0-1.5-1-2.5-2-3.5-1-1-2-2.5-1.5-4.5C7 8 5 11 5 14a7 7 0 0 0 14 0c0-3-1.5-5-2-6-1 2-3 2.5-4 1"/></svg>);
+    case 'speech':  return (<svg {...p}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>);
+    case 'shield':  return (<svg {...p}><path d="M12 2l9 4v6c0 5-4 9-9 10-5-1-9-5-9-10V6z"/><polyline points="9 12 11 14 15 10"/></svg>);
+    case 'home':    return (<svg {...p}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-4v-7H10v7H6a2 2 0 0 1-2-2z"/></svg>);
     default: return null;
   }
 }
@@ -563,7 +573,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                 <span className="mc-seminar-date-month">{nextDate.toLocaleDateString('de-DE', { month: 'short' })}</span>
                 <span className="mc-seminar-date-weekday">{weekday}</span>
               </div>
-              <div className="mc-seminar-icon">{s.icon}</div>
+              <div className="mc-seminar-icon"><Icon name={s.iconName} size={22} stroke={1.7} /></div>
               <div className="mc-seminar-body">
                 <div className="mc-seminar-title">{s.title}</div>
                 <div className="mc-seminar-subtitle">{s.subtitle}</div>
@@ -597,7 +607,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
               <button className="mc-modal-close" onClick={() => setOpenSeminar(null)} aria-label="Schließen">✕</button>
 
               <div className="mc-modal-header">
-                <div className="mc-modal-icon">{sem.icon}</div>
+                <div className="mc-modal-icon"><Icon name={sem.iconName} size={30} stroke={1.6} /></div>
                 <div className="mc-modal-header-text">
                   <div className="mc-modal-eyebrow">Live-Seminar</div>
                   <h2 className="mc-modal-title">{sem.title}</h2>
