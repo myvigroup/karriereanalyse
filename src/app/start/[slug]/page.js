@@ -4,6 +4,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import AppFooter from '@/components/layout/AppFooter';
 
 export const dynamic = 'force-dynamic';
 
@@ -98,7 +99,7 @@ export default async function AffiliateLanding({ params }) {
             Jetzt CV hochladen <Icon name="arrow" size={16} />
           </Link>
           <span className="aff-cta-meta">
-            <Icon name="check" size={14} /> 60 Sek · <Icon name="check" size={14} /> kostenlos · <Icon name="check" size={14} /> kein Account nötig
+            <Icon name="check" size={14} /> 60 Sekunden · <Icon name="check" size={14} /> KI-Auswertung sofort
           </span>
         </div>
       </section>
@@ -146,9 +147,12 @@ export default async function AffiliateLanding({ params }) {
           Jetzt CV hochladen <Icon name="arrow" size={16} />
         </Link>
         <div className="aff-final-tos">
-          Kein Konto nötig für den CV-Check. Deine Daten werden ausschließlich an {advisor.display_name} weitergegeben.
+          Mit dem Start akzeptierst du unsere Nutzungsbedingungen und Datenschutzrichtlinie.
+          Deine Daten werden an {advisor.display_name} weitergegeben.
         </div>
       </section>
+
+      <AppFooter showLogo={true} />
     </div>
   );
 }

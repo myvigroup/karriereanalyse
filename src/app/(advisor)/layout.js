@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
+import AppFooter from '@/components/layout/AppFooter';
 
 export default async function AdvisorLayout({ children }) {
   const supabase = createClient();
@@ -31,6 +32,7 @@ export default async function AdvisorLayout({ children }) {
       <Sidebar profile={profile} version={buildVersion} env={buildEnv} />
       <main className="app-main">
         {children}
+        <AppFooter />
       </main>
     </div>
   );

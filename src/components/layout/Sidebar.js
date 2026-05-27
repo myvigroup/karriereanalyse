@@ -257,9 +257,6 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
           v{version}{env && env !== 'production' ? ` · ${env}` : ''}
         </div>
       )}
-      <div className="sb-disclaimer" title="Aus Gründen der besseren Lesbarkeit verzichten wir auf gegenderte Sprache. Personenbezeichnungen gelten für alle Geschlechter.">
-        Aus Gründen der Lesbarkeit verzichten wir auf gegenderte Sprache.
-      </div>
     </>
   );
 

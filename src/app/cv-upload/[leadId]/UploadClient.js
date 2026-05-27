@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import Icon from '@/components/ui/Icon';
+import AppFooter from '@/components/layout/AppFooter';
 
 const ACCEPTED = '.pdf,.docx,.jpg,.jpeg,.png';
 
@@ -113,6 +114,7 @@ export default function UploadClient({ lead, advisorName }) {
           Deine Daten bleiben bei dir und {advisorName}. Wir teilen nichts mit Dritten.
         </div>
       </div>
+      <AppFooter showLogo={true} />
     </div>
   );
 }

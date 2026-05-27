@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSelfServiceLead } from '../actions';
+import AppFooter from '@/components/layout/AppFooter';
 
 export default function CheckFormClient({ advisor, slug }) {
   const router = useRouter();
@@ -83,6 +84,8 @@ export default function CheckFormClient({ advisor, slug }) {
           </div>
         </form>
       </section>
+
+      <AppFooter showLogo={true} />
     </div>
   );
 }

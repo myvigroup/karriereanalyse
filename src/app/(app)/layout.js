@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import MobileNav from '@/components/layout/MobileNav';
 import AnalysePopup from '@/components/layout/AnalysePopup';
+import AppFooter from '@/components/layout/AppFooter';
 import AppTour from '@/components/ui/AppTour';
 import GlobalSearch from '@/components/ui/GlobalSearch';
 import InstallPrompt from '@/components/ui/InstallPrompt';
@@ -58,6 +59,7 @@ export default async function AppLayout({ children }) {
       <Sidebar profile={profile} analysisResults={formattedResults} version={buildVersion} env={buildEnv} />
       <main className="app-main">
         {children}
+        <AppFooter />
       </main>
       <MobileNav />
       <AppTour profile={profile} userId={user.id} />
