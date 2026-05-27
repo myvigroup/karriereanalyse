@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
             <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>E-Mail gesendet</h2>
             <p style={{ color: 'var(--ki-text-secondary)', marginBottom: 20 }}>Wir haben einen Reset-Link an <strong>{email}</strong> gesendet.</p>
             <div style={{ background: '#FFF9E6', border: '1px solid #FDE68A', borderRadius: 10, padding: '12px 16px', marginBottom: 24, fontSize: 13, color: '#92400E', lineHeight: 1.5 }}>
-              📬 Keine E-Mail erhalten? Bitte prüfe auch deinen <strong>Spam-Ordner</strong>.
+              Keine E-Mail erhalten? Bitte prüfe auch deinen <strong>Spam-Ordner</strong>.
             </div>
             <a href="/auth/login" className="btn btn-secondary">Zurück zum Login</a>
           </div>

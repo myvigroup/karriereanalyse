@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Icon from '@/components/ui/Icon';
 
 export default function AngeboteClient() {
   const [interval, setInterval] = useState('monthly');
@@ -166,13 +167,13 @@ export default function AngeboteClient() {
 
           <ul style={{ listStyle: 'none', marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
-              ['📅', '1x Seminar/Monat', 'Jeden Monat ein neuer Skill, der dich im Job weiterbringt'],
-              ['💰', 'Gehalts-Masterclass', '7–12 % mehr Gehalt — mit System und Skripten'],
-              ['📚', 'Alle E-Learning Kurse', 'Rhetorik, Leadership, Achtsamkeit & mehr'],
-              ['◎', 'Karriere-Analyse', 'Verstehe, wo du stehst — und wo du hinwillst'],
-            ].map(([icon, title, desc], i) => (
+              ['calendar', '1x Seminar/Monat', 'Jeden Monat ein neuer Skill, der dich im Job weiterbringt'],
+              ['money', 'Gehalts-Masterclass', '7–12 % mehr Gehalt — mit System und Skripten'],
+              ['books', 'Alle E-Learning Kurse', 'Rhetorik, Leadership, Achtsamkeit & mehr'],
+              ['target', 'Karriere-Analyse', 'Verstehe, wo du stehst — und wo du hinwillst'],
+            ].map(([iconName, title, desc], i) => (
               <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}>{icon}</span>
+                <span style={{ flexShrink: 0, marginTop: 1, color: 'var(--ki-red)', display: 'flex' }}><Icon name={iconName} size={15} stroke={1.7} /></span>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ki-text)' }}>{title}</div>
                   <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', lineHeight: 1.4, marginTop: 1 }}>{desc}</div>
@@ -199,7 +200,7 @@ export default function AngeboteClient() {
           borderRadius: 'var(--r-lg)', padding: '24px 32px',
           display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
         }}>
-          <div style={{ fontSize: 36 }}>💰</div>
+          <div style={{ color: '#fff', display: 'flex' }}><Icon name="money" size={36} stroke={1.4} /></div>
           <div style={{ flex: 1, minWidth: 200 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 4 }}>
               Nur die Gehalts-Masterclass?

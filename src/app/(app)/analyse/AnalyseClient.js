@@ -133,7 +133,7 @@ function FieldCard({ field, score, locked }) {
 function ScaleQuestion({ question, selected, onSelect, disabled }) {
   return (
     <div>
-      <div className="ana-q-kicker">📊 Selbsteinschätzung</div>
+      <div className="ana-q-kicker">Selbsteinschätzung</div>
       <div className="ana-q-text">{question.text}</div>
       <div className="ana-q-scale-row">
         {[1, 2, 3, 4, 5].map(val => (
@@ -154,7 +154,7 @@ function ScaleQuestion({ question, selected, onSelect, disabled }) {
 function ScenarioQuestion({ question, selected, onSelect, disabled }) {
   return (
     <div>
-      <div className="ana-q-kicker">📍 Szenario</div>
+      <div className="ana-q-kicker">Szenario</div>
       <div className="ana-q-text">{question.text}</div>
       <div className="ana-q-scenarios">
         {question.options.map((opt, i) => (

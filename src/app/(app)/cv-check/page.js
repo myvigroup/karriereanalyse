@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import Icon from '@/components/ui/Icon';
 
 const CATEGORIES = [
   { key: 'struktur', label: 'Struktur' },
@@ -175,7 +176,7 @@ export default async function CVCheckPage() {
           gap: 14, flexWrap: 'wrap',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 22 }}>🔑</span>
+            <span style={{ color: 'var(--ki-red)', display: 'flex' }}><Icon name="key" size={22} stroke={1.6} /></span>
             <div>
               <div style={{ fontSize: 13.5, fontWeight: 700, color: '#92400E' }}>Eigenes Passwort setzen</div>
               <div style={{ fontSize: 12.5, color: '#78350F', lineHeight: 1.4 }}>
@@ -209,7 +210,7 @@ export default async function CVCheckPage() {
       {/* Headbar */}
       <div className="cvc-headbar">
         {lead?.target_position && (
-          <span className="cvc-jobmatch-tag">🎯 {lead.target_position}</span>
+          <span className="cvc-jobmatch-tag"><Icon name="target" size={12} stroke={1.8} /> {lead.target_position}</span>
         )}
         <span className="cvc-version">{doc.file_name}</span>
         <span className="cvc-spacer" />

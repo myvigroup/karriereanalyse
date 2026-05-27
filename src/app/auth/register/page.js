@@ -59,7 +59,7 @@ export default function RegisterPage() {
             borderRadius: 10, padding: '12px 16px', marginBottom: 32,
             fontSize: 13, color: '#92400E', lineHeight: 1.5, textAlign: 'left',
           }}>
-            📬 Keine E-Mail erhalten? Bitte prüfe auch deinen <strong>Spam-Ordner</strong>.
+            Keine E-Mail erhalten? Bitte prüfe auch deinen <strong>Spam-Ordner</strong>.
           </div>
           <a href="/auth/login" className="btn btn-primary" style={{ display: 'inline-block', padding: '12px 32px', fontSize: 15 }}>
             Zur Anmeldeseite

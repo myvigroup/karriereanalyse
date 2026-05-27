@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import Icon from '@/components/ui/Icon';
 
 /* ───────────────────────── useCountUp ───────────────────────── */
 function useCountUp(target, duration = 1500) {
@@ -272,8 +273,8 @@ export default function MarktwertClient({ profile, log, progress, courses, userI
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', flex: 1, minWidth: 0 }}>
-                  <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>
-                    {completed ? '✅' : '🔒'}
+                  <span style={{ flexShrink: 0, color: completed ? '#15803d' : 'var(--label-3)', display: 'flex' }}>
+                    <Icon name={completed ? 'check-circle' : 'lock'} size={18} stroke={1.7} />
                   </span>
                   <span style={{
                     fontWeight: 600,

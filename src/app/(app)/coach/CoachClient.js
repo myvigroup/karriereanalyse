@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import AppIcon from '@/components/ui/Icon';
 
 // ─── Daily impulse (preserved from previous version) ─────────────────────────
 function getDailyImpulse(profile) {
@@ -16,11 +17,11 @@ function getDailyImpulse(profile) {
 }
 
 const MOOD_OPTIONS = [
-  { id: 'gut',         label: 'Gut',         emoji: '😊' },
-  { id: 'ok',          label: 'Okay',        emoji: '😐' },
-  { id: 'gestresst',   label: 'Gestresst',   emoji: '😬' },
-  { id: 'frustriert',  label: 'Frustriert',  emoji: '😤' },
-  { id: 'erschöpft',   label: 'Erschöpft',   emoji: '😴' },
+  { id: 'gut',         label: 'Gut',         iconName: 'mood-happy' },
+  { id: 'ok',          label: 'Okay',        iconName: 'mood-neutral' },
+  { id: 'gestresst',   label: 'Gestresst',   iconName: 'mood-stressed' },
+  { id: 'frustriert',  label: 'Frustriert',  iconName: 'mood-stressed' },
+  { id: 'erschöpft',   label: 'Erschöpft',   iconName: 'mood-tired' },
 ];
 
 const SUGGESTIONS = [
@@ -216,7 +217,7 @@ export default function CoachClient({ chats: initialChats, userId, profile }) {
                       className="coach-mood-btn"
                       onClick={() => handleMoodSelect(m.id)}
                     >
-                      <span className="emoji">{m.emoji}</span>
+                      <span className="emoji"><AppIcon name={m.iconName} size={22} stroke={1.6} /></span>
                       <span className="label">{m.label}</span>
                     </button>
                   ))}
