@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useState, useEffect } from 'react';
 import { berechnePersonalisierung } from '@/lib/personalization';
-import Icon from '@/components/ui/Icon';
+import AppIcon from '@/components/ui/Icon';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function getNextWebinar() {
@@ -67,7 +67,7 @@ function MesseAngebotBlock({ fairLead, profile }) {
     <div style={{ marginBottom: 'var(--gap)', borderRadius: 'var(--r-lg)', overflow: 'hidden', border: '1px solid rgba(204,20,38,0.2)' }}>
       <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ color: '#fff', display: 'flex' }}><Icon name="building" size={22} stroke={1.6} /></div>
+          <div style={{ color: '#fff', display: 'flex' }}><AppIcon name="building" size={22} stroke={1.6} /></div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
               {fairName ? `Dein Messe-Angebot nach der ${fairName}` : 'Dein exklusives Messe-Angebot'}
@@ -83,7 +83,7 @@ function MesseAngebotBlock({ fairLead, profile }) {
       </div>
       <div style={{ padding: 20, background: 'var(--surface)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '16px 18px', borderRadius: 'var(--r-md)', background: 'rgba(204,20,38,0.04)', border: '1px solid rgba(204,20,38,0.1)', marginBottom: 14 }}>
-          <div style={{ flexShrink: 0, color: 'var(--ki-red)', display: 'flex' }}><Icon name="gem" size={28} stroke={1.6} /></div>
+          <div style={{ flexShrink: 0, color: 'var(--ki-red)', display: 'flex' }}><AppIcon name="gem" size={28} stroke={1.6} /></div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--label)', marginBottom: 3 }}>
               Premium-Mitgliedschaft — 15 €/Monat
