@@ -4,7 +4,6 @@ import Sidebar from '@/components/layout/Sidebar';
 import MobileNav from '@/components/layout/MobileNav';
 import AnalysePopup from '@/components/layout/AnalysePopup';
 import AppFooter from '@/components/layout/AppFooter';
-import DemoBanner from '@/components/layout/DemoBanner';
 import AppTour from '@/components/ui/AppTour';
 import GlobalSearch from '@/components/ui/GlobalSearch';
 import InstallPrompt from '@/components/ui/InstallPrompt';
@@ -57,7 +56,6 @@ export default async function AppLayout({ children }) {
 
   return (
     <div className="app-shell">
-      <DemoBanner />
       <Sidebar profile={profile} analysisResults={formattedResults} version={buildVersion} env={buildEnv} />
       <main className="app-main">
         {children}

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { setupDemoAction, resetDemoAction, wipeDemoAction } from './actions';
 
-export default function DemoAdminClient({ isSetUp, stats, links, credentials }) {
+export default function DemoAdminClient({ isSetUp, demoEmail, stats, links }) {
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState(null);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -13,7 +13,10 @@ export default function DemoAdminClient({ isSetUp, stats, links, credentials }) 
     startTransition(async () => {
       try {
         const result = await action();
-        setMessage({ type: 'success', text: `${label} erfolgreich. ${result?.leadsCreated ? `${result.leadsCreated} Leads erstellt.` : ''}` });
+        setMessage({
+          type: 'success',
+          text: `${label} erfolgreich.${result?.leadsCreated ? ` ${result.leadsCreated} Leads + ${result.selfChecks || 0} Self-Service-Checks erstellt.` : ''}`,
+        });
         setConfirmReset(false);
       } catch (err) {
         setMessage({ type: 'error', text: `${label} fehlgeschlagen: ${err?.message || err}` });
@@ -32,10 +35,11 @@ export default function DemoAdminClient({ isSetUp, stats, links, credentials }) 
       <div className="admin-pageheader">
         <div>
           <div className="title-kicker"><span className="pulse" /> Admin · Demo-Präsentation</div>
-          <h1 className="page-title">Demo-Account verwalten</h1>
+          <h1 className="page-title">Demo-Daten verwalten</h1>
           <p className="page-sub">
-            Eigener Berater-Account mit fiktiven Leads, vor-gescannten CVs und realistischen Affiliate-Stats —
-            zum Vorführen auf der Bühne. Reset jederzeit per Klick.
+            Die Demo läuft auf deinem Admin-Account <strong>{demoEmail}</strong> — du bekommst einen
+            Berater-Eintrag mit fiktiven Leads, vor-gescannten CVs und realistischen Affiliate-Stats.
+            Nur Demo-Daten (Emails @beispiel.de) werden beim Reset gelöscht — echte Leads bleiben unangetastet.
           </p>
         </div>
       </div>
@@ -70,14 +74,14 @@ export default function DemoAdminClient({ isSetUp, stats, links, credentials }) 
         </div>
         <div className="admin-stat">
           <div className="admin-stat-body">
-            <div className="admin-stat-value">{stats.clicks}</div>
-            <div className="admin-stat-label">Affiliate-Klicks</div>
+            <div className="admin-stat-value">{stats.selfChecks}</div>
+            <div className="admin-stat-label">Self-Service</div>
           </div>
         </div>
         <div className="admin-stat">
           <div className="admin-stat-body">
-            <div className="admin-stat-value">{stats.signups}</div>
-            <div className="admin-stat-label">Sign-ups</div>
+            <div className="admin-stat-value">{stats.clicks}</div>
+            <div className="admin-stat-label">Affiliate-Klicks</div>
           </div>
         </div>
       </div>
@@ -95,7 +99,7 @@ export default function DemoAdminClient({ isSetUp, stats, links, credentials }) 
               onClick={() => run(setupDemoAction, 'Setup')}
               style={{ padding: '12px 24px', fontSize: 15 }}
             >
-              {isPending ? 'Setup läuft...' : 'Demo-Account einrichten'}
+              {isPending ? 'Setup läuft...' : 'Demo-Daten anlegen'}
             </button>
           )}
           {isSetUp && !confirmReset && (
@@ -116,7 +120,7 @@ export default function DemoAdminClient({ isSetUp, stats, links, credentials }) 
                 onClick={() => run(resetDemoAction, 'Reset')}
                 style={{ padding: '12px 24px', fontSize: 15, background: '#CC1426' }}
               >
-                {isPending ? 'Reset läuft...' : 'Ja, alle Demo-Daten neu seeden'}
+                {isPending ? 'Reset läuft...' : 'Ja, Demo-Daten neu seeden'}
               </button>
               <button
                 className="admin-action-btn"
@@ -133,12 +137,17 @@ export default function DemoAdminClient({ isSetUp, stats, links, credentials }) 
               disabled={isPending}
               onClick={() => run(wipeDemoAction, 'Wipe')}
               style={{ marginLeft: 'auto' }}
-              title="Löscht nur die Daten, Account bleibt erhalten"
+              title="Löscht nur die fiktiven Demo-Daten (Emails @beispiel.de)"
             >
-              Nur Daten leeren
+              Demo-Daten löschen
             </button>
           )}
         </div>
+        <p style={{ fontSize: 13, color: '#86868b', marginTop: 12, lineHeight: 1.5 }}>
+          <strong>Hinweis:</strong> Es werden ausschließlich die fiktiven Demo-Personen (Anna Müller,
+          Marcus Berger, Sarah Vogt, Tobias Klein, Christina Walter, Julian Hoffmann, Lena Krause, Robin Schmidt)
+          gelöscht. Echte Leads in deinem Account bleiben unangetastet.
+        </p>
       </section>
 
       {/* Bühnen-URLs */}
@@ -149,21 +158,21 @@ export default function DemoAdminClient({ isSetUp, stats, links, credentials }) 
           </div>
           <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
             <LinkRow
-              label="Auto-Login (für die Bühne)"
-              url={links.magic}
-              hint="Einfach aufrufen → automatisch als Demo-Berater eingeloggt → Berater-Dashboard"
+              label="Berater-Dashboard"
+              url={links.advisor}
+              hint="Du bist als Admin schon eingeloggt — Link öffnet direkt deinen Berater-Bereich mit den Demo-Daten."
               onCopy={copyToClipboard}
             />
             <LinkRow
-              label="Affiliate-Landing (Berater-spezifischer Funnel)"
+              label="Affiliate-Landing (so sieht's der Lead)"
               url={links.landing}
-              hint="So sieht ein Lead die Seite, wenn er über den Berater-Link kommt"
+              hint="So sieht ein Lead die Seite, wenn er über deinen Berater-Link kommt."
               onCopy={copyToClipboard}
             />
             <LinkRow
               label="Affiliate-Redirect (das, was der Berater teilt)"
               url={links.affiliate}
-              hint="Setzt Tracking-Cookie und leitet zur Landing weiter"
+              hint="Setzt Tracking-Cookie und leitet zur Landing weiter."
               onCopy={copyToClipboard}
             />
           </div>
@@ -193,8 +202,7 @@ export default function DemoAdminClient({ isSetUp, stats, links, credentials }) 
               </div>
               <p style={{ fontSize: 13, color: '#86868b', margin: 0 }}>
                 Fiktiver CV mit klarer Struktur, quantifizierten Erfolgen und 8 Jahren Erfahrung.
-                Wurde so getestet, dass die KI eine starke Auswertung liefert. Lade ihn vor der Demo runter,
-                damit du ihn auf der Bühne im Browser hochladen kannst.
+                Wurde so getestet, dass die KI eine starke Auswertung liefert.
               </p>
             </div>
             <a
@@ -205,35 +213,6 @@ export default function DemoAdminClient({ isSetUp, stats, links, credentials }) 
             >
               CV herunterladen
             </a>
-          </div>
-        </section>
-      )}
-
-      {/* Login-Daten zum Verteilen */}
-      {isSetUp && (
-        <section className="admin-hub-section" style={{ marginTop: 32 }}>
-          <div className="admin-hub-secthead">
-            <h3>Login-Daten (zum Verteilen an Mitarbeiter)</h3>
-          </div>
-          <div style={{
-            background: '#FFF9E6',
-            border: '1px solid #FDE68A',
-            borderRadius: 10,
-            padding: 16,
-            marginTop: 12,
-            fontSize: 14,
-            color: '#92400E',
-          }}>
-            <div style={{ marginBottom: 8 }}>
-              <strong>E-Mail:</strong> <code>{credentials.email}</code>
-            </div>
-            <div>
-              <strong>Passwort:</strong> <code>{credentials.password}</code>
-            </div>
-            <p style={{ marginTop: 12, fontSize: 13, marginBottom: 0 }}>
-              Hinweis: Demo-Daten werden geteilt — jeder Mitarbeiter sieht dasselbe Dashboard.
-              Wenn jemand ausprobiert und die Daten verändert, einfach hier oben &bdquo;Demo zurücksetzen&ldquo;.
-            </p>
           </div>
         </section>
       )}

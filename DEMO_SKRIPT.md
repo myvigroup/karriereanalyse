@@ -6,11 +6,15 @@
 
 ## Vor der Präsentation (15 Min Vorlauf)
 
-1. **Demo-Account einrichten** (einmalig — danach nur noch Reset):
-   - Login als Admin: `app.daskarriereinstitut.de/auth/login`
-   - Navigieren: Admin → **Demo-Account** (Kachel unten in „Demo & Präsentation")
-   - Knopf **„Demo-Account einrichten"** drücken → Bestätigung abwarten
-   - Status sollte zeigen: 5 Demo-Leads, 3 CV-Auswertungen, 47 Klicks, 12 Sign-ups
+Die Demo läuft auf deinem Admin-Account **l.jacob@myvi.de** — du bist morgens
+schon eingeloggt. Beim allerersten Mal werden dir Demo-Daten (fiktive Leads)
+zugeordnet; nur diese fiktiven Daten werden bei einem Reset gelöscht.
+
+1. **Demo-Daten einmalig anlegen** (nur beim ersten Mal — danach nur noch Reset):
+   - Eingeloggt als Admin (`l.jacob@myvi.de`)
+   - Navigieren: Admin-Hub → Kachel **„Demo-Account"** (in „Demo & Präsentation")
+   - Knopf **„Demo-Daten anlegen"** drücken → Bestätigung abwarten
+   - Status zeigt: 5 Demo-Leads, 3 CV-Auswertungen, 3 Self-Service, 47 Klicks, 12 Sign-ups
 
 2. **Muster-Lebenslauf herunterladen** (für die Live-Upload-Demo):
    - Auf derselben Seite: Knopf **„CV herunterladen"** → `demo-cv-sarah-berg.pdf` speichern (z.B. auf dem Desktop)
@@ -18,9 +22,9 @@
 3. **Letzter Reset direkt vor der Präsi:**
    - **„Demo zurücksetzen"** → bestätigen → Zähler springen auf saubere Werte
 
-4. **Zweite Browser-Tab vorbereiten:**
+4. **Zwei Browser-Tabs vorbereiten:**
    - Tab 1: `app.daskarriereinstitut.de/admin/demo` (für Notfall-Reset)
-   - Tab 2: `app.daskarriereinstitut.de/demo` (deine Bühne)
+   - Tab 2: `app.daskarriereinstitut.de/advisor` (dein Berater-Dashboard für die Bühne)
 
 ---
 
@@ -30,8 +34,10 @@
 
 > *„Bisher hattet ihr nur das Messe-Tool. Heute zeige ich euch, wohin wir uns entwickelt haben."*
 
-- Auf `/demo` klicken → bist sofort als **Demo Berater** im neuen Portal
-- Oben sieht man dezent das Pille **„DEMO-MODUS"**
+- In Tab 2 navigieren: `app.daskarriereinstitut.de/advisor`
+- Du landest direkt im Berater-Dashboard (du bist als Admin schon eingeloggt)
+- Oben sieht man dezent das Pille **„DEMO-MODUS"** — erscheint automatisch,
+  weil deine Demo-Daten gerade aktiv sind (verschwindet nach „Demo-Daten löschen")
 
 ### Akt 2 — Das neue Berater-Dashboard (2 Min)
 
@@ -144,20 +150,17 @@ Auf dem Berater-Dashboard sind sichtbar:
 
 | Was | URL |
 |---|---|
-| Auto-Login Demo | `app.daskarriereinstitut.de/demo` |
+| Berater-Dashboard (Bühne) | `app.daskarriereinstitut.de/advisor` |
 | Affiliate-Landing (so sieht's der Lead) | `app.daskarriereinstitut.de/start/demo` |
 | Affiliate-Redirect (das teilt der Berater) | `app.daskarriereinstitut.de/r/demo` |
-| Admin-Reset | `app.daskarriereinstitut.de/admin/demo` |
+| Admin-Reset (für dich) | `app.daskarriereinstitut.de/admin/demo` |
 
-## Login-Daten zum Verteilen
+## Für Mitarbeiter zum Ausprobieren
 
-- **E-Mail:** demo@daskarriereinstitut.de
-- **Passwort:** siehe Admin → Demo-Account → „Login-Daten zum Verteilen"
-  (Das Passwort liegt aus Sicherheitsgründen nur in der Vercel Environment Variable
-  `DEMO_PASSWORD` — wer das ändern will, ändert es dort.)
-
-Mitarbeiter können sich damit nach der Präsi selbst einloggen und alles in Ruhe ausprobieren.
-Daten werden geteilt — falls jemand was kaputt macht, jederzeit über Admin-Page resetten.
+Mitarbeiter brauchen einen eigenen Account zum Ausprobieren — bitte regulär
+über Berater-Anlegen im Admin-Bereich erstellen (`/admin/advisors → + Berater`).
+Sie sehen dann ihren eigenen Berater-Bereich (ohne Demo-Daten — die liegen ja
+in deinem Account) und können den Flow selbst nachvollziehen.
 
 ---
 
@@ -171,10 +174,10 @@ Direkt nach dem Deploy einmal durchklicken, damit morgen nichts überrascht:
 - [ ] „CV herunterladen" — PDF lädt sich (4 KB, Sarah Berg)
 - [ ] Auto-Login-Link kopieren
 
-**2. Bühnen-Login simulieren (3 Min)**
-- [ ] In neuem **Inkognito-Fenster** den `/demo`-Link öffnen
-- [ ] → landet direkt im Berater-Dashboard, oben rote **„DEMO-MODUS"** Pill sichtbar
-- [ ] Sidebar zeigt: Mitglieder-Sektion + Berater-Sektion + Admin-Sektion (Demo ist nur Berater, also keine Admin-Sektion)
+**2. Bühnen-Sicht prüfen (3 Min)**
+- [ ] Eingeloggt als `l.jacob@myvi.de` → `/advisor` aufrufen
+- [ ] → Berater-Dashboard öffnet sich, oben rote **„DEMO-MODUS"** Pill sichtbar
+- [ ] Sidebar zeigt: Mitglieder-Sektion + Berater-Sektion + Admin-Sektion (du hast alle)
 
 **3. CV-Checks-Übersicht (3 Min)**
 - [ ] Sidebar → **„CV-Checks"** klicken (war vorher „Alle Leads")
@@ -199,9 +202,10 @@ Direkt nach dem Deploy einmal durchklicken, damit morgen nichts überrascht:
 
 ## Morgen früh — 5 Minuten vor Beginn
 
+- [ ] Eingeloggt sein als `l.jacob@myvi.de`
 - [ ] `/admin/demo` → **„Demo zurücksetzen"** drücken (frische Daten)
-- [ ] Zwei Tabs offen halten: `/demo` (Bühne) und `/admin/demo` (Notfall-Reset)
+- [ ] Zwei Tabs offen halten: `/advisor` (Bühne) und `/admin/demo` (Notfall-Reset)
 - [ ] Muster-CV `demo-cv-sarah-berg.pdf` auf dem Desktop bereitlegen
-- [ ] Login-Folie für Mitarbeiter zeigen mit:
-  - URL: `app.daskarriereinstitut.de/demo`
-  - Oder: `app.daskarriereinstitut.de/auth/login` mit Login-Daten aus Admin-Page
+- [ ] **Nach der Präsi:** wenn du den DEMO-MODUS-Banner los werden willst,
+      einfach im Admin-Demo-Panel auf **„Demo-Daten löschen"** klicken — Banner
+      verschwindet automatisch, dein Account ist wieder im Admin-Normalbetrieb

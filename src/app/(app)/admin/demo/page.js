@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
-import { DEMO_EMAIL, DEMO_PASSWORD, DEMO_SLUG } from '@/lib/demo';
+import { DEMO_EMAIL, DEMO_SLUG } from '@/lib/demo';
 import DemoAdminClient from './DemoAdminClient';
 
 export default async function AdminDemoPage() {
@@ -24,11 +24,13 @@ export default async function AdminDemoPage() {
 
   let leadCount = 0;
   let cvCount = 0;
+  let selfCount = 0;
   if (advisor) {
     const { count: leads } = await admin
       .from('fair_leads')
       .select('id', { count: 'exact', head: true })
-      .eq('advisor_id', advisor.id);
+      .eq('advisor_id', advisor.id)
+      .like('email', '%@beispiel.de');
     leadCount = leads || 0;
 
     const { count: cvs } = await admin
@@ -36,6 +38,12 @@ export default async function AdminDemoPage() {
       .select('id', { count: 'exact', head: true })
       .eq('advisor_id', advisor.id);
     cvCount = cvs || 0;
+
+    const { count: selfs } = await admin
+      .from('self_service_checks')
+      .select('id', { count: 'exact', head: true })
+      .like('email', '%@beispiel.de');
+    selfCount = selfs || 0;
   }
 
   const headersList = headers();
@@ -46,13 +54,19 @@ export default async function AdminDemoPage() {
   return (
     <DemoAdminClient
       isSetUp={!!advisor}
-      stats={{ leads: leadCount, cvs: cvCount, signups: advisor?.affiliate_signups || 0, clicks: advisor?.affiliate_clicks || 0 }}
-      links={{
-        magic: `${baseUrl}/demo`,
-        affiliate: `${baseUrl}/r/${DEMO_SLUG}`,
-        landing: `${baseUrl}/start/${DEMO_SLUG}`,
+      demoEmail={DEMO_EMAIL}
+      stats={{
+        leads: leadCount,
+        cvs: cvCount,
+        selfChecks: selfCount,
+        signups: advisor?.affiliate_signups || 0,
+        clicks: advisor?.affiliate_clicks || 0,
       }}
-      credentials={{ email: DEMO_EMAIL, password: DEMO_PASSWORD }}
+      links={{
+        advisor:   `${baseUrl}/advisor`,
+        affiliate: `${baseUrl}/r/${DEMO_SLUG}`,
+        landing:   `${baseUrl}/start/${DEMO_SLUG}`,
+      }}
     />
   );
 }
