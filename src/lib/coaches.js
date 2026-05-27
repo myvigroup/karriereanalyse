@@ -222,7 +222,59 @@ export function getActiveCoaches() {
   return COACHES.filter(c => c.seminarIds.length > 0 || c.masterclassIds.length > 0);
 }
 
-// Alle einzigartigen Schwerpunkt-Tags über alle aktiven Coaches — für die Filter-Pillen.
+// Konsolidierte Schwerpunkt-Gruppen für die Filter-Pillen (sonst werden's 20+).
+// Jede Gruppe enthält die spezifischen Specialty-Tags, die unter sie fallen.
+export const SPECIALTY_GROUPS = [
+  {
+    key: 'strategie',
+    label: 'Karriere-Strategie',
+    tags: ['Karriere-Strategie', 'Karriereplanung', 'Mid-Career-Wechsel', 'Mid-Life-Wechsel', 'Quereinstieg', 'Karriere-Einstieg'],
+  },
+  {
+    key: 'fuehrung',
+    label: 'Führung',
+    tags: ['Führungskräfte-Coaching', 'Personal Leadership', 'C-Level-Coaching', 'Senior-Coaching', 'Female Leadership'],
+  },
+  {
+    key: 'bewerbung',
+    label: 'Bewerbung',
+    tags: ['Bewerbungsstrategie', 'Vorstellungsgespräche'],
+  },
+  {
+    key: 'kommunikation',
+    label: 'Kommunikation',
+    tags: ['Rhetorik & Dialektik', 'Typgerechtes Lernen', 'Personal Branding'],
+  },
+  {
+    key: 'persoenlichkeit',
+    label: 'Persönlichkeit',
+    tags: ['Persönlichkeitsentwicklung', 'Personal Development', 'Achtsamkeit', 'Work-Life-Balance'],
+  },
+  {
+    key: 'gehalt',
+    label: 'Gehalt & Gründung',
+    tags: ['Gehaltsverhandlung', 'Unternehmensgründung'],
+  },
+];
+
+// Liefert die Filter-Gruppen, die mindestens 1 aktiven Coach haben.
+export function getActiveSpecialtyGroups() {
+  const active = getActiveCoaches();
+  return SPECIALTY_GROUPS.filter(g =>
+    active.some(c => c.specialties.some(s => g.tags.includes(s)))
+  );
+}
+
+// Filter Coaches nach Gruppen-Key (z.B. 'fuehrung').
+export function getCoachesByGroup(groupKey) {
+  const group = SPECIALTY_GROUPS.find(g => g.key === groupKey);
+  if (!group) return getActiveCoaches();
+  return getActiveCoaches().filter(c =>
+    c.specialties.some(s => group.tags.includes(s))
+  );
+}
+
+// Backward-compatibility (falls noch irgendwo verwendet)
 export function getAllSpecialties() {
   const set = new Set();
   getActiveCoaches().forEach(c => c.specialties.forEach(s => set.add(s)));

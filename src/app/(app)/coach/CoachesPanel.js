@@ -1,6 +1,6 @@
 'use client';
 import { useState, useMemo, useEffect } from 'react';
-import { getActiveCoaches, getAllSpecialties } from '@/lib/coaches';
+import { getActiveCoaches, getActiveSpecialtyGroups, getCoachesByGroup } from '@/lib/coaches';
 
 const SEMINAR_TITLES = {
   'sem-typgerecht': 'Typgerechtes Lernen',
@@ -17,14 +17,21 @@ const SEMINAR_TITLES = {
 
 export default function CoachesPanel() {
   const allCoaches = useMemo(() => getActiveCoaches(), []);
-  const allSpecialties = useMemo(() => getAllSpecialties(), []);
+  const filterGroups = useMemo(() => getActiveSpecialtyGroups(), []);
   const [filter, setFilter] = useState('alle');
   const [openCoach, setOpenCoach] = useState(null);
 
   const filteredCoaches = useMemo(() => {
     if (filter === 'alle') return allCoaches;
-    return allCoaches.filter(c => c.specialties.includes(filter));
+    return getCoachesByGroup(filter);
   }, [allCoaches, filter]);
+
+  // Wenn der aktive Filter durch Gruppen-Änderung ungültig wird, zurück auf 'alle'
+  useEffect(() => {
+    if (filter !== 'alle' && !filterGroups.some(g => g.key === filter)) {
+      setFilter('alle');
+    }
+  }, [filter, filterGroups]);
 
   // ESC schließt Modal + Scroll-Lock
   useEffect(() => {
@@ -41,7 +48,7 @@ export default function CoachesPanel() {
 
   return (
     <div className="coaches-v3">
-      {/* Filter-Sektion */}
+      {/* Filter-Sektion — konsolidierte Hauptkategorien */}
       <div className="coaches-filterhead">
         <div className="coaches-filterhead-title">Wonach suchst du?</div>
         <div className="coaches-pills">
@@ -52,14 +59,14 @@ export default function CoachesPanel() {
           >
             Alle
           </button>
-          {allSpecialties.map(s => (
+          {filterGroups.map(g => (
             <button
-              key={s}
-              className={`coaches-pill ${filter === s ? 'on' : ''}`}
-              onClick={() => setFilter(s)}
+              key={g.key}
+              className={`coaches-pill ${filter === g.key ? 'on' : ''}`}
+              onClick={() => setFilter(g.key)}
               type="button"
             >
-              {s}
+              {g.label}
             </button>
           ))}
         </div>
