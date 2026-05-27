@@ -85,60 +85,67 @@ export default async function AdvisorDashboard() {
 
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '–';
 
+  const firstName = advisor?.display_name?.split(' ')[0] || profile?.name?.split(' ')[0] || '';
   return (
-    <div>
-      <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
-        Guten Tag{advisor?.display_name ? `, ${advisor.display_name.split(' ')[0]}` : (profile?.name ? `, ${profile.name.split(' ')[0]}` : '')}
-      </h1>
-      <p style={{ color: '#86868b', marginBottom: 16 }}>
-        Dein Berater-Dashboard
-      </p>
-
-      {/* Schnellaktionen */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 32, flexWrap: 'wrap' }}>
-        <Link href="/advisor/quick-lead" style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          padding: '10px 18px', background: '#CC1426', color: '#fff',
-          borderRadius: 980, textDecoration: 'none', fontSize: 13.5, fontWeight: 600,
-          boxShadow: '0 1px 2px rgba(204,20,38,0.25)',
-        }}>
-          + Neuer CV-Check (Ad-hoc)
-        </Link>
-        <Link href="/advisor/leads" style={{
-          display: 'inline-flex', alignItems: 'center',
-          padding: '10px 18px', background: '#fff', color: '#1A1A1A',
-          borderRadius: 980, textDecoration: 'none', fontSize: 13.5, fontWeight: 600,
-          border: '0.5px solid #E8E6E1',
-        }}>
-          Alle Leads ansehen
+    <div className="admin-coaches">
+      <div className="admin-pageheader">
+        <div>
+          <div className="title-kicker"><span className="pulse" /> Berater · Messe-Dashboard</div>
+          <h1 className="page-title">
+            Guten Tag{firstName ? `, ${firstName}` : ''}.{' '}
+            <span className="faded">Hier siehst du alles auf einen Blick.</span>
+          </h1>
+          <p className="page-sub">
+            Ad-hoc CV-Checks anlegen, Messe-Termine verwalten und Leads abarbeiten — alles in einem Portal.
+          </p>
+        </div>
+        <Link href="/advisor/quick-lead" className="admin-cta-primary">
+          + Neuer CV-Check
         </Link>
       </div>
 
-      {/* Kennzahlen */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40 }}>
-        {[
-          { label: 'Gespräche heute', value: todayLeads.length, color: '#CC1426' },
-          { label: 'Offene CV-Checks', value: openChecks, color: '#D97706' },
-          { label: 'Gespräche gesamt', value: totalLeads, color: '#059669' },
-        ].map((stat, i) => (
-          <div key={i} style={{
-            background: '#fff',
-            borderRadius: 16,
-            padding: '20px 24px',
-            border: '1px solid #E8E6E1',
-          }}>
-            <div style={{ fontSize: 36, fontWeight: 700, color: stat.color, marginBottom: 4 }}>
-              {stat.value}
-            </div>
-            <div style={{ fontSize: 13, color: '#86868b' }}>{stat.label}</div>
+      {/* Stats-Reihe im Apple-Style */}
+      <div className="admin-stats-row">
+        <div className="admin-stat highlight">
+          <div className="admin-stat-icon" style={{ color: 'var(--ki-red)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
-        ))}
+          <div className="admin-stat-body">
+            <div className="admin-stat-value">{todayLeads.length}</div>
+            <div className="admin-stat-label">Gespräche heute</div>
+          </div>
+        </div>
+        <div className="admin-stat">
+          <div className="admin-stat-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div className="admin-stat-body">
+            <div className="admin-stat-value">{openChecks}</div>
+            <div className="admin-stat-label">Offene CV-Checks</div>
+          </div>
+        </div>
+        <div className="admin-stat">
+          <div className="admin-stat-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div className="admin-stat-body">
+            <div className="admin-stat-value">{totalLeads}</div>
+            <div className="admin-stat-label">Gespräche gesamt</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-toolbar" style={{ marginTop: 24 }}>
+        <Link href="/advisor/leads" className="admin-action-btn">Alle Leads</Link>
+        <Link href="/advisor/quick-lead" className="admin-action-btn">Quick-Leads</Link>
       </div>
 
       {/* Aktive Messen */}
-      <h2 style={{ fontSize: 17, fontWeight: 600, color: '#1A1A1A', marginBottom: 16 }}>
-        {isAdmin ? 'Alle Messen' : 'Meine Messen'}
-      </h2>
+      <div className="admin-hub-section">
+        <div className="admin-hub-secthead">
+          <h3>{isAdmin ? 'Alle Messen' : 'Meine Messen'} · {activeFairs.length}</h3>
+        </div>
+      </div>
 
       {activeFairs.length === 0 ? (
         <div style={{

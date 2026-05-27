@@ -177,16 +177,17 @@ export default async function LeadsPage({ searchParams }) {
   };
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 4 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
-          Lebenslauf-Checks
-        </h1>
+    <div className="admin-coaches">
+      <div className="admin-pageheader">
+        <div>
+          <div className="title-kicker"><span className="pulse" /> Berater · Alle Leads</div>
+          <h1 className="page-title">Lebenslauf-Checks <span className="faded">{leads.length}</span></h1>
+          <p className="page-sub">
+            Alle Gespräche und CV-Checks im Überblick — Filter, Status, Coach-Termin.
+          </p>
+        </div>
         {isSuperAdmin && <RetriggerButton />}
       </div>
-      <p style={{ color: '#86868b', marginBottom: duplicateCount > 0 ? 8 : 32 }}>
-        Alle Gespräche und CV-Checks im Überblick.
-      </p>
       {duplicateCount > 0 && (
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
