@@ -11,7 +11,7 @@ export default function BrandLogo({ variant = 'default', className = '', style =
   const h = heights[variant] || heights.default;
   return (
     <img
-      src="/logo-karriereinstitut.svg"
+      src="/logo-karriereinstitut.png"
       alt="Karriere-Institut"
       style={{ height: h, width: 'auto', display: 'block', ...style }}
       className={className}
