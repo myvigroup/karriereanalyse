@@ -48,7 +48,7 @@ export const GEHALTSDATEN = {
   berufe: [
     // ═══ IT & TECH ═══
     {
-      titel: 'Software-Entwickler/in',
+      titel: 'Software-Entwickler',
       berufsgruppe: 'IT & Technologie',
       gehalt: { '0-2': { p25: 3400, median: 4000, p75: 4700 }, '3-5': { p25: 4200, median: 4900, p75: 5800 }, '6-10': { p25: 5000, median: 5700, p75: 6800 }, '10+': { p25: 5500, median: 6400, p75: 7800 } },
     },
@@ -58,17 +58,17 @@ export const GEHALTSDATEN = {
       gehalt: { '0-2': { p25: 3600, median: 4200, p75: 5000 }, '3-5': { p25: 4500, median: 5300, p75: 6200 }, '6-10': { p25: 5200, median: 6100, p75: 7200 }, '10+': { p25: 5800, median: 6800, p75: 8200 } },
     },
     {
-      titel: 'IT-Systemadministrator/in',
+      titel: 'IT-Systemadministrator',
       berufsgruppe: 'IT & Technologie',
       gehalt: { '0-2': { p25: 2800, median: 3300, p75: 3900 }, '3-5': { p25: 3300, median: 3900, p75: 4600 }, '6-10': { p25: 3800, median: 4400, p75: 5200 }, '10+': { p25: 4100, median: 4900, p75: 5800 } },
     },
     {
-      titel: 'IT-Projektmanager/in',
+      titel: 'IT-Projektmanager',
       berufsgruppe: 'IT & Technologie',
       gehalt: { '0-2': { p25: 3500, median: 4100, p75: 4800 }, '3-5': { p25: 4300, median: 5100, p75: 6000 }, '6-10': { p25: 5100, median: 5900, p75: 7000 }, '10+': { p25: 5600, median: 6500, p75: 7800 } },
     },
     {
-      titel: 'UX/UI Designer/in',
+      titel: 'UX/UI Designer',
       berufsgruppe: 'IT & Technologie',
       gehalt: { '0-2': { p25: 2900, median: 3400, p75: 4000 }, '3-5': { p25: 3500, median: 4200, p75: 5000 }, '6-10': { p25: 4100, median: 4900, p75: 5800 }, '10+': { p25: 4500, median: 5400, p75: 6400 } },
     },
@@ -80,34 +80,34 @@ export const GEHALTSDATEN = {
 
     // ═══ INGENIEURWESEN ═══
     {
-      titel: 'Maschinenbauingenieur/in',
+      titel: 'Maschinenbauingenieur',
       berufsgruppe: 'Ingenieurwesen',
       gehalt: { '0-2': { p25: 3500, median: 4100, p75: 4700 }, '3-5': { p25: 4200, median: 4900, p75: 5700 }, '6-10': { p25: 4900, median: 5600, p75: 6600 }, '10+': { p25: 5400, median: 6300, p75: 7500 } },
     },
     {
-      titel: 'Elektroingenieur/in',
+      titel: 'Elektroingenieur',
       berufsgruppe: 'Ingenieurwesen',
       gehalt: { '0-2': { p25: 3600, median: 4200, p75: 4800 }, '3-5': { p25: 4300, median: 5000, p75: 5800 }, '6-10': { p25: 5000, median: 5800, p75: 6800 }, '10+': { p25: 5500, median: 6400, p75: 7600 } },
     },
     {
-      titel: 'Bauingenieur/in',
+      titel: 'Bauingenieur',
       berufsgruppe: 'Ingenieurwesen',
       gehalt: { '0-2': { p25: 3200, median: 3800, p75: 4400 }, '3-5': { p25: 3900, median: 4500, p75: 5300 }, '6-10': { p25: 4500, median: 5200, p75: 6200 }, '10+': { p25: 5000, median: 5800, p75: 7000 } },
     },
     {
-      titel: 'Wirtschaftsingenieur/in',
+      titel: 'Wirtschaftsingenieur',
       berufsgruppe: 'Ingenieurwesen',
       gehalt: { '0-2': { p25: 3600, median: 4200, p75: 4900 }, '3-5': { p25: 4400, median: 5200, p75: 6100 }, '6-10': { p25: 5200, median: 6000, p75: 7100 }, '10+': { p25: 5700, median: 6700, p75: 8000 } },
     },
 
     // ═══ WIRTSCHAFT & FINANCE ═══
     {
-      titel: 'Controller/in',
+      titel: 'Controller',
       berufsgruppe: 'Wirtschaft & Finance',
       gehalt: { '0-2': { p25: 3200, median: 3800, p75: 4400 }, '3-5': { p25: 4000, median: 4700, p75: 5500 }, '6-10': { p25: 4700, median: 5500, p75: 6500 }, '10+': { p25: 5200, median: 6200, p75: 7500 } },
     },
     {
-      titel: 'Wirtschaftsprüfer/in',
+      titel: 'Wirtschaftsprüfer',
       berufsgruppe: 'Wirtschaft & Finance',
       gehalt: { '0-2': { p25: 3500, median: 4200, p75: 5000 }, '3-5': { p25: 4500, median: 5500, p75: 6500 }, '6-10': { p25: 5500, median: 6800, p75: 8200 }, '10+': { p25: 6500, median: 8000, p75: 10000 } },
     },
@@ -117,7 +117,7 @@ export const GEHALTSDATEN = {
       gehalt: { '0-2': { p25: 2600, median: 3100, p75: 3600 }, '3-5': { p25: 3100, median: 3700, p75: 4300 }, '6-10': { p25: 3600, median: 4300, p75: 5100 }, '10+': { p25: 4000, median: 4800, p75: 5700 } },
     },
     {
-      titel: 'Steuerberater/in',
+      titel: 'Steuerberater',
       berufsgruppe: 'Wirtschaft & Finance',
       gehalt: { '0-2': { p25: 3200, median: 3800, p75: 4500 }, '3-5': { p25: 4000, median: 4800, p75: 5700 }, '6-10': { p25: 4800, median: 5800, p75: 7000 }, '10+': { p25: 5500, median: 6800, p75: 8500 } },
     },
@@ -127,60 +127,60 @@ export const GEHALTSDATEN = {
       gehalt: { '0-2': { p25: 2500, median: 3000, p75: 3500 }, '3-5': { p25: 3000, median: 3600, p75: 4200 }, '6-10': { p25: 3500, median: 4200, p75: 5000 }, '10+': { p25: 3900, median: 4700, p75: 5600 } },
     },
     {
-      titel: 'Buchhalter/in',
+      titel: 'Buchhalter',
       berufsgruppe: 'Wirtschaft & Finance',
       gehalt: { '0-2': { p25: 2400, median: 2800, p75: 3300 }, '3-5': { p25: 2800, median: 3300, p75: 3900 }, '6-10': { p25: 3200, median: 3800, p75: 4400 }, '10+': { p25: 3500, median: 4200, p75: 5000 } },
     },
 
     // ═══ MANAGEMENT & BERATUNG ═══
     {
-      titel: 'Projektmanager/in',
+      titel: 'Projektmanager',
       berufsgruppe: 'Management',
       gehalt: { '0-2': { p25: 3000, median: 3500, p75: 4100 }, '3-5': { p25: 3700, median: 4400, p75: 5200 }, '6-10': { p25: 4400, median: 5200, p75: 6200 }, '10+': { p25: 5000, median: 5900, p75: 7200 } },
     },
     {
-      titel: 'Unternehmensberater/in',
+      titel: 'Unternehmensberater',
       berufsgruppe: 'Management',
       gehalt: { '0-2': { p25: 3500, median: 4200, p75: 5000 }, '3-5': { p25: 4500, median: 5500, p75: 6500 }, '6-10': { p25: 5500, median: 6800, p75: 8500 }, '10+': { p25: 6500, median: 8200, p75: 11000 } },
     },
     {
-      titel: 'Produktmanager/in',
+      titel: 'Produktmanager',
       berufsgruppe: 'Management',
       gehalt: { '0-2': { p25: 3200, median: 3800, p75: 4400 }, '3-5': { p25: 4000, median: 4700, p75: 5500 }, '6-10': { p25: 4700, median: 5600, p75: 6700 }, '10+': { p25: 5300, median: 6300, p75: 7600 } },
     },
 
     // ═══ MARKETING & VERTRIEB ═══
     {
-      titel: 'Marketing-Manager/in',
+      titel: 'Marketing-Manager',
       berufsgruppe: 'Marketing & Vertrieb',
       gehalt: { '0-2': { p25: 2700, median: 3200, p75: 3800 }, '3-5': { p25: 3400, median: 4000, p75: 4800 }, '6-10': { p25: 4000, median: 4800, p75: 5800 }, '10+': { p25: 4500, median: 5500, p75: 6800 } },
     },
     {
-      titel: 'Vertriebsleiter/in',
+      titel: 'Vertriebsleiter',
       berufsgruppe: 'Marketing & Vertrieb',
       gehalt: { '0-2': { p25: 3000, median: 3600, p75: 4300 }, '3-5': { p25: 3800, median: 4600, p75: 5500 }, '6-10': { p25: 4600, median: 5600, p75: 6800 }, '10+': { p25: 5200, median: 6500, p75: 8000 } },
     },
     {
-      titel: 'Online-Marketing-Manager/in',
+      titel: 'Online-Marketing-Manager',
       berufsgruppe: 'Marketing & Vertrieb',
       gehalt: { '0-2': { p25: 2500, median: 3000, p75: 3500 }, '3-5': { p25: 3100, median: 3700, p75: 4400 }, '6-10': { p25: 3700, median: 4400, p75: 5300 }, '10+': { p25: 4100, median: 5000, p75: 6000 } },
     },
 
     // ═══ PERSONAL (HR) ═══
     {
-      titel: 'HR-Manager/in',
+      titel: 'HR-Manager',
       berufsgruppe: 'Personal',
       gehalt: { '0-2': { p25: 2800, median: 3300, p75: 3900 }, '3-5': { p25: 3500, median: 4200, p75: 5000 }, '6-10': { p25: 4200, median: 5000, p75: 6000 }, '10+': { p25: 4800, median: 5700, p75: 7000 } },
     },
     {
-      titel: 'Personalreferent/in',
+      titel: 'Personalreferent',
       berufsgruppe: 'Personal',
       gehalt: { '0-2': { p25: 2500, median: 3000, p75: 3500 }, '3-5': { p25: 3000, median: 3600, p75: 4200 }, '6-10': { p25: 3500, median: 4200, p75: 5000 }, '10+': { p25: 3900, median: 4700, p75: 5600 } },
     },
 
     // ═══ RECHT ═══
     {
-      titel: 'Jurist/in (Volljurist)',
+      titel: 'Jurist (Volljurist)',
       berufsgruppe: 'Recht',
       gehalt: { '0-2': { p25: 3800, median: 4500, p75: 5500 }, '3-5': { p25: 4800, median: 5700, p75: 7000 }, '6-10': { p25: 5700, median: 7000, p75: 8500 }, '10+': { p25: 6500, median: 8200, p75: 10500 } },
     },
@@ -197,7 +197,7 @@ export const GEHALTSDATEN = {
       gehalt: { '0-2': { p25: 4200, median: 4800, p75: 5200 }, '3-5': { p25: 5000, median: 5600, p75: 6200 }, '6-10': { p25: 5800, median: 6500, p75: 7500 }, '10+': { p25: 6500, median: 7800, p75: 9500 } },
     },
     {
-      titel: 'Krankenpfleger/in',
+      titel: 'Krankenpfleger',
       berufsgruppe: 'Gesundheit',
       gehalt: { '0-2': { p25: 2600, median: 3000, p75: 3400 }, '3-5': { p25: 2900, median: 3300, p75: 3700 }, '6-10': { p25: 3200, median: 3600, p75: 4100 }, '10+': { p25: 3400, median: 3900, p75: 4400 } },
     },
@@ -207,31 +207,31 @@ export const GEHALTSDATEN = {
       gehalt: { '0-2': { p25: 3500, median: 4200, p75: 5000 }, '3-5': { p25: 4500, median: 5500, p75: 6500 }, '6-10': { p25: 5500, median: 6800, p75: 8500 }, '10+': { p25: 6500, median: 8500, p75: 12000 } },
     },
     {
-      titel: 'Pharmareferent/in',
+      titel: 'Pharmareferent',
       berufsgruppe: 'Gesundheit',
       gehalt: { '0-2': { p25: 3000, median: 3500, p75: 4100 }, '3-5': { p25: 3600, median: 4300, p75: 5100 }, '6-10': { p25: 4200, median: 5000, p75: 5900 }, '10+': { p25: 4600, median: 5500, p75: 6600 } },
     },
 
     // ═══ BILDUNG ═══
     {
-      titel: 'Lehrer/in (verbeamtet)',
+      titel: 'Lehrer (verbeamtet)',
       berufsgruppe: 'Bildung',
       gehalt: { '0-2': { p25: 3500, median: 3900, p75: 4200 }, '3-5': { p25: 3900, median: 4300, p75: 4600 }, '6-10': { p25: 4200, median: 4700, p75: 5100 }, '10+': { p25: 4600, median: 5200, p75: 5700 } },
     },
 
     // ═══ HANDWERK & PRODUKTION ═══
     {
-      titel: 'Elektriker/in',
+      titel: 'Elektriker',
       berufsgruppe: 'Handwerk',
       gehalt: { '0-2': { p25: 2300, median: 2700, p75: 3100 }, '3-5': { p25: 2700, median: 3100, p75: 3600 }, '6-10': { p25: 3000, median: 3500, p75: 4000 }, '10+': { p25: 3300, median: 3800, p75: 4400 } },
     },
     {
-      titel: 'Mechatroniker/in',
+      titel: 'Mechatroniker',
       berufsgruppe: 'Handwerk',
       gehalt: { '0-2': { p25: 2400, median: 2800, p75: 3300 }, '3-5': { p25: 2800, median: 3300, p75: 3800 }, '6-10': { p25: 3200, median: 3700, p75: 4300 }, '10+': { p25: 3500, median: 4100, p75: 4700 } },
     },
     {
-      titel: 'Industriemechaniker/in',
+      titel: 'Industriemechaniker',
       berufsgruppe: 'Handwerk',
       gehalt: { '0-2': { p25: 2500, median: 2900, p75: 3400 }, '3-5': { p25: 2900, median: 3400, p75: 3900 }, '6-10': { p25: 3300, median: 3800, p75: 4400 }, '10+': { p25: 3600, median: 4200, p75: 4800 } },
     },
@@ -248,38 +248,38 @@ export const GEHALTSDATEN = {
       gehalt: { '0-2': { p25: 2400, median: 2800, p75: 3300 }, '3-5': { p25: 2900, median: 3400, p75: 4000 }, '6-10': { p25: 3300, median: 3900, p75: 4600 }, '10+': { p25: 3700, median: 4300, p75: 5100 } },
     },
     {
-      titel: 'Einkäufer/in',
+      titel: 'Einkäufer',
       berufsgruppe: 'Kaufmännisch',
       gehalt: { '0-2': { p25: 2700, median: 3200, p75: 3700 }, '3-5': { p25: 3300, median: 3900, p75: 4600 }, '6-10': { p25: 3900, median: 4600, p75: 5500 }, '10+': { p25: 4300, median: 5100, p75: 6200 } },
     },
 
     // ═══ LOGISTIK ═══
     {
-      titel: 'Logistiker/in',
+      titel: 'Logistiker',
       berufsgruppe: 'Logistik',
       gehalt: { '0-2': { p25: 2300, median: 2700, p75: 3200 }, '3-5': { p25: 2700, median: 3200, p75: 3800 }, '6-10': { p25: 3100, median: 3700, p75: 4300 }, '10+': { p25: 3400, median: 4100, p75: 4800 } },
     },
     {
-      titel: 'Supply Chain Manager/in',
+      titel: 'Supply Chain Manager',
       berufsgruppe: 'Logistik',
       gehalt: { '0-2': { p25: 3000, median: 3600, p75: 4200 }, '3-5': { p25: 3700, median: 4400, p75: 5200 }, '6-10': { p25: 4400, median: 5200, p75: 6200 }, '10+': { p25: 5000, median: 5900, p75: 7100 } },
     },
 
     // ═══ ARCHITEKTUR ═══
     {
-      titel: 'Architekt/in',
+      titel: 'Architekt',
       berufsgruppe: 'Architektur',
       gehalt: { '0-2': { p25: 2800, median: 3300, p75: 3800 }, '3-5': { p25: 3300, median: 3900, p75: 4600 }, '6-10': { p25: 3900, median: 4600, p75: 5500 }, '10+': { p25: 4400, median: 5200, p75: 6400 } },
     },
     {
-      titel: 'Immobilienmakler/in',
+      titel: 'Immobilienmakler',
       berufsgruppe: 'Architektur',
       gehalt: { '0-2': { p25: 2200, median: 2700, p75: 3400 }, '3-5': { p25: 2800, median: 3500, p75: 4500 }, '6-10': { p25: 3400, median: 4300, p75: 5500 }, '10+': { p25: 3800, median: 5000, p75: 6500 } },
     },
 
     // ═══ NATURWISSENSCHAFT ═══
     {
-      titel: 'Chemiker/in',
+      titel: 'Chemiker',
       berufsgruppe: 'Naturwissenschaft',
       gehalt: { '0-2': { p25: 3300, median: 3900, p75: 4500 }, '3-5': { p25: 4000, median: 4700, p75: 5500 }, '6-10': { p25: 4700, median: 5500, p75: 6500 }, '10+': { p25: 5200, median: 6200, p75: 7500 } },
     },
@@ -303,24 +303,24 @@ export const GEHALTSDATEN = {
 
     // ═══ MEDIEN & DESIGN ═══
     {
-      titel: 'Grafik-Designer/in',
+      titel: 'Grafik-Designer',
       berufsgruppe: 'Medien & Design',
       gehalt: { '0-2': { p25: 2200, median: 2600, p75: 3100 }, '3-5': { p25: 2700, median: 3200, p75: 3800 }, '6-10': { p25: 3100, median: 3700, p75: 4400 }, '10+': { p25: 3400, median: 4100, p75: 4900 } },
     },
     {
-      titel: 'Journalist/in',
+      titel: 'Journalist',
       berufsgruppe: 'Medien & Design',
       gehalt: { '0-2': { p25: 2300, median: 2800, p75: 3300 }, '3-5': { p25: 2800, median: 3400, p75: 4000 }, '6-10': { p25: 3300, median: 4000, p75: 4800 }, '10+': { p25: 3700, median: 4500, p75: 5500 } },
     },
 
     // ═══ SOZIALES ═══
     {
-      titel: 'Sozialarbeiter/in',
+      titel: 'Sozialarbeiter',
       berufsgruppe: 'Soziales',
       gehalt: { '0-2': { p25: 2400, median: 2800, p75: 3200 }, '3-5': { p25: 2800, median: 3200, p75: 3700 }, '6-10': { p25: 3100, median: 3600, p75: 4100 }, '10+': { p25: 3400, median: 3900, p75: 4500 } },
     },
     {
-      titel: 'Erzieher/in',
+      titel: 'Erzieher',
       berufsgruppe: 'Soziales',
       gehalt: { '0-2': { p25: 2400, median: 2800, p75: 3100 }, '3-5': { p25: 2700, median: 3100, p75: 3500 }, '6-10': { p25: 3000, median: 3400, p75: 3800 }, '10+': { p25: 3200, median: 3700, p75: 4100 } },
     },

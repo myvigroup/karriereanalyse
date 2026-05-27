@@ -24,10 +24,11 @@ const NAV_GROUPS = [
   },
 ];
 
-// Berater-spezifische Items (Messen, Quick-Lead, Leads-Liste)
+// Berater-spezifische Items (Messen, Quick-Lead, Leads-Liste, Affiliate)
 const ADVISOR_ITEMS = [
   { label: 'Messe-Dashboard',   path: '/advisor',              icon: 'grid' },
   { label: 'Neuer CV-Check',    path: '/advisor/quick-lead',   icon: 'doc' },
+  { label: 'Mein Affiliate',    path: '/advisor/affiliate',    icon: 'users' },
   { label: 'Alle Leads',        path: '/advisor/leads',        icon: 'briefcase' },
 ];
 
@@ -201,9 +202,10 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
   const sidebarBody = (
     <>
       <div className="sb-brand">
-        <div className="sb-logo">K</div>
+        <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut"
+             className="sb-logo-img"
+             style={{ height: 28, width: 'auto' }} />
         <div className="sb-brand-text">
-          <div className="sb-brand-title">Karriere-Institut</div>
           <div className="sb-brand-sub">{isAdmin ? 'Admin-Portal' : 'Mitglieder-Portal'}</div>
         </div>
       </div>
@@ -255,6 +257,9 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
           v{version}{env && env !== 'production' ? ` · ${env}` : ''}
         </div>
       )}
+      <div className="sb-disclaimer" title="Aus Gründen der besseren Lesbarkeit verzichten wir auf gegenderte Sprache. Personenbezeichnungen gelten für alle Geschlechter.">
+        Aus Gründen der Lesbarkeit verzichten wir auf gegenderte Sprache.
+      </div>
     </>
   );
 

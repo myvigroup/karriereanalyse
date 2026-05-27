@@ -675,7 +675,7 @@ export default function MasterclassClient({ courses, progress, analysisResults, 
                   return (
                     <div className="mc-modal-coaches">
                       <div className="mc-modal-coaches-label">
-                        {semCoaches.length > 1 ? 'Deine Trainer:innen' : 'Deine Trainerin / dein Trainer'}
+                        {semCoaches.length > 1 ? 'Deine Trainer' : 'Deine Trainerin / dein Trainer'}
                       </div>
                       <div className="mc-modal-coaches-list">
                         {semCoaches.map(c => (

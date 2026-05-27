@@ -68,9 +68,7 @@ function LoginContent() {
           padding: '28px 24px 24px',
           flexDirection: 'column',
         }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'var(--ki-red)', marginBottom: 10, textTransform: 'uppercase' }}>
-            Karriere-Institut
-          </div>
+          <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut" style={{ height: 28, width: 'auto', marginBottom: 18 }} />
           <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.15 }}>
             Dein Karriere-Betriebssystem.
           </div>
@@ -90,9 +88,8 @@ function LoginContent() {
           background: 'var(--ki-charcoal)', color: 'white', padding: '64px',
         }}>
           <div style={{ maxWidth: 400 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '0.1em', color: 'var(--ki-red)', marginBottom: 24, textTransform: 'uppercase' }}>
-              Karriere-Institut
-            </div>
+            <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut"
+                 style={{ height: 32, width: 'auto', marginBottom: 24, filter: 'brightness(0) invert(1)' }} />
             <h1 style={{ fontSize: 42, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 16 }}>
               Dein Karriere-Betriebssystem.
             </h1>

@@ -14,14 +14,15 @@ export const metadata = {
 
 const BENEFITS = [
   {
-    icon: 'target',
-    title: 'KI-Karriere-Analyse',
-    desc: '12 Kompetenzfelder · in 10 Min · sofortiges Feedback.',
+    icon: 'doc',
+    title: 'Lebenslauf-Check (jetzt kostenlos)',
+    desc: 'KI scannt deinen CV in Sekunden — du siehst sofort, was Recruiter in den ersten 6 Sekunden wahrnehmen.',
+    highlight: true,
   },
   {
-    icon: 'doc',
-    title: 'Lebenslauf-Check',
-    desc: 'Was bei Recruitern in 6 Sekunden ankommt — und was nicht.',
+    icon: 'target',
+    title: 'Karriere-Analyse',
+    desc: '12 Kompetenzfelder · in 10 Min · sofortiges Feedback. Danach wird das Portal auf dich zugeschnitten.',
   },
   {
     icon: 'play',
@@ -63,17 +64,17 @@ export default async function AffiliateLanding({ params }) {
 
   const firstName = (advisor.display_name || '').split(' ')[0];
 
-  // Register-URL behält ?ref=name (für UI-Personalisierung)
-  // Cookie wird in /r/[slug] gesetzt — wenn der User direkt auf /start/[slug] kommt,
-  // setzen wir hier den Ref-Parameter nochmal mit, damit das Advisor-Mapping greift.
+  // Primärer CTA = CV-Selbstcheck (Freemie ohne Account-Pflicht)
+  // Sekundär = direkt zur Registrierung (für Wiederkehrer)
+  const checkUrl = `/start/${slug}/check`;
   const registerUrl = `/auth/register?ref=${encodeURIComponent(advisor.display_name)}&advisor=${encodeURIComponent(advisor.id)}`;
 
   return (
     <div className="affiliate-landing">
       {/* Header */}
       <header className="aff-header">
-        <div className="aff-logo">KARRIERE-INSTITUT</div>
-        <Link href={registerUrl} className="aff-header-cta">Direkt zum Konto</Link>
+        <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut" style={{ height: 32, width: 'auto' }} />
+        <Link href={registerUrl} className="aff-header-cta">Schon Mitglied? Anmelden</Link>
       </header>
 
       {/* Hero */}
@@ -84,30 +85,30 @@ export default async function AffiliateLanding({ params }) {
         <h1 className="aff-title">
           {firstName ? `${firstName} hat dich eingeladen.` : 'Du wurdest eingeladen.'}
           {' '}
-          <span className="aff-title-faded">Schau dir an, was du bekommst.</span>
+          <span className="aff-title-faded">Starte mit dem KI-Lebenslauf-Check — gratis.</span>
         </h1>
         <p className="aff-sub">
-          Das Karriere-Institut begleitet seit über 30 Jahren Berufseinsteiger:innen, Fach- und Führungskräfte.
-          Über deine persönliche Einladung bekommst du <strong>kostenlosen Zugang</strong> zur
-          KI-Karriere-Analyse, dem Lebenslauf-Check und unseren Masterclasses.
+          Lade deinen CV hoch, gib kurz an, welche Position du suchst —
+          und du bekommst in Sekunden eine KI-Auswertung mit konkreten Verbesserungs-Hebeln.
+          Danach geht {firstName || advisor.display_name} das Ergebnis im Gespräch mit dir durch.
         </p>
 
         <div className="aff-hero-cta">
-          <Link href={registerUrl} className="aff-cta-primary">
-            Jetzt Karriere-Analyse starten <Icon name="arrow" size={16} />
+          <Link href={checkUrl} className="aff-cta-primary">
+            Jetzt CV hochladen <Icon name="arrow" size={16} />
           </Link>
           <span className="aff-cta-meta">
-            <Icon name="check" size={14} /> 10 Minuten · <Icon name="check" size={14} /> kostenlos · <Icon name="check" size={14} /> kein Risiko
+            <Icon name="check" size={14} /> 60 Sek · <Icon name="check" size={14} /> kostenlos · <Icon name="check" size={14} /> kein Account nötig
           </span>
         </div>
       </section>
 
       {/* Benefit Grid */}
       <section className="aff-benefits">
-        <div className="aff-benefits-head">Was du als Mitglied bekommst</div>
+        <div className="aff-benefits-head">Was nach dem CV-Check auf dich wartet</div>
         <div className="aff-benefits-grid">
           {BENEFITS.map((b, i) => (
-            <div key={i} className="aff-benefit">
+            <div key={i} className={`aff-benefit ${b.highlight ? 'highlight' : ''}`}>
               <div className="aff-benefit-icon"><Icon name={b.icon} size={20} /></div>
               <div className="aff-benefit-body">
                 <div className="aff-benefit-title">{b.title}</div>
@@ -138,14 +139,14 @@ export default async function AffiliateLanding({ params }) {
       <section className="aff-final">
         <h2 className="aff-final-title">Bereit?</h2>
         <p className="aff-final-sub">
-          Die Karriere-Analyse dauert keine 10 Minuten. Danach weißt du, wo du stehst —
-          und {firstName || advisor.display_name} bekommt eine Notiz, dass du gestartet bist.
+          Der CV-Check dauert keine Minute. Du bekommst die Auswertung sofort —
+          und {firstName || advisor.display_name} sieht das Ergebnis im Berater-Dashboard, um mit dir den nächsten Schritt zu besprechen.
         </p>
-        <Link href={registerUrl} className="aff-cta-primary aff-final-cta">
-          Konto erstellen & starten <Icon name="arrow" size={16} />
+        <Link href={checkUrl} className="aff-cta-primary aff-final-cta">
+          Jetzt CV hochladen <Icon name="arrow" size={16} />
         </Link>
         <div className="aff-final-tos">
-          Mit der Registrierung akzeptierst du unsere Nutzungsbedingungen und Datenschutzrichtlinie.
+          Kein Konto nötig für den CV-Check. Deine Daten werden ausschließlich an {advisor.display_name} weitergegeben.
         </div>
       </section>
     </div>

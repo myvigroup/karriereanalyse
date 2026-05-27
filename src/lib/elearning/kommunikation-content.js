@@ -767,11 +767,11 @@ export const FEEDBACK_TEMPLATES = {
       typ: 'konstruktiv',
       vorlage: {
         situation: 'Im Sprint-Review am [Datum]...',
-        behavior: '...hast du drei Mal Kolleg:innen unterbrochen, bevor sie ihren Punkt zu Ende bringen konnten.',
+        behavior: '...hast du drei Mal Kollegen unterbrochen, bevor sie ihren Punkt zu Ende bringen konnten.',
         impact: 'Zwei Teammitglieder haben danach aufgehört, sich zu beteiligen. Wir haben wertvolle Perspektiven verloren.',
       },
       beispiel:
-        '"Im Sprint-Review am Mittwoch hast du drei Mal Kolleg:innen unterbrochen, bevor sie ihren Punkt zu Ende bringen konnten. Zwei Teammitglieder haben danach aufgehört, sich zu beteiligen — wir haben wertvolle Perspektiven verloren."',
+        '"Im Sprint-Review am Mittwoch hast du drei Mal Kollegen unterbrochen, bevor sie ihren Punkt zu Ende bringen konnten. Zwei Teammitglieder haben danach aufgehört, sich zu beteiligen — wir haben wertvolle Perspektiven verloren."',
     },
   ],
 };

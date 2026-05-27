@@ -5592,6 +5592,91 @@ body:has(.course-v2) .sos-button {
   margin-top: 18px;
 }
 
+.aff-benefit.highlight {
+  background: linear-gradient(135deg, rgba(204,20,38,0.06), rgba(204,20,38,0.02));
+  border-color: rgba(204,20,38,0.25);
+}
+.aff-benefit.highlight .aff-benefit-icon {
+  background: var(--ki-red);
+  color: #fff;
+}
+
+/* CV-Check Form (auf /start/[slug]/check) */
+.aff-form-section {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 8px 32px 64px;
+}
+.aff-form {
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 28px 32px;
+}
+.aff-form-title {
+  font-family: var(--sf);
+  font-size: 14px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--label-3);
+  margin: 0 0 18px;
+}
+.aff-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.aff-form-field { display: flex; flex-direction: column; gap: 5px; }
+.aff-form-field > span {
+  font-size: 12px; font-weight: 600;
+  color: var(--label-2);
+}
+.aff-form-field input {
+  padding: 11px 14px;
+  background: var(--bg);
+  border: 0.5px solid var(--line);
+  border-radius: 10px;
+  font-family: inherit; font-size: 14px;
+  color: var(--label);
+  outline: none;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.aff-form-field input:focus {
+  border-color: var(--ki-red);
+  box-shadow: 0 0 0 3px rgba(204,20,38,0.1);
+}
+.aff-form-error {
+  padding: 10px 14px;
+  background: rgba(204,20,38,0.08);
+  color: var(--ki-red-dark);
+  border-radius: 10px;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.aff-form-submit {
+  width: 100%;
+  margin-top: 18px;
+  justify-content: center;
+}
+.aff-form-tos {
+  margin-top: 14px;
+  font-size: 11.5px;
+  color: var(--label-4);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Sidebar-Disclaimer */
+.sb-disclaimer {
+  padding: 6px 14px 10px;
+  font-size: 9.5px;
+  color: var(--label-4);
+  line-height: 1.4;
+  text-align: center;
+  letter-spacing: 0;
+}
+html[data-sb="collapsed"] .sb-disclaimer { display: none; }
+
 /* ═══════════════════════════════════════════════════════════════════
    Analyse-Gate Banner (Soft-CTA — Karriere-Analyse nachholen)
    ═══════════════════════════════════════════════════════════════════ */

@@ -251,7 +251,7 @@ const COACH_PROFILES = {
     online: true,
     location: 'Berlin', languages: 'Deutsch, Englisch',
     yearsExp: 12, rating: 4.9, sessions: 480, response: '< 4 Std',
-    bio: 'Florian arbeitet seit 12 Jahren mit ambitionierten Berufseinsteiger:innen und Senior-Talenten. Vor dem Karriere-Institut leitete er ein Recruiting-Team bei einem DAX-Konzern und kennt beide Seiten des Tisches — Kandidat und Hiring Manager. Sein Schwerpunkt: Karriere-Strategie, Gehaltsverhandlung und positionierende Personal Brands.',
+    bio: 'Florian arbeitet seit 12 Jahren mit ambitionierten Berufseinsteiger und Senior-Talenten. Vor dem Karriere-Institut leitete er ein Recruiting-Team bei einem DAX-Konzern und kennt beide Seiten des Tisches — Kandidat und Hiring Manager. Sein Schwerpunkt: Karriere-Strategie, Gehaltsverhandlung und positionierende Personal Brands.',
     specialties: ['Gehaltsverhandlung', 'Karriere-Strategie', 'Personal Branding', 'C-Level-Coaching', 'Story-Building'],
     industries: ['FinTech', 'B2B SaaS', 'Beratung', 'Tech'],
     slots: [
@@ -687,7 +687,7 @@ const ALL_NEXT_STEPS = [
   { group: 'Diesen Monat', items: [
     { icon: icons.target,  title: 'Karriere-Score auf 80 bringen',      sub: 'Aktuell 72 — Lücke „Verhandlungs-Taktik" schließen', meta: 'Ziel' },
     { icon: icons.brief,   title: 'Doctolib · Angebot entscheiden',     sub: 'Frist 12. Mai · Range vergleichen',          meta: '12. Mai',    href: 'Bewerbungen.html' },
-    { icon: icons.users,   title: '3 neue Coffee-Chats',                sub: 'Alumni / Mentor:innen aus FinTech',          meta: '0 / 3',      href: 'Community.html' },
+    { icon: icons.users,   title: '3 neue Coffee-Chats',                sub: 'Alumni / Mentoren aus FinTech',          meta: '0 / 3',      href: 'Community.html' },
     { icon: icons.spark,   title: 'LinkedIn-Profil überarbeiten',       sub: 'Headline · Featured · 3 Skills aktualisieren', meta: 'Aufgabe' }
   ]},
   { group: 'Später', items: [
