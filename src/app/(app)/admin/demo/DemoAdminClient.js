@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { setupDemoAction, resetDemoAction, wipeDemoAction } from './actions';
 
-export default function DemoAdminClient({ isSetUp, demoEmail, stats, links }) {
+export default function DemoAdminClient({ isSetUp, stats, links, credentials }) {
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState(null);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -35,11 +35,12 @@ export default function DemoAdminClient({ isSetUp, demoEmail, stats, links }) {
       <div className="admin-pageheader">
         <div>
           <div className="title-kicker"><span className="pulse" /> Admin · Demo-Präsentation</div>
-          <h1 className="page-title">Demo-Daten verwalten</h1>
+          <h1 className="page-title">Demo-Account verwalten</h1>
           <p className="page-sub">
-            Die Demo läuft auf deinem Admin-Account <strong>{demoEmail}</strong> — du bekommst einen
-            Berater-Eintrag mit fiktiven Leads, vor-gescannten CVs und realistischen Affiliate-Stats.
-            Nur Demo-Daten (Emails @beispiel.de) werden beim Reset gelöscht — echte Leads bleiben unangetastet.
+            Separater Berater-Account <strong>demo@daskarriereinstitut.de</strong> mit fiktiven Leads,
+            vor-gescannten CVs und realistischen Affiliate-Stats. Auto-Login auf der Bühne via{' '}
+            <code style={{ background: '#F5F5F7', padding: '2px 6px', borderRadius: 4 }}>{links.magic}</code>{' '}
+            — ein Klick, du bist drin.
           </p>
         </div>
       </div>
@@ -99,7 +100,7 @@ export default function DemoAdminClient({ isSetUp, demoEmail, stats, links }) {
               onClick={() => run(setupDemoAction, 'Setup')}
               style={{ padding: '12px 24px', fontSize: 15 }}
             >
-              {isPending ? 'Setup läuft...' : 'Demo-Daten anlegen'}
+              {isPending ? 'Setup läuft...' : 'Demo-Account einrichten'}
             </button>
           )}
           {isSetUp && !confirmReset && (
@@ -137,17 +138,12 @@ export default function DemoAdminClient({ isSetUp, demoEmail, stats, links }) {
               disabled={isPending}
               onClick={() => run(wipeDemoAction, 'Wipe')}
               style={{ marginLeft: 'auto' }}
-              title="Löscht nur die fiktiven Demo-Daten (Emails @beispiel.de)"
+              title="Löscht nur die Daten des Demo-Accounts, Account bleibt erhalten"
             >
-              Demo-Daten löschen
+              Nur Daten leeren
             </button>
           )}
         </div>
-        <p style={{ fontSize: 13, color: '#86868b', marginTop: 12, lineHeight: 1.5 }}>
-          <strong>Hinweis:</strong> Es werden ausschließlich die fiktiven Demo-Personen (Anna Müller,
-          Marcus Berger, Sarah Vogt, Tobias Klein, Christina Walter, Julian Hoffmann, Lena Krause, Robin Schmidt)
-          gelöscht. Echte Leads in deinem Account bleiben unangetastet.
-        </p>
       </section>
 
       {/* Bühnen-URLs */}
@@ -158,15 +154,16 @@ export default function DemoAdminClient({ isSetUp, demoEmail, stats, links }) {
           </div>
           <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
             <LinkRow
-              label="Berater-Dashboard"
-              url={links.advisor}
-              hint="Du bist als Admin schon eingeloggt — Link öffnet direkt deinen Berater-Bereich mit den Demo-Daten."
+              label="Auto-Login (das ist DEIN Link für die Bühne)"
+              url={links.magic}
+              hint="Einfach in einem neuen Tab aufrufen → du bist sofort als Demo-Berater eingeloggt und landest im Berater-Dashboard. Kein Login-Formular, kein Tippen."
               onCopy={copyToClipboard}
+              highlight
             />
             <LinkRow
-              label="Affiliate-Landing (so sieht's der Lead)"
+              label="Affiliate-Landing (das sieht ein Lead)"
               url={links.landing}
-              hint="So sieht ein Lead die Seite, wenn er über deinen Berater-Link kommt."
+              hint="So sieht ein Lead die Seite, wenn er über den Berater-Link kommt. Öffentlich, kein Login nötig."
               onCopy={copyToClipboard}
             />
             <LinkRow
@@ -202,7 +199,8 @@ export default function DemoAdminClient({ isSetUp, demoEmail, stats, links }) {
               </div>
               <p style={{ fontSize: 13, color: '#86868b', margin: 0 }}>
                 Fiktiver CV mit klarer Struktur, quantifizierten Erfolgen und 8 Jahren Erfahrung.
-                Wurde so getestet, dass die KI eine starke Auswertung liefert.
+                Wurde so getestet, dass die KI eine starke Auswertung liefert. Lade ihn vor der Demo runter,
+                damit du ihn auf der Bühne im Browser hochladen kannst.
               </p>
             </div>
             <a
@@ -216,20 +214,50 @@ export default function DemoAdminClient({ isSetUp, demoEmail, stats, links }) {
           </div>
         </section>
       )}
+
+      {/* Login-Daten zum Verteilen */}
+      {isSetUp && (
+        <section className="admin-hub-section" style={{ marginTop: 32 }}>
+          <div className="admin-hub-secthead">
+            <h3>Login-Daten (zum Verteilen an Mitarbeiter)</h3>
+          </div>
+          <div style={{
+            background: '#FFF9E6',
+            border: '1px solid #FDE68A',
+            borderRadius: 10,
+            padding: 16,
+            marginTop: 12,
+            fontSize: 14,
+            color: '#92400E',
+          }}>
+            <div style={{ marginBottom: 8 }}>
+              <strong>E-Mail:</strong> <code>{credentials.email}</code>
+            </div>
+            <div>
+              <strong>Passwort:</strong> <code>{credentials.password}</code>
+            </div>
+            <p style={{ marginTop: 12, fontSize: 13, marginBottom: 0 }}>
+              Mitarbeiter können sich damit selbst anmelden und alles ausprobieren.
+              Oder einfach den Auto-Login-Link oben teilen — der spart ihnen das Tippen.
+              Daten sind geteilt — falls jemand was kaputt macht, einfach hier oben &bdquo;Demo zurücksetzen&ldquo;.
+            </p>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
 
-function LinkRow({ label, url, hint, onCopy }) {
+function LinkRow({ label, url, hint, onCopy, highlight = false }) {
   return (
     <div style={{
-      background: '#fff',
-      border: '1px solid #E8E6E1',
+      background: highlight ? '#FEF2F2' : '#fff',
+      border: highlight ? '1px solid #FCA5A5' : '1px solid #E8E6E1',
       borderRadius: 12,
       padding: 16,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-        <div style={{ fontSize: 14, fontWeight: 600 }}>{label}</div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: highlight ? '#CC1426' : '#1A1A1A' }}>{label}</div>
         <button
           className="admin-action-btn"
           onClick={() => onCopy(url)}

@@ -1,33 +1,14 @@
-// Demo-Banner — zeigt sich nur, wenn der eingeloggte User der Demo-Advisor IST
-// UND mindestens ein Demo-Lead in seinem Account existiert. Damit ist der Banner
-// im normalen Admin-Alltag unsichtbar und nur sichtbar, wenn die Demo-Daten
-// gerade geseeded sind (also Bühne aktiv).
+// Demo-Banner — zeigt sich, wenn der Demo-Berater-Account eingeloggt ist.
+// Server Component — checked die E-Mail direkt aus der Session.
 
 import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
 import { isDemoEmail } from '@/lib/demo';
-
-const DEMO_LEAD_MARKER = 'anna.mueller@beispiel.de';
 
 export default async function DemoBanner() {
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !isDemoEmail(user.email)) return null;
-
-    // Schneller Check: ist Anna Müller als Lead da? Dann ist Demo-Mode aktiv.
-    const admin = createAdminClient();
-    const { data: advisor } = await admin
-      .from('advisors').select('id').eq('user_id', user.id).maybeSingle();
-    if (!advisor) return null;
-
-    const { count } = await admin
-      .from('fair_leads')
-      .select('id', { count: 'exact', head: true })
-      .eq('advisor_id', advisor.id)
-      .eq('email', DEMO_LEAD_MARKER);
-
-    if (!count || count === 0) return null;
 
     return (
       <div

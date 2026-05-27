@@ -1,81 +1,90 @@
 // =====================================================
 // Demo-Account-Verwaltung
 // =====================================================
-// Demo läuft auf dem Admin-Account l.jacob@myvi.de — wir legen ihm einen
-// Advisor-Eintrag mit Slug 'demo' an und seeden fiktive Leads + Self-Service-Checks
-// auf seine advisor_id. Sein User-Account wird NICHT verändert (Passwort, Rolle bleiben).
+// Separater Demo-Berater-Account: demo@daskarriereinstitut.de
+// Auto-Login via /demo Route — Passwort liegt in Vercel Env-Var DEMO_PASSWORD,
+// niemals im Code.
 //
 // Funktionen:
-//   - ensureDemoAdvisor(): findet den User in auth.users, stellt sicher dass er
-//     einen advisor-Eintrag hat (idempotent). Kein createUser, kein Passwort-Update.
-//   - seedDemoData(): erstellt 5 fiktive Leads + 3 Self-Service-Checks + Affiliate-Stats.
-//   - wipeDemoData(): löscht ausschließlich die Demo-Daten (per Email-Match auf
-//     die fiktiven Personen-Emails). Echte Leads bleiben unangetastet.
+//   - ensureDemoAdvisor(): legt Auth-User + Profile + Advisor an (idempotent).
+//     Setzt das Account-Passwort beim jedem Aufruf auf den aktuellen ENV-Wert,
+//     damit Passwort-Rotation per Env-Var-Update funktioniert.
+//   - seedDemoData(): 5 fiktive Leads + 3 Self-Service + Affiliate-Stats.
+//   - wipeDemoData(): löscht alle Daten des Demo-Accounts (sicher, weil
+//     separater Account — keine echten Leads betroffen).
 //   - resetDemo(): wipe + seed.
 //
 // Server-only — niemals client-seitig importieren.
 
 import { createAdminClient } from '@/lib/supabase/admin';
 
-export const DEMO_EMAIL = 'l.jacob@myvi.de';
-export const DEMO_DISPLAY_NAME = 'Louis Jacob (Demo)';
+export const DEMO_EMAIL = 'demo@daskarriereinstitut.de';
+// WICHTIG: Passwort kommt aus Vercel Environment Variable DEMO_PASSWORD.
+// Fallback nur für lokale Entwicklung; in Production MUSS die Env-Var gesetzt sein.
+export const DEMO_PASSWORD = process.env.DEMO_PASSWORD || 'local-dev-only-change-in-prod';
+export const DEMO_DISPLAY_NAME = 'Demo Berater';
 export const DEMO_SLUG = 'demo';
 export const DEMO_PHONE = '+49 511 5468 4547';
 
-// Email-Adressen aller fiktiven Demo-Personen — werden für sicheren wipe verwendet.
-// Nur Datensätze mit diesen Emails werden bei resetDemo() gelöscht.
-const DEMO_LEAD_EMAILS = [
-  'anna.mueller@beispiel.de',
-  'marcus.berger@beispiel.de',
-  'sarah.vogt@beispiel.de',
-  'tobias.klein@beispiel.de',
-  'christina.walter@beispiel.de',
-];
-
-const DEMO_SELF_SERVICE_EMAILS = [
-  'julian.hoffmann@beispiel.de',
-  'lena.krause@beispiel.de',
-  'robin.schmidt@beispiel.de',
-];
+if (!process.env.DEMO_PASSWORD && process.env.NODE_ENV === 'production') {
+  console.warn('[demo.js] WARN: DEMO_PASSWORD env-var nicht gesetzt — Demo-Login wird scheitern.');
+}
 
 export function isDemoEmail(email) {
   return (email || '').toLowerCase() === DEMO_EMAIL;
 }
 
 // -----------------------------------------------------
-// ensureDemoAdvisor — idempotent: findet den User, stellt advisor-Eintrag sicher
-// User-Account (Passwort, Rolle) wird NICHT verändert.
-// Returns: { userId, advisorId }
+// ensureDemoAdvisor — idempotent: User + Profile + Advisor anlegen
+// Returns: { userId, advisorId, created }
 // -----------------------------------------------------
 export async function ensureDemoAdvisor() {
   const admin = createAdminClient();
 
-  // 1) User in auth.users finden — wenn nicht da, ist das ein Setup-Fehler
+  // 1) Auth-User suchen oder anlegen
+  let userId;
+  let created = false;
   const { data: existingUsers } = await admin.auth.admin.listUsers({ perPage: 500 });
-  const user = (existingUsers?.users || []).find(u => u.email?.toLowerCase() === DEMO_EMAIL);
-  if (!user) {
-    throw new Error(`Admin-Account ${DEMO_EMAIL} existiert nicht in Supabase. Bitte erst manuell anlegen.`);
-  }
-  const userId = user.id;
+  const existing = (existingUsers?.users || []).find(u => u.email?.toLowerCase() === DEMO_EMAIL);
 
-  // 2) Profile-Eintrag sicherstellen (ohne role oder Namen zu überschreiben)
-  const { data: existingProfile } = await admin
-    .from('profiles')
-    .select('id')
-    .eq('id', userId)
-    .maybeSingle();
-
-  if (!existingProfile) {
-    await admin.from('profiles').insert({
-      id: userId,
-      email: DEMO_EMAIL,
-      name: 'Louis Jacob',
-      role: 'admin',
-      onboarding_complete: true,
+  if (existing) {
+    userId = existing.id;
+    // Passwort auf aktuellen ENV-Wert setzen (für Rotation)
+    await admin.auth.admin.updateUserById(userId, {
+      password: DEMO_PASSWORD,
+      email_confirm: true,
     });
+  } else {
+    const { data, error } = await admin.auth.admin.createUser({
+      email: DEMO_EMAIL,
+      password: DEMO_PASSWORD,
+      email_confirm: true,
+      user_metadata: {
+        first_name: 'Demo',
+        last_name: 'Berater',
+        company: 'Karriere-Institut',
+        position: 'Senior Karriere-Berater',
+      },
+    });
+    if (error) throw new Error(`Auth-User anlegen fehlgeschlagen: ${error.message}`);
+    userId = data.user.id;
+    created = true;
   }
 
-  // 3) Advisor-Eintrag (Upsert per user_id) — slug='demo' für Affiliate-Route
+  // 2) Profile-Eintrag (Upsert)
+  await admin.from('profiles').upsert({
+    id: userId,
+    email: DEMO_EMAIL,
+    first_name: 'Demo',
+    last_name: 'Berater',
+    name: DEMO_DISPLAY_NAME,
+    avatar_initials: 'DB',
+    role: 'advisor',
+    phase: 'pre_coaching',
+    onboarding_complete: true,
+  }, { onConflict: 'id' });
+
+  // 3) Advisor-Eintrag (Upsert per user_id)
   const { data: existingAdvisor } = await admin
     .from('advisors')
     .select('id')
@@ -109,20 +118,18 @@ export async function ensureDemoAdvisor() {
     advisorId = newAdvisor.id;
   }
 
-  return { userId, advisorId };
+  return { userId, advisorId, created };
 }
 
 // -----------------------------------------------------
-// Demo-Daten-Vorlage — fiktive Leads in verschiedenen Stadien
+// Demo-Daten-Vorlage
 // -----------------------------------------------------
 const DEMO_LEADS = [
   {
     first_name: 'Anna', last_name: 'Müller',
     email: 'anna.mueller@beispiel.de', phone: '+49 170 1234567',
     target_position: 'Senior Brand Manager',
-    status: 'converted',
-    source: 'affiliate',
-    days_ago: 12,
+    status: 'converted', source: 'affiliate', days_ago: 12,
     cv_summary: 'Erfahrene Markenmanagerin mit 7 Jahren Konsumgüter-Erfahrung. Starke analytische Fähigkeiten, klarer Aufstiegsweg. Empfehlung: Senior-Position mit Budgetverantwortung — Marktwert-Potenzial €78–92k.',
     cv_rating: 5,
   },
@@ -130,9 +137,7 @@ const DEMO_LEADS = [
     first_name: 'Marcus', last_name: 'Berger',
     email: 'marcus.berger@beispiel.de', phone: '+49 171 2345678',
     target_position: 'Geschäftsführer Vertrieb Mittelstand',
-    status: 'feedback_given',
-    source: 'affiliate',
-    days_ago: 5,
+    status: 'feedback_given', source: 'affiliate', days_ago: 5,
     cv_summary: 'Vertriebsleiter mit 12 Jahren Mittelstands-Expertise (Maschinenbau). Führungsstärke nachgewiesen, P&L-Verantwortung €18 Mio. Empfehlung: GF-Position oder Bereichsleiter Großkonzern — Marktwert €130–160k.',
     cv_rating: 4,
   },
@@ -140,47 +145,45 @@ const DEMO_LEADS = [
     first_name: 'Sarah', last_name: 'Vogt',
     email: 'sarah.vogt@beispiel.de', phone: '+49 172 3456789',
     target_position: 'Tech Lead / Engineering Manager',
-    status: 'cv_uploaded',
-    source: 'direct',
-    days_ago: 1,
-    cv_summary: null,
-    cv_rating: null,
+    status: 'cv_uploaded', source: 'direct', days_ago: 1,
+    cv_summary: null, cv_rating: null,
   },
   {
     first_name: 'Tobias', last_name: 'Klein',
     email: 'tobias.klein@beispiel.de', phone: '+49 173 4567890',
     target_position: 'Operations Manager Logistik',
-    status: 'new',
-    source: 'direct',
-    days_ago: 0,
-    cv_summary: null,
-    cv_rating: null,
+    status: 'new', source: 'direct', days_ago: 0,
+    cv_summary: null, cv_rating: null,
   },
   {
     first_name: 'Christina', last_name: 'Walter',
     email: 'christina.walter@beispiel.de', phone: '+49 174 5678901',
     target_position: 'HR Business Partner Konzern',
-    status: 'completed',
-    source: 'affiliate',
-    days_ago: 18,
+    status: 'completed', source: 'affiliate', days_ago: 18,
     cv_summary: 'Personalreferentin mit 6 Jahren Generalist-Erfahrung im Mittelstand. Möchte in HRBP-Rolle wechseln. CV solide, Skills passend — Coaching empfohlen zur Stärkung des Profils für Konzern-Bewerbungen.',
     cv_rating: 4,
   },
 ];
 
+const DEMO_SELF_SERVICE_EMAILS = [
+  'julian.hoffmann@beispiel.de',
+  'lena.krause@beispiel.de',
+  'robin.schmidt@beispiel.de',
+];
+
 // -----------------------------------------------------
-// seedDemoData — befüllt Demo-Account mit realistischen Daten
+// seedDemoData
 // -----------------------------------------------------
 export async function seedDemoData() {
   const admin = createAdminClient();
   const { userId, advisorId } = await ensureDemoAdvisor();
 
-  // Erst aufräumen (nur Demo-Daten), damit Re-Seed sauber ist
+  // Erst aufräumen, damit Re-Seed sauber ist
   await wipeDemoData();
 
   const now = Date.now();
 
-  // 1) Leads anlegen
+  // 1) Leads
   const leadInserts = DEMO_LEADS.map(lead => ({
     fair_id: null,
     advisor_id: advisorId,
@@ -202,7 +205,7 @@ export async function seedDemoData() {
     .select('id, first_name');
   if (leadErr) throw new Error(`Lead-Seed fehlgeschlagen: ${leadErr.message}`);
 
-  // 2) CV-Dokumente + AI-Auswertung für Leads mit cv_summary
+  // 2) CV-Docs + Feedback
   for (let i = 0; i < DEMO_LEADS.length; i++) {
     const tpl = DEMO_LEADS[i];
     const lead = insertedLeads[i];
@@ -223,10 +226,7 @@ export async function seedDemoData() {
       })
       .select('id')
       .single();
-    if (docErr) {
-      console.error('CV-Doc-Insert error:', docErr.message);
-      continue;
-    }
+    if (docErr) { console.error('CV-Doc-Insert error:', docErr.message); continue; }
 
     await admin.from('cv_feedback').insert({
       cv_document_id: doc.id,
@@ -245,7 +245,7 @@ export async function seedDemoData() {
     });
   }
 
-  // 3) Self-Service-Checks (Kunden haben sich selbst ausgewertet)
+  // 3) Self-Service-Checks
   const selfChecks = [
     { name: 'Julian Hoffmann', email: 'julian.hoffmann@beispiel.de', target_position: 'Junior Controller', overall_rating: 4, days_ago: 3 },
     { name: 'Lena Krause',     email: 'lena.krause@beispiel.de',     target_position: 'UX Designer',      overall_rating: 5, days_ago: 7 },
@@ -273,7 +273,7 @@ export async function seedDemoData() {
     console.warn('Self-Service-Seed übersprungen:', err?.message);
   }
 
-  // 4) Affiliate-Counter (defensiv — Spalten existieren u.U. nicht)
+  // 4) Affiliate-Counter (defensiv)
   try {
     await admin.from('advisors').update({
       affiliate_signups: 12,
@@ -283,7 +283,7 @@ export async function seedDemoData() {
     console.warn('Affiliate-Counter-Update übersprungen:', err?.message);
   }
 
-  // 5) Analytics-Events (47 fiktive Klicks über 30 Tage)
+  // 5) Analytics-Events
   const clickEvents = [];
   for (let i = 0; i < 47; i++) {
     const daysAgo = Math.floor(Math.random() * 30);
@@ -306,8 +306,7 @@ export async function seedDemoData() {
 }
 
 // -----------------------------------------------------
-// wipeDemoData — löscht NUR die Demo-Daten (per Email-Match)
-// Echte Leads/CVs des Beraters bleiben unangetastet.
+// wipeDemoData — separater Account, alles weg
 // -----------------------------------------------------
 export async function wipeDemoData() {
   const admin = createAdminClient();
@@ -319,33 +318,13 @@ export async function wipeDemoData() {
 
   if (!advisor) return { ok: true, note: 'Demo-Advisor existiert nicht — nichts zu löschen' };
 
-  // Nur Demo-Leads per Email-Match löschen (cascaded löscht cv_documents + cv_feedback)
-  await admin
-    .from('fair_leads')
-    .delete()
-    .eq('advisor_id', advisor.id)
-    .in('email', DEMO_LEAD_EMAILS);
-
-  // Analytics-Events des Demo-Seeds löschen (markiert durch metadata.source='demo_seed')
-  try {
-    // Supabase erlaubt JSONB-Match via .contains
-    await admin
-      .from('analytics_events')
-      .delete()
-      .eq('advisor_id', advisor.id)
-      .contains('metadata', { source: 'demo_seed' });
-  } catch (err) {
-    console.warn('Analytics-Wipe übersprungen:', err?.message);
-  }
-
-  // Self-Service-Demo-Checks löschen (per Email)
+  await admin.from('fair_leads').delete().eq('advisor_id', advisor.id);
+  await admin.from('analytics_events').delete().eq('advisor_id', advisor.id);
   try {
     await admin.from('self_service_checks').delete().in('email', DEMO_SELF_SERVICE_EMAILS);
   } catch (err) {
     console.warn('Self-Service-Wipe übersprungen:', err?.message);
   }
-
-  // Affiliate-Counter zurücksetzen (defensiv)
   try {
     await admin.from('advisors').update({
       affiliate_signups: 0,
@@ -359,7 +338,7 @@ export async function wipeDemoData() {
 }
 
 // -----------------------------------------------------
-// resetDemo — wipe + seed (für den Bühnen-Knopf)
+// resetDemo — wipe + seed
 // -----------------------------------------------------
 export async function resetDemo() {
   await wipeDemoData();

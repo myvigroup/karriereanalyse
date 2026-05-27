@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
-import { DEMO_EMAIL, DEMO_SLUG } from '@/lib/demo';
+import { DEMO_EMAIL, DEMO_PASSWORD, DEMO_SLUG } from '@/lib/demo';
 import DemoAdminClient from './DemoAdminClient';
 
 export default async function AdminDemoPage() {
@@ -29,8 +29,7 @@ export default async function AdminDemoPage() {
     const { count: leads } = await admin
       .from('fair_leads')
       .select('id', { count: 'exact', head: true })
-      .eq('advisor_id', advisor.id)
-      .like('email', '%@beispiel.de');
+      .eq('advisor_id', advisor.id);
     leadCount = leads || 0;
 
     const { count: cvs } = await admin
@@ -54,7 +53,6 @@ export default async function AdminDemoPage() {
   return (
     <DemoAdminClient
       isSetUp={!!advisor}
-      demoEmail={DEMO_EMAIL}
       stats={{
         leads: leadCount,
         cvs: cvCount,
@@ -63,10 +61,11 @@ export default async function AdminDemoPage() {
         clicks: advisor?.affiliate_clicks || 0,
       }}
       links={{
-        advisor:   `${baseUrl}/advisor`,
+        magic:     `${baseUrl}/demo`,
         affiliate: `${baseUrl}/r/${DEMO_SLUG}`,
         landing:   `${baseUrl}/start/${DEMO_SLUG}`,
       }}
+      credentials={{ email: DEMO_EMAIL, password: DEMO_PASSWORD }}
     />
   );
 }
