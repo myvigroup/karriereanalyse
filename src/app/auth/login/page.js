@@ -69,7 +69,7 @@ function LoginContent() {
           padding: '28px 24px 24px',
           flexDirection: 'column',
         }}>
-          <BrandLogo height={28} variant="light" style={{ marginBottom: 18 }} />
+          <BrandLogo height={22} variant="light" style={{ marginBottom: 18, filter: 'brightness(0) invert(1)' }} />
           <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.15 }}>
             Dein Karriere-Betriebssystem.
           </div>
@@ -85,11 +85,13 @@ function LoginContent() {
 
         {/* Desktop: Left Branding */}
         <div className="login-branding" style={{
-          flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+          flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
           background: 'var(--ki-charcoal)', color: 'white', padding: '64px',
         }}>
+          <div style={{ position: 'absolute', top: 40, left: 48 }}>
+            <BrandLogo height={28} variant="light" style={{ filter: 'brightness(0) invert(1)' }} />
+          </div>
           <div style={{ maxWidth: 400 }}>
-            <BrandLogo height={44} variant="light" style={{ marginBottom: 24 }} />
             <h1 style={{ fontSize: 42, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 16 }}>
               Dein Karriere-Betriebssystem.
             </h1>
