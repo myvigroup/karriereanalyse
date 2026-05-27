@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { LEVELS, getLevelProgress } from '@/lib/gamification';
 import { getPersonalization, FIELD_TO_COURSE, berechnePersonalisierung } from '@/lib/personalization';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import Icon from '@/components/ui/Icon';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  Inline styles for animations that cannot live in globals.css               */
@@ -195,7 +196,7 @@ function LevelTimeline({ current }) {
                   transform: isActive ? 'scale(1.15)' : 'scale(1)',
                   transition: 'transform var(--t-med)',
                 }}>
-                  {isPast ? '✓' : isFuture ? '🔒' : level.icon}
+                  {isPast ? <Icon name="check" size={14} stroke={2} /> : isFuture ? <Icon name="lock" size={14} stroke={1.8} /> : level.icon}
                 </div>
 
                 {/* Text */}
@@ -344,7 +345,7 @@ function SkillTree({ courses, progress }) {
                     fontSize: 26,
                     filter: (!node.isDone && !node.isRecommended) ? 'grayscale(100%) opacity(0.5)' : 'none',
                   }}>
-                    {node.isDone ? '✓' : node.icon || '📚'}
+                    {node.isDone ? <Icon name="check" size={14} stroke={2} /> : (node.icon || <Icon name="books" size={14} stroke={1.7} />)}
                   </span>
                 </div>
 
@@ -439,7 +440,7 @@ function NextStepCard({ courses, progress, profile }) {
           padding: '12px 16px', marginBottom: 16,
           border: '1px solid var(--ki-border)',
         }}>
-          <span style={{ fontSize: 24 }}>{nextCourse.icon || '📚'}</span>
+          <span style={{ color: 'var(--ki-red)', display: 'flex' }}>{nextCourse.icon || <Icon name="books" size={22} stroke={1.6} />}</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 14, fontWeight: 700 }}>{nextCourse.title}</div>
             {nextCourse.description && (
@@ -498,7 +499,7 @@ function CertificateGallery({ certificates }) {
                 pointerEvents: 'none',
               }} />
 
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🏆</div>
+              <div style={{ marginBottom: 12, color: 'var(--ki-red)', display: 'flex', justifyContent: 'center' }}><Icon name="trophy" size={40} stroke={1.5} /></div>
 
               <div style={{
                 fontSize: 11, fontWeight: 600, color: 'var(--ki-red)',
@@ -549,7 +550,7 @@ function CertificateGallery({ certificates }) {
         </div>
       ) : (
         <div className="card" style={{ textAlign: 'center', padding: '48px 32px', color: 'var(--ki-text-tertiary)' }}>
-          <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>🏆</div>
+          <div style={{ marginBottom: 16, opacity: 0.4, color: 'var(--label-3)', display: 'flex', justifyContent: 'center' }}><Icon name="trophy" size={48} stroke={1.4} /></div>
           <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8, color: 'var(--ki-text-secondary)' }}>
             Noch keine Zertifikate
           </div>
@@ -706,7 +707,7 @@ function DynamicRoadmap({ analysisSession, analysisResults, courses, progress, p
   ];
 
   const statusIcon = (status) => {
-    if (status === 'done') return '✅';
+    if (status === 'done') return <Icon name="check-circle" size={14} stroke={1.8} />;
     if (status === 'current' || status === 'recommended') return '⭐';
     return '○';
   };

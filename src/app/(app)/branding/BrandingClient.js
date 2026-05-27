@@ -504,7 +504,7 @@ export default function BrandingClient({ userId, existing, profile }) {
             color: 'var(--ki-text)',
           }}
         >
-          🏢 Wir:Personalberater Jobportal
+          Wir:Personalberater Jobportal
         </h2>
         <p
           style={{
@@ -616,7 +616,7 @@ export default function BrandingClient({ userId, existing, profile }) {
                         gap: 8,
                       }}
                     >
-                      <span style={{ fontSize: 20 }}>{platform.icon}</span>
+                      <span style={{ width: 14, height: 14, borderRadius: '50%', background: platform.color, display: 'inline-block', flexShrink: 0, boxShadow: 'inset 0 0 0 0.5px rgba(0,0,0,0.1)' }} />
                       <h3
                         style={{
                           fontSize: 16,

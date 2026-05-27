@@ -23,11 +23,11 @@ const DEFAULT_CHECKLIST = [
 ];
 
 const BURNOUT_QUESTIONS = [
-  { text: 'Ich fuehle mich morgens energielos',                            emoji: ['😊','😐','😟','😰','🤯'] },
-  { text: 'Ich distanziere mich emotional von meiner Arbeit',              emoji: ['😊','😐','😟','😰','🤯'] },
-  { text: 'Meine Leistungsfaehigkeit hat abgenommen',                      emoji: ['😊','😐','😟','😰','🤯'] },
-  { text: 'Ich habe Schlafprobleme wegen der Arbeit',                      emoji: ['😊','😐','😟','😰','🤯'] },
-  { text: 'Ich fuehle mich von Kollegen/Vorgesetzten nicht wertgeschaetzt',emoji: ['😊','😐','😟','😰','🤯'] },
+  { text: 'Ich fuehle mich morgens energielos',                            colors: ['#16a34a','#84cc16','#eab308','#f97316','#dc2626'] },
+  { text: 'Ich distanziere mich emotional von meiner Arbeit',              colors: ['#16a34a','#84cc16','#eab308','#f97316','#dc2626'] },
+  { text: 'Meine Leistungsfaehigkeit hat abgenommen',                      colors: ['#16a34a','#84cc16','#eab308','#f97316','#dc2626'] },
+  { text: 'Ich habe Schlafprobleme wegen der Arbeit',                      colors: ['#16a34a','#84cc16','#eab308','#f97316','#dc2626'] },
+  { text: 'Ich fuehle mich von Kollegen/Vorgesetzten nicht wertgeschaetzt',colors: ['#16a34a','#84cc16','#eab308','#f97316','#dc2626'] },
 ];
 
 const LEGAL_CHECKLIST = [
@@ -369,9 +369,9 @@ export default function ExitClient({ userId, existingPlan, profile }) {
           2. BURNOUT-CHECK
       ════════════════════════════════════════════════════════════ */}
       <div className="card animate-in delay-1" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>🧠 Burnout-Check</h3>
+        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Burnout-Check</h3>
         <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 20 }}>
-          Beantworte jede Frage ehrlich — von 😊 (trifft nicht zu) bis 🤯 (trifft voll zu).
+          Beantworte jede Frage ehrlich — von 1 (trifft nicht zu) bis 5 (trifft voll zu).
         </p>
 
         {BURNOUT_QUESTIONS.map((q, idx) => (
@@ -390,9 +390,10 @@ export default function ExitClient({ userId, existingPlan, profile }) {
               {idx + 1}. {q.text}
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {q.emoji.map((em, valIdx) => {
+              {q.colors.map((color, valIdx) => {
                 const val = valIdx + 1;
                 const selected = burnoutScores[idx] === val;
+                const label = ['Stimme nicht zu', 'Eher nicht', 'Teils teils', 'Eher ja', 'Stimme voll zu'][valIdx];
                 return (
                   <button
                     key={val}
@@ -403,18 +404,20 @@ export default function ExitClient({ userId, existingPlan, profile }) {
                       setBurnoutSaved(false);
                     }}
                     style={{
-                      fontSize: 22,
-                      padding: '6px 10px',
+                      padding: '10px 14px',
                       borderRadius: 'var(--r-md)',
                       border: selected ? '2px solid var(--ki-red)' : '2px solid transparent',
                       background: selected ? 'rgba(204,20,38,0.08)' : 'var(--ki-card)',
                       cursor: 'pointer',
                       transition: 'all var(--t-fast)',
-                      transform: selected ? 'scale(1.15)' : 'scale(1)',
+                      transform: selected ? 'scale(1.08)' : 'scale(1)',
+                      display: 'inline-flex', alignItems: 'center', gap: 8,
+                      fontSize: 13, fontWeight: 600, color: 'var(--label)',
                     }}
-                    title={`${val} — ${['Stimme nicht zu', 'Eher nicht', 'Teils teils', 'Eher ja', 'Stimme voll zu'][valIdx]}`}
+                    title={`${val} — ${label}`}
                   >
-                    {em}
+                    <span style={{ width: 14, height: 14, borderRadius: '50%', background: color, display: 'inline-block', boxShadow: 'inset 0 0 0 0.5px rgba(0,0,0,0.15)' }} />
+                    {val}
                   </button>
                 );
               })}
@@ -707,7 +710,7 @@ export default function ExitClient({ userId, existingPlan, profile }) {
           5. ABFINDUNGS-SIMULATOR (full)
       ════════════════════════════════════════════════════════════ */}
       <div className="card animate-in delay-3" style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>🧮 Abfindungs-Simulator</h3>
+        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Abfindungs-Simulator</h3>
         <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>
           Berechne deinen moeglichen Abfindungsanspruch — wird auch im Runway beruecksichtigt.
         </p>
