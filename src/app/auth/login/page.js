@@ -88,8 +88,15 @@ function LoginContent() {
           background: 'var(--ki-charcoal)', color: 'white', padding: '64px',
         }}>
           <div style={{ maxWidth: 400 }}>
-            <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut"
-                 style={{ height: 32, width: 'auto', marginBottom: 24, filter: 'brightness(0) invert(1)' }} />
+            <div style={{
+              display: 'inline-flex', alignItems: 'center',
+              padding: '8px 14px', marginBottom: 24,
+              background: '#fff', borderRadius: 12,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+            }}>
+              <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut"
+                   width="83" height="32" style={{ display: 'block' }} />
+            </div>
             <h1 style={{ fontSize: 42, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 16 }}>
               Dein Karriere-Betriebssystem.
             </h1>
