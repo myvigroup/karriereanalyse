@@ -59,7 +59,7 @@ export default async function DashboardPage() {
     .maybeSingle();
 
   const { data: analysisSession } = await supabase
-    .from('analysis_sessions').select('*').eq('user_id', user.id).order('completed_at', { ascending: false }).limit(1).single();
+    .from('analysis_sessions').select('*').eq('user_id', user.id).order('completed_at', { ascending: false }).limit(1).maybeSingle();
 
   const { data: analysisResults } = await supabase
     .from('analysis_results').select('*, competency_fields(title, icon, slug)').eq('user_id', user.id);
