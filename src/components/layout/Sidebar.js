@@ -25,14 +25,17 @@ const NAV_GROUPS = [
 ];
 
 const ADMIN_ITEMS = [
-  { label: 'Admin-Hub',         path: '/admin',           icon: 'grid' },
-  { label: 'Mitglieder',        path: '/admin/users',     icon: 'user' },
-  { label: 'Coaches',           path: '/admin/coaches',   icon: 'users' },
-  { label: 'Masterclasses',     path: '/admin/courses',   icon: 'books' },
-  { label: 'Live-Seminare',     path: '/admin/content',   icon: 'cap' },
-  { label: 'Badges',            path: '/admin/coaching',  icon: 'badge' },
-  { label: 'Analytics',         path: '/admin/analytics', icon: 'chart' },
-  { label: 'FK Dashboard',      path: '/coach-dashboard', icon: 'doc' },
+  { label: 'Admin-Hub',         path: '/admin',            icon: 'grid' },
+  { label: 'Mitglieder',        path: '/admin/users',      icon: 'user' },
+  { label: 'Coaches',           path: '/admin/coaches',    icon: 'users' },
+  { label: 'Berater',           path: '/admin/advisors',   icon: 'briefcase' },
+  { label: 'Masterclasses',     path: '/admin/courses',    icon: 'books' },
+  { label: 'Live-Seminare',     path: '/admin/content',    icon: 'cap' },
+  { label: 'Community',         path: '/admin/community',  icon: 'chat' },
+  { label: 'CV-Checks',         path: '/admin/cv-checks',  icon: 'doc' },
+  { label: 'Badges',            path: '/admin/coaching',   icon: 'badge' },
+  { label: 'Analytics',         path: '/admin/analytics',  icon: 'chart' },
+  { label: 'FK Dashboard',      path: '/coach-dashboard',  icon: 'doc' },
 ];
 
 // ─── Inline icons (Lucide-style, 16px) ───────────────────────────────────────

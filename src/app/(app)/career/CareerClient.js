@@ -667,7 +667,7 @@ function DynamicRoadmap({ analysisSession, analysisResults, courses, progress, p
     {
       id: 'strukturgramm',
       status: profile?.strukturgramm_done ? 'done' : 'locked',
-      title: 'Strukturgramm®',
+      title: 'Struktogramm®',
       sub: 'Premium-Analyse: Verstehe deine biologisch fundierte Persönlichkeitsstruktur',
       href: STRUKTURGRAMM_URL,
       cta: 'Mehr erfahren →',

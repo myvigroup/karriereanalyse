@@ -5061,6 +5061,256 @@ body:has(.course-v2) .sos-button {
 }
 .admin-toast.error { background: var(--ki-red); color: #fff; }
 
+/* Stats-Row für Admin-Pages */
+.admin-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.admin-stat {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: var(--r-md);
+}
+.admin-stat.highlight {
+  background: linear-gradient(135deg, rgba(204,20,38,0.05), rgba(204,20,38,0.02));
+  border-color: rgba(204,20,38,0.2);
+}
+.admin-stat-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--fill);
+  color: var(--ki-red);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.admin-stat-body { display: flex; flex-direction: column; gap: 1px; }
+.admin-stat-value {
+  font-family: var(--sf);
+  font-size: 19px; font-weight: 600;
+  color: var(--label);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.admin-stat-label {
+  font-size: 11.5px; color: var(--label-3);
+}
+
+/* Tab-Bar für Admin */
+.admin-tabs {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.admin-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 0.5px solid var(--line);
+  border-radius: 980px;
+  font-family: inherit; font-size: 12.5px; font-weight: 600;
+  color: var(--label-2);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.admin-tab:hover { background: var(--fill); color: var(--label); border-color: var(--line-2); }
+.admin-tab.on {
+  background: var(--ki-red);
+  color: #fff;
+  border-color: var(--ki-red);
+  box-shadow: 0 1px 2px rgba(204,20,38,0.25);
+}
+
+/* Toolbar (Filter + Search nebeneinander) */
+.admin-toolbar {
+  display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.admin-toolbar .admin-tabs { margin-bottom: 0; }
+.admin-search-input {
+  flex: 1; min-width: 240px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: 980px;
+  font-family: inherit; font-size: 13px;
+  color: var(--label);
+  outline: none;
+}
+.admin-search-input:focus {
+  border-color: var(--ki-red);
+  box-shadow: 0 0 0 3px rgba(204,20,38,0.1);
+}
+
+/* Liste + Rows (generisch für Community, CV-Checks, Advisors) */
+.admin-list { display: flex; flex-direction: column; gap: 10px; }
+.admin-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: var(--r-md);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.admin-row:hover { border-color: var(--line-2); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.admin-row.inactive { opacity: 0.6; }
+
+.admin-avatar.small {
+  width: 36px; height: 36px;
+  font-size: 13px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: #fff;
+  font-family: var(--sf); font-weight: 600;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+}
+
+.admin-row-body { flex: 1; min-width: 0; }
+.admin-row-name {
+  font-family: var(--sf);
+  font-size: 14.5px; font-weight: 600;
+  color: var(--label);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 2px;
+}
+.admin-row-content {
+  font-size: 13px; color: var(--label-2);
+  line-height: 1.45;
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 4px;
+}
+.admin-row-meta {
+  font-size: 11.5px; color: var(--label-4);
+  display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+}
+.admin-row-error {
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: rgba(204,20,38,0.08);
+  border-radius: var(--r-sm);
+  font-size: 11.5px; color: var(--ki-red-dark);
+}
+
+.admin-coach-badge.tier-good { background: rgba(45,93,58,0.12); color: #2d5d3a; }
+.admin-coach-badge.tier-mid  { background: rgba(204,118,21,0.12); color: #b8741a; }
+.admin-coach-badge.tier-low  { background: rgba(120,120,128,0.12); color: var(--label-3); }
+
+.admin-match-pair {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--label-4);
+}
+
+.admin-empty {
+  padding: 50px 20px;
+  text-align: center;
+  color: var(--label-3);
+  font-size: 13px;
+  background: var(--fill);
+  border-radius: var(--r-md);
+}
+
+/* Affiliate-Link Display (Admin-Advisors) */
+.admin-affiliate-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 6px;
+  padding: 4px 10px;
+  background: var(--fill);
+  border: 0.5px solid var(--line);
+  border-radius: var(--r-sm);
+  font-size: 11.5px;
+  color: var(--label-2);
+}
+.admin-affiliate-link code {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  color: var(--label);
+}
+.admin-link-copy {
+  background: transparent; border: 0;
+  padding: 2px 4px; border-radius: 4px;
+  color: var(--label-3); cursor: pointer;
+  display: inline-flex; align-items: center;
+}
+.admin-link-copy:hover { background: var(--surface); color: var(--ki-red); }
+
+/* Quick-Lead Form + Result */
+.quick-lead-form {
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 22px 24px;
+  margin-bottom: 18px;
+}
+.quick-lead-form h3 {
+  font-family: var(--sf);
+  font-size: 13px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--label-3);
+  margin: 0 0 14px;
+}
+
+.quick-lead-result {
+  background: linear-gradient(135deg, rgba(45,93,58,0.06), rgba(45,93,58,0.02));
+  border: 0.5px solid rgba(45,93,58,0.2);
+  border-radius: var(--r-lg);
+  padding: 20px 22px;
+  margin-bottom: 18px;
+}
+.quick-lead-result-head {
+  display: flex; align-items: flex-start; gap: 14px;
+  color: #2d5d3a;
+}
+.quick-lead-result-head h3 {
+  font-family: var(--sf);
+  font-size: 16px; font-weight: 600;
+  color: var(--label);
+  margin: 0;
+}
+.quick-lead-result-head p {
+  font-size: 13px; color: var(--label-2);
+  margin: 2px 0 0;
+}
+.quick-lead-result-head > div { flex: 1; }
+.quick-lead-result-body {
+  display: flex; gap: 24px; align-items: flex-start;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 0.5px solid rgba(45,93,58,0.15);
+  flex-wrap: wrap;
+}
+.quick-lead-qr {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  flex-shrink: 0;
+}
+.quick-lead-qr img {
+  width: 160px; height: 160px;
+  border-radius: 12px;
+  background: #fff;
+  padding: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.quick-lead-qr span {
+  font-size: 11.5px; color: var(--label-3);
+  font-weight: 600;
+}
+.quick-lead-actions {
+  flex: 1; min-width: 240px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.quick-lead-url {
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: 8px;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 12px;
+  color: var(--label);
+  word-break: break-all;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    Analyse-Gate Banner (Soft-CTA — Karriere-Analyse nachholen)
    ═══════════════════════════════════════════════════════════════════ */

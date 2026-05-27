@@ -90,9 +90,29 @@ export default async function AdvisorDashboard() {
       <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
         Guten Tag{advisor?.display_name ? `, ${advisor.display_name.split(' ')[0]}` : (profile?.name ? `, ${profile.name.split(' ')[0]}` : '')}
       </h1>
-      <p style={{ color: '#86868b', marginBottom: 32 }}>
+      <p style={{ color: '#86868b', marginBottom: 16 }}>
         Dein Berater-Dashboard
       </p>
+
+      {/* Schnellaktionen */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 32, flexWrap: 'wrap' }}>
+        <Link href="/advisor/quick-lead" style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          padding: '10px 18px', background: '#CC1426', color: '#fff',
+          borderRadius: 980, textDecoration: 'none', fontSize: 13.5, fontWeight: 600,
+          boxShadow: '0 1px 2px rgba(204,20,38,0.25)',
+        }}>
+          + Neuer CV-Check (Ad-hoc)
+        </Link>
+        <Link href="/advisor/leads" style={{
+          display: 'inline-flex', alignItems: 'center',
+          padding: '10px 18px', background: '#fff', color: '#1A1A1A',
+          borderRadius: 980, textDecoration: 'none', fontSize: 13.5, fontWeight: 600,
+          border: '0.5px solid #E8E6E1',
+        }}>
+          Alle Leads ansehen
+        </Link>
+      </div>
 
       {/* Kennzahlen */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40 }}>

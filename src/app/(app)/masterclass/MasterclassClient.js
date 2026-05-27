@@ -9,7 +9,7 @@ const ANALYSE_TOOLS = [
   {
     id: 'strukturgramm',
     icon: '🔺',
-    title: 'Strukturgramm®',
+    title: 'Struktogramm®',
     subtitle: 'Erkenne deine Biostruktur',
     pricing: 'Online-Test + Coaching · Preis auf Anfrage',
     link: 'https://www.daskarriereinstitut.de/de/e/structogram-82?uId=2',
