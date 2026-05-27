@@ -5422,6 +5422,13 @@ body:has(.course-v2) .sos-button {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 32px;
   border-bottom: 0.5px solid var(--line-2);
+  gap: 12px;
+}
+.aff-header img { max-width: 180px; }
+@media (max-width: 560px) {
+  .aff-header { padding: 14px 16px; }
+  .aff-header img { height: 24px !important; max-width: 140px; }
+  .aff-header-cta { font-size: 11px; }
 }
 .aff-logo {
   font-family: var(--sf);
