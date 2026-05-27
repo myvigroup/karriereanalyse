@@ -13,7 +13,7 @@ export async function createAutoNotifications(supabase, userId, context = {}) {
       notifications.push({
         user_id: userId,
         title: `Follow-up: ${app.company_name}`,
-        content: 'Seit 7+ Tagen ohne R\u00FCckmeldung. Zeit f\u00FCr ein Follow-up!',
+        content: 'Seit 7+ Tagen ohne Rückmeldung. Zeit für ein Follow-up!',
         type: 'reminder',
         link: '/applications',
       });
@@ -42,7 +42,7 @@ export async function createAutoNotifications(supabase, userId, context = {}) {
       notifications.push({
         user_id: userId,
         title: `${cold.length} Kontakt${cold.length > 1 ? 'e' : ''} warten auf dich`,
-        content: `${cold[0].name} und andere wurden l\u00E4nger nicht kontaktiert.`,
+        content: `${cold[0].name} und andere wurden länger nicht kontaktiert.`,
         type: 'reminder',
         link: '/network',
       });
@@ -54,7 +54,7 @@ export async function createAutoNotifications(supabase, userId, context = {}) {
     notifications.push({
       user_id: userId,
       title: 'Burnout-Warnung',
-      content: 'Dein Burnout-Score ist erh\u00F6ht. Sprich mit deinem Coach.',
+      content: 'Dein Burnout-Score ist erhöht. Sprich mit deinem Coach.',
       type: 'coaching_impulse',
       link: '/coach',
     });

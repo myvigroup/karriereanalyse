@@ -3,7 +3,7 @@ import CookieBanner from '@/components/ui/CookieBanner';
 
 export const metadata = {
   title: 'Karriere-Institut | Dein Karriere-Betriebssystem',
-  description: 'Karriereanalyse, Masterclass & Coaching f\u00FCr Fach- und F\u00FChrungskr\u00E4fte',
+  description: 'Karriereanalyse, Masterclass & Coaching für Fach- und Führungskräfte',
   themeColor: '#CC1426',
   appleWebApp: { statusBarStyle: 'black-translucent', title: 'Karriere-OS' },
   viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',

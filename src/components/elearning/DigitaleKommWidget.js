@@ -4,28 +4,28 @@ import { useState } from 'react';
 import { DIGITALE_KOMMUNIKATION } from '@/lib/elearning/kommunikation-content';
 
 const DEFAULT_SLACK_RULES = [
-  { regel: 'Thread-Pflicht f\u00fcr Antworten', warum: 'Threads halten Kan\u00e4le \u00fcbersichtlich. Ohne Threads entstehen lange, verwirrende Konversationen, in denen niemand mehr den Kontext findet.' },
-  { regel: 'Emoji-Reaktionen statt "OK"-Nachrichten', warum: 'Ein Daumen-hoch-Emoji spart eine Benachrichtigung und reduziert Noise. Jede unn\u00f6tige Nachricht ist eine Unterbrechung.' },
-  { regel: 'Status aktiv pflegen', warum: 'Dein Status zeigt dem Team, ob du erreichbar bist, im Meeting sitzt oder fokussiert arbeitest. Das reduziert unn\u00f6tige Pings.' },
-  { regel: 'Channels statt DMs f\u00fcr Team-Themen', warum: 'Wissen geh\u00f6rt ins Team, nicht in private Nachrichten. In Channels kann jeder mitlesen und beitragen.' },
+  { regel: 'Thread-Pflicht für Antworten', warum: 'Threads halten Kanäle übersichtlich. Ohne Threads entstehen lange, verwirrende Konversationen, in denen niemand mehr den Kontext findet.' },
+  { regel: 'Emoji-Reaktionen statt "OK"-Nachrichten', warum: 'Ein Daumen-hoch-Emoji spart eine Benachrichtigung und reduziert Noise. Jede unnötige Nachricht ist eine Unterbrechung.' },
+  { regel: 'Status aktiv pflegen', warum: 'Dein Status zeigt dem Team, ob du erreichbar bist, im Meeting sitzt oder fokussiert arbeitest. Das reduziert unnötige Pings.' },
+  { regel: 'Channels statt DMs für Team-Themen', warum: 'Wissen gehört ins Team, nicht in private Nachrichten. In Channels kann jeder mitlesen und beitragen.' },
   { regel: '@here und @channel sparsam nutzen', warum: 'Jedes @channel benachrichtigt ALLE. Frage dich: Muss das wirklich jeder sofort sehen? Meistens reicht @here oder ein gezielter @mention.' },
 ];
 
 const DEFAULT_VIDEO_RULES = [
-  { regel: 'Kamera an = Respekt', warum: 'Eingeschaltete Kameras verbessern die Kommunikation. Mimik und Gestik sind essentiell f\u00fcr Verst\u00e4ndnis. Kamera aus sendet das Signal: "Mir ist es nicht wichtig."' },
-  { regel: 'Mute wenn du nicht sprichst', warum: 'Hintergrundger\u00e4usche st\u00f6ren alle. Ein Klick auf Mute ist einfach und zeigt R\u00fccksicht.' },
-  { regel: 'Virtual Background professionell', warum: 'Ein aufger\u00e4umter (virtueller) Hintergrund wirkt professionell. Vermeide ablenkende oder lustige Hintergr\u00fcnde in Business-Calls.' },
-  { regel: 'Chat f\u00fcr Fragen nutzen', warum: 'Statt den Sprecher zu unterbrechen: Frage in den Chat schreiben. Der Moderator sammelt und stellt sie geb\u00fcndelt.' },
-  { regel: 'P\u00fcnktlich = 2 Minuten vorher', warum: 'Technik-Probleme passieren. Sei 2 Minuten fr\u00fcher da, teste Audio/Video, und starte entspannt statt gehetzt.' },
+  { regel: 'Kamera an = Respekt', warum: 'Eingeschaltete Kameras verbessern die Kommunikation. Mimik und Gestik sind essentiell für Verständnis. Kamera aus sendet das Signal: "Mir ist es nicht wichtig."' },
+  { regel: 'Mute wenn du nicht sprichst', warum: 'Hintergrundgeräusche stören alle. Ein Klick auf Mute ist einfach und zeigt Rücksicht.' },
+  { regel: 'Virtual Background professionell', warum: 'Ein aufgeräumter (virtueller) Hintergrund wirkt professionell. Vermeide ablenkende oder lustige Hintergründe in Business-Calls.' },
+  { regel: 'Chat für Fragen nutzen', warum: 'Statt den Sprecher zu unterbrechen: Frage in den Chat schreiben. Der Moderator sammelt und stellt sie gebündelt.' },
+  { regel: 'Pünktlich = 2 Minuten vorher', warum: 'Technik-Probleme passieren. Sei 2 Minuten früher da, teste Audio/Video, und starte entspannt statt gehetzt.' },
 ];
 
 const DEFAULT_KANAL_QUIZ = [
-  { situation: 'Kurze R\u00fcckfrage zum Status eines Tasks', correct: 'Chat', feedback: 'Kurze, asynchrone Fragen geh\u00f6ren in den Chat. Kein Meeting n\u00f6tig!' },
-  { situation: 'Konfliktkl\u00e4rung mit einem Kollegen', correct: 'Video', feedback: 'Konflikte brauchen Mimik und Tonalit\u00e4t. Text kann leicht missverstanden werden.' },
-  { situation: 'Formelle Projektfreigabe dokumentieren', correct: 'Email', feedback: 'E-Mails sind dokumentiert und formal. Perfekt f\u00fcr offizielle Freigaben.' },
+  { situation: 'Kurze Rückfrage zum Status eines Tasks', correct: 'Chat', feedback: 'Kurze, asynchrone Fragen gehören in den Chat. Kein Meeting nötig!' },
+  { situation: 'Konfliktklärung mit einem Kollegen', correct: 'Video', feedback: 'Konflikte brauchen Mimik und Tonalität. Text kann leicht missverstanden werden.' },
+  { situation: 'Formelle Projektfreigabe dokumentieren', correct: 'Email', feedback: 'E-Mails sind dokumentiert und formal. Perfekt für offizielle Freigaben.' },
   { situation: 'Dringende Frage zu einem Kundenanruf in 10 Minuten', correct: 'Anruf', feedback: 'Bei Zeitdruck ist ein kurzer Anruf der schnellste Kanal.' },
-  { situation: 'Wochenbericht ans Team senden', correct: 'Email', feedback: 'Strukturierte Informationen, die nachgelesen werden sollen, geh\u00f6ren in eine E-Mail.' },
-  { situation: 'Brainstorming-Session mit 4 Personen', correct: 'Video', feedback: 'Kreative Zusammenarbeit braucht Interaktion \u2013 Video ist ideal f\u00fcr Brainstorming.' },
+  { situation: 'Wochenbericht ans Team senden', correct: 'Email', feedback: 'Strukturierte Informationen, die nachgelesen werden sollen, gehören in eine E-Mail.' },
+  { situation: 'Brainstorming-Session mit 4 Personen', correct: 'Video', feedback: 'Kreative Zusammenarbeit braucht Interaktion \u2013 Video ist ideal für Brainstorming.' },
 ];
 
 const CHANNEL_OPTIONS = [
@@ -128,7 +128,7 @@ export default function DigitaleKommWidget({ onComplete }) {
             </div>
             <p style={styles.resultFeedback}>
               {quizPassed
-                ? 'Du wei\u00dft genau, welcher Kanal wann passt!'
+                ? 'Du weißt genau, welcher Kanal wann passt!'
                 : 'Schau dir die Regeln nochmal an \u2013 der richtige Kanal macht den Unterschied.'}
             </p>
           </div>
@@ -208,13 +208,13 @@ export default function DigitaleKommWidget({ onComplete }) {
                 ...styles.feedbackTitle,
                 color: quizAnswer === current.correct ? '#10B981' : '#EF4444',
               }}>
-                {quizAnswer === current.correct ? 'Richtig!' : `Nicht ganz \u2013 richtig w\u00e4re: ${current.correct}`}
+                {quizAnswer === current.correct ? 'Richtig!' : `Nicht ganz \u2013 richtig wäre: ${current.correct}`}
               </p>
               <p style={styles.feedbackText}>{current.feedback}</p>
             </div>
             <div style={styles.actions}>
               <button className="btn btn-primary" onClick={handleQuizNext}>
-                {quizIndex + 1 < kanalQuiz.length ? 'N\u00e4chste Frage' : 'Ergebnis anzeigen'}
+                {quizIndex + 1 < kanalQuiz.length ? 'Nächste Frage' : 'Ergebnis anzeigen'}
               </button>
             </div>
           </>

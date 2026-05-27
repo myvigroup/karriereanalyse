@@ -154,14 +154,57 @@ export default async function CVCheckPage() {
   // 1-5 → 0-100
   const score100 = Math.round((displayRating / 5) * 100);
   const scoreHeadline = score100 >= 85 ? 'Top-Liga. Halte das Niveau.'
-    : score100 >= 70 ? 'Solide Basis. Drei Hebel für den Sprung.'
+    : score100 >= 70 ? 'Solide Basis. Drei Hebel für den Sprung in die Top-Liga.'
     : score100 >= 50 ? 'Solider Stand mit klaren Stellschrauben.'
     : score100 > 0 ? 'Da geht mehr — wir zeigen dir genau wo.'
     : 'Deine Auswertung wird gerade vorbereitet.';
+  const scoreLead = score100 >= 85 ? 'Recruiter scannen 6 Sekunden. Bei dir reichen die ersten zwei Zeilen — perfekter Stand.'
+    : score100 >= 70 ? 'Recruiter scannen 6 Sekunden. Deine ersten zwei Zeilen tragen — danach verlierst du sie. Wir wissen wo.'
+    : score100 >= 50 ? 'Recruiter scannen 6 Sekunden. Du hast den Stand. Jetzt schärfen wir die Wirkung — Hebel sind klar.'
+    : score100 > 0 ? 'Recruiter scannen 6 Sekunden. Aktuell verlierst du sie früh. Drei konkrete Hebel ändern das sofort.'
+    : '';
 
   const dateStr = lead?.fairs?.start_date
     ? new Date(lead.fairs.start_date).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
     : null;
+
+  // Tageszeit-Begrüßung für Kicker
+  const now = new Date();
+  const greeting = now.getHours() < 11 ? 'Guten Morgen'
+    : now.getHours() < 14 ? 'Guten Mittag'
+    : now.getHours() < 18 ? 'Guten Nachmittag' : 'Guten Abend';
+  const weekday = now.toLocaleDateString('de-DE', { weekday: 'long' });
+  const dayMonth = now.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
+
+  // CV-Version (derzeit nur "Aktuelle Version" — Versionshistorie kommt später)
+  const versionStr = 'Aktuelle Version';
+  const checkedAtStr = feedback?.created_at
+    ? new Date(feedback.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+    : 'heute';
+
+  // Map auf 5 Mockup-Kategorien — wo Daten fehlen → graceful fallback aus existierenden
+  const getCat = (key) => aiCategories?.[key] || byCategory[key] || {};
+  const ratingToScore = (r) => Math.round((Number(r) || 0) * 20);
+  const tierFromScore = (s) => s >= 80 ? 'good' : s >= 60 ? 'mid' : s > 0 ? 'low' : 'mid';
+  const tierToLabel = (t) => t === 'good' ? 'STARK' : t === 'mid' ? 'MITTEL' : 'SCHWACH';
+
+  const fiveCats = [
+    { key: 'design',    label: 'Design & Layout',       score: ratingToScore(getCat('design').rating)  || 0,  data: getCat('design') },
+    { key: 'struktur',  label: 'Struktur & Lesbarkeit', score: ratingToScore(getCat('struktur').rating) || 0, data: getCat('struktur') },
+    { key: 'inhalt',    label: 'Inhalt & Wirkung',      score: ratingToScore(getCat('inhalt').rating)  || 0,  data: getCat('inhalt') },
+    { key: 'wirkung',   label: 'Skills & Match',        score: ratingToScore(getCat('wirkung').rating) || 0,  data: getCat('wirkung') },
+    { key: 'keywords',  label: 'Keywords & ATS',        score: ai?.keywordScore || 0,                          data: { detail: ai?.keywordHint || 'Keyword-Analyse wird laufend ergänzt.' } },
+  ];
+
+  // Job-Match-Daten (heuristisch aus AI ableiten oder Defaults)
+  const jobPosition = lead?.target_position || 'Deine Wunsch-Position';
+  const jobMatchPct = ai?.jobMatchScore || score100;
+  const missingSkills = ai?.missingSkills || [];
+
+  // Coach-Vorschlag (passend zur Position — default Alexander Zill für Leadership/Senior, Maximilian für Bewerbung)
+  const suggestedCoach = (jobPosition.toLowerCase().includes('lead') || jobPosition.toLowerCase().includes('senior'))
+    ? { name: 'Alexander Zill', role: 'Leadership-Coach', initials: 'AZ', gradient: 'linear-gradient(135deg, #1d4d2e 0%, #0e2818 100%)', years: '30+ Jahre' }
+    : { name: 'Maximilian Wimmer', role: 'Bewerbungsstratege', initials: 'MW', gradient: 'linear-gradient(135deg, #1d4e89 0%, #0f2e4f 100%)', years: '4+ Jahre' };
 
   return (
     <div className="cvcheck-v2">
@@ -194,35 +237,35 @@ export default async function CVCheckPage() {
         </div>
       )}
 
-      {/* Title block */}
+      {/* Title block — Tageszeit-Kicker + Headline + Dynamic Sub */}
       <div className="title-kicker">
         <span className="pulse" />
-        {fairName ? `${fairName}${dateStr ? ` · ${dateStr}` : ''}` : 'Lebenslauf-Check'}
+        {weekday}, {dayMonth} · {greeting}
       </div>
       <h1 className="page-title">
         Lebenslauf-Check.{' '}
         <span className="faded">Was wirklich beim Recruiter ankommt.</span>
       </h1>
       <p className="page-sub">
-        Eine ehrliche, datenbasierte Analyse mit konkreten Hebeln für mehr Wirkung.
+        Wir scannen deinen CV in 6 Sekunden — was Recruiter sehen, in welcher Reihenfolge, was sie überspringen.
+        {lead?.target_position && <> Aktuelle Jobbeschreibung: <strong>{lead.target_position}</strong>.</>}
       </p>
 
-      {/* Headbar */}
-      <div className="cvc-headbar">
-        {lead?.target_position && (
-          <span className="cvc-jobmatch-tag"><AppIcon name="target" size={12} stroke={1.8} /> {lead.target_position}</span>
-        )}
-        <span className="cvc-version">{doc.file_name}</span>
+      {/* Action Bar: Upload-Button · Version-Info · Edit-Job-Button */}
+      <div className="cvc-actionbar">
+        <Link href="/cv-check/upload" className="cvc-action-primary">
+          <AppIcon name="arrow-up" size={14} stroke={1.8} /> Neue Version hochladen
+        </Link>
+        <span className="cvc-action-meta">
+          {versionStr} · zuletzt geprüft {checkedAtStr}
+        </span>
         <span className="cvc-spacer" />
-        {previewUrl && (
-          <a className="btn btn-ghost" href={previewUrl} download
-             style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <Icon name="dl" size={14} /> Download
-          </a>
-        )}
+        <Link href="/profile" className="cvc-action-secondary">
+          Jobbeschreibung ändern
+        </Link>
       </div>
 
-      {/* Top grid: Score Hero (left) + Categories (right) */}
+      {/* Top grid: Score Hero (left, LARGER) + Categories (right, 5 Bereiche) */}
       <div className="cvc-grid">
         <div className="cvc-col-left">
           <div className="cvc-score-hero">
@@ -246,46 +289,47 @@ export default async function CVCheckPage() {
               <div className="cvc-score-meta">
                 <div className="eyebrow">Dein CV-Score</div>
                 <h2>{scoreHeadline}</h2>
-                {displaySummary && <p>{displaySummary}</p>}
+                <p>{scoreLead || displaySummary}</p>
+                {hasRating && (
+                  <div className="cvc-score-progress">
+                    <AppIcon name="trending-up" size={13} stroke={2} />
+                    Aktuelle Auswertung · {versionStr}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right: Categories */}
-        <div className="card">
+        {/* Right: Categories — 5 Bereiche mit Score /100 + colored bars */}
+        <div className="card cvc-cats-card">
           <div className="card-head">
             <h3 className="card-title">
               Kategorien
-              <span className="kicker">4 Bereiche</span>
+              <span className="kicker">5 Bereiche</span>
             </h3>
+            <span className="cvc-method-link">Methodik</span>
           </div>
           <div className="cvc-cats">
-            {CATEGORIES.map(cat => {
-              const aiCat = aiCategories?.[cat.key] || {};
-              const localCat = byCategory[cat.key];
-              const rawRating = aiCat.rating || localCat?.rating || 0;
-              const s100 = rawRating * 20;
-              const tier = s100 >= 80 ? 'good' : s100 >= 60 ? 'mid' : s100 > 0 ? 'low' : 'mid';
-              const tierLabel = tier === 'good' ? 'Stark' : tier === 'mid' ? 'Mittel' : 'Schwach';
-              const presets = (localCat?.presets?.length ? localCat.presets : (aiCat.selectedPresets || []));
-              const freetext = localCat?.freetext;
-              const comment = aiCat.comment;
-              const detail = aiCat.detail;
-              const hasAnyContent = presets.length > 0 || !!comment || !!detail || !!freetext;
+            {fiveCats.map(c => {
+              const tier = tierFromScore(c.score);
+              const presets = c.data?.selectedPresets || c.data?.presets || [];
+              const comment = c.data?.comment;
+              const detail = c.data?.detail;
+              const hasAnyContent = presets.length > 0 || !!comment || !!detail;
               return (
-                <div className="cvc-cat" key={cat.key}>
-                  <span className="cvc-cat-name">{cat.label}</span>
+                <div className="cvc-cat" key={c.key}>
+                  <span className="cvc-cat-name">{c.label}</span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-                    {rawRating > 0 && <span className={`cvc-cat-tag t-${tier}`}>{tierLabel}</span>}
-                    {rawRating > 0 && (
+                    {c.score > 0 && <span className={`cvc-cat-tag t-${tier}`}>{tierToLabel(tier)}</span>}
+                    {c.score > 0 && (
                       <span className="cvc-cat-score">
-                        {rawRating}<span className="of">/5</span>
+                        {c.score}<span className="of">/100</span>
                       </span>
                     )}
                   </span>
                   <div className={`cvc-cat-bar s-${tier}`}>
-                    <div style={{ width: `${s100}%` }} />
+                    <div style={{ width: `${c.score}%` }} />
                   </div>
                   {hasAnyContent && (
                     <div className="cvc-cat-detail" style={{ gridColumn: '1 / -1' }}>
@@ -304,13 +348,52 @@ export default async function CVCheckPage() {
                         </ul>
                       )}
                       {comment && <div className="cvc-cat-comment">„{comment}"</div>}
-                      {freetext && <div className="cvc-cat-comment">„{freetext}"</div>}
                     </div>
                   )}
                 </div>
               );
             })}
           </div>
+
+          {/* Job-Match Section (innerhalb der Categories-Card unten) */}
+          {lead?.target_position && (
+            <div className="cvc-jobmatch">
+              <div className="cvc-jobmatch-ring">
+                <svg viewBox="0 0 60 60">
+                  <circle cx="30" cy="30" r="26" fill="none" stroke="var(--fill)" strokeWidth="6" />
+                  <circle cx="30" cy="30" r="26" fill="none" stroke="var(--ki-red)" strokeWidth="6"
+                          strokeDasharray={`${(jobMatchPct / 100) * 163.36} 163.36`}
+                          strokeLinecap="round" transform="rotate(-90 30 30)" />
+                </svg>
+                <span>{jobMatchPct}%</span>
+              </div>
+              <div className="cvc-jobmatch-text">
+                <div className="cvc-jobmatch-label">JOB-MATCH</div>
+                <div className="cvc-jobmatch-title">{jobPosition}</div>
+                <div className="cvc-jobmatch-sub">
+                  {missingSkills.length > 0
+                    ? <>Du erfüllst {Math.round(jobMatchPct / 10)} von 10+ Schlüsselkompetenzen. Drei fehlen: <strong>{missingSkills.slice(0, 3).join(', ')}</strong>.</>
+                    : <>Wir analysieren gerade deine Schlüsselkompetenzen für diese Position.</>
+                  }
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Coach-CTA Card */}
+      <div className="cvc-coach-card">
+        <div className="cvc-coach-avatar" style={{ background: suggestedCoach.gradient }}>
+          {suggestedCoach.initials}
+        </div>
+        <div className="cvc-coach-info">
+          <div className="cvc-coach-name">{suggestedCoach.name}</div>
+          <div className="cvc-coach-role">{suggestedCoach.role} · {suggestedCoach.years} Erfahrung</div>
+        </div>
+        <div className="cvc-coach-actions">
+          <Link href="/coach" className="cvc-coach-cta-primary">CV-Termin buchen · 30 Min</Link>
+          <Link href="/coach" className="cvc-coach-cta-secondary">Profil ansehen</Link>
         </div>
       </div>
 

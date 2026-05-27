@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 
 const PRODUCT_INFO = {
   MASTERCLASS: { icon: '\u25B6', title: 'Willkommen zur Masterclass!', sub: 'Starte deinen ersten Kurs.', cta: 'Zu den Kursen', link: '/masterclass' },
-  SEMINAR: { icon: '\u{1F3AF}', title: 'Seminar gebucht!', sub: 'Du erh\u00E4ltst eine Best\u00E4tigung per Email.', cta: 'Zum Dashboard', link: '/dashboard' },
+  SEMINAR: { icon: '\u{1F3AF}', title: 'Seminar gebucht!', sub: 'Du erhältst eine Bestätigung per Email.', cta: 'Zum Dashboard', link: '/dashboard' },
   COACHING: { icon: '\u{1F91D}', title: 'Coaching gebucht!', sub: 'Buche jetzt deinen Termin.', cta: 'Termin buchen', link: null, calendly: true },
   ANALYSE_STUDENT: { icon: '\u25CE', title: 'Karriere-Blutbild freigeschaltet!', sub: 'Starte jetzt deine Analyse.', cta: 'Zur Analyse', link: '/analyse' },
   ANALYSE_PRO: { icon: '\u25CE', title: 'Karriere-Blutbild freigeschaltet!', sub: 'Starte jetzt deine professionelle Analyse.', cta: 'Zur Analyse', link: '/analyse' },

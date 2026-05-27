@@ -244,58 +244,11 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
     <>
       {/* Desktop sidebar */}
       <aside className="sb" data-tour-sidebar="" aria-label="Hauptmenü">
-        <button className="sb-toggle" onClick={toggleCollapsed} type="button" aria-label="Sidebar umschalten">
+        <button className="sb-toggle" onClick={toggleCollapsed} type="button" aria-label="Sidebar umschalten" title="Sidebar ein-/ausklappen">
           <Icon name="chevron" />
         </button>
 
-        <button
-          className="sb-bell"
-          data-tour-notifications=""
-          onClick={() => setShowNotifs(v => !v)}
-          type="button"
-          aria-label="Benachrichtigungen"
-          title="Benachrichtigungen"
-        >
-          <Icon name="bell" />
-          {unreadCount > 0 && <span className="sb-bell-dot">{unreadCount}</span>}
-        </button>
-
         {sidebarBody}
-
-        {showNotifs && (
-          <div className="sb-notifs" role="dialog" aria-label="Benachrichtigungen">
-            <div className="sb-notifs-head">
-              <span>Benachrichtigungen</span>
-              {unreadCount > 0 && (
-                <button type="button" onClick={markAllRead}>Alle gelesen</button>
-              )}
-            </div>
-            {notifications.length === 0 ? (
-              <div className="sb-notifs-empty">Keine Benachrichtigungen</div>
-            ) : (
-              notifications.map(n => (
-                <button
-                  key={n.id}
-                  type="button"
-                  onClick={() => handleNotifClick(n)}
-                  className={`sb-notif${n.read ? '' : ' unread'}`}
-                >
-                  <span className="sb-notif-emoji">
-                    {n.type === 'coaching_impulse' ? '💡' : n.type === 'badge' ? '🏅' : n.type === 'achievement' ? '🏆' : '📌'}
-                  </span>
-                  <div className="sb-notif-body">
-                    <div className="sb-notif-title">{n.title}</div>
-                    {n.content && <div className="sb-notif-content">{n.content}</div>}
-                    <div className="sb-notif-time">
-                      {new Date(n.created_at).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                    </div>
-                  </div>
-                  {!n.read && <span className="sb-notif-dot" />}
-                </button>
-              ))
-            )}
-          </div>
-        )}
       </aside>
 
       {/* Mobile top bar */}
@@ -309,15 +262,7 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
           <span /><span /><span />
         </button>
         <div className="sb-mobile-brand">Karriere-Institut</div>
-        <button
-          className="sb-mobile-bell"
-          onClick={() => setShowNotifs(v => !v)}
-          type="button"
-          aria-label="Benachrichtigungen"
-        >
-          <Icon name="bell" />
-          {unreadCount > 0 && <span className="sb-bell-dot">{unreadCount}</span>}
-        </button>
+        <div style={{ width: 32 }} />
       </div>
 
       {/* Mobile drawer overlay */}

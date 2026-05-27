@@ -19,14 +19,14 @@ const DEFAULT_SNIPPETS = [
     explanation: 'Person B ignoriert das Gesagte komplett und wechselt das Thema.',
   },
   {
-    personA: 'Ich mache mir Sorgen um die Pr\u00e4sentation morgen.',
+    personA: 'Ich mache mir Sorgen um die Präsentation morgen.',
     personB: 'Ja ja, wird schon... mhm... klar...',
     correct: 1,
-    explanation: 'Person B gibt nur oberfl\u00e4chliche Reaktionen, ohne wirklich zuzuh\u00f6ren.',
+    explanation: 'Person B gibt nur oberflächliche Reaktionen, ohne wirklich zuzuhören.',
   },
   {
     personA: 'Im Meeting ging es um Budget, Timelines und auch um die neuen Rollen.',
-    personB: 'Oh, neue Rollen? Erz\u00e4hl mehr! Was ist mit dem Budget?',
+    personB: 'Oh, neue Rollen? Erzähl mehr! Was ist mit dem Budget?',
     correct: 2,
     explanation: 'Person B greift nur die interessanten Teile heraus und ignoriert den Rest.',
   },
@@ -34,13 +34,13 @@ const DEFAULT_SNIPPETS = [
     personA: 'Ich bin unsicher, ob ich die Stelle annehmen soll.',
     personB: 'Was genau macht dich unsicher? Ist es das Gehalt oder die Aufgaben?',
     correct: 3,
-    explanation: 'Person B h\u00f6rt aufmerksam zu und stellt gezielte R\u00fcckfragen.',
+    explanation: 'Person B hört aufmerksam zu und stellt gezielte Rückfragen.',
   },
   {
-    personA: 'Seit der Umstrukturierung f\u00fchle ich mich im Team nicht mehr wohl.',
-    personB: 'Das klingt so, als w\u00fcrdest du dich unsichtbar f\u00fchlen. Das muss belastend sein.',
+    personA: 'Seit der Umstrukturierung fühle ich mich im Team nicht mehr wohl.',
+    personB: 'Das klingt so, als würdest du dich unsichtbar fühlen. Das muss belastend sein.',
     correct: 4,
-    explanation: 'Person B versteht die Emotion dahinter und spiegelt die Gef\u00fchle empathisch wider.',
+    explanation: 'Person B versteht die Emotion dahinter und spiegelt die Gefühle empathisch wider.',
   },
 ];
 
@@ -80,9 +80,9 @@ export default function ZuhoerStufenWidget({ onComplete }) {
   if (phase === 'intro') {
     return (
       <div style={styles.container}>
-        <h2 style={styles.heading}>Die 5 Stufen des Zuh\u00f6rens</h2>
+        <h2 style={styles.heading}>Die 5 Stufen des Zuhörens</h2>
         <p style={styles.subtext}>
-          Nicht jedes Zuh\u00f6ren ist gleich. Lerne die 5 Stufen kennen &mdash; von Ignorieren bis Empathisch.
+          Nicht jedes Zuhören ist gleich. Lerne die 5 Stufen kennen &mdash; von Ignorieren bis Empathisch.
         </p>
 
         <div style={styles.staircase}>
@@ -108,7 +108,7 @@ export default function ZuhoerStufenWidget({ onComplete }) {
 
         <div style={styles.actions}>
           <button className="btn btn-primary" onClick={() => setPhase('quiz')}>
-            Jetzt \u00fcben
+            Jetzt üben
           </button>
         </div>
       </div>
@@ -132,9 +132,9 @@ export default function ZuhoerStufenWidget({ onComplete }) {
           </div>
           <p style={styles.feedbackSummary}>
             {totalCorrect >= 4
-              ? 'Ausgezeichnet! Du erkennst die Zuh\u00f6rstufen zuverl\u00e4ssig.'
+              ? 'Ausgezeichnet! Du erkennst die Zuhörstufen zuverlässig.'
               : totalCorrect >= 3
-                ? 'Gut gemacht! Mit etwas \u00dcbung erkennst du noch feinere Unterschiede.'
+                ? 'Gut gemacht! Mit etwas Übung erkennst du noch feinere Unterschiede.'
                 : 'Schau dir die Stufen nochmal an. Die Unterschiede sind subtil!'}
           </p>
         </div>
@@ -169,7 +169,7 @@ export default function ZuhoerStufenWidget({ onComplete }) {
         </div>
       </div>
 
-      <p style={styles.questionText}>Auf welcher Stufe h\u00f6rt Person B zu?</p>
+      <p style={styles.questionText}>Auf welcher Stufe hört Person B zu?</p>
 
       {/* Stufen buttons */}
       <div style={styles.stufenBtns}>
@@ -217,7 +217,7 @@ export default function ZuhoerStufenWidget({ onComplete }) {
       {showFeedback && (
         <div style={styles.actions}>
           <button className="btn btn-primary" onClick={handleNext}>
-            {currentIndex + 1 < snippets.length ? 'N\u00e4chste Frage' : 'Ergebnis anzeigen'}
+            {currentIndex + 1 < snippets.length ? 'Nächste Frage' : 'Ergebnis anzeigen'}
           </button>
         </div>
       )}

@@ -1300,15 +1300,169 @@ html[data-sb="collapsed"] .sb-version { display: none; }
   min-height: 0;
 }
 
-/* ── Score Hero (dark red gradient — kompakt, dezent) ──────────────────── */
+/* ── Score Hero (dark red gradient — prominent aber nicht overstretched) ── */
 .cvcheck-v2 .cvc-score-hero {
   background: linear-gradient(135deg, var(--ki-red) 0%, var(--ki-red-4) 60%, #3c0411 100%);
   border-radius: var(--r-lg);
-  padding: 24px 26px;
+  padding: 32px 36px;
   color: #fff;
   position: relative; overflow: hidden;
-  box-shadow: 0 8px 24px rgba(130,3,28,0.18), 0 1px 2px rgba(0,0,0,0.04);
+  box-shadow: 0 12px 32px rgba(130,3,28,0.18), 0 1px 2px rgba(0,0,0,0.04);
 }
+
+/* Action-Bar (Upload + Version + Edit-Job) */
+.cvcheck-v2 .cvc-actionbar {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.cvcheck-v2 .cvc-action-primary {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 18px;
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: 980px;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--label);
+  text-decoration: none;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.cvcheck-v2 .cvc-action-primary:hover { background: var(--fill); border-color: var(--line-2); }
+.cvcheck-v2 .cvc-action-secondary {
+  display: inline-flex; align-items: center;
+  padding: 10px 18px;
+  background: transparent;
+  border: 0.5px solid var(--line);
+  border-radius: 980px;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--label-2);
+  text-decoration: none;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.cvcheck-v2 .cvc-action-secondary:hover { background: var(--fill); color: var(--label); }
+.cvcheck-v2 .cvc-action-meta {
+  font-size: 12.5px; color: var(--label-3);
+}
+.cvcheck-v2 .cvc-spacer { flex: 1; }
+
+/* Methodik-Link in Categories-Card */
+.cvcheck-v2 .cvc-method-link {
+  font-size: 12.5px; font-weight: 600;
+  color: var(--ki-red-dark);
+  margin-left: auto;
+}
+
+/* Progress-Pill in Score-Hero */
+.cvcheck-v2 .cvc-score-progress {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 16px;
+  padding: 7px 13px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 980px;
+  font-size: 12px; font-weight: 600;
+  color: #fff;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Job-Match-Section (innerhalb Categories-Card unten) */
+.cvcheck-v2 .cvc-jobmatch {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px;
+  margin-top: 20px;
+  background: var(--fill);
+  border-radius: var(--r-md);
+  border: 0.5px solid var(--line);
+}
+.cvcheck-v2 .cvc-jobmatch-ring {
+  position: relative;
+  width: 60px; height: 60px;
+  flex-shrink: 0;
+  display: grid; place-items: center;
+}
+.cvcheck-v2 .cvc-jobmatch-ring svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+.cvcheck-v2 .cvc-jobmatch-ring span {
+  font-family: var(--sf);
+  font-size: 15px; font-weight: 600;
+  color: var(--label);
+  letter-spacing: -0.02em;
+}
+.cvcheck-v2 .cvc-jobmatch-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.cvcheck-v2 .cvc-jobmatch-label {
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--label-4);
+}
+.cvcheck-v2 .cvc-jobmatch-title {
+  font-family: var(--sf);
+  font-size: 15px; font-weight: 600;
+  color: var(--label);
+  letter-spacing: -0.015em;
+}
+.cvcheck-v2 .cvc-jobmatch-sub {
+  font-size: 12.5px; line-height: 1.45;
+  color: var(--label-2);
+}
+.cvcheck-v2 .cvc-jobmatch-sub strong { color: var(--label); font-weight: 600; }
+
+/* Coach-CTA Card (unten) */
+.cvcheck-v2 .cvc-coach-card {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 22px;
+  margin-top: var(--gap);
+  background: var(--surface);
+  border: 0.5px solid var(--line);
+  border-radius: var(--r-lg);
+  flex-wrap: wrap;
+}
+.cvcheck-v2 .cvc-coach-avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: #fff;
+  font-family: var(--sf); font-size: 19px; font-weight: 600;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+.cvcheck-v2 .cvc-coach-info { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 2px; }
+.cvcheck-v2 .cvc-coach-name {
+  font-family: var(--sf);
+  font-size: 16px; font-weight: 600;
+  color: var(--label);
+  letter-spacing: -0.015em;
+}
+.cvcheck-v2 .cvc-coach-role {
+  font-size: 12.5px; color: var(--label-3);
+}
+.cvcheck-v2 .cvc-coach-actions {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.cvcheck-v2 .cvc-coach-cta-primary {
+  display: inline-flex; align-items: center;
+  padding: 10px 18px;
+  background: var(--ki-red);
+  color: #fff;
+  border-radius: 980px;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(204,20,38,0.25), inset 0 0.5px 0 rgba(255,255,255,0.2);
+  transition: background 0.12s ease;
+}
+.cvcheck-v2 .cvc-coach-cta-primary:hover { background: var(--ki-red-dark); }
+.cvcheck-v2 .cvc-coach-cta-secondary {
+  display: inline-flex; align-items: center;
+  padding: 10px 18px;
+  background: transparent;
+  border: 0.5px solid var(--line);
+  border-radius: 980px;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--label-2);
+  text-decoration: none;
+  transition: background 0.12s ease;
+}
+.cvcheck-v2 .cvc-coach-cta-secondary:hover { background: var(--fill); }
 .cvcheck-v2 .cvc-score-hero .hero-grain {
   position: absolute; inset: 0; pointer-events: none; opacity: 0.35;
   background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);

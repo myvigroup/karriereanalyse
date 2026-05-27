@@ -5,9 +5,9 @@ import { STIMM_TRAINING } from '@/lib/elearning/kommunikation-content';
 
 const DEFAULT_EXERCISES = [
   {
-    name: 'Atemst\u00fctze',
+    name: 'Atemstütze',
     icon: '\u{1F4A8}',
-    sentence: 'Ich pr\u00e4sentiere heute die Quartalszahlen und bin \u00fcberzeugt von unserer Strategie.',
+    sentence: 'Ich präsentiere heute die Quartalszahlen und bin überzeugt von unserer Strategie.',
     steps: [
       'Stehe aufrecht, Schultern entspannt.',
       'Atme tief in den Bauch ein (4 Sekunden).',
@@ -15,51 +15,51 @@ const DEFAULT_EXERCISES = [
       'Sprich den Satz langsam beim Ausatmen.',
       'Wiederhole 3x \u2013 jedes Mal etwas lauter.',
     ],
-    tips: 'Die Atemst\u00fctze gibt deiner Stimme Kraft und verhindert, dass sie am Satzende wegbricht.',
+    tips: 'Die Atemstütze gibt deiner Stimme Kraft und verhindert, dass sie am Satzende wegbricht.',
   },
   {
     name: 'Betonung & Pausen',
     icon: '\u{23F8}\u{FE0F}',
-    sentence: 'Wir m\u00fcssen JETZT handeln \u2013 [Pause] \u2013 bevor es zu sp\u00e4t ist.',
+    sentence: 'Wir müssen JETZT handeln \u2013 [Pause] \u2013 bevor es zu spät ist.',
     steps: [
-      'Lies den Satz zun\u00e4chst monoton vor.',
-      'Betone nun das Wort in Gro\u00dfbuchstaben.',
-      'F\u00fcge an der markierten Stelle eine 2-Sekunden-Pause ein.',
-      'Variiere: Betone verschiedene W\u00f6rter und beobachte die Wirkung.',
+      'Lies den Satz zunächst monoton vor.',
+      'Betone nun das Wort in Großbuchstaben.',
+      'Füge an der markierten Stelle eine 2-Sekunden-Pause ein.',
+      'Variiere: Betone verschiedene Wörter und beobachte die Wirkung.',
     ],
-    tips: 'Pausen sind m\u00e4chtiger als W\u00f6rter. Sie geben dem Zuh\u00f6rer Zeit zum Verarbeiten.',
+    tips: 'Pausen sind mächtiger als Wörter. Sie geben dem Zuhörer Zeit zum Verarbeiten.',
   },
   {
     name: 'Stimmtiefe',
     icon: '\u{1F3B5}',
     sentence: 'Guten Morgen, mein Name ist [dein Name] und ich leite das heutige Meeting.',
     steps: [
-      'Summe ein tiefes "Mmmm" f\u00fcr 10 Sekunden.',
+      'Summe ein tiefes "Mmmm" für 10 Sekunden.',
       'Sprich den Satz in deiner normalen Stimmlage.',
       'Sprich ihn erneut, etwas tiefer \u2013 stell dir vor, du sprichst "aus dem Brustkorb".',
-      'Finde deine nat\u00fcrliche, resonante Stimmlage.',
+      'Finde deine natürliche, resonante Stimmlage.',
     ],
     tips: 'Eine tiefere Stimme wirkt kompetenter. Aber erzwinge es nicht \u2013 finde DEINE beste Lage.',
   },
   {
     name: 'Tempo & Klarheit',
     icon: '\u{1F3C3}',
-    sentence: 'Unsere drei Priorit\u00e4ten sind: Erstens Kundenservice, zweitens Innovation, drittens Effizienz.',
+    sentence: 'Unsere drei Prioritäten sind: Erstens Kundenservice, zweitens Innovation, drittens Effizienz.',
     steps: [
       'Sprich den Satz in normalem Tempo (nimm die Zeit).',
-      'Sprich ihn 50% langsamer \u2013 betone jede Priorit\u00e4t.',
-      'Sprich ihn z\u00fcgig aber deutlich \u2013 jede Silbe muss erkennbar sein.',
-      'Finde das Tempo, bei dem du klar UND nat\u00fcrlich klingst.',
+      'Sprich ihn 50% langsamer \u2013 betone jede Priorität.',
+      'Sprich ihn zügig aber deutlich \u2013 jede Silbe muss erkennbar sein.',
+      'Finde das Tempo, bei dem du klar UND natürlich klingst.',
     ],
-    tips: 'Gutes Sprechtempo: 120\u2013150 W\u00f6rter pro Minute. Bei wichtigen Punkten: langsamer!',
+    tips: 'Gutes Sprechtempo: 120\u2013150 Wörter pro Minute. Bei wichtigen Punkten: langsamer!',
   },
 ];
 
 const DEFAULT_STIMMKILLER = [
   {
-    problem: '\u201e\u00c4hm\u201c und F\u00fcllw\u00f6rter',
+    problem: '\u201eÄhm\u201c und Füllwörter',
     icon: '\u{1F6AB}',
-    fix: 'Ersetze \u201e\u00c4hm\u201c durch eine kurze Pause. Stille wirkt souver\u00e4ner als F\u00fcllw\u00f6rter.',
+    fix: 'Ersetze \u201eÄhm\u201c durch eine kurze Pause. Stille wirkt souveräner als Füllwörter.',
   },
   {
     problem: 'Hochtonigkeit am Satzende',
@@ -69,12 +69,12 @@ const DEFAULT_STIMMKILLER = [
   {
     problem: 'Zu schnell sprechen',
     icon: '\u{26A1}',
-    fix: 'Atme zwischen S\u00e4tzen. Setze bewusst Punkte. Dein Publikum braucht Zeit zum Verstehen.',
+    fix: 'Atme zwischen Sätzen. Setze bewusst Punkte. Dein Publikum braucht Zeit zum Verstehen.',
   },
   {
     problem: 'Monotone Stimme',
     icon: '\u{1F4CF}',
-    fix: 'Variiere Lautst\u00e4rke, Tempo und Tonh\u00f6he. Stell dir vor, du erz\u00e4hlst eine spannende Geschichte.',
+    fix: 'Variiere Lautstärke, Tempo und Tonhöhe. Stell dir vor, du erzählst eine spannende Geschichte.',
   },
 ];
 
@@ -119,7 +119,7 @@ export default function StimmTrainingWidget({ onComplete }) {
         <span style={styles.micIcon}>{'🎤'}</span> Stimmtraining
       </h2>
       <p style={styles.subtext}>
-        Deine Stimme ist dein wichtigstes Werkzeug. Trainiere sie mit diesen \u00dcbungen.
+        Deine Stimme ist dein wichtigstes Werkzeug. Trainiere sie mit diesen Übungen.
       </p>
 
       {/* Audio wave decoration */}
@@ -190,7 +190,7 @@ export default function StimmTrainingWidget({ onComplete }) {
               onChange={() => handleCheck(activeTab)}
               style={styles.checkbox}
             />
-            <span style={styles.checkText}>Verstanden & Ge\u00fcbt</span>
+            <span style={styles.checkText}>Verstanden & Geübt</span>
           </label>
         </div>
       )}
@@ -214,13 +214,13 @@ export default function StimmTrainingWidget({ onComplete }) {
         <div style={styles.progressBarOuter}>
           <div style={{ ...styles.progressBarInner, width: `${(checked.size / Math.max(exercises.length, 1)) * 100}%` }} />
         </div>
-        <p style={styles.progressText}>{checked.size} von {exercises.length} \u00dcbungen absolviert</p>
+        <p style={styles.progressText}>{checked.size} von {exercises.length} Übungen absolviert</p>
       </div>
 
       {allChecked && (
         <div style={styles.completeSection}>
           <p style={styles.completeText}>
-            Alle \u00dcbungen absolviert! Trainiere regelm\u00e4\u00dfig \u2013 deine Stimme wird st\u00e4rker.
+            Alle Übungen absolviert! Trainiere regelmäßig \u2013 deine Stimme wird stärker.
           </p>
           <button
             className="btn btn-primary"

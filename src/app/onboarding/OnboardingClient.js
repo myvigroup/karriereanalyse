@@ -14,7 +14,7 @@ const INDUSTRIES = [
 ];
 
 const OBSTACLES = [
-  { id: 'worth', label: 'Ich wei\u00DF nicht, was ich wert bin', icon: '\u{1F937}' },
+  { id: 'worth', label: 'Ich weiß nicht, was ich wert bin', icon: '\u{1F937}' },
   { id: 'selling', label: 'Ich kann mich nicht verkaufen', icon: '\u{1F5E3}\uFE0F' },
   { id: 'plan', label: 'Mir fehlt ein Plan', icon: '\u{1F5FA}\uFE0F' },
   { id: 'stuck', label: 'Ich bin unzufrieden aber stecke fest', icon: '\u{1F512}' },
