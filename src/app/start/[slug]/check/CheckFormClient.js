@@ -27,7 +27,8 @@ export default function CheckFormClient({ advisor, slug }) {
   return (
     <div className="affiliate-landing">
       <header className="aff-header">
-        <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut" style={{ height: 32, width: 'auto' }} />
+        <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut"
+             width="83" height="32" style={{ display: 'block' }} />
       </header>
 
       <section className="aff-hero" style={{ paddingTop: 40, paddingBottom: 24 }}>

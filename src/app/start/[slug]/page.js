@@ -74,7 +74,8 @@ export default async function AffiliateLanding({ params }) {
     <div className="affiliate-landing">
       {/* Header */}
       <header className="aff-header">
-        <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut" style={{ height: 32, width: 'auto' }} />
+        <img src="/logo-karriereinstitut.svg" alt="Karriere-Institut"
+             width="83" height="32" style={{ display: 'block' }} />
         <Link href={registerUrl} className="aff-header-cta">Schon Mitglied? Anmelden</Link>
       </header>
 
