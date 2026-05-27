@@ -4772,7 +4772,7 @@ body:has(.course-v2) .sos-button {
 .coaches-v3 .coaches-grid-v3 {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
+  gap: 28px;
 }
 
 /* Cards */
