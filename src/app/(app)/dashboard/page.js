@@ -16,8 +16,8 @@ export default async function DashboardPage() {
     return <ProfileLoading />;
   }
 
-  // Admin + Berater → Messe-Dashboard
-  if (profile.role === 'advisor' || profile.role === 'admin') redirect('/advisor');
+  // Admin + Berater bleiben jetzt auch im normalen Mitglieder-Portal —
+  // Berater-Funktionen sind in der Sidebar zugänglich.
 
   const admin = createAdminClient();
 

@@ -50,7 +50,9 @@ export async function GET(request) {
         if (user.user_metadata?.needs_password_setup) {
           return NextResponse.redirect(new URL('/auth/set-password', request.url));
         }
-        return NextResponse.redirect(new URL('/advisor', request.url));
+        // Admins/Berater landen auf dem gemeinsamen Dashboard — Berater-Funktionen
+        // sind in der Sidebar verlinkt (Messen, Quick-Lead, Leads).
+        return NextResponse.redirect(new URL('/dashboard', request.url));
       }
 
       // Neuer User: Onboarding noch nicht abgeschlossen → /onboarding

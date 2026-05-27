@@ -24,6 +24,13 @@ const NAV_GROUPS = [
   },
 ];
 
+// Berater-spezifische Items (Messen, Quick-Lead, Leads-Liste)
+const ADVISOR_ITEMS = [
+  { label: 'Messe-Dashboard',   path: '/advisor',              icon: 'grid' },
+  { label: 'Neuer CV-Check',    path: '/advisor/quick-lead',   icon: 'doc' },
+  { label: 'Alle Leads',        path: '/advisor/leads',        icon: 'briefcase' },
+];
+
 const ADMIN_ITEMS = [
   { label: 'Admin-Hub',         path: '/admin',            icon: 'grid' },
   { label: 'Mitglieder',        path: '/admin/users',      icon: 'user' },
@@ -35,7 +42,6 @@ const ADMIN_ITEMS = [
   { label: 'CV-Checks',         path: '/admin/cv-checks',  icon: 'doc' },
   { label: 'Badges',            path: '/admin/coaching',   icon: 'badge' },
   { label: 'Analytics',         path: '/admin/analytics',  icon: 'chart' },
-  { label: 'FK Dashboard',      path: '/coach-dashboard',  icon: 'doc' },
 ];
 
 // ─── Inline icons (Lucide-style, 16px) ───────────────────────────────────────
@@ -70,6 +76,7 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
   const router = useRouter();
   const supabase = createClient();
   const isAdmin = profile?.role === 'admin' || profile?.role === 'coach';
+  const isAdvisor = ['admin', 'advisor', 'messeleiter', 'coach'].includes(profile?.role);
 
   const [collapsed, setCollapsed] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -214,6 +221,13 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
             {group.items.map(item => (<NavItem key={item.path} item={item} />))}
           </div>
         ))}
+
+        {isAdvisor && (
+          <div className="sb-section">
+            <div className="sb-section-label">Berater</div>
+            {ADVISOR_ITEMS.map(item => (<NavItem key={item.path} item={item} />))}
+          </div>
+        )}
 
         {isAdmin && (
           <div className="sb-section">
