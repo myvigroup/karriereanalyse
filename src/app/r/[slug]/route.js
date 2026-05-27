@@ -36,8 +36,8 @@ export async function GET(request, { params }) {
     .eq('id', advisor.id)
     .then(() => {}, () => {});
 
-  // Redirect mit ref-Parameter für UI-Personalisierung
-  const target = new URL(`/auth/register?ref=${encodeURIComponent(advisor.display_name)}`, origin);
+  // Redirect zur Affiliate-Landing (mit Benefit-Pitch vor der Registrierung)
+  const target = new URL(`/start/${slug}`, origin);
   const response = NextResponse.redirect(target);
 
   // Referral-Cookie setzen (30 Tage) — wird in /api/ensure-profile gelesen

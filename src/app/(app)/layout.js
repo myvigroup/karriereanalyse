@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import MobileNav from '@/components/layout/MobileNav';
-import AnalyseGateWrapper from '@/components/layout/AnalyseGateWrapper';
+import AnalysePopup from '@/components/layout/AnalysePopup';
 import AppTour from '@/components/ui/AppTour';
 import GlobalSearch from '@/components/ui/GlobalSearch';
 import InstallPrompt from '@/components/ui/InstallPrompt';
@@ -57,9 +57,7 @@ export default async function AppLayout({ children }) {
     <div className="app-shell">
       <Sidebar profile={profile} analysisResults={formattedResults} version={buildVersion} env={buildEnv} />
       <main className="app-main">
-        <AnalyseGateWrapper hasAnalysis={hasCompletedAnalysis}>
-          {children}
-        </AnalyseGateWrapper>
+        {children}
       </main>
       <MobileNav />
       <AppTour profile={profile} userId={user.id} />
@@ -67,6 +65,7 @@ export default async function AppLayout({ children }) {
       <InstallPrompt />
       <SOSButton userId={user.id} />
       <NightModeShield />
+      <AnalysePopup hasAnalysis={hasCompletedAnalysis} />
     </div>
   );
 }

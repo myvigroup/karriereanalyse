@@ -19,7 +19,7 @@ export async function middleware(request) {
   const isAuthPage = pathname.startsWith('/auth');
   const isBeraterAuthPage = pathname.startsWith('/berater/login') || pathname.startsWith('/berater/forgot-password');
   const isPublicUpload = pathname.startsWith('/upload') || pathname.startsWith('/cv-upload');
-  const isAffiliateRoute = pathname.startsWith('/r/');
+  const isAffiliateRoute = pathname.startsWith('/r/') || pathname.startsWith('/start/');
   const isPublicPage = pathname.startsWith('/agb') || pathname.startsWith('/datenschutz') || pathname.startsWith('/impressum') || pathname.startsWith('/widerruf') || pathname.startsWith('/angebote') || pathname.startsWith('/gehaltsverhandlung') || pathname.startsWith('/seminare') || pathname.startsWith('/scan') || pathname === '/qr-anleitung.html';
   if (!user && !isAuthPage && !isBeraterAuthPage && !isPublicUpload && !isAffiliateRoute && !isPublicPage) {
     return NextResponse.redirect(new URL('/auth/login', request.url));

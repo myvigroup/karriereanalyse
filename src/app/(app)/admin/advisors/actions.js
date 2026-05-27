@@ -20,13 +20,20 @@ function slugify(text) {
     .replace(/^-|-$/g, '');
 }
 
+// Slug aus E-Mail-Local-Part (eindeutig: zwei „Thomas Müller" mit unterschiedlichen
+// Mails bekommen unterschiedliche Slugs). Fallback auf Display-Name nur wenn keine Mail.
+function defaultSlugFor(payload) {
+  if (payload.email) return slugify(payload.email.split('@')[0]);
+  return slugify(payload.display_name);
+}
+
 export async function saveAdvisor(payload) {
   const supabase = await requireAdmin();
   if (!payload.display_name) throw new Error('Name fehlt');
   if (!payload.email) throw new Error('E-Mail fehlt');
 
   let slug = (payload.slug || '').trim().toLowerCase();
-  if (!slug) slug = slugify(payload.display_name);
+  if (!slug) slug = defaultSlugFor(payload);
 
   // Unique-Check: falls Slug schon belegt (von anderem Berater), -2 etc. anhängen
   let finalSlug = slug;
