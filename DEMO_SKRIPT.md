@@ -44,21 +44,35 @@ Auf dem Berater-Dashboard sind sichtbar:
 
 **Talking-Point:** „Das ist nicht nur eine schönere Oberfläche — wir verfolgen jetzt jeden Lead über den ganzen Lebenszyklus."
 
-### Akt 3 — Leads-Pipeline (2 Min)
+### Akt 3 — CV-Checks-Übersicht (2,5 Min)
 
 > *„Hier kommen wir zum eigentlichen Game-Changer."*
 
-- Klick auf **„Alle Leads"** in der Sidebar
-- 5 Demo-Leads sichtbar in verschiedenen Stadien:
-  - Anna Müller — **Coaching gebucht** (converted)
-  - Marcus Berger — **Auswertung fertig** (feedback_given)
-  - Sarah Vogt — **CV hochgeladen** (KI läuft)
-  - Tobias Klein — **Neuer Lead** (frisch)
-  - Christina Walter — **Beratung abgeschlossen** (completed)
+- Klick auf **„CV-Checks"** in der Sidebar
+- **Zwei klar getrennte Boxen** sichtbar:
+
+  **Box 1: Aus Beratungsgesprächen** (5 Einträge)
+  Jeder Lead hat einen farbigen Quelle-Pill:
+  - 🎪 *gelb* = Messe-Name (für Leads aus Messe-Gesprächen)
+  - ⚡ *türkis* = Direkt (Quick-Lead, Berater hat erfasst)
+  - 🔗 *lila* = Affiliate (über Berater-Link reingekommen)
+
+  Beispiele:
+  - Anna Müller (Affiliate) — **Coaching gebucht** (converted)
+  - Marcus Berger (Affiliate) — **Auswertung fertig**
+  - Sarah Vogt (Direkt) — **CV hochgeladen** (KI läuft)
+  - Tobias Klein (Direkt) — **Neuer Lead**
+  - Christina Walter (Affiliate) — **Beratung abgeschlossen**
+
+  **Box 2: Self-Service CV-Checks** (3 Einträge)
+  Kunden haben sich selbst auf der Website ausgewertet:
+  - Julian Hoffmann — 4 ★ (Junior Controller)
+  - Lena Krause — 5 ★ (UX Designer)
+  - Robin Schmidt — 3 ★ (Sales Manager)
 
 - Klick auf **Anna Müller** → CV + KI-Auswertung mit Marktwert-Potenzial €78–92k
 
-**Talking-Point:** „Aus jedem Gespräch wird ein nachverfolgbarer Lead. Wir wissen jederzeit, wo wir stehen."
+**Talking-Point:** „Aus jedem Gespräch und jedem Self-Scan wird ein nachverfolgbarer Lead. Die Quelle-Labels zeigen euch sofort, woher der Kontakt kam — Messe, Direkt-Beratung oder Self-Service über den Link."
 
 ### Akt 4 — Affiliate-Dashboard (2 Min)
 
@@ -138,7 +152,56 @@ Auf dem Berater-Dashboard sind sichtbar:
 ## Login-Daten zum Verteilen
 
 - **E-Mail:** demo@daskarriereinstitut.de
-- **Passwort:** KarriereInstitutDemo2026!
+- **Passwort:** siehe Admin → Demo-Account → „Login-Daten zum Verteilen"
+  (Das Passwort liegt aus Sicherheitsgründen nur in der Vercel Environment Variable
+  `DEMO_PASSWORD` — wer das ändern will, ändert es dort.)
 
 Mitarbeiter können sich damit nach der Präsi selbst einloggen und alles in Ruhe ausprobieren.
 Daten werden geteilt — falls jemand was kaputt macht, jederzeit über Admin-Page resetten.
+
+---
+
+## Smoke-Test heute Abend (15 Minuten)
+
+Direkt nach dem Deploy einmal durchklicken, damit morgen nichts überrascht:
+
+**1. Demo-Flow komplett (5 Min)**
+- [ ] `/admin/demo` öffnen — Status-Karten zeigen Zahlen (5 Leads, 3 CVs, 47 Klicks, 12 Sign-ups)
+- [ ] „Demo zurücksetzen" klicken — kommt grüne Bestätigung mit „5 Leads erstellt"
+- [ ] „CV herunterladen" — PDF lädt sich (4 KB, Sarah Berg)
+- [ ] Auto-Login-Link kopieren
+
+**2. Bühnen-Login simulieren (3 Min)**
+- [ ] In neuem **Inkognito-Fenster** den `/demo`-Link öffnen
+- [ ] → landet direkt im Berater-Dashboard, oben rote **„DEMO-MODUS"** Pill sichtbar
+- [ ] Sidebar zeigt: Mitglieder-Sektion + Berater-Sektion + Admin-Sektion (Demo ist nur Berater, also keine Admin-Sektion)
+
+**3. CV-Checks-Übersicht (3 Min)**
+- [ ] Sidebar → **„CV-Checks"** klicken (war vorher „Alle Leads")
+- [ ] Box 1 „Aus Beratungsgesprächen" zeigt 5 Einträge mit Quelle-Pills (🎪 / ⚡ / 🔗)
+- [ ] Box 2 „Self-Service CV-Checks" zeigt 3 Einträge (Julian, Lena, Robin) mit Sternen
+- [ ] Auf Anna Müller klicken → Detail mit CV-Auswertung sichtbar
+
+**4. Live-CV-Upload (3 Min)**
+- [ ] Sidebar → **„Neuer CV-Check"** klicken
+- [ ] Formular ausfüllen: Sarah / sarah.berg@beispiel.de / Senior Marketing Managerin → **„Quick-Lead anlegen"**
+- [ ] CV `demo-cv-sarah-berg.pdf` hochladen
+- [ ] KI-Analyse läuft, Auswertung erscheint mit Marktwert-Schätzung
+
+**5. Affiliate-Dashboard (1 Min)**
+- [ ] Sidebar → **„Mein Affiliate"** klicken
+- [ ] Stats: 47 Klicks · 12 Sign-ups sichtbar
+- [ ] Affiliate-URL `app.daskarriereinstitut.de/r/demo` sichtbar + Kopieren-Knopf funktioniert
+
+**Falls etwas davon nicht klappt:** sofort dem Code-Buddy melden, nicht erst morgens.
+
+---
+
+## Morgen früh — 5 Minuten vor Beginn
+
+- [ ] `/admin/demo` → **„Demo zurücksetzen"** drücken (frische Daten)
+- [ ] Zwei Tabs offen halten: `/demo` (Bühne) und `/admin/demo` (Notfall-Reset)
+- [ ] Muster-CV `demo-cv-sarah-berg.pdf` auf dem Desktop bereitlegen
+- [ ] Login-Folie für Mitarbeiter zeigen mit:
+  - URL: `app.daskarriereinstitut.de/demo`
+  - Oder: `app.daskarriereinstitut.de/auth/login` mit Login-Daten aus Admin-Page
