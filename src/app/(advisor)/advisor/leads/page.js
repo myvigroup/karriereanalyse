@@ -68,7 +68,7 @@ export default async function LeadsPage({ searchParams }) {
   // Leads laden — Admin sieht alle, Messeleiter alle seiner Messen, Berater nur eigene
   let query = admin
     .from('fair_leads')
-    .select('id, first_name, last_name, email, phone, status, follow_up_status, fair_id, advisor_user_id, created_at, updated_at')
+    .select('id, first_name, last_name, email, phone, status, follow_up_status, fair_id, advisor_user_id, source, created_at, updated_at')
     .order('created_at', { ascending: false });
 
   if (isSuperAdmin) {
@@ -180,13 +180,19 @@ export default async function LeadsPage({ searchParams }) {
     <div className="admin-coaches">
       <div className="admin-pageheader">
         <div>
-          <div className="title-kicker"><span className="pulse" /> Berater · Alle Leads</div>
-          <h1 className="page-title">Lebenslauf-Checks <span className="faded">{leads.length}</span></h1>
+          <div className="title-kicker"><span className="pulse" /> Berater · CV-Checks</div>
+          <h1 className="page-title">CV-Checks <span className="faded">{leads.length + (selfChecks?.length || 0)}</span></h1>
           <p className="page-sub">
-            Alle Gespräche und CV-Checks im Überblick — Filter, Status, Coach-Termin.
+            Alle Lebenslauf-Auswertungen in zwei Gruppen: aus Beratungsgesprächen (Messe + Direkt) und
+            Self-Service-Checks (Affiliate-Link oder QR-Code).
           </p>
         </div>
-        {isSuperAdmin && <RetriggerButton />}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Link href="/advisor/quick-lead" className="admin-cta-primary" style={{ whiteSpace: 'nowrap' }}>
+            + Direkter CV-Check
+          </Link>
+          {isSuperAdmin && <RetriggerButton />}
+        </div>
       </div>
       {duplicateCount > 0 && (
         <div style={{
@@ -301,6 +307,16 @@ export default async function LeadsPage({ searchParams }) {
         )}
       </div>
 
+      {/* === BOX 1: Aus Beratungsgesprächen (Messe + Direkt) === */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
+          Aus Beratungsgesprächen
+        </h2>
+        <span style={{ fontSize: 13, color: '#86868b' }}>
+          {leads.length} · Messe-Leads und direkte CV-Checks
+        </span>
+      </div>
+
       {/* Tabelle */}
       {(!leads || leads.length === 0) ? (
         <div style={{
@@ -311,7 +327,7 @@ export default async function LeadsPage({ searchParams }) {
           border: '1px solid #E8E6E1',
           color: '#86868b',
         }}>
-          Keine Einträge gefunden.
+          Noch keine CV-Checks aus Beratungsgesprächen.
         </div>
       ) : (
         <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden' }}>
@@ -380,12 +396,37 @@ export default async function LeadsPage({ searchParams }) {
                   )}
                 </div>
 
-                {/* Messe */}
-                <div style={{ padding: '14px 0', position: 'relative', zIndex: 1 }}>
-                  <div style={{ fontSize: 13, color: '#6B7280' }}>{fair?.name || '–'}</div>
+                {/* Quelle (Messe / Direkt / Affiliate) + Status */}
+                <div style={{ padding: '14px 0', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {fair ? (
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 980,
+                      background: '#FEF3C7', color: '#92400E', whiteSpace: 'nowrap',
+                      display: 'inline-block', alignSelf: 'flex-start',
+                    }} title={`Messe-Lead — ${fair.name}`}>
+                      🎪 {fair.name}
+                    </span>
+                  ) : lead.source === 'affiliate' ? (
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 980,
+                      background: '#F3E8FF', color: '#7C3AED', whiteSpace: 'nowrap',
+                      display: 'inline-block', alignSelf: 'flex-start',
+                    }} title="Über Affiliate-Link erfasst">
+                      🔗 Affiliate
+                    </span>
+                  ) : (
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 980,
+                      background: '#CCFBF1', color: '#0F766E', whiteSpace: 'nowrap',
+                      display: 'inline-block', alignSelf: 'flex-start',
+                    }} title="Direkter CV-Check ohne Messe-Kontext">
+                      ⚡ Direkt
+                    </span>
+                  )}
                   <span style={{
                     fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 980,
                     background: statusInfo.bg, color: statusInfo.color, whiteSpace: 'nowrap',
+                    display: 'inline-block', alignSelf: 'flex-start',
                   }}>
                     {statusInfo.label}
                   </span>
@@ -436,13 +477,15 @@ export default async function LeadsPage({ searchParams }) {
         </div>
       )}
 
-      {/* Self-Service Checks (QR-Code Scans) */}
+      {/* === BOX 2: Self-Service CV-Checks (Kunden machen den Check selbst) === */}
       {selfChecks && selfChecks.length > 0 && (
-        <div style={{ marginTop: 40 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>QR-Code Selbst-Scans</h2>
-            <span style={{ background: '#F0FDF4', color: '#059669', fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 980, border: '1px solid #A7F3D0' }}>
-              {selfChecks.length} neu
+        <div style={{ marginTop: 48 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
+              Self-Service CV-Checks
+            </h2>
+            <span style={{ fontSize: 13, color: '#86868b' }}>
+              {selfChecks.length} · Kunden haben selbst gescannt (QR-Code oder Affiliate-Link)
             </span>
           </div>
           <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden' }}>

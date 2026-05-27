@@ -17,10 +17,17 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const DEMO_EMAIL = 'demo@daskarriereinstitut.de';
-export const DEMO_PASSWORD = 'KarriereInstitutDemo2026!';
+// WICHTIG: Demo-Passwort kommt aus Vercel Environment Variable DEMO_PASSWORD
+// (server-only). Niemals im Code hartkodieren — GitGuardian wird sonst alarmieren.
+// Fallback nur für lokale Entwicklung; in Production muss die Env-Var gesetzt sein.
+export const DEMO_PASSWORD = process.env.DEMO_PASSWORD || 'local-dev-only-change-in-prod';
 export const DEMO_DISPLAY_NAME = 'Demo Berater';
 export const DEMO_SLUG = 'demo';
 export const DEMO_PHONE = '+49 511 5468 4547';
+
+if (!process.env.DEMO_PASSWORD && process.env.NODE_ENV === 'production') {
+  console.warn('[demo.js] WARN: DEMO_PASSWORD env-var nicht gesetzt — Demo-Login wird scheitern.');
+}
 
 export function isDemoEmail(email) {
   return (email || '').toLowerCase() === DEMO_EMAIL;
@@ -260,6 +267,34 @@ export async function seedDemoData() {
     console.warn('Affiliate-Counter-Update übersprungen:', err?.message);
   }
 
+  // 3b) Self-Service-Checks (Kunden haben selbst über QR / Affiliate gescannt)
+  const selfChecks = [
+    { name: 'Julian Hoffmann', email: 'julian.hoffmann@beispiel.de', target_position: 'Junior Controller', overall_rating: 4, days_ago: 3 },
+    { name: 'Lena Krause',     email: 'lena.krause@beispiel.de',     target_position: 'UX Designer',      overall_rating: 5, days_ago: 7 },
+    { name: 'Robin Schmidt',   email: 'robin.schmidt@beispiel.de',   target_position: 'Sales Manager',    overall_rating: 3, days_ago: 14 },
+  ];
+  try {
+    await admin.from('self_service_checks').insert(
+      selfChecks.map(sc => ({
+        fair_id: null,
+        name: sc.name,
+        email: sc.email,
+        target_position: sc.target_position,
+        overall_rating: sc.overall_rating,
+        summary: `Auswertung für ${sc.name}: solider CV mit klarem Profil für ${sc.target_position}.`,
+        status: 'completed',
+        ai_analysis: {
+          overall_score: sc.overall_rating * 20,
+          strengths: ['Klare Struktur', 'Relevante Erfahrung'],
+          improvements: ['Mehr quantifizierte Erfolge', 'Skill-Sektion ausbauen'],
+        },
+        created_at: new Date(now - sc.days_ago * 24 * 60 * 60 * 1000).toISOString(),
+      }))
+    );
+  } catch (err) {
+    console.warn('Self-Service-Seed übersprungen:', err?.message);
+  }
+
   // 4) Analytics-Events (47 fiktive Klicks über die letzten 30 Tage verteilt)
   const clickEvents = [];
   for (let i = 0; i < 47; i++) {
@@ -300,6 +335,18 @@ export async function wipeDemoData() {
 
   // Analytics-Events
   await admin.from('analytics_events').delete().eq('advisor_id', advisor.id);
+
+  // Self-Service-Checks der Demo-Personen löschen (kein advisor_id-Bezug, daher per Email)
+  const demoSelfEmails = [
+    'julian.hoffmann@beispiel.de',
+    'lena.krause@beispiel.de',
+    'robin.schmidt@beispiel.de',
+  ];
+  try {
+    await admin.from('self_service_checks').delete().in('email', demoSelfEmails);
+  } catch (err) {
+    console.warn('Self-Service-Wipe übersprungen:', err?.message);
+  }
 
   // Counter zurücksetzen (defensiv — Spalten u.U. nicht da)
   try {

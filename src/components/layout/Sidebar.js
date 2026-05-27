@@ -11,9 +11,9 @@ const NAV_GROUPS = [
     items: [
       { label: 'Übersicht',         path: '/dashboard',    icon: 'grid',     tour: 'dashboard' },
       { label: 'Karriere-Analyse',  path: '/analyse',      icon: 'target',   tour: 'analyse' },
-      { label: 'Masterclass',       path: '/masterclass',  icon: 'play' },
-      { label: 'Lebenslauf-Check',  path: '/cv-check',     icon: 'doc' },
-      { label: 'Coach',             path: '/coach',        icon: 'chat' },
+      { label: 'Masterclass',       path: '/masterclass',  icon: 'play', tour: 'masterclass' },
+      { label: 'Lebenslauf-Check',  path: '/cv-check',     icon: 'doc',  tour: 'cvcheck' },
+      { label: 'Coach',             path: '/coach',        icon: 'chat', tour: 'coach' },
     ],
   },
   {
@@ -30,7 +30,7 @@ const ADVISOR_ITEMS = [
   { label: 'Messe-Dashboard',   path: '/advisor',              icon: 'grid' },
   { label: 'Neuer CV-Check',    path: '/advisor/quick-lead',   icon: 'doc' },
   { label: 'Mein Affiliate',    path: '/advisor/affiliate',    icon: 'users' },
-  { label: 'Alle Leads',        path: '/advisor/leads',        icon: 'briefcase' },
+  { label: 'CV-Checks',         path: '/advisor/leads',        icon: 'briefcase' },
 ];
 
 const ADMIN_ITEMS = [
@@ -171,8 +171,7 @@ export default function Sidebar({ profile, analysisResults, version, env }) {
 
   function NavItem({ item }) {
     const active = isActive(item.path);
-    const tourAttr = item.tour === 'dashboard' ? { 'data-tour-dashboard': '' }
-      : item.tour === 'analyse' ? { 'data-tour-analyse': '' } : {};
+    const tourAttr = item.tour ? { [`data-tour-${item.tour}`]: '' } : {};
     return (
       <a
         href={item.path}
