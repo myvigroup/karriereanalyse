@@ -28,10 +28,13 @@ export async function GET(request) {
 
     // 2) Beim ersten Mal: Demo-Daten seeden
     const admin = createAdminClient();
+    // fair_leads hat advisor_user_id (kein advisor_id)
+    const { data: adv } = await admin
+      .from('advisors').select('user_id').eq('id', advisorId).maybeSingle();
     const { count } = await admin
       .from('fair_leads')
       .select('id', { count: 'exact', head: true })
-      .eq('advisor_id', advisorId);
+      .eq('advisor_user_id', adv?.user_id || '');
     if (!count || count === 0) {
       await seedDemoData();
     }

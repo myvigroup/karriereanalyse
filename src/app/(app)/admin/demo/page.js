@@ -26,10 +26,11 @@ export default async function AdminDemoPage() {
   let cvCount = 0;
   let selfCount = 0;
   if (advisor) {
+    // fair_leads hat advisor_user_id (kein advisor_id)
     const { count: leads } = await admin
       .from('fair_leads')
       .select('id', { count: 'exact', head: true })
-      .eq('advisor_id', advisor.id);
+      .eq('advisor_user_id', advisor.user_id);
     leadCount = leads || 0;
 
     const { count: cvs } = await admin

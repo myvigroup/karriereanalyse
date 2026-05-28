@@ -31,7 +31,7 @@ export async function createSelfServiceLead(slug, formData) {
     .from('fair_leads')
     .insert({
       fair_id: null,
-      advisor_id: advisor.id,
+      // Live-DB: kein advisor_id-FK, nur advisor_user_id
       advisor_user_id: advisor.user_id,
       first_name: name,
       last_name: '',
@@ -60,7 +60,7 @@ export async function createSelfServiceLead(slug, formData) {
       }
     });
 
-  // Analytics
+  // Analytics (analytics_events hat advisor_id-Spalte — der ist hier OK)
   admin.from('analytics_events').insert({
     event_name: 'affiliate_lead_created',
     advisor_id: advisor.id,
