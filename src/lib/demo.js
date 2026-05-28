@@ -126,9 +126,20 @@ export async function ensureDemoAdvisor() {
 // -----------------------------------------------------
 // Demo-Daten-Vorlage
 // -----------------------------------------------------
+// Feste UUIDs für die Demo-Leads — die Bühnen-Tour navigiert mit diesen IDs
+// direkt zu spezifischen Detail-/Review-Pages.
+export const DEMO_LEAD_IDS = {
+  ANNA:      'a1111111-1111-1111-1111-111111111111',
+  MARCUS:    'a2222222-2222-2222-2222-222222222222',
+  SARAH:     'a3333333-3333-3333-3333-333333333333',
+  TOBIAS:    'a4444444-4444-4444-4444-444444444444',
+  CHRISTINA: 'a5555555-5555-5555-5555-555555555555',
+};
+
 // hours_ago statt days_ago, damit mehrere Leads "heute" sind (für Stats "Gespräche heute")
 const DEMO_LEADS = [
   {
+    id: DEMO_LEAD_IDS.ANNA,
     first_name: 'Anna', last_name: 'Müller',
     email: 'anna.mueller@beispiel.de', phone: '+49 170 1234567',
     target_position: 'Senior Brand Manager',
@@ -137,6 +148,7 @@ const DEMO_LEADS = [
     cv_rating: 5,
   },
   {
+    id: DEMO_LEAD_IDS.MARCUS,
     first_name: 'Marcus', last_name: 'Berger',
     email: 'marcus.berger@beispiel.de', phone: '+49 171 2345678',
     target_position: 'Geschäftsführer Vertrieb Mittelstand',
@@ -145,6 +157,7 @@ const DEMO_LEADS = [
     cv_rating: 4,
   },
   {
+    id: DEMO_LEAD_IDS.SARAH,
     first_name: 'Sarah', last_name: 'Vogt',
     email: 'sarah.vogt@beispiel.de', phone: '+49 172 3456789',
     target_position: 'Tech Lead / Engineering Manager',
@@ -152,6 +165,7 @@ const DEMO_LEADS = [
     cv_summary: null, cv_rating: null,
   },
   {
+    id: DEMO_LEAD_IDS.TOBIAS,
     first_name: 'Tobias', last_name: 'Klein',
     email: 'tobias.klein@beispiel.de', phone: '+49 173 4567890',
     target_position: 'Operations Manager Logistik',
@@ -159,6 +173,7 @@ const DEMO_LEADS = [
     cv_summary: null, cv_rating: null,
   },
   {
+    id: DEMO_LEAD_IDS.CHRISTINA,
     first_name: 'Christina', last_name: 'Walter',
     email: 'christina.walter@beispiel.de', phone: '+49 174 5678901',
     target_position: 'HR Business Partner Konzern',
@@ -229,6 +244,7 @@ export async function seedDemoData() {
   const leadInserts = DEMO_LEADS.map(lead => {
     const createdAt = new Date(now - lead.hours_ago * 60 * 60 * 1000).toISOString();
     return {
+      id: lead.id,  // feste UUID damit Tour-URLs stabil sind
       fair_id: lead.use_fair ? DEMO_FAIR_ID : null,
       advisor_user_id: userId,
       first_name: lead.first_name,

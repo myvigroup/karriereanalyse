@@ -10,85 +10,149 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
+// Bullets können String[] sein — werden als Liste gerendert.
+// body bleibt der kurze Lead-Satz oben.
 const STEPS = [
-  // ── 1. Welcome ──────────────────────────────────────────────────────────
+  // ── 1. Welcome ──
   {
     path: '/advisor/leads',
     target: null,
-    title: 'Willkommen im Berater-Portal',
-    body: 'Wir gehen jetzt einen typischen Tag durch: Ein Bewerber kommt an deinen Messestand und macht mit dir einen Lebenslauf-Check. Danach zeige ich dir, wie das auch im Self-Service funktioniert — wenn ein Bewerber selbst über deinen Link einen CV hochlädt. Am Ende läuft alles in deinem zentralen Dashboard zusammen. Klick „Weiter", wenn du bereit bist.',
+    title: 'Willkommen',
+    body: 'Was wir gleich durchgehen:',
+    bullets: [
+      'Bewerber am Messestand → Check mit Berater',
+      'Bewerber im Self-Service → Check über Link',
+      'Alles im Dashboard zentral sichtbar',
+    ],
   },
 
-  // ── 2. Szenario A: Bewerber am Messetisch ──────────────────────────────
+  // ── 2. Szenario A: Wahl-Page ──
   {
     path: '/advisor/cv-check/new',
     target: '[data-tour="cv-choice"]',
-    title: 'Szenario 1 — Bewerber am Messestand',
-    body: 'Ein Bewerber kommt an deinen Tisch und möchte seinen Lebenslauf checken lassen. Du klickst auf „+ Neuer CV-Check" und landest auf dieser Wahl-Seite. Hier hast du zwei Optionen: Entweder ihr macht den Check zusammen direkt vor Ort — oder du gibst ihm einen Link, mit dem er es selbst macht. Für die Messe-Situation wählst du normalerweise die linke Karte „Mit dem Kunden zusammen".',
+    title: 'Szenario 1 — Bewerber am Stand',
+    body: 'Klick auf „+ Neuer CV-Check" → zwei Wege:',
+    bullets: [
+      'Links: mit Kunde zusammen (Messe-Beratung)',
+      'Rechts: Kunde macht selbst (Link teilen)',
+    ],
   },
 
-  // ── 3. Quick-Lead-Formular ──────────────────────────────────────────────
+  // ── 3. Quick-Lead-Formular ──
   {
     path: '/advisor/quick-lead',
-    target: null,
+    target: '[data-tour="quick-form"]',
     title: 'Kundendaten erfassen',
-    body: 'Du landest in einem schnellen Formular: Vorname, E-Mail-Adresse, Telefonnummer und seine Wunschposition. Drei bis vier Felder, höchstens 30 Sekunden Eingabe. Mit Klick auf „Quick-Lead anlegen" wird der Lead erstellt — der Bewerber existiert jetzt als Eintrag in deinem Dashboard, auch wenn er noch keinen Lebenslauf hochgeladen hat.',
+    body: '4 Felder, 30 Sekunden:',
+    bullets: [
+      'Vorname · E-Mail · Telefon · Wunschposition',
+      'Klick „Quick-Lead anlegen" → Lead existiert',
+    ],
   },
 
-  // ── 4. CV-Upload + KI-Auswertung erklären ──────────────────────────────
+  // ── 4. CV-Upload + KI ──
   {
     path: '/advisor/quick-lead',
     target: null,
-    title: 'CV hochladen und KI-Auswertung',
-    body: 'Nach dem Anlegen kommst du direkt zur Upload-Seite. Du nimmst sein Tablet oder Smartphone, lädst seinen Lebenslauf hoch (PDF oder DOCX) — und die KI analysiert ihn in 10–20 Sekunden. Du bekommst eine Auswertung mit Stärken, Schwächen und einer Marktwert-Schätzung in Euro. Das kannst du direkt mit dem Bewerber besprechen — perfekter Aufhänger für ein Beratungs-Gespräch.',
+    title: 'CV hochladen → KI in 20 Sek',
+    body: 'Lebenslauf hochladen (PDF/DOCX). KI liefert:',
+    bullets: [
+      'Stärken & Schwächen',
+      'Marktwert-Schätzung in Euro',
+      'Sofort mit Bewerber besprechen',
+    ],
   },
 
-  // ── 5. Szenario B: Self-Service ─────────────────────────────────────────
+  // ── 4b. Beispiel-Review: Marcus Berger (Messe, feedback_pending mit vollem CV) ──
+  {
+    path: '/advisor/fair/11111111-1111-1111-1111-111111111111/lead/a2222222-2222-2222-2222-222222222222/review',
+    target: null,
+    title: 'KI-Auswertung im Detail',
+    body: 'So sieht die Auswertung am Ende aus:',
+    bullets: [
+      'CV links · KI-Feedback rechts',
+      'Tabs: Struktur · Inhalt · Design · Wirkung',
+      'Sterne-Rating + KI-Vorschläge per Klick',
+      'Eigener Kommentar fürs Gespräch',
+    ],
+  },
+
+  // ── 5. Szenario B: Self-Service ──
   {
     path: '/advisor/affiliate',
     target: null,
-    title: 'Szenario 2 — Bewerber macht den Check selbst',
-    body: 'Zweite Variante: Der Bewerber kommt zwar an den Stand, hat aber gerade keine Zeit. Oder du triffst ihn auf LinkedIn, im Bekanntenkreis, auf einer Konferenz. Du teilst einfach deinen persönlichen Affiliate-Link oder QR-Code. Der Bewerber klickt drauf, lädt selbst seinen CV hoch und bekommt direkt die KI-Auswertung — komplett ohne dich. Du siehst den Lead automatisch in deinem Dashboard. Skalierbar ohne Mehraufwand.',
+    title: 'Szenario 2 — Self-Service',
+    body: 'Bewerber macht selbst, ohne dich:',
+    bullets: [
+      'Du teilst Affiliate-Link oder QR-Code',
+      'Er lädt CV hoch → KI bewertet',
+      'Lead landet automatisch bei dir',
+    ],
   },
 
-  // ── 6. Dashboard: Alle Leads zentral ───────────────────────────────────
+  // ── 6. Dashboard ──
   {
     path: '/advisor/leads',
     target: '[data-tour="leads-table"]',
-    title: 'Dein zentrales Dashboard',
-    body: 'Egal ob Messe-Lead, Direkt-Lead oder Self-Service — alle Bewerber landen hier in einer Liste. Du siehst pro Eintrag: Name, Telefonnummer, E-Mail, Wunschposition, den aktuellen Status und ein Quelle-Pill (🎪 Messe-Name / ⚡ Direkt / 🔗 Affiliate). Ein Klick auf einen Lead öffnet die Detail-Ansicht mit komplettem CV und KI-Auswertung — alles was du fürs Nachfass-Gespräch brauchst.',
+    title: 'Alle Leads zentral',
+    body: 'Eine Liste für alle Quellen:',
+    bullets: [
+      'Name, Telefon, E-Mail, Wunschposition',
+      'Quelle-Pill: 🎪 Messe · ⚡ Direkt · 🔗 Affiliate',
+      'Klick öffnet Detail mit CV + Auswertung',
+    ],
   },
 
-  // ── 7. Self-Service-Box ─────────────────────────────────────────────────
+  // ── 7. Self-Service-Box ──
   {
     path: '/advisor/leads',
     target: '[data-tour="self-service"]',
-    title: 'Self-Service-Box — passive Pipeline',
-    body: 'Diese zweite Box ist nur für Self-Service-Checks: Bewerber, die selbst über deinen Link gescannt haben — ohne dich dabei. Du siehst Name, E-Mail, Wunschposition und die KI-Bewertung mit Sternen. So weißt du sofort, wer interessant ist und nachgefasst werden sollte.',
+    title: 'Self-Service-Box',
+    body: 'Eigene Box für passive Pipeline:',
+    bullets: [
+      'Bewerber, die selbst über deinen Link kamen',
+      'Sterne-Rating zur Priorisierung',
+      'Direkt nachfassbar',
+    ],
   },
 
-  // ── 8. Stats + Messen ───────────────────────────────────────────────────
+  // ── 8. Stats ──
   {
     path: '/advisor/leads',
     target: '[data-tour="stats"]',
-    title: 'Deine Tageszahlen im Blick',
-    body: 'Oben siehst du deine Live-Stats: Gespräche heute, offene CV-Checks (also wo du noch nachfassen musst), Gespräche insgesamt und aktive Messen. Damit weißt du jederzeit, wo du stehst — und kannst die Übersicht auch deinem Team-Lead zeigen.',
+    title: 'Live-Stats oben',
+    body: 'Auf einen Blick:',
+    bullets: [
+      'Gespräche heute',
+      'Offene CV-Checks',
+      'Gespräche gesamt · Aktive Messen',
+    ],
   },
 
-  // ── 9. Affiliate-Dashboard ──────────────────────────────────────────────
+  // ── 9. Affiliate ──
   {
     path: '/advisor/affiliate',
     target: null,
-    title: 'Dein Affiliate-Dashboard',
-    body: 'Hier siehst du, wie deine Affiliate-Aktivitäten laufen: Klicks auf deinen Link, Sign-ups, eingegangene Leads. Jeder Lead, der über deinen Link kommt, wird dir dauerhaft zugeordnet — auch wenn er erst Wochen später ein Coaching bucht, bekommst du die Provision.',
+    title: 'Affiliate-Dashboard',
+    body: 'Dein Link für alles außerhalb der Messe:',
+    bullets: [
+      'Klicks, Sign-ups, Leads — alle deine',
+      'Provision dauerhaft zugeordnet',
+      'Für LinkedIn, Mail-Signatur, QR-Code',
+    ],
   },
 
-  // ── 10. Abschluss ───────────────────────────────────────────────────────
+  // ── 10. Abschluss ──
   {
     path: '/advisor/leads',
     target: null,
-    title: 'Tour beendet — jetzt selbst ausprobieren',
-    body: 'Du kennst jetzt den kompletten Flow: vom Messe-Gespräch über Self-Service-Checks bis zur zentralen Lead-Übersicht. Klick durch die Demo-Leads, schau dir die KI-Auswertung an oder lade selbst einen Test-CV hoch. Bei Fragen findest du oben rechts immer den Tour-Button zum Wiederholen.',
+    title: 'Tour fertig — los geht’s',
+    body: 'Jetzt selbst:',
+    bullets: [
+      'Demo-Leads anklicken',
+      'KI-Auswertung anschauen',
+      'Eigenen CV hochladen',
+    ],
   },
 ];
 
@@ -339,17 +403,40 @@ export default function AdvisorTour({ enabled = true }) {
 
         {/* Body */}
         <h3 style={{
-          fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em',
-          marginBottom: 10, color: '#1A1A1A',
+          fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em',
+          marginBottom: 8, color: '#1A1A1A',
         }}>
           {current.title}
         </h3>
-        <p style={{
-          fontSize: 15, color: '#525252',
-          lineHeight: 1.6, marginBottom: 18,
-        }}>
-          {current.body}
-        </p>
+        {current.body && (
+          <p style={{
+            fontSize: 14, color: '#525252',
+            lineHeight: 1.5, marginBottom: current.bullets ? 10 : 16,
+          }}>
+            {current.body}
+          </p>
+        )}
+        {current.bullets && current.bullets.length > 0 && (
+          <ul style={{
+            listStyle: 'none', padding: 0, margin: '0 0 16px',
+            display: 'flex', flexDirection: 'column', gap: 6,
+          }}>
+            {current.bullets.map((b, i) => (
+              <li key={i} style={{
+                fontSize: 14, color: '#1A1A1A',
+                lineHeight: 1.45,
+                paddingLeft: 18, position: 'relative',
+              }}>
+                <span style={{
+                  position: 'absolute', left: 0, top: 6,
+                  width: 6, height: 6, borderRadius: '50%',
+                  background: '#CC1426',
+                }} />
+                {b}
+              </li>
+            ))}
+          </ul>
+        )}
 
         {/* Progress-Dots */}
         <div style={{ display: 'flex', gap: 4, marginBottom: 18 }}>

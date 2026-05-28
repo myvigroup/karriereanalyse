@@ -1,226 +1,198 @@
 'use client';
-import { useState, useEffect } from 'react';
-import Icon from '@/components/ui/Icon';
-import { createQuickLead, deleteQuickLead } from './actions';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { createQuickLead } from './actions';
 
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-}
+const BERUFSFELDER = [
+  { group: 'Studium / Ausbildung', options: [
+    'Duales Studium (allgemein)',
+    'Ausbildungsplatz (allgemein)',
+    'Studium (allgemein)',
+  ]},
+  { group: 'Kaufmännisch & Verwaltung', options: [
+    'Kaufmann/-frau für Büromanagement',
+    'Industriekaufmann/-frau',
+    'Bankkaufmann/-frau',
+    'Personalwesen / HR',
+    'Buchhaltung / Controlling',
+  ]},
+  { group: 'IT & Technik', options: [
+    'Softwareentwickler/-in',
+    'Data Science / KI',
+    'IT-Systemkaufmann/-frau',
+    'Mechatroniker/-in',
+    'Maschinenbau / Konstruktion',
+  ]},
+  { group: 'Marketing, Medien & Kreativ', options: [
+    'Marketing / Online-Marketing',
+    'Grafik & Design',
+    'Social Media Management',
+  ]},
+  { group: 'Gesundheit & Soziales', options: [
+    'Pflegefachkraft',
+    'Erzieher/-in',
+    'Sozialpädagoge/-in',
+  ]},
+  { group: 'Handwerk & Produktion', options: [
+    'Elektriker/-in',
+    'KFZ-Mechatroniker/-in',
+    'Logistik / Lagerlogistik',
+  ]},
+];
 
-function leadStatus(lead) {
-  const fb = lead.cv_feedback?.[0];
-  if (fb?.status === 'completed') return { label: 'Abgeschlossen', tier: 'good' };
-  if (fb?.ai_parsed_at) return { label: 'KI-Analyse fertig', tier: 'mid' };
-  if (lead.cv_documents?.length > 0) return { label: 'CV hochgeladen', tier: 'mid' };
-  return { label: 'Wartet auf CV-Upload', tier: 'low' };
-}
+const inputStyle = {
+  width: '100%',
+  padding: '14px 18px',
+  fontSize: 16,
+  border: '1px solid #E8E6E1',
+  borderRadius: 12,
+  outline: 'none',
+  background: '#fff',
+  boxSizing: 'border-box',
+  color: '#1A1A1A',
+  appearance: 'none',
+};
 
-function qrCodeUrl(url) {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}&margin=2`;
-}
-
-export default function QuickLeadClient({ initialLeads, advisorName, baseUrl }) {
-  const [leads, setLeads] = useState(initialLeads);
-  const [showForm, setShowForm] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [created, setCreated] = useState(null); // Lead just created → show QR + Link
-  const [toast, setToast] = useState(null);
-
-  function showToast(text, kind = 'ok') {
-    setToast({ text, kind });
-    setTimeout(() => setToast(null), 3000);
-  }
+export default function QuickLeadClient() {
+  const router = useRouter();
+  const [name, setName] = useState('');
+  const [field, setField] = useState('');
+  const [customField, setCustomField] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setSubmitting(true);
-    const fd = new FormData(e.target);
-    const result = await createQuickLead(fd);
-    setSubmitting(false);
-    if (result.error) {
-      showToast('Fehler: ' + result.error, 'error');
-      return;
+    if (!name.trim()) { setError('Vorname ist Pflicht.'); return; }
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.set('name', name.trim());
+    formData.set('target_position', field === '__sonstiges__' ? customField.trim() : (field || ''));
+
+    try {
+      const result = await createQuickLead(formData);
+      if (result?.error) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+      // Direkt zum CV-Upload für diesen frisch erstellten Lead
+      router.push(`/cv-upload/${result.leadId}`);
+    } catch (err) {
+      if (err?.digest?.startsWith('NEXT_REDIRECT')) throw err;
+      setError(err.message || 'Ein Fehler ist aufgetreten');
+      setLoading(false);
     }
-    const uploadUrl = `${baseUrl}/cv-upload/${result.leadId}`;
-    setCreated({
-      leadId: result.leadId,
-      uploadUrl,
-      name: fd.get('name'),
-      email: fd.get('email'),
-    });
-    setLeads(prev => [{
-      id: result.leadId,
-      first_name: fd.get('name'),
-      last_name: '',
-      email: fd.get('email') || null,
-      phone: fd.get('phone') || null,
-      target_position: fd.get('target_position') || null,
-      source: 'direct',
-      status: 'new',
-      created_at: new Date().toISOString(),
-      cv_documents: [],
-      cv_feedback: [],
-    }, ...prev]);
-    e.target.reset();
-    setShowForm(false);
-  }
-
-  async function handleDelete(lead) {
-    if (!confirm(`Lead „${lead.first_name}" wirklich löschen?`)) return;
-    const result = await deleteQuickLead(lead.id);
-    if (result.error) { showToast(result.error, 'error'); return; }
-    setLeads(prev => prev.filter(l => l.id !== lead.id));
-    showToast('Lead gelöscht.');
-  }
-
-  function copyUrl(url) {
-    navigator.clipboard.writeText(url).then(
-      () => showToast('Link kopiert.'),
-      () => showToast('Konnte nicht kopieren.', 'error')
-    );
-  }
-
-  function emailMailto(lead, url) {
-    const subj = `Dein CV-Check beim Karriere-Institut`;
-    const body = `Hallo ${lead.name},
-
-wie besprochen hier der Link für deinen CV-Check:
-
-${url}
-
-Lade einfach deinen Lebenslauf hoch — die KI-Analyse liefert dir in wenigen Sekunden ein erstes Feedback. Danach gehe ich es im Gespräch mit dir durch.
-
-Viele Grüße,
-${advisorName}`;
-    return `mailto:${lead.email || ''}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
   }
 
   return (
-    <div className="quick-lead-page admin-coaches">
+    <div className="admin-coaches">
       <div className="admin-pageheader">
         <div>
-          <div className="title-kicker"><span className="pulse" /> Berater · Direkt-CV-Check</div>
-          <h1 className="page-title">Quick-Leads <span className="faded">{leads.length}</span></h1>
+          <div className="title-kicker"><span className="pulse" /> Berater · CV-Check starten</div>
+          <h1 className="page-title">Neuen CV-Check starten</h1>
           <p className="page-sub">
-            Ad-hoc CV-Check für Kunden anlegen. Du bekommst einen QR-Code und Direkt-Link, den du per E-Mail oder im Gespräch übergibst.
+            Nur zwei kurze Angaben — danach geht es direkt zum CV-Upload und zur KI-Auswertung.
           </p>
         </div>
-        {!showForm && (
-          <button className="admin-cta-primary" type="button" onClick={() => { setCreated(null); setShowForm(true); }}>
-            <Icon name="plus" size={14} stroke={2} /> Neuer Quick-Lead
-          </button>
-        )}
       </div>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="quick-lead-form">
-          <h3>Kundendaten</h3>
-          <div className="admin-form-row">
-            <label className="admin-form-field">
-              <span className="admin-form-label">Vorname *</span>
-              <input name="name" required autoFocus placeholder="z.B. Sarah" />
-            </label>
-            <label className="admin-form-field">
-              <span className="admin-form-label">E-Mail</span>
-              <input name="email" type="email" placeholder="sarah@beispiel.de" />
-            </label>
-          </div>
-          <div className="admin-form-row">
-            <label className="admin-form-field">
-              <span className="admin-form-label">Telefon</span>
-              <input name="phone" placeholder="+49 …" />
-            </label>
-            <label className="admin-form-field">
-              <span className="admin-form-label">Zielposition (optional)</span>
-              <input name="target_position" placeholder="z.B. Marketing Manager" />
-            </label>
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-            <button type="button" className="admin-action-btn" onClick={() => setShowForm(false)}>Abbrechen</button>
-            <button type="submit" className="admin-cta-primary" disabled={submitting}>
-              {submitting ? 'Erstelle…' : 'Quick-Lead anlegen'}
-            </button>
-          </div>
-        </form>
-      )}
+      <form
+        onSubmit={handleSubmit}
+        data-tour="quick-form"
+        style={{
+          background: '#fff',
+          border: '1px solid #E8E6E1',
+          borderRadius: 16,
+          padding: 28,
+          maxWidth: 560,
+        }}
+      >
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
+            Vorname des Bewerbers *
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+            autoFocus
+            placeholder="z.B. Sarah"
+            style={{ ...inputStyle, fontSize: 18, padding: '16px 18px' }}
+          />
+        </div>
 
-      {created && (
-        <div className="quick-lead-result">
-          <div className="quick-lead-result-head">
-            <Icon name="check-circle" size={20} stroke={1.7} />
-            <div>
-              <h3>Lead für {created.name} angelegt</h3>
-              <p>Sende deinem Kunden den Link oder zeige den QR-Code direkt am Bildschirm.</p>
-            </div>
-            <button type="button" className="admin-icon-btn" onClick={() => setCreated(null)} title="Schließen">
-              <Icon name="x" size={16} stroke={1.8} />
-            </button>
-          </div>
-          <div className="quick-lead-result-body">
-            <div className="quick-lead-qr">
-              <img src={qrCodeUrl(created.uploadUrl)} alt="QR-Code für CV-Upload" />
-              <span>Direkt scannen lassen</span>
-            </div>
-            <div className="quick-lead-actions">
-              <div className="quick-lead-url">
-                <code>{created.uploadUrl}</code>
-              </div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <button type="button" className="admin-action-btn" onClick={() => copyUrl(created.uploadUrl)}>
-                  <Icon name="paperclip" size={13} stroke={1.8} /> Link kopieren
-                </button>
-                {created.email && (
-                  <a href={emailMailto(created, created.uploadUrl)} className="admin-cta-primary">
-                    <Icon name="mail" size={13} stroke={1.8} /> Per E-Mail senden
-                  </a>
-                )}
-              </div>
-            </div>
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
+            Zielbranche / Berufsfeld
+            <span style={{ fontWeight: 400, color: '#86868b', marginLeft: 6 }}>— in welche Richtung geht's?</span>
+          </label>
+          <div style={{ position: 'relative' }}>
+            <select
+              value={field}
+              onChange={e => setField(e.target.value)}
+              style={{ ...inputStyle, paddingRight: 40, cursor: 'pointer' }}
+            >
+              <option value="">— Bitte wählen —</option>
+              {BERUFSFELDER.map(group => (
+                <optgroup key={group.group} label={group.group}>
+                  {group.options.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </optgroup>
+              ))}
+              <option value="__sonstiges__">✏️ Sonstiges / Freitext…</option>
+            </select>
+            <span style={{
+              position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)',
+              pointerEvents: 'none', color: '#86868b', fontSize: 12,
+            }}>▼</span>
           </div>
         </div>
-      )}
 
-      <div className="admin-list" style={{ marginTop: 24 }}>
-        {leads.length === 0 && (
-          <div className="admin-empty">Noch keine Quick-Leads. Klick auf „Neuer Quick-Lead" um zu starten.</div>
+        {field === '__sonstiges__' && (
+          <div style={{ marginBottom: 24 }}>
+            <input
+              type="text"
+              value={customField}
+              onChange={e => setCustomField(e.target.value)}
+              autoFocus
+              placeholder="z.B. Eventmanagement, Übersetzung, Architektur…"
+              style={inputStyle}
+            />
+          </div>
         )}
-        {leads.map(l => {
-          const status = leadStatus(l);
-          const uploadUrl = `${baseUrl}/cv-upload/${l.id}`;
-          return (
-            <div key={l.id} className="admin-row">
-              <div className="admin-avatar small">{(l.first_name?.[0] || '?').toUpperCase()}</div>
-              <div className="admin-row-body">
-                <div className="admin-row-name">
-                  {l.first_name} {l.last_name}
-                  <span className={`admin-coach-badge tier-${status.tier}`}>{status.label}</span>
-                </div>
-                <div className="admin-row-content">
-                  {l.email || '—'}
-                  {l.phone && ` · ${l.phone}`}
-                  {l.target_position && ` · Ziel: ${l.target_position}`}
-                </div>
-                <div className="admin-row-meta">
-                  <span>Erstellt {formatDate(l.created_at)}</span>
-                  {l.cv_feedback?.[0]?.overall_rating && (
-                    <><span>·</span><span>★ {l.cv_feedback[0].overall_rating}/5</span></>
-                  )}
-                </div>
-              </div>
-              <div className="admin-coach-actions">
-                <button type="button" className="admin-action-btn" onClick={() => copyUrl(uploadUrl)}>
-                  Link kopieren
-                </button>
-                <button type="button" className="admin-icon-btn danger" onClick={() => handleDelete(l)} title="Löschen">
-                  <Icon name="x" size={16} stroke={1.8} />
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
 
-      {toast && <div className={`admin-toast ${toast.kind}`}>{toast.text}</div>}
+        {error && (
+          <div style={{
+            background: '#FEF2F2', color: '#CC1426',
+            padding: '12px 16px', borderRadius: 12,
+            fontSize: 14, marginBottom: 16,
+          }}>
+            {error}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn btn-primary"
+          style={{
+            width: '100%', padding: '16px',
+            fontSize: 16, fontWeight: 600,
+            cursor: loading ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {loading ? 'Wird gestartet…' : 'Weiter zum CV-Upload →'}
+        </button>
+
+        <p style={{ fontSize: 12, color: '#86868b', marginTop: 14, textAlign: 'center' }}>
+          E-Mail und Telefonnummer kannst du nach der Auswertung optional ergänzen.
+        </p>
+      </form>
     </div>
   );
 }

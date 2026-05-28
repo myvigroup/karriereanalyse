@@ -1,7 +1,11 @@
+import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import DemoBanner from '@/components/layout/DemoBanner';
+import AdvisorTour from '@/components/layout/AdvisorTour';
+import { isDemoEmail } from '@/lib/demo';
 
 export default async function AdvisorSessionLayout({ children }) {
   const supabase = createClient();
@@ -17,8 +21,11 @@ export default async function AdvisorSessionLayout({ children }) {
 
   if (!profile || !['advisor', 'messeleiter', 'admin'].includes(profile.role)) redirect('/dashboard');
 
+  const showTour = isDemoEmail(user.email);
+
   return (
     <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column' }}>
+      <DemoBanner />
       {/* Minimale Top-Bar */}
       <div style={{
         height: 52,
@@ -61,6 +68,12 @@ export default async function AdvisorSessionLayout({ children }) {
       <div style={{ flex: 1, padding: '32px 40px', maxWidth: 1200, width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
         {children}
       </div>
+
+      {showTour && (
+        <Suspense fallback={null}>
+          <AdvisorTour />
+        </Suspense>
+      )}
     </div>
   );
 }
