@@ -27,9 +27,9 @@ const NAV_GROUPS = [
 
 // Berater-spezifische Items (Messen, Quick-Lead, Leads-Liste, Affiliate)
 const ADVISOR_ITEMS = [
-  { label: 'CV-Checks',         path: '/advisor/leads',        icon: 'grid' },
-  { label: 'Neuer CV-Check',    path: '/advisor/quick-lead',   icon: 'doc' },
-  { label: 'Mein Affiliate',    path: '/advisor/affiliate',    icon: 'users' },
+  { label: 'CV-Checks',         path: '/advisor/leads',          icon: 'grid' },
+  { label: 'Neuer CV-Check',    path: '/advisor/cv-check/new',   icon: 'doc' },
+  { label: 'Mein Affiliate',    path: '/advisor/affiliate',      icon: 'users' },
 ];
 
 const ADMIN_ITEMS = [

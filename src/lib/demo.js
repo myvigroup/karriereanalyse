@@ -25,6 +25,8 @@ export const DEMO_PASSWORD = process.env.DEMO_PASSWORD || 'local-dev-only-change
 export const DEMO_DISPLAY_NAME = 'Demo Berater';
 export const DEMO_SLUG = 'demo';
 export const DEMO_PHONE = '+49 511 5468 4547';
+export const DEMO_FAIR_ID = '11111111-1111-1111-1111-111111111111';
+export const DEMO_FAIR_NAME = 'Karriere-Messe Hannover 2026 (Demo)';
 
 if (!process.env.DEMO_PASSWORD && process.env.NODE_ENV === 'production') {
   console.warn('[demo.js] WARN: DEMO_PASSWORD env-var nicht gesetzt — Demo-Login wird scheitern.');
@@ -124,12 +126,13 @@ export async function ensureDemoAdvisor() {
 // -----------------------------------------------------
 // Demo-Daten-Vorlage
 // -----------------------------------------------------
+// hours_ago statt days_ago, damit mehrere Leads "heute" sind (für Stats "Gespräche heute")
 const DEMO_LEADS = [
   {
     first_name: 'Anna', last_name: 'Müller',
     email: 'anna.mueller@beispiel.de', phone: '+49 170 1234567',
     target_position: 'Senior Brand Manager',
-    status: 'converted', source: 'affiliate', days_ago: 12,
+    status: 'converted', source: 'messe', use_fair: true, hours_ago: 2,
     cv_summary: 'Erfahrene Markenmanagerin mit 7 Jahren Konsumgüter-Erfahrung. Starke analytische Fähigkeiten, klarer Aufstiegsweg. Empfehlung: Senior-Position mit Budgetverantwortung — Marktwert-Potenzial €78–92k.',
     cv_rating: 5,
   },
@@ -137,7 +140,7 @@ const DEMO_LEADS = [
     first_name: 'Marcus', last_name: 'Berger',
     email: 'marcus.berger@beispiel.de', phone: '+49 171 2345678',
     target_position: 'Geschäftsführer Vertrieb Mittelstand',
-    status: 'feedback_pending', source: 'affiliate', days_ago: 5,
+    status: 'feedback_pending', source: 'messe', use_fair: true, hours_ago: 4,
     cv_summary: 'Vertriebsleiter mit 12 Jahren Mittelstands-Expertise (Maschinenbau). Führungsstärke nachgewiesen, P&L-Verantwortung €18 Mio. Empfehlung: GF-Position oder Bereichsleiter Großkonzern — Marktwert €130–160k.',
     cv_rating: 4,
   },
@@ -145,21 +148,21 @@ const DEMO_LEADS = [
     first_name: 'Sarah', last_name: 'Vogt',
     email: 'sarah.vogt@beispiel.de', phone: '+49 172 3456789',
     target_position: 'Tech Lead / Engineering Manager',
-    status: 'analyzing', source: 'direct', days_ago: 1,
+    status: 'analyzing', source: 'direct', use_fair: false, hours_ago: 1,
     cv_summary: null, cv_rating: null,
   },
   {
     first_name: 'Tobias', last_name: 'Klein',
     email: 'tobias.klein@beispiel.de', phone: '+49 173 4567890',
     target_position: 'Operations Manager Logistik',
-    status: 'new', source: 'direct', days_ago: 0,
+    status: 'new', source: 'messe', use_fair: true, hours_ago: 0.3,  // ~20 min
     cv_summary: null, cv_rating: null,
   },
   {
     first_name: 'Christina', last_name: 'Walter',
     email: 'christina.walter@beispiel.de', phone: '+49 174 5678901',
     target_position: 'HR Business Partner Konzern',
-    status: 'completed', source: 'affiliate', days_ago: 18,
+    status: 'completed', source: 'affiliate', use_fair: false, hours_ago: 18 * 24,
     cv_summary: 'Personalreferentin mit 6 Jahren Generalist-Erfahrung im Mittelstand. Möchte in HRBP-Rolle wechseln. CV solide, Skills passend — Coaching empfohlen zur Stärkung des Profils für Konzern-Bewerbungen.',
     cv_rating: 4,
   },

@@ -6,8 +6,6 @@ import Link from 'next/link';
 const LEGAL_LINKS = [
   { href: '/impressum',   label: 'Impressum' },
   { href: '/datenschutz', label: 'Datenschutz' },
-  { href: '/agb',         label: 'AGB' },
-  { href: '/widerruf',    label: 'Widerruf' },
 ];
 
 const CONTACT_LINKS = [
@@ -39,10 +37,6 @@ export default function AppFooter({ variant = 'default', showLogo = false }) {
         )}
         <div className="app-footer-meta">
           <span>© {year} Karriere-Institut</span>
-          <span className="app-footer-disclaimer">
-            Aus Gründen der besseren Lesbarkeit verzichten wir auf gegenderte Sprache.
-            Personenbezeichnungen gelten für alle Geschlechter.
-          </span>
         </div>
       </div>
     </footer>

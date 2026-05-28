@@ -78,11 +78,11 @@ export default async function LeadsPage({ searchParams }) {
     const isManagerForFair = managerFairIds.includes(fairFilter);
     query = query.eq('fair_id', fairFilter);
     if (!isManagerForFair) query = query.eq('advisor_user_id', user.id);
-  } else if (fairIds.length > 0 && managerFairIds.length > 0) {
-    query = query.in('fair_id', fairIds);
   } else {
+    // Default-View: eigene Leads aller Quellen (Messe + Direkt + Affiliate)
+    // — nicht mehr auf Messe-Leads beschränken für Messeleiter,
+    //   das wäre dann ein expliziter Messe-Filter
     query = query.eq('advisor_user_id', user.id);
-    if (fairIds.length > 0) query = query.in('fair_id', fairIds);
   }
 
   if (statusFilter === 'open') {
@@ -195,8 +195,8 @@ export default async function LeadsPage({ searchParams }) {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Link href="/advisor/quick-lead" className="admin-cta-primary" style={{ whiteSpace: 'nowrap' }}>
-            + Direkter CV-Check
+          <Link href="/advisor/cv-check/new" className="admin-cta-primary" style={{ whiteSpace: 'nowrap' }}>
+            + Neuer CV-Check
           </Link>
           {isSuperAdmin && <RetriggerButton />}
         </div>
