@@ -60,9 +60,9 @@ export default async function LeadsPage({ searchParams }) {
 
   // Alle Messen laden (Admin sieht alle, andere nur ihre)
   const { data: fairs } = isSuperAdmin
-    ? await admin.from('fairs').select('id, name').order('start_date', { ascending: false })
+    ? await admin.from('fairs').select('id, name, city, status, start_date, end_date').order('start_date', { ascending: false })
     : fairIds.length > 0
-      ? await admin.from('fairs').select('id, name').in('id', fairIds).order('start_date', { ascending: false })
+      ? await admin.from('fairs').select('id, name, city, status, start_date, end_date').in('id', fairIds).order('start_date', { ascending: false })
       : { data: [] };
 
   // Leads laden — Admin sieht alle, Messeleiter alle seiner Messen, Berater nur eigene
@@ -159,6 +159,13 @@ export default async function LeadsPage({ searchParams }) {
 
   const fairById = (fairs || []).reduce((acc, f) => { acc[f.id] = f; return acc; }, {});
 
+  // Stats für Dashboard-Sektion oben
+  const today = new Date().toISOString().split('T')[0];
+  const todayCount = (rawLeads || []).filter(l => (l.created_at || '').startsWith(today)).length;
+  const openCount = (rawLeads || []).filter(l => ['new', 'analyzing', 'feedback_pending'].includes(l.status)).length;
+  const totalCount = (rawLeads || []).length;
+  const activeFairs = (fairs || []).filter(f => ['upcoming', 'active'].includes(f.status));
+
   const TZ = 'Europe/Berlin';
   const formatDate = (d) => new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: TZ });
   const formatTime = (d) => new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: TZ });
@@ -203,6 +210,70 @@ export default async function LeadsPage({ searchParams }) {
         }}>
           <span>⚠️</span>
           <span>{duplicateCount} Duplikat{duplicateCount !== 1 ? 'e' : ''} ausgeblendet — es wird jeweils nur der neueste/fortgeschrittenste Eintrag pro Person angezeigt.</span>
+        </div>
+      )}
+
+      {/* === Stats-Sektion (war früher Messe-Dashboard) === */}
+      <div className="admin-stats-row" style={{ marginBottom: 24 }}>
+        <div className="admin-stat highlight">
+          <div className="admin-stat-icon" style={{ color: 'var(--ki-red)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div className="admin-stat-body">
+            <div className="admin-stat-value">{todayCount}</div>
+            <div className="admin-stat-label">Gespräche heute</div>
+          </div>
+        </div>
+        <div className="admin-stat">
+          <div className="admin-stat-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div className="admin-stat-body">
+            <div className="admin-stat-value">{openCount}</div>
+            <div className="admin-stat-label">Offene CV-Checks</div>
+          </div>
+        </div>
+        <div className="admin-stat">
+          <div className="admin-stat-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div className="admin-stat-body">
+            <div className="admin-stat-value">{totalCount}</div>
+            <div className="admin-stat-label">Gespräche gesamt</div>
+          </div>
+        </div>
+        <div className="admin-stat">
+          <div className="admin-stat-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          </div>
+          <div className="admin-stat-body">
+            <div className="admin-stat-value">{activeFairs.length}</div>
+            <div className="admin-stat-label">Aktive Messen</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Aktive Messen als kleine Karten */}
+      {activeFairs.length > 0 && (
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 32 }}>
+          {activeFairs.map(fair => (
+            <Link
+              key={fair.id}
+              href={`/advisor/fair/${fair.id}`}
+              style={{
+                textDecoration: 'none', color: 'inherit',
+                background: '#FFF7ED', border: '1px solid #FDBA74',
+                borderRadius: 10, padding: '10px 14px',
+                display: 'inline-flex', alignItems: 'center', gap: 10,
+                fontSize: 13,
+              }}
+            >
+              <span style={{ fontSize: 16 }}>🎪</span>
+              <span style={{ fontWeight: 600, color: '#9A3412' }}>{fair.name}</span>
+              {fair.city && <span style={{ color: '#9A3412', opacity: 0.7 }}>· {fair.city}</span>}
+              <span style={{ color: '#CC1426', fontWeight: 600, marginLeft: 6 }}>Messe-Sitzung öffnen →</span>
+            </Link>
+          ))}
         </div>
       )}
 
