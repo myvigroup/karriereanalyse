@@ -35,19 +35,22 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Datei zu groß (max. 10 MB)' }, { status: 400 });
   }
 
-  // Lead validieren (muss existieren und fair_id IS NULL — also Quick-Lead)
+  // Lead validieren (Live-DB: fair_leads hat advisor_user_id, kein advisor_id-FK)
   const { data: lead, error: leadErr } = await admin
     .from('fair_leads')
-    .select('id, advisor_id, advisor_user_id, fair_id, first_name')
+    .select('id, advisor_user_id, fair_id, first_name')
     .eq('id', leadId)
     .maybeSingle();
 
-  if (leadErr || !lead) {
+  if (leadErr) {
+    console.error('[quick-upload] Lead-Query Fehler:', leadErr.message);
+    return NextResponse.json({ error: 'Lead-Query fehlgeschlagen: ' + leadErr.message }, { status: 500 });
+  }
+  if (!lead) {
     return NextResponse.json({ error: 'Lead nicht gefunden' }, { status: 404 });
   }
-  if (lead.fair_id !== null) {
-    return NextResponse.json({ error: 'Dieser Lead ist messe-gebunden, bitte Standard-Upload verwenden.' }, { status: 400 });
-  }
+  // Hinweis: fair_id-Check entfernt — Quick-Upload funktioniert für alle Leads,
+  // auch Messe-Leads, denn /cv-upload ist der einheitliche Upload-Endpoint geworden.
 
   try {
     const docId = crypto.randomUUID();
