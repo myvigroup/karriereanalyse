@@ -197,23 +197,36 @@ export default function DatenschutzPage() {
                 </td>
               </tr>
               <tr>
-                <td style={td}>Dienstleister für die Kundenverwaltung</td>
+                <td style={td}>Hosting der Plattform</td>
                 <td style={td}>
-                  Courseticket GmbH, Liechtensteinstraße 111-115, 1090 Wien, Österreich
+                  Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA
+                  — bereitstellung der Anwendung über ein globales Content-Delivery-Network.
+                  Datenübermittlung in die USA auf Grundlage von Standardvertragsklauseln (Art. 46 DSGVO).
                 </td>
               </tr>
               <tr>
-                <td style={td}>Hosting der Plattform</td>
+                <td style={td}>Datenbank, Authentifizierung &amp; Datei-Speicher</td>
                 <td style={td}>
-                  Courseticket GmbH, Liechtensteinstraße 111-115, 1090 Wien, Österreich (Auftragsverarbeiter)
+                  Supabase Inc., 970 Toa Payoh North #07-04, Singapore 318992
+                  — Speicherung von Kundenkonten, Lebenslauf-Dokumenten und Auswertungen.
+                  Hosting der Datenbank innerhalb der EU (Frankfurt).
+                </td>
+              </tr>
+              <tr>
+                <td style={td}>KI-basierte Lebenslauf-Analyse</td>
+                <td style={td}>
+                  OpenAI, L.L.C., 3180 18th Street, San Francisco, CA 94110, USA
+                  — Verarbeitung von Lebenslauf-Inhalten zur automatisierten Auswertung. Die übermittelten Daten
+                  werden gemäß Vereinbarung nicht zum Training der Modelle verwendet. Datenübermittlung in die USA
+                  auf Grundlage von Standardvertragsklauseln (Art. 46 DSGVO).
                 </td>
               </tr>
               <tr>
                 <td style={td}>Zahlungsdienstleister</td>
                 <td style={td}>
-                  <strong>Kreditkarten/SEPA/ELV:</strong> PAYONE GmbH, Zweigniederlassung Österreich,
-                  Am Belvedere 10, 1100 Wien, Österreich<br />
-                  <strong>Online-Überweisungen:</strong> Klarna Bank AB, Sveavägen 46, 111 34 Stockholm, Schweden
+                  Bei Buchung kostenpflichtiger Leistungen können Ihre Zahlungsdaten an entsprechende
+                  Zahlungsdienstleister (z. B. PAYONE, Klarna oder Stripe) übermittelt werden, soweit dies zur
+                  Abwicklung notwendig ist. Die Dienstleister verarbeiten Ihre Daten in eigener Verantwortung.
                 </td>
               </tr>
               <tr>
