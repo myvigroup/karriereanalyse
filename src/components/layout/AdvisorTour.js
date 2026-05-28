@@ -205,18 +205,49 @@ export default function AdvisorTour({ enabled = true }) {
   const isLast = step === STEPS.length - 1;
   const isFirst = step === 0;
 
-  // Card-Position: wenn Target oben in der Seite → Card unten, sonst Card oben.
-  // Wenn kein Target → zentral mittig.
+  // Card-Position berechnen — die Card darf den Spotlight NICHT überdecken.
+  // Logik:
+  //   - Kein Target → Card zentral mittig
+  //   - Genug Platz unter dem Target → Card direkt darunter, zentriert
+  //   - Genug Platz über dem Target → Card direkt darüber, zentriert
+  //   - Sonst → Card oben rechts oder unten rechts (Fallback)
+  const CARD_WIDTH = 420;
+  const CARD_HEIGHT_EST = 360;
+  const GAP = 20;
   let cardPosition = { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
-  if (targetRect) {
-    const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const targetCenterY = targetRect.top + targetRect.height / 2;
-    if (targetCenterY < vh / 2) {
-      // Target oben → Card unten
-      cardPosition = { bottom: 32, left: '50%', transform: 'translateX(-50%)' };
+
+  if (targetRect && typeof window !== 'undefined') {
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+    const spaceBelow = vh - targetRect.bottom;
+    const spaceAbove = targetRect.top;
+
+    if (spaceBelow >= CARD_HEIGHT_EST + GAP) {
+      // Card unter dem Target, horizontal zentriert
+      cardPosition = {
+        top: targetRect.bottom + GAP,
+        left: '50%',
+        transform: 'translateX(-50%)',
+      };
+    } else if (spaceAbove >= CARD_HEIGHT_EST + GAP) {
+      // Card über dem Target, horizontal zentriert
+      cardPosition = {
+        top: Math.max(16, targetRect.top - CARD_HEIGHT_EST - GAP),
+        left: '50%',
+        transform: 'translateX(-50%)',
+      };
     } else {
-      // Target unten → Card oben
-      cardPosition = { top: 80, left: '50%', transform: 'translateX(-50%)' };
+      // Kein vertikaler Platz — Card oben rechts (überlappt nicht mit Spotlight in der Mitte)
+      cardPosition = {
+        top: 24,
+        right: 24,
+      };
+    }
+    // Card-Breite respektieren
+    if (vw < CARD_WIDTH + 32) {
+      cardPosition.left = 16;
+      cardPosition.right = 16;
+      cardPosition.transform = undefined;
     }
   }
 
@@ -275,12 +306,12 @@ export default function AdvisorTour({ enabled = true }) {
           position: 'fixed',
           ...cardPosition,
           zIndex: 9998,
-          width: 460,
+          width: CARD_WIDTH,
           maxWidth: 'calc(100vw - 32px)',
           background: '#fff',
           borderRadius: 20,
           boxShadow: '0 32px 80px rgba(0,0,0,0.4)',
-          padding: 28,
+          padding: 24,
           animation: 'tour-pop 0.25s ease-out both',
         }}
       >
@@ -374,8 +405,8 @@ export default function AdvisorTour({ enabled = true }) {
           to   { opacity: 1; }
         }
         @keyframes tour-pop {
-          from { opacity: 0; transform: ${cardPosition.transform || ''} translateY(8px) scale(0.98); }
-          to   { opacity: 1; transform: ${cardPosition.transform || ''} translateY(0) scale(1); }
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
       `}} />
     </>
