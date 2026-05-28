@@ -43,6 +43,7 @@ const ADMIN_ITEMS = [
   { label: 'CV-Checks',         path: '/admin/cv-checks',  icon: 'doc' },
   { label: 'Badges',            path: '/admin/coaching',   icon: 'badge' },
   { label: 'Analytics',         path: '/admin/analytics',  icon: 'chart' },
+  { label: 'Backlog',           path: '/admin/backlog',    icon: 'doc' },
 ];
 
 // ─── Inline icons (Lucide-style, 16px) ───────────────────────────────────────

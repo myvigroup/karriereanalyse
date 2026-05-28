@@ -34,6 +34,12 @@ const TILES = [
       { href: '/admin/demo',         iconName: 'play',       title: 'Demo-Account',    desc: 'Bühnen-Demo: fiktive Leads, Auto-Login-Link, Reset-Knopf.' },
     ],
   },
+  {
+    section: 'Steuerung',
+    items: [
+      { href: '/admin/backlog',      iconName: 'file-text',  title: 'Backlog',         desc: 'Offene Features, Bugs und Aufgaben als Tickets verwalten.' },
+    ],
+  },
 ];
 
 export default function AdminHubClient({ profile, stats }) {
