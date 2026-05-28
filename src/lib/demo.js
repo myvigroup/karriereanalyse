@@ -137,7 +137,7 @@ const DEMO_LEADS = [
     first_name: 'Marcus', last_name: 'Berger',
     email: 'marcus.berger@beispiel.de', phone: '+49 171 2345678',
     target_position: 'Geschäftsführer Vertrieb Mittelstand',
-    status: 'feedback_given', source: 'affiliate', days_ago: 5,
+    status: 'feedback_pending', source: 'affiliate', days_ago: 5,
     cv_summary: 'Vertriebsleiter mit 12 Jahren Mittelstands-Expertise (Maschinenbau). Führungsstärke nachgewiesen, P&L-Verantwortung €18 Mio. Empfehlung: GF-Position oder Bereichsleiter Großkonzern — Marktwert €130–160k.',
     cv_rating: 4,
   },
@@ -145,7 +145,7 @@ const DEMO_LEADS = [
     first_name: 'Sarah', last_name: 'Vogt',
     email: 'sarah.vogt@beispiel.de', phone: '+49 172 3456789',
     target_position: 'Tech Lead / Engineering Manager',
-    status: 'cv_uploaded', source: 'direct', days_ago: 1,
+    status: 'analyzing', source: 'direct', days_ago: 1,
     cv_summary: null, cv_rating: null,
   },
   {
