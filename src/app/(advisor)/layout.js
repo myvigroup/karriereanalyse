@@ -4,9 +4,12 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import AppFooter from '@/components/layout/AppFooter';
 import DemoBanner from '@/components/layout/DemoBanner';
+import AdvisorTour from '@/components/layout/AdvisorTour';
+import { isDemoEmail } from '@/lib/demo';
 
 export default async function AdvisorLayout({ children }) {
   const supabase = createClient();
@@ -28,6 +31,8 @@ export default async function AdvisorLayout({ children }) {
   const buildVersion = (process.env.VERCEL_GIT_COMMIT_SHA || 'dev').slice(0, 7);
   const buildEnv = process.env.VERCEL_ENV || null;
 
+  const showTour = isDemoEmail(user.email);
+
   return (
     <div className="app-shell">
       <DemoBanner />
@@ -36,6 +41,11 @@ export default async function AdvisorLayout({ children }) {
         {children}
         <AppFooter />
       </main>
+      {showTour && (
+        <Suspense fallback={null}>
+          <AdvisorTour />
+        </Suspense>
+      )}
     </div>
   );
 }
