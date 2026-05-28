@@ -20,7 +20,7 @@ export default function NewCvCheckChooser() {
         </Link>
       </div>
 
-      <div style={{
+      <div data-tour="cv-choice" style={{
         display: 'grid',
         gap: 20,
         gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',

@@ -214,7 +214,7 @@ export default async function LeadsPage({ searchParams }) {
       )}
 
       {/* === Stats-Sektion (war früher Messe-Dashboard) === */}
-      <div className="admin-stats-row" style={{ marginBottom: 24 }}>
+      <div className="admin-stats-row" data-tour="stats" style={{ marginBottom: 24 }}>
         <div className="admin-stat highlight">
           <div className="admin-stat-icon" style={{ color: 'var(--ki-red)' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -255,7 +255,7 @@ export default async function LeadsPage({ searchParams }) {
 
       {/* Aktive Messen als kleine Karten */}
       {activeFairs.length > 0 && (
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 32 }}>
+        <div data-tour="fairs" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 32 }}>
           {activeFairs.map(fair => (
             <Link
               key={fair.id}
@@ -401,7 +401,7 @@ export default async function LeadsPage({ searchParams }) {
           Noch keine CV-Checks aus Beratungsgesprächen.
         </div>
       ) : (
-        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden' }}>
+        <div data-tour="leads-table" style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden' }}>
           {/* Tabellen-Header */}
           <div style={{
             display: 'grid',
@@ -550,7 +550,7 @@ export default async function LeadsPage({ searchParams }) {
 
       {/* === BOX 2: Self-Service CV-Checks (Kunden machen den Check selbst) === */}
       {selfChecks && selfChecks.length > 0 && (
-        <div style={{ marginTop: 48 }}>
+        <div data-tour="self-service" style={{ marginTop: 48 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
             <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
               Self-Service CV-Checks
