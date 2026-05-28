@@ -28,15 +28,15 @@ export default async function AdvisorAffiliatePage() {
   if (!advisor && isAdmin) redirect('/admin/advisors');
 
   // Affiliate-Leads (über /r/[slug] reingekommen)
+  // Live-DB: fair_leads hat advisor_user_id, kein advisor_id-FK
   const { data: affiliateLeads } = await admin
     .from('fair_leads')
     .select(`
       id, first_name, last_name, email, phone, target_position, status, source,
       created_at, updated_at,
-      cv_documents(id),
       cv_feedback(id, overall_rating, status, ai_parsed_at)
     `)
-    .eq('advisor_id', advisor.id)
+    .eq('advisor_user_id', advisor.user_id)
     .in('source', ['affiliate', 'direct'])
     .order('created_at', { ascending: false })
     .limit(100);

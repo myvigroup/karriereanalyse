@@ -20,12 +20,17 @@ export default async function AdminAdvisorsPage() {
     .select('*')
     .order('created_at', { ascending: false });
 
-  // Lead-Counts pro Berater
+  // Lead-Counts pro Berater (Live-DB: fair_leads hat advisor_user_id, kein advisor_id)
   const { data: leadCounts } = await admin
-    .from('fair_leads').select('advisor_id');
-  const leadCountMap = {};
+    .from('fair_leads').select('advisor_user_id');
+  const leadCountByUserId = {};
   (leadCounts || []).forEach(l => {
-    if (l.advisor_id) leadCountMap[l.advisor_id] = (leadCountMap[l.advisor_id] || 0) + 1;
+    if (l.advisor_user_id) leadCountByUserId[l.advisor_user_id] = (leadCountByUserId[l.advisor_user_id] || 0) + 1;
+  });
+  // Map advisors.id → lead count über advisors.user_id
+  const leadCountMap = {};
+  (advisors || []).forEach(a => {
+    if (a.user_id) leadCountMap[a.id] = leadCountByUserId[a.user_id] || 0;
   });
 
   // Referral-Signups pro Berater

@@ -37,7 +37,7 @@ export async function createQuickLead(formData) {
     .from('fair_leads')
     .insert({
       fair_id: null,
-      advisor_id: advisor?.id || null,
+      // Live-DB: fair_leads hat advisor_user_id, kein advisor_id-FK
       advisor_user_id: user.id,
       first_name: name,
       last_name: '',

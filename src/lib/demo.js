@@ -184,9 +184,9 @@ export async function seedDemoData() {
   const now = Date.now();
 
   // 1) Leads
+  // Hinweis: fair_leads hat in der Live-DB nur advisor_user_id (kein advisor_id-FK)
   const leadInserts = DEMO_LEADS.map(lead => ({
     fair_id: null,
-    advisor_id: advisorId,
     advisor_user_id: userId,
     first_name: lead.first_name,
     last_name: lead.last_name,
@@ -211,15 +211,16 @@ export async function seedDemoData() {
     const lead = insertedLeads[i];
     if (!tpl.cv_summary) continue;
 
+    // Live-DB: cv_documents hat lead_id (nicht fair_lead_id), storage_path (nicht file_path), kein version
     const { data: doc, error: docErr } = await admin
       .from('cv_documents')
       .insert({
-        fair_lead_id: lead.id,
-        file_path: `demo/${lead.id}/${tpl.first_name.toLowerCase()}-cv.pdf`,
+        lead_id: lead.id,
+        user_id: userId,
+        storage_path: `demo/${lead.id}/${tpl.first_name.toLowerCase()}-cv.pdf`,
         file_name: `${tpl.first_name}_${tpl.last_name}_CV.pdf`,
         file_type: 'pdf',
         file_size_bytes: 245000,
-        version: 1,
         is_current: true,
         extraction_status: 'success',
         extracted_text: `[Demo-CV: ${tpl.first_name} ${tpl.last_name}, ${tpl.target_position}]`,
@@ -231,7 +232,7 @@ export async function seedDemoData() {
     await admin.from('cv_feedback').insert({
       cv_document_id: doc.id,
       fair_lead_id: lead.id,
-      advisor_id: advisorId,
+      advisor_id: advisorId,   // cv_feedback hat advisor_id (anders als fair_leads!)
       overall_rating: tpl.cv_rating,
       summary: tpl.cv_summary,
       status: 'completed',
@@ -318,7 +319,17 @@ export async function wipeDemoData() {
 
   if (!advisor) return { ok: true, note: 'Demo-Advisor existiert nicht — nichts zu löschen' };
 
-  await admin.from('fair_leads').delete().eq('advisor_id', advisor.id);
+  // fair_leads hat advisor_user_id (kein advisor_id-FK in der Live-DB)
+  await admin.from('fair_leads').delete().eq('advisor_user_id', advisor.user_id);
+
+  // cv_feedback hat advisor_id (echter advisors.id-FK) — separat löschen
+  // (cascaded normalerweise via fair_leads, aber sicherheitshalber explizit)
+  try {
+    await admin.from('cv_feedback').delete().eq('advisor_id', advisor.id);
+  } catch (err) {
+    console.warn('cv_feedback-Wipe übersprungen:', err?.message);
+  }
+
   await admin.from('analytics_events').delete().eq('advisor_id', advisor.id);
   try {
     await admin.from('self_service_checks').delete().in('email', DEMO_SELF_SERVICE_EMAILS);
