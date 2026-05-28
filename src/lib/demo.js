@@ -186,21 +186,63 @@ export async function seedDemoData() {
 
   const now = Date.now();
 
-  // 1) Leads
-  // Hinweis: fair_leads hat in der Live-DB nur advisor_user_id (kein advisor_id-FK)
-  const leadInserts = DEMO_LEADS.map(lead => ({
-    fair_id: null,
-    advisor_user_id: userId,
-    first_name: lead.first_name,
-    last_name: lead.last_name,
-    email: lead.email,
-    phone: lead.phone,
-    target_position: lead.target_position,
-    status: lead.status,
-    source: lead.source,
-    created_at: new Date(now - lead.days_ago * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(now - lead.days_ago * 24 * 60 * 60 * 1000).toISOString(),
-  }));
+  // 1a) Demo-Messe sicherstellen (upsert per fester ID)
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const endDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    await admin.from('fairs').upsert({
+      id: DEMO_FAIR_ID,
+      name: DEMO_FAIR_NAME,
+      location: 'Messegelände Hannover',
+      city: 'Hannover',
+      start_date: today,
+      end_date: endDate,
+      status: 'active',
+    }, { onConflict: 'id' });
+  } catch (err) {
+    console.warn('Demo-Messe-Upsert übersprungen:', err?.message);
+  }
+
+  // 1b) Berater der Demo-Messe zuordnen (falls noch nicht)
+  try {
+    const { data: existingAssign } = await admin
+      .from('fair_advisors')
+      .select('id')
+      .eq('fair_id', DEMO_FAIR_ID)
+      .eq('advisor_user_id', userId)
+      .maybeSingle();
+    if (!existingAssign) {
+      await admin.from('fair_advisors').insert({
+        fair_id: DEMO_FAIR_ID,
+        advisor_user_id: userId,
+        is_manager: true,
+        assigned_at: new Date().toISOString(),
+      });
+    }
+  } catch (err) {
+    console.warn('Berater-Zuordnung übersprungen:', err?.message);
+  }
+
+  // 2) Leads
+  // Live-DB: fair_leads hat advisor_user_id (kein advisor_id-FK)
+  // use_fair=true → Lead landet auf Demo-Messe, sonst fair_id=null (direct/affiliate)
+  const leadInserts = DEMO_LEADS.map(lead => {
+    const createdAt = new Date(now - lead.hours_ago * 60 * 60 * 1000).toISOString();
+    return {
+      fair_id: lead.use_fair ? DEMO_FAIR_ID : null,
+      advisor_user_id: userId,
+      first_name: lead.first_name,
+      last_name: lead.last_name,
+      email: lead.email,
+      phone: lead.phone,
+      target_position: lead.target_position,
+      status: lead.status,
+      source: lead.source,
+      created_at: createdAt,
+      updated_at: createdAt,
+      started_at: createdAt,
+    };
+  });
 
   const { data: insertedLeads, error: leadErr } = await admin
     .from('fair_leads')
@@ -239,7 +281,7 @@ export async function seedDemoData() {
       overall_rating: tpl.cv_rating,
       summary: tpl.cv_summary,
       status: 'completed',
-      ai_parsed_at: new Date(now - tpl.days_ago * 24 * 60 * 60 * 1000).toISOString(),
+      ai_parsed_at: new Date(now - tpl.hours_ago * 60 * 60 * 1000).toISOString(),
       ai_analysis: {
         overall_score: tpl.cv_rating * 20,
         strengths: ['Klare Karriereentwicklung', 'Quantifizierte Erfolge', 'Branchen-Expertise'],
