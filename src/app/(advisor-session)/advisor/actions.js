@@ -292,11 +292,23 @@ export async function completeFeedback(leadId) {
   const leadName = `${lead.first_name} ${lead.last_name || ''}`.trim();
 
   // E-Mail senden
-  await sendEmail({
+  const emailResult = await sendEmail({
     to: lead.email,
     subject: 'Dein Lebenslauf-Check – Ergebnisse ansehen',
-    html: buildCvCheckEmail(leadName, fairName, 'Dein Karriere-Coach', magicLinkUrl, lead.email, tempPassword),
+    html: buildCvCheckEmail(leadName, fairName, advisorName || 'Dein Karriere-Coach', magicLinkUrl, lead.email, tempPassword),
   });
+
+  if (emailResult?.error) {
+    console.error('Email send failed for lead', leadId, ':', emailResult.error);
+    // Lead trotzdem als completed markieren, aber Fehler an Berater zurückgeben
+    return { error: `Gespräch abgeschlossen, aber E-Mail konnte nicht gesendet werden: ${emailResult.error}` };
+  }
+
+  // E-Mail-Timestamp speichern
+  await admin.from('fair_leads')
+    .update({ magic_link_sent_at: new Date().toISOString() })
+    .eq('id', leadId)
+    .then(() => {}).catch(() => {});
 
   // SharePoint-Webhook (Power Automate) — Fehler ignorieren, nicht blockieren
   const webhookUrl = process.env.POWERAUTOMATE_WEBHOOK_URL;
@@ -327,6 +339,55 @@ export async function completeFeedback(leadId) {
   ]).then(() => {}).catch(() => {});
 
   redirect(`/advisor/fair/${lead.fair_id}/lead/${leadId}/done`);
+}
+
+// E-Mail für abgeschlossenen Lead erneut senden
+export async function resendEmail(leadId) {
+  const admin = createAdminClient();
+
+  const { data: lead } = await admin.from('fair_leads')
+    .select('*, fairs(name)')
+    .eq('id', leadId)
+    .maybeSingle();
+
+  if (!lead) return { error: 'Lead nicht gefunden' };
+  if (!lead.email) return { error: 'Keine E-Mail-Adresse erfasst' };
+
+  const { data: advisorProfile } = lead.advisor_user_id
+    ? await admin.from('advisors').select('display_name').eq('user_id', lead.advisor_user_id).maybeSingle()
+    : { data: null };
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de';
+
+  const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+    type: 'magiclink',
+    email: lead.email,
+    options: { redirectTo: `${appUrl}/cv-check` },
+  });
+
+  if (linkError) {
+    console.error('Magic Link Fehler beim Resend:', linkError);
+    return { error: 'Magic Link konnte nicht generiert werden: ' + linkError.message };
+  }
+
+  const magicLinkUrl = linkData?.properties?.action_link;
+  const fairName = lead.fairs?.name || 'der Karrieremesse';
+  const leadName = `${lead.first_name} ${lead.last_name || ''}`.trim();
+
+  const emailResult = await sendEmail({
+    to: lead.email,
+    subject: 'Dein Lebenslauf-Check – Ergebnisse ansehen',
+    html: buildCvCheckEmail(leadName, fairName, advisorProfile?.display_name || 'Dein Karriere-Coach', magicLinkUrl, lead.email, null),
+  });
+
+  if (emailResult?.error) return { error: 'E-Mail konnte nicht gesendet werden: ' + emailResult.error };
+
+  await admin.from('fair_leads')
+    .update({ magic_link_sent_at: new Date().toISOString() })
+    .eq('id', leadId)
+    .then(() => {}).catch(() => {});
+
+  return { success: true };
 }
 
 function buildCvCheckEmail(name, fairName, advisorName, magicLinkUrl, email, tempPassword) {

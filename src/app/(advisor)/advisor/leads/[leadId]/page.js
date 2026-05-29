@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import FollowUpSelect from '../FollowUpSelect';
+import ResendEmailButton from '../ResendEmailButton';
 
 const STATUS_LABELS = {
   new: { label: 'Neu', bg: '#F3F4F6', color: '#6B7280' },
@@ -189,6 +190,13 @@ export default async function LeadDetailPage({ params }) {
               </div>
             )}
           </div>
+          {lead.status === 'completed' && lead.email && (
+            <ResendEmailButton
+              leadId={lead.id}
+              email={lead.email}
+              sentAt={lead.magic_link_sent_at}
+            />
+          )}
         </div>
       </div>
 
