@@ -16,8 +16,8 @@ export default async function DashboardPage() {
     return <ProfileLoading />;
   }
 
-  // Admin + Berater → Messe-Dashboard
-  if (profile.role === 'advisor' || profile.role === 'admin') redirect('/advisor');
+  // Admin + Berater bleiben jetzt auch im normalen Mitglieder-Portal —
+  // Berater-Funktionen sind in der Sidebar zugänglich.
 
   const admin = createAdminClient();
 
@@ -44,8 +44,8 @@ export default async function DashboardPage() {
   let cvFeedback = null;
   if (cvDoc) {
     const { data: fb } = await admin
-      .from('cv_feedback').select('overall_rating, summary')
-      .eq('cv_document_id', cvDoc.id).eq('status', 'completed').maybeSingle();
+      .from('cv_feedback').select('overall_rating, summary, ai_analysis')
+      .eq('cv_document_id', cvDoc.id).maybeSingle();
     cvFeedback = fb || null;
   }
 
@@ -59,7 +59,7 @@ export default async function DashboardPage() {
     .maybeSingle();
 
   const { data: analysisSession } = await supabase
-    .from('analysis_sessions').select('*').eq('user_id', user.id).order('completed_at', { ascending: false }).limit(1).single();
+    .from('analysis_sessions').select('*').eq('user_id', user.id).order('completed_at', { ascending: false }).limit(1).maybeSingle();
 
   const { data: analysisResults } = await supabase
     .from('analysis_results').select('*, competency_fields(title, icon, slug)').eq('user_id', user.id);

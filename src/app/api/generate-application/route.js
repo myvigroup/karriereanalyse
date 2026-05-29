@@ -13,7 +13,7 @@ export async function POST(request) {
 
     const rateCheck = await checkRateLimit(supabase, user.id, 'generate-application');
     if (!rateCheck.allowed) {
-      return NextResponse.json({ error: 'Rate limit erreicht. Versuche es sp\u00E4ter erneut.' }, { status: 429 });
+      return NextResponse.json({ error: 'Rate limit erreicht. Versuche es später erneut.' }, { status: 429 });
     }
 
     const { company, position } = await request.json();
@@ -70,7 +70,7 @@ BETREFF: [Betreffzeile]
 function getMockApplication(company, position, profile) {
   const name = `${profile?.first_name || 'Max'} ${profile?.last_name || 'Mustermann'}`;
   return {
-    cover_letter: `Sehr geehrte Damen und Herren,\n\nmit gro\u00DFem Interesse habe ich die Ausschreibung f\u00FCr die Position als ${position} bei ${company} gelesen. Mit ${profile?.experience_years || 'mehreren'} Jahren Berufserfahrung in der Branche ${profile?.industry || ''} bringe ich die idealen Voraussetzungen mit.\n\nIch freue mich auf ein pers\u00F6nliches Gespr\u00E4ch.\n\nMit freundlichen Gr\u00FC\u00DFen\n${name}`,
+    cover_letter: `Sehr geehrte Damen und Herren,\n\nmit großem Interesse habe ich die Ausschreibung für die Position als ${position} bei ${company} gelesen. Mit ${profile?.experience_years || 'mehreren'} Jahren Berufserfahrung in der Branche ${profile?.industry || ''} bringe ich die idealen Voraussetzungen mit.\n\nIch freue mich auf ein persönliches Gespräch.\n\nMit freundlichen Grüßen\n${name}`,
     subject_line: `Bewerbung als ${position} bei ${company}`,
   };
 }

@@ -2,7 +2,9 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import MobileNav from '@/components/layout/MobileNav';
-import AnalyseGateWrapper from '@/components/layout/AnalyseGateWrapper';
+import AnalysePopup from '@/components/layout/AnalysePopup';
+import AppFooter from '@/components/layout/AppFooter';
+import DemoBanner from '@/components/layout/DemoBanner';
 import AppTour from '@/components/ui/AppTour';
 import GlobalSearch from '@/components/ui/GlobalSearch';
 import InstallPrompt from '@/components/ui/InstallPrompt';
@@ -50,13 +52,16 @@ export default async function AppLayout({ children }) {
     field_title: r.competency_fields?.title,
   }));
 
+  const buildVersion = (process.env.VERCEL_GIT_COMMIT_SHA || 'dev').slice(0, 7);
+  const buildEnv = process.env.VERCEL_ENV || null;
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar profile={profile} analysisResults={formattedResults} />
-      <main style={{ flex: 1, marginLeft: 240, background: 'var(--ki-bg)', minHeight: '100vh' }}>
-        <AnalyseGateWrapper hasAnalysis={hasCompletedAnalysis}>
-          {children}
-        </AnalyseGateWrapper>
+    <div className="app-shell">
+      <DemoBanner />
+      <Sidebar profile={profile} analysisResults={formattedResults} version={buildVersion} env={buildEnv} />
+      <main className="app-main">
+        {children}
+        <AppFooter />
       </main>
       <MobileNav />
       <AppTour profile={profile} userId={user.id} />
@@ -64,6 +69,7 @@ export default async function AppLayout({ children }) {
       <InstallPrompt />
       <SOSButton userId={user.id} />
       <NightModeShield />
+      <AnalysePopup hasAnalysis={hasCompletedAnalysis} />
     </div>
   );
 }

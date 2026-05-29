@@ -13,7 +13,7 @@ const TAG_OPTIONS = [
   { key: 'mentor',   label: 'Mentor',           icon: '\u{1F9E0}' },
   { key: 'kollege',  label: 'Kollege',          icon: '\u{1F91D}' },
   { key: 'hr',       label: 'HR',               icon: '\u{1F454}' },
-  { key: 'fuehrung', label: 'F\u00FChrungskraft', icon: '\u{1F451}' },
+  { key: 'fuehrung', label: 'Führungskraft', icon: '\u{1F451}' },
   { key: 'branche',  label: 'Branche-Kontakt',  icon: '\u{1F3E2}' },
   { key: 'freund',   label: 'Freund',           icon: '\u{1F4AC}' },
   { key: 'coach',    label: 'Coach',            icon: '\u{1F3AF}' },
@@ -312,7 +312,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
   }
 
   async function deleteContact(id) {
-    if (!confirm('Kontakt wirklich l\u00F6schen?')) return;
+    if (!confirm('Kontakt wirklich löschen?')) return;
     await supabase.from('contacts').delete().eq('id', id);
     setContacts(prev => prev.filter(c => c.id !== id));
   }
@@ -918,7 +918,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
               <input
                 className="input" value={form.city}
                 onChange={e => f('city', e.target.value)}
-                placeholder="M\u00FCnchen" style={{ width: '100%' }}
+                placeholder="München" style={{ width: '100%' }}
               />
             </div>
 
@@ -999,7 +999,7 @@ export default function NetworkClient({ contacts: initial, userId }) {
                 className="input" rows={3}
                 value={form.notes}
                 onChange={e => f('notes', e.target.value)}
-                placeholder="Pers\u00F6nliche Notizen zum Kontakt\u2026"
+                placeholder="Persönliche Notizen zum Kontakt\u2026"
                 style={{ width: '100%', resize: 'vertical' }}
               />
             </div>

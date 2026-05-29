@@ -39,7 +39,7 @@ export async function POST(req) {
       .eq('organization_id', organizationId);
 
     if ((currentMembers || 0) >= (org?.max_seats || 10)) {
-      return NextResponse.json({ error: 'Maximale Teamgr\u00F6\u00DFe erreicht' }, { status: 400 });
+      return NextResponse.json({ error: 'Maximale Teamgröße erreicht' }, { status: 400 });
     }
 
     // Check if user exists

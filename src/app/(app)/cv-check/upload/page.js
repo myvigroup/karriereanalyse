@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Icon from '@/components/ui/Icon';
 
 const ACCEPTED = '.pdf,.docx,.jpg,.jpeg,.png,.heic';
 const IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic'];
@@ -242,15 +243,15 @@ export default function CVUploadPage() {
 
         {uploading ? (
           <div>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>
-              {progress?.includes('KI') ? '🤖' : '⏳'}
+            <div style={{ marginBottom: 16, color: 'var(--ki-red)', display: 'flex', justifyContent: 'center' }}>
+              <Icon name={progress?.includes('KI') ? 'ai' : 'refresh'} size={40} stroke={1.4} />
             </div>
             <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ki-text)', marginBottom: 4 }}>{progress}</div>
             <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>Bitte warten…</div>
           </div>
         ) : (
           <div>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>📄</div>
+            <div style={{ marginBottom: 16, color: 'var(--ki-red)', display: 'flex', justifyContent: 'center' }}><Icon name="file-text" size={48} stroke={1.4} /></div>
             <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ki-text)', marginBottom: 8 }}>
               Datei hierhin ziehen oder klicken
             </div>
@@ -269,13 +270,13 @@ export default function CVUploadPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             {[
-              { icon: '📐', label: 'Struktur', desc: 'Aufbau, Länge, Vollständigkeit' },
-              { icon: '📝', label: 'Inhalt', desc: 'Erfahrungen, Kompetenzen, Erfolge' },
-              { icon: '🎨', label: 'Design', desc: 'Layout, Lesbarkeit, Formatierung' },
-              { icon: '✨', label: 'Wirkung', desc: 'Positionierung, erster Eindruck' },
+              { iconName: 'ruler',    label: 'Struktur', desc: 'Aufbau, Länge, Vollständigkeit' },
+              { iconName: 'pen',      label: 'Inhalt',   desc: 'Erfahrungen, Kompetenzen, Erfolge' },
+              { iconName: 'palette',  label: 'Design',   desc: 'Layout, Lesbarkeit, Formatierung' },
+              { iconName: 'sparkle',  label: 'Wirkung',  desc: 'Positionierung, erster Eindruck' },
             ].map((item) => (
               <div key={item.label} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 18, flexShrink: 0 }}>{item.icon}</span>
+                <span style={{ flexShrink: 0, color: 'var(--ki-red)', display: 'flex' }}><Icon name={item.iconName} size={18} stroke={1.6} /></span>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{item.label}</div>
                   <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>{item.desc}</div>

@@ -173,6 +173,7 @@ export default function SOSButton({ userId }) {
       <button
         onClick={handleOpen}
         style={styles.sosButton}
+        className="sos-button"
         aria-label="SOS Notfall-Protokoll"
       >
         <span style={styles.sosText}>SOS</span>

@@ -68,9 +68,10 @@ export async function runCVAnalysis({ documentId, feedbackId, targetPosition }) 
 
   try {
     if (doc.file_type === 'pdf') {
-      const pdfParse = (await import('pdf-parse')).default;
-      const pdfData = await pdfParse(buffer);
-      extractedText = pdfData.text;
+      const { extractText, getDocumentProxy } = await import('unpdf');
+      const pdf = await getDocumentProxy(new Uint8Array(buffer));
+      const extracted = await extractText(pdf, { mergePages: true });
+      extractedText = extracted.text || '';
     } else if (doc.file_type === 'docx') {
       const mammoth = await import('mammoth');
       const result = await mammoth.extractRawText({ buffer });

@@ -9,31 +9,39 @@ export default function AnalyseGate({ hasAnalysis, children }) {
   return (
     <>
       {!hasAnalysis && (
-        <div style={{
-          padding: '12px 24px',
-          background: 'linear-gradient(135deg, rgba(204,20,38,0.06) 0%, rgba(204,20,38,0.02) 100%)',
-          borderBottom: '1px solid rgba(204,20,38,0.12)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          flexWrap: 'wrap',
-        }}>
-          <span style={{ fontSize: 20 }}>🎯</span>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ki-text)' }}>
-              Karriere-Analyse noch nicht abgeschlossen
+        <div className="analyse-gate-banner">
+          <div className="analyse-gate-inner">
+            <div className="analyse-gate-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" strokeWidth="1.8"
+                   strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+              </svg>
             </div>
-            <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>
-              ~10 Minuten — danach passt sich die gesamte App an dich an.
+            <div className="analyse-gate-text">
+              <div className="analyse-gate-title">
+                Karriere-Analyse noch nicht abgeschlossen
+              </div>
+              <div className="analyse-gate-sub">
+                ~10 Minuten — danach passt sich die gesamte App an dich an.
+              </div>
             </div>
+            <button
+              onClick={() => router.push('/analyse')}
+              className="analyse-gate-cta"
+              type="button"
+            >
+              Analyse starten
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" strokeWidth="2"
+                   strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </button>
           </div>
-          <button
-            onClick={() => router.push('/analyse')}
-            className="btn btn-primary"
-            style={{ padding: '8px 20px', fontSize: 13, flexShrink: 0 }}
-          >
-            Analyse starten →
-          </button>
         </div>
       )}
       {children}

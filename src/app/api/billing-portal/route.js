@@ -26,6 +26,6 @@ export async function POST() {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error('Billing portal error:', error);
-    return NextResponse.json({ error: 'Portal konnte nicht ge\u00F6ffnet werden' }, { status: 500 });
+    return NextResponse.json({ error: 'Portal konnte nicht geöffnet werden' }, { status: 500 });
   }
 }

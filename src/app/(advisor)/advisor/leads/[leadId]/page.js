@@ -85,6 +85,14 @@ export default async function LeadDetailPage({ params }) {
     }
   });
 
+  // KI-Analyse als Anzeige-Fallback, falls noch keine Berater-Items vorliegen
+  // (z. B. bei per "KI-Analyse nachholen" verarbeiteten CVs)
+  const aiAnalysis = feedback?.ai_analysis || null;
+  const aiCategories = aiAnalysis?.categories || {};
+  const displaySummary = feedback?.summary || aiAnalysis?.summary || null;
+  const displayOverallRating = feedback?.overall_rating || aiAnalysis?.overallRating || 0;
+  const feedbackIsAiOnly = !!aiAnalysis && (feedback?.cv_feedback_items || []).length === 0;
+
   return (
     <div style={{ maxWidth: 900, margin: '0 auto' }}>
       {/* Header */}
@@ -183,10 +191,10 @@ export default async function LeadDetailPage({ params }) {
                 <span style={{ color: '#059669', fontWeight: 600 }}>✓ {formatDateTime(lead.magic_link_opened_at)}</span>
               </div>
             )}
-            {feedback?.overall_rating > 0 && (
+            {displayOverallRating > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, alignItems: 'center' }}>
                 <span style={{ color: '#86868b' }}>Gesamtbewertung</span>
-                <Stars value={feedback.overall_rating} />
+                <Stars value={displayOverallRating} />
               </div>
             )}
           </div>
@@ -205,26 +213,35 @@ export default async function LeadDetailPage({ params }) {
         <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', padding: 20, marginTop: 16 }}>
           <h2 style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>CV-Feedback</h2>
 
-          {feedback.summary && (
+          {feedbackIsAiOnly && (
+            <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, color: '#7C3AED', background: '#F3E8FF', padding: '3px 10px', borderRadius: 980, marginBottom: 12 }}>
+              🤖 KI-Analyse
+            </div>
+          )}
+
+          {displaySummary && (
             <div style={{ background: '#F5F5F7', borderRadius: 12, padding: 16, marginBottom: 16, fontSize: 14, color: '#1A1A1A', lineHeight: 1.6 }}>
-              {feedback.summary}
+              {displaySummary}
             </div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             {Object.entries(CATEGORY_LABELS).map(([key, cat]) => {
               const catData = itemsByCategory[key];
-              if (!catData && !feedback) return null;
-              const rating = catData?.rating;
+              const aiCat = aiCategories[key] || null;
               const presets = catData?.presets || [];
-              const freetext = catData?.freetext;
+              // KI-Presets nur als Fallback, wenn der Berater noch keine Items gesetzt hat
+              const aiPresets = (presets.length === 0 && Array.isArray(aiCat?.selectedPresets)) ? aiCat.selectedPresets : [];
+              const rating = catData?.rating || aiCat?.rating || null;
+              const freetext = catData?.freetext || aiCat?.comment || null;
+              const hasContent = presets.length > 0 || aiPresets.length > 0 || freetext;
               return (
                 <div key={key} style={{ border: '1px solid #E8E6E1', borderRadius: 12, padding: 14 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{cat.icon} {cat.label}</span>
                     {rating && <Stars value={rating} />}
                   </div>
-                  {presets.length > 0 && (
+                  {(presets.length > 0 || aiPresets.length > 0) && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: freetext ? 8 : 0 }}>
                       {presets.map(p => (
                         <span key={p.id} style={{
@@ -235,12 +252,20 @@ export default async function LeadDetailPage({ params }) {
                           {p.sentiment === 'positive' ? '✓ ' : p.sentiment === 'negative' ? '✗ ' : ''}{p.content}
                         </span>
                       ))}
+                      {aiPresets.map((label, i) => (
+                        <span key={`ai-${i}`} style={{
+                          fontSize: 11, padding: '3px 8px', borderRadius: 980, fontWeight: 600,
+                          background: '#F3F4F6', color: '#6B7280',
+                        }}>
+                          {label}
+                        </span>
+                      ))}
                     </div>
                   )}
                   {freetext && (
                     <div style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.5 }}>{freetext}</div>
                   )}
-                  {presets.length === 0 && !freetext && (
+                  {!hasContent && (
                     <div style={{ fontSize: 12, color: '#C5C5C7' }}>Kein Feedback</div>
                   )}
                 </div>

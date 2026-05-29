@@ -51,7 +51,7 @@ ABGESCHLOSSENE E-LEARNINGS: ${(completedCourses || []).join(', ') || 'Noch keine
 
 PRODUKTE DES KARRIERE-INSTITUTS:
 1. 6 E-Learnings: Kommunikation, Prioritätenmanagement, Networking, Speedreading, Typgerechtes Lernen, Work-Life-Balance
-2. Strukturgramm® — Biologische Grundstruktur → https://www.daskarriereinstitut.de/de/e/structogram-82?uId=2
+2. Struktogramm® — Biologische Grundstruktur → https://www.daskarriereinstitut.de/de/e/structogram-82?uId=2
 3. INSIGHTS MDI® TriMetrix EQ (499€) → https://www.daskarriereinstitut.de/de/e/insights-mdi-trimetrix-eq-analyse-und-auswertungsgespr%C3%A4ch-94?uId=2
 4. Live-Seminare — Samstags 09:30-12:00 Uhr online via MS Teams, ab 99€
 5. Privat-Coaching — 199€/Session

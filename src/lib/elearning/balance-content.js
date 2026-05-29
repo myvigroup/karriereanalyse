@@ -445,7 +445,7 @@ export const IDENTITY_SHIFT = {
   uebung: {
     titel: 'Dein Identitaets-Rad',
     beschreibung: 'Male ein Rad mit 8 Speichen. Jede Speiche ist ein Teil deiner Identitaet. Fuelle mindestens 5 Speichen mit Dingen, die NICHTS mit deinem Job zu tun haben.',
-    beispiele: ['Partner/in', 'Elternteil', 'Musiker/in', 'Sportler/in', 'Freund/in', 'Leser/in', 'Reisende/r', 'Koch/Koechin', 'Ehrenamtliche/r', 'Lernende/r'],
+    beispiele: ['Partner', 'Elternteil', 'Musiker', 'Sportler', 'Freund', 'Leser', 'Reisende/r', 'Koch/Koechin', 'Ehrenamtliche/r', 'Lernende/r'],
   },
 };
 

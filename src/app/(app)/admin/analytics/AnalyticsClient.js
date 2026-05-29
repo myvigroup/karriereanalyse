@@ -56,14 +56,14 @@ export default function AnalyticsClient({ activeUsers7d, totalUsers, recentEvent
   return (
     <div className="page-container">
       <h1 className="page-title">Analytics</h1>
-      <p className="page-subtitle" style={{ marginBottom: 32 }}>Plattform-\u00DCbersicht der letzten 30 Tage</p>
+      <p className="page-subtitle" style={{ marginBottom: 32 }}>Plattform-Übersicht der letzten 30 Tage</p>
 
       {/* KPIs */}
       <div className="grid-4" style={{ marginBottom: 32 }}>
         <KPICard label="Aktive User (7d)" value={activeUsers7d} />
         <KPICard label="Neue Registrierungen" value={newRegistrations7d} sub="Letzte 7 Tage" />
         <KPICard label="Onboarding-Rate" value={`${onboardingRate}%`} />
-        <KPICard label="\u00D8 KI-Points" value={avgPoints} sub={`${totalUsers} User gesamt`} />
+        <KPICard label="Ø KI-Points" value={avgPoints} sub={`${totalUsers} User gesamt`} />
       </div>
 
       <div className="grid-2" style={{ marginBottom: 32 }}>

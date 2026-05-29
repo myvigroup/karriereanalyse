@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', company: '', position: '', password: '', confirm: '' });
@@ -37,7 +38,7 @@ export default function RegisterPage() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--ki-bg)', padding: 24 }}>
         <div style={{ maxWidth: 480, width: '100%', textAlign: 'center' }}>
-          <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '0.1em', color: 'var(--ki-red)', marginBottom: 32, textTransform: 'uppercase' }}>Karriere-Institut</div>
+          <span style={{ display: 'block', margin: '0 auto 32px', width: 'fit-content' }}><BrandLogo height={36} /></span>
           <div style={{
             width: 72, height: 72, borderRadius: '50%',
             background: 'rgba(204,20,38,0.08)', border: '2px solid rgba(204,20,38,0.2)',
@@ -59,7 +60,7 @@ export default function RegisterPage() {
             borderRadius: 10, padding: '12px 16px', marginBottom: 32,
             fontSize: 13, color: '#92400E', lineHeight: 1.5, textAlign: 'left',
           }}>
-            📬 Keine E-Mail erhalten? Bitte prüfe auch deinen <strong>Spam-Ordner</strong>.
+            Keine E-Mail erhalten? Bitte prüfe auch deinen <strong>Spam-Ordner</strong>.
           </div>
           <a href="/auth/login" className="btn btn-primary" style={{ display: 'inline-block', padding: '12px 32px', fontSize: 15 }}>
             Zur Anmeldeseite
@@ -79,7 +80,7 @@ export default function RegisterPage() {
     <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', background: 'var(--ki-bg)', padding: '32px 16px' }}>
       <div style={{ maxWidth: 480, width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '0.1em', color: 'var(--ki-red)', marginBottom: 12, textTransform: 'uppercase' }}>Karriere-Institut</div>
+          <span style={{ display: 'block', margin: '0 auto 16px', width: 'fit-content' }}><BrandLogo height={32} /></span>
           <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em' }}>Konto erstellen</h1>
           <p style={{ color: 'var(--ki-text-secondary)', marginTop: 8 }}>Starte jetzt deine Karriereanalyse.</p>
         </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import Icon from '@/components/ui/Icon';
 
 /* ───────────────────────── useCountUp ───────────────────────── */
 function useCountUp(target, duration = 1500) {
@@ -60,7 +61,7 @@ const CERTIFICATES = [
   { key: 'speedreading',    label: 'Speedreading',             type: 'elearning' },
   { key: 'worklife',        label: 'Work-Life-Balance',        type: 'elearning' },
   { key: 'typgerecht',      label: 'Typgerechtes Lernen',      type: 'elearning' },
-  { key: 'strukturgramm',   label: 'Strukturgramm®',           type: 'premium'   },
+  { key: 'strukturgramm',   label: 'Struktogramm®',           type: 'premium'   },
   { key: 'insights',        label: 'INSIGHTS MDI® EQ',         type: 'premium'   },
 ];
 
@@ -68,7 +69,7 @@ const CERTIFICATES = [
 const SCORE_BREAKDOWN = [
   { label: 'Karriere-Analyse abgeschlossen', value: '+20%',       key: 'analyse'       },
   { label: 'Pro E-Learning Zertifikat',      value: '+10%',       key: 'elearning'     },
-  { label: 'Strukturgramm®',                 value: '+15%',       key: 'strukturgramm' },
+  { label: 'Struktogramm®',                 value: '+15%',       key: 'strukturgramm' },
   { label: 'INSIGHTS MDI® EQ',              value: '+15%',       key: 'insights'      },
   { label: 'Alle 6 E-Learnings komplett',    value: '+10% Bonus', key: 'bonus'         },
   { label: 'Maximaler Score',               value: '100%',       key: 'max'           },
@@ -272,8 +273,8 @@ export default function MarktwertClient({ profile, log, progress, courses, userI
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', flex: 1, minWidth: 0 }}>
-                  <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>
-                    {completed ? '✅' : '🔒'}
+                  <span style={{ flexShrink: 0, color: completed ? '#15803d' : 'var(--label-3)', display: 'flex' }}>
+                    <Icon name={completed ? 'check-circle' : 'lock'} size={18} stroke={1.7} />
                   </span>
                   <span style={{
                     fontWeight: 600,

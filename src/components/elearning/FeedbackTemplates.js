@@ -66,7 +66,7 @@ export default function FeedbackTemplates({ templates = [], onComplete }) {
     <div style={styles.container}>
       <h2 style={styles.title}>SBI-Feedback-Vorlagen</h2>
       <p style={styles.subtitle}>
-        Situation &mdash; Beobachtung &mdash; Impact: Fertige Vorlagen f\u00fcr konstruktives Feedback.
+        Situation &mdash; Beobachtung &mdash; Impact: Fertige Vorlagen für konstruktives Feedback.
       </p>
 
       {/* SBI legend */}
@@ -176,7 +176,7 @@ export default function FeedbackTemplates({ templates = [], onComplete }) {
       {allViewed && (
         <div style={styles.completeSection}>
           <p style={styles.completeText}>
-            Du hast alle Feedback-Vorlagen gesehen. Nutze sie als Ausgangspunkt f\u00fcr dein n\u00e4chstes Gespr\u00e4ch!
+            Du hast alle Feedback-Vorlagen gesehen. Nutze sie als Ausgangspunkt für dein nächstes Gespräch!
           </p>
           <button
             className="btn btn-primary"

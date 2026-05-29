@@ -38,7 +38,7 @@ export async function GET() {
 
     const exportData = {
       export_date: new Date().toISOString(),
-      export_type: 'DSGVO Art. 20 - Datenportabilit\u00E4t',
+      export_type: 'DSGVO Art. 20 - Datenportabilität',
       profile,
       applications: applications || [],
       contacts: contacts || [],

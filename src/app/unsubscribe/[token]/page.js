@@ -28,15 +28,15 @@ export default async function UnsubscribePage({ params }) {
             <div style={{ fontSize: 48, marginBottom: 16 }}>{'\u2709\uFE0F'}</div>
             <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 12 }}>Abgemeldet</h1>
             <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', lineHeight: 1.6, marginBottom: 24 }}>
-              Du erh\u00E4ltst keine E-Mails mehr vom Karriere-Institut. Du kannst dies jederzeit in deinem Profil unter Einstellungen \u00E4ndern.
+              Du erhältst keine E-Mails mehr vom Karriere-Institut. Du kannst dies jederzeit in deinem Profil unter Einstellungen ändern.
             </p>
             <a href="/profile" style={{ color: 'var(--ki-red)', fontSize: 14, fontWeight: 600 }}>Zu den Einstellungen</a>
           </>
         ) : (
           <>
             <div style={{ fontSize: 48, marginBottom: 16 }}>{'\u26A0\uFE0F'}</div>
-            <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 12 }}>Link ung\u00FCltig</h1>
-            <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)' }}>Dieser Abmelde-Link ist ung\u00FCltig oder abgelaufen.</p>
+            <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 12 }}>Link ungültig</h1>
+            <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)' }}>Dieser Abmelde-Link ist ungültig oder abgelaufen.</p>
           </>
         )}
       </div>

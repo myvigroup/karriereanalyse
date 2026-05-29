@@ -68,8 +68,8 @@ export default function OrgDashboardClient({ org, members: initial, userId }) {
       <div className="grid-4" style={{ marginBottom: 24 }}>
         <KPI label="Mitglieder" value={members.length} sub={`Max ${org?.max_seats || 10}`} />
         <KPI label="Aktiv" value={activeMembers.length} />
-        <KPI label={'\u00D8 XP'} value={avgXP} />
-        <KPI label="Pl\u00E4tze frei" value={Math.max(0, (org?.max_seats || 10) - members.length)} />
+        <KPI label={'Ø XP'} value={avgXP} />
+        <KPI label="Plätze frei" value={Math.max(0, (org?.max_seats || 10) - members.length)} />
       </div>
 
       {/* Invite Form */}

@@ -1,18 +1,17 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import InfoTooltip from '@/components/ui/InfoTooltip';
-import { berechnePersonalisierung } from '@/lib/personalization';
+import { getCoachesForSeminar } from '@/lib/coaches';
+// `coaches` wird vom Page-Wrapper als prop reingereicht (geladen aus Supabase).
 
-// ─── Hardcoded Analyse-Tools ──────────────────────────────────────────────────
+// ─── Hardcoded Inhalte (preserved from previous version) ─────────────────────
 const ANALYSE_TOOLS = [
   {
     id: 'strukturgramm',
     icon: '🔺',
-    title: 'Strukturgramm®',
+    title: 'Struktogramm®',
     subtitle: 'Erkenne deine Biostruktur',
-    pricing: 'Online-Test + Coaching | Preis auf Anfrage',
-    badge: '⭐ Premium',
+    pricing: 'Online-Test + Coaching · Preis auf Anfrage',
     link: 'https://www.daskarriereinstitut.de/de/e/structogram-82?uId=2',
     features: [
       'Persönlichkeitsstruktur wissenschaftlich analysieren',
@@ -26,8 +25,7 @@ const ANALYSE_TOOLS = [
     icon: '🔬',
     title: 'INSIGHTS MDI® EQ',
     subtitle: 'Emotionale Intelligenz verstehen',
-    pricing: 'Test + Auswertung | 499€ pro Person',
-    badge: '⭐ Premium',
+    pricing: 'Test + Auswertung · 499 € pro Person',
     link: 'https://www.daskarriereinstitut.de/de/e/insights-mdi-trimetrix-eq-analyse-und-auswertungsgespr%C3%A4ch-94?uId=2',
     features: [
       'EQ-Profil mit internationalem Standard',
@@ -38,762 +36,719 @@ const ANALYSE_TOOLS = [
   },
 ];
 
-// ─── Hardcoded Seminare ───────────────────────────────────────────────────────
-const SEMINARE = [
+// ─── Masterclasses in Vorbereitung (aufgenommen / in Planung / Idee) ────────
+// Diese Liste zeigt was demnächst dazukommt und stimuliert „Kaufkraft".
+const COMING_SOON_MASTERCLASSES = [
   {
-    id: 'sem-typgerecht', icon: '🧠',
-    title: 'Typgerechtes Lernen',
-    subtitle: 'Finde deinen Weg zum Wissen',
-    description: 'Warum lernen, denken und vergessen wir unterschiedlich? Was motiviert uns zum Lernen?',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: '2026-04-18',
+    id: 'soon-gehaltsverhandlung',
+    title: 'Gehaltsverhandlung',
+    subtitle: '7-12 % mehr Gehalt — mit System und Skripten',
+    description: 'Die komplette Verhandlungs-Methodik für Mitarbeitergespräche, Jobwechsel und Beförderungen. Mit echten Skripten und Simulationen.',
+    launch: 'aufgenommen',
+    coachInitials: 'JuJ',
+    coachName: 'Julia Jacob',
+    letter: 'G',
+    gradient: 'linear-gradient(135deg, #b8336a 0%, #6b1d3c 100%)',
   },
   {
-    id: 'sem-worklife', icon: '⚖️',
-    title: 'Work-Life-Balance',
-    subtitle: 'Gesundheit trifft Leistung',
-    description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: '2026-05-09',
+    id: 'soon-vg-fragen',
+    title: 'Kritische Fragen im Vorstellungsgespräch',
+    subtitle: 'Souverän durch jede Frage — auch die unangenehmen',
+    description: 'Die 50 häufigsten Fragen, Stress-Interview-Techniken und wie du auf Lücken im CV reagierst. Mit Antworten, die wirken.',
+    launch: 'aufgenommen',
+    coachInitials: 'JuJ',
+    coachName: 'Julia Jacob',
+    letter: 'V',
+    gradient: 'linear-gradient(135deg, #5d3a91 0%, #3a2266 100%)',
   },
   {
-    id: 'sem-leadership', icon: '👑',
-    title: 'Personal Leadership',
-    subtitle: 'Authentisch führen, wirksam bleiben',
-    description: 'Wie du aus Wünschen echte Ziele machst und diese erreichen kannst.',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: '2026-06-13',
+    id: 'soon-karriere-grundlagen',
+    title: 'Karriereseminar Grundlagen',
+    subtitle: 'Das Fundament für jede starke Bewerbung',
+    description: 'Von der Selbstreflexion über Marktwertanalyse bis zur Bewerbungsstrategie — die Basis, auf der alles weitere aufbaut.',
+    launch: 'aufgenommen',
+    coachInitials: 'FF',
+    coachName: 'Florian Fritsch',
+    letter: 'K',
+    gradient: 'linear-gradient(135deg, #1d3a5f 0%, #0c1f36 100%)',
   },
   {
-    id: 'sem-speedreading', icon: '📖',
-    title: 'Speedreading',
-    subtitle: 'Geschwindigkeit trifft Verständnis',
-    description: 'Grundlagen des überdurchschnittlich schnellen Lesens mit hohem Textverständnis.',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: '2026-07-11',
+    id: 'soon-weiche-gehaltsfaktoren',
+    title: 'Weiche Gehaltsfaktoren',
+    subtitle: 'Mehr als nur das Grundgehalt',
+    description: 'Boni, Aktien, Weiterbildung, Homeoffice-Budget, Sabbatical — der wahre Wert eines Angebots steckt im Drumherum.',
+    launch: 'in Planung',
+    letter: 'W',
+    gradient: 'linear-gradient(135deg, #1d4d2e 0%, #0e2818 100%)',
   },
   {
-    id: 'sem-achtsamkeit', icon: '🧘',
-    title: 'Achtsamkeit',
-    subtitle: 'Gelassenheit ist trainierbar',
-    description: 'Nur selten nimmt man sich neben dem Beruf und reizüberfluteten Alltag Zeit für sich und die eigenen Bedürfnisse.',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: '2026-08-08',
-  },
-  {
-    id: 'sem-rhetorik', icon: '🎤',
-    title: 'Rhetorik, Dialektik, Kinesik',
-    subtitle: 'Überzeugen mit Worten und Wirkung',
-    description: 'Wirkungsvoll, passend und adressatengerecht kommunizieren in jeder Situation.',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: '2026-09-12',
-  },
-  {
-    id: 'sem-motivation', icon: '🔥',
-    title: 'Selbstmotivation',
-    subtitle: 'Dein Warum, dein Motor',
-    description: 'Wie du dich effektiv motivierst, langfristig und diszipliniert an eigenen Zielen arbeitest.',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: '2026-10-10',
-  },
-  {
-    id: 'sem-kommunikation', icon: '💬',
-    title: 'Kommunikation',
-    subtitle: 'Verständigung als Schlüssel zum Erfolg',
-    description: 'Effektive Kommunikation mit Kollegen und Geschäftspartnern.',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: '2026-11-14',
-  },
-  {
-    id: 'sem-konflikt', icon: '🤜',
-    title: 'Konfliktmanagement',
-    subtitle: 'Aus Krisen Chancen machen',
-    description: 'Strategien und Techniken zur erfolgreichen Konfliktbewältigung.',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: '2026-12-12',
-  },
-  {
-    id: 'sem-homeoffice', icon: '🏠',
-    title: 'Arbeiten aus dem Home Office',
-    subtitle: 'Effizient arbeiten, flexibel leben',
-    description: 'Strategien und Impulse, um auch von zu Hause aus ausgeglichen und effektiv deiner Arbeit nachzugehen.',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
-  },
-  {
-    id: 'sem-knigge', icon: '👔',
-    title: 'Business Knigge',
-    subtitle: 'Der erste Eindruck zählt, der zweite bleibt',
-    description: 'Die richtigen Formen und Kommunikationsfähigkeiten im Berufs- und Geschäftsumfeld.',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
-  },
-  {
-    id: 'sem-networking', icon: '🤝',
-    title: 'Networking',
-    subtitle: 'Kontakte knüpfen, Vertrauen aufbauen',
-    description: 'Fähigkeiten im Aufbau und der Pflege von beruflichen Beziehungen verbessern.',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
-  },
-  {
-    id: 'sem-prioritaeten', icon: '🎯',
-    title: 'Prioritätenmanagement',
-    subtitle: 'Nicht alles gleichzeitig, sondern das Richtige zuerst',
-    description: 'Bewusster Umgang mit unserer Zeit als Schlüssel zum beruflichen Erfolg.',
-    teams_link: 'https://teams.microsoft.com/l/meetup-join/PLACEHOLDER',
-    next_date: null,
+    id: 'soon-finanzielle-intelligenz',
+    title: 'Geldmindset & Finanzielle Intelligenz',
+    subtitle: 'Was du in der Schule nie über Geld gelernt hast',
+    description: 'Vom Sparen zum Investieren, vom Konsum zum Vermögensaufbau. Praxiswissen für Berufstätige — verständlich, neutral, alltagstauglich.',
+    launch: 'Idee · powered by IFI',
+    coachInitials: 'MaB',
+    coachName: 'Mario Blumwerk',
+    poweredBy: 'IFI · Institut für Finanzielle Intelligenz',
+    letter: 'F',
+    gradient: 'linear-gradient(135deg, #8a4a14 0%, #4d2906 100%)',
   },
 ];
 
-// ─── Seminar Kalender Helper ──────────────────────────────────────────────────
-function groupByMonth(seminare) {
-  const groups = {};
-  seminare.forEach(s => {
-    if (!s.next_date) return;
-    const d = new Date(s.next_date);
-    const key = d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(s);
-  });
-  return groups;
-}
+const SEMINARE = [
+  { id: 'sem-typgerecht', iconName: 'brain', title: 'Typgerechtes Lernen', subtitle: 'Lern dich smart — so funktioniert dein Gehirn wirklich', description: 'Warum lernen, denken und vergessen wir unterschiedlich?', next_date: '2026-04-18' },
+  { id: 'sem-worklife', iconName: 'scales', title: 'Work-Life-Balance', subtitle: 'Leistung ohne Burnout — Karriere ohne kaputtzugehen', description: 'Ausgewogene Balance zwischen beruflichen und privaten Verpflichtungen.', next_date: '2026-05-09' },
+  {
+    id: 'sem-leadership',
+    iconName: 'crown',
+    title: 'Personal Leadership',
+    subtitle: 'Endlich tun, was du dir vornimmst',
+    description: 'Wie du aus Wünschen echte Ziele machst und sie erreichst.',
+    next_date: '2026-06-13',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/personal-leadership-authentisch-f%C3%BChren-wirksam-bleiben-26?c=811',
+    rating: '4.9',
+    ratingCount: 36,
+    bookableUntil: 'Fr. 12. Juni 2026, 21:59',
+    longDescription: `
+      <h4>Führe dich selbst, bevor du andere führst</h4>
+      <p>Das Seminar <strong>„Personal Leadership“</strong> richtet sich an <strong>Studenten, Berufseinsteiger und Berufstätige</strong>, die ihre Fähigkeit zur <strong>Selbstführung</strong> auf ein neues Level bringen wollen. Denn wahre Führung beginnt nicht mit einem Titel — sondern mit dem <strong>klaren Umgang mit den eigenen Zielen, Entscheidungen und Gewohnheiten</strong>.</p>
 
-// ─── MS Teams Live helper ─────────────────────────────────────────────────────
-function isSeminarLive(nextDate) {
-  if (!nextDate) return false;
-  const now = new Date();
-  const seminar = new Date(nextDate);
-  const isSameDay = now.toDateString() === seminar.toDateString();
-  const hour = now.getHours();
-  return isSameDay && hour >= 9 && (hour < 12 || (hour === 12 && now.getMinutes() <= 30));
-}
+      <h4>Was dich im Seminar erwartet</h4>
+      <p>Unsere erfahrenen Referenten zeigen dir, <strong>wie aus Zielen ECHTE Ziele werden</strong> — konkret, erreichbar und motivierend. Du lernst, wie du:</p>
+      <ul>
+        <li>deine <strong>Ziele richtig formulierst</strong>, sodass sie wirklich motivieren</li>
+        <li><strong>getroffene Maßnahmen konsequent umsetzt</strong></li>
+        <li>neue Gewohnheiten <strong>nachhaltig in deinen Alltag integrierst</strong></li>
+        <li>dein <strong>Zeit- und Selbstmanagement</strong> effektiv steuerst — statt dich selbst auszubremsen</li>
+      </ul>
+      <p>Du bekommst nicht nur theoretische Impulse, sondern vor allem <strong>praxisnahe Tools und Übungen</strong>, mit denen du sofort ins Umsetzen kommst.</p>
 
-// ─── Milestone helper ─────────────────────────────────────────────────────────
-function getMilestone(completed) {
-  if (completed >= 6) return { label: 'Gold 🥇', next: null };
-  if (completed >= 3) return { label: 'Silber 🥈', next: 6 };
-  if (completed >= 1) return { label: 'Bronze 🥉', next: 3 };
-  return { label: null, next: 1 };
-}
+      <h4>Dein Ziel nach dem Seminar</h4>
+      <p>Du wirst lernen, wie du <strong>Verantwortung für dich selbst übernimmst</strong>, klare Prioritäten setzt und aus deinen guten Vorsätzen <strong>konkrete Ergebnisse</strong> machst.</p>
+      <blockquote>Personal Leadership heißt: bewusste Entscheidungen treffen — jeden Tag.</blockquote>
 
-// ─── Course Card ─────────────────────────────────────────────────────────────
-function CourseCard({ course, i, hasAnalyseData }) {
-  return (
-    <a
-      href={`/masterclass/${course.id}`}
-      className="card animate-in"
-      style={{
-        textDecoration: 'none', color: 'inherit', position: 'relative', overflow: 'hidden',
-        cursor: 'pointer', animationDelay: `${(i || 0) * 0.05}s`, display: 'flex', flexDirection: 'column',
-      }}
-    >
-      {/* Thumbnail area */}
-      <div style={{
-        position: 'relative',
-        width: 'calc(100% + 48px)',
-        marginLeft: -24,
-        marginTop: -24,
-        marginBottom: 16,
-        height: 140,
-        overflow: 'hidden',
-        borderRadius: '12px 12px 0 0',
-        background: course.thumbnail_url
-          ? `url(${course.thumbnail_url}) center/cover no-repeat`
-          : 'linear-gradient(135deg, #CC1426 0%, #8B0D1A 40%, #1a1a1a 100%)',
-        flexShrink: 0,
-      }}>
-        {/* Subtle pattern overlay for fallback */}
-        {!course.thumbnail_url && (
-          <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 40%)',
-          }} />
-        )}
-        {/* Dark overlay for text readability on image thumbnails */}
-        {course.thumbnail_url && (
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)' }} />
-        )}
-        {/* Emoji + play button */}
-        <div style={{
-          position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
-        }}>
-          <span style={{ fontSize: 36, filter: course.thumbnail_url ? 'none' : 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }}>{course.icon || '📘'}</span>
-          <div style={{
-            width: 40, height: 40, borderRadius: '50%',
-            background: course.thumbnail_url ? '#CC1426' : 'rgba(255,255,255,0.15)',
-            backdropFilter: course.thumbnail_url ? 'none' : 'blur(4px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            boxShadow: course.thumbnail_url ? '0 2px 12px rgba(204,20,38,0.5)' : '0 2px 12px rgba(0,0,0,0.2)',
-            border: course.thumbnail_url ? 'none' : '1px solid rgba(255,255,255,0.2)',
-          }}>
-            <span style={{ fontSize: 14, marginLeft: 3, color: '#fff' }}>▶</span>
-          </div>
-        </div>
-        {/* Pill badge on thumbnail */}
-        {course.isTopEmpfehlung ? (
-          <span className="pill pill-red" style={{ position: 'absolute', top: 10, right: 10, fontSize: 11, fontWeight: 700 }}>#1 Empfehlung</span>
-        ) : course.isPrio ? (
-          <span className="pill pill-gold" style={{ position: 'absolute', top: 10, right: 10, fontSize: 11, fontWeight: 700 }}>2x XP</span>
-        ) : null}
-      </div>
-      <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.02em', marginBottom: 4 }}>{course.title}</div>
-      {course.description && <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)', marginBottom: 10, lineHeight: 1.5, flex: 1 }}>{course.description}</div>}
-      {course.empfehlung && hasAnalyseData && <div style={{ fontSize: 11, color: 'var(--ki-text-secondary)', marginBottom: 8, lineHeight: 1.4, fontStyle: 'italic' }}>{course.empfehlung}</div>}
-      <div style={{ fontSize: 11, color: 'var(--ki-text-tertiary)', marginBottom: 10 }}>
-        {(course.modules || []).length} Module &bull; {course.total} Lektionen{course.isPrio ? ' • 2x XP' : ''}
-      </div>
-      <div className="progress-bar" style={{ marginBottom: 4 }}>
-        <div className="progress-bar-fill" style={{ width: `${course.pct}%`, background: course.pct === 100 ? 'var(--ki-success)' : 'var(--ki-red)' }} />
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ki-text-secondary)' }}>
-        <span>{course.done}/{course.total}</span>
-        <span style={{ fontWeight: 600, color: course.pct === 100 ? 'var(--ki-success)' : 'var(--ki-text)' }}>{course.pct}%</span>
-      </div>
-    </a>
-  );
-}
+      <h4>Voraussetzungen</h4>
+      <p>Bitte wähle dich <strong>5–10 Minuten vor Beginn</strong> ein und mache einen kurzen <strong>Technik-Check</strong> (Audio, Kamera, Internetverbindung). Während des Seminars bitten wir dich, deine Kamera aktiv zu halten und dich mit Wortbeiträgen einzubringen — die Interaktion mit Referenten und Teilnehmenden ist zentraler Bestandteil und entscheidend für den Praxistransfer.</p>
+    `,
+  },
+  {
+    id: 'sem-speedreading',
+    iconName: 'book',
+    title: 'Speedreading',
+    subtitle: 'Lies doppelt so schnell — ohne Verständnis-Verlust',
+    description: 'Grundlagen des überdurchschnittlich schnellen Lesens mit hohem Textverständnis.',
+    next_date: '2026-07-11',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/speedreading-geschwindigkeit-trifft-verst%C3%A4ndnis-34?c=812',
+    rating: '5.0',
+    ratingCount: 4,
+    bookableUntil: 'Fr. 10. Juli 2026, 21:59',
+    longDescription: `
+      <h4>Schnelllesen leicht gemacht</h4>
+      <p>In einer Welt, die von Informationen überflutet wird, ist die Fähigkeit, <strong>effizient und schnell zu lesen</strong>, unschätzbar wertvoll. Dieses Seminar bringt dir Techniken und Strategien bei, mit denen du deine <strong>Lesegeschwindigkeit verdoppeln oder verdreifachen</strong> kannst — ohne das Verständnis zu opfern.</p>
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-export default function MasterclassClient({ courses, progress, analysisResults, profile, seminars: seminarsFromDB, seminarRegistrations }) {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState('alle');
+      <h4>Was dich erwartet</h4>
+      <ul>
+        <li><strong>Grundlagen des Speedreadings</strong> — wissenschaftliche Hintergründe und Vorteile</li>
+        <li><strong>Augenbewegung & visuelle Wahrnehmung</strong> gezielt verbessern</li>
+        <li><strong>Wörter gruppieren</strong> — mehrere Wörter auf einmal erfassen</li>
+        <li><strong>Interaktive Lesetests</strong> zur Fortschrittsmessung</li>
+        <li>Konzentration und <strong>Textverständnis</strong> nachhaltig steigern</li>
+      </ul>
 
-  // Use DB seminars if available, fallback to hardcoded
-  const activeSeminars = (seminarsFromDB && seminarsFromDB.length > 0) ? seminarsFromDB : SEMINARE;
-  const [bookingLoading, setBookingLoading] = useState(null); // seminarId or null
-  const [bookedSeminars, setBookedSeminars] = useState(
-    () => new Set((seminarRegistrations || []).map(r => r.seminar_id))
-  );
+      <h4>Dein Nutzen</h4>
+      <ul>
+        <li><strong>Zeitersparnis</strong> — mehr in kürzerer Zeit lesen, höhere Produktivität</li>
+        <li><strong>Karrierevorteil</strong> — große Informationsmengen schnell verarbeiten</li>
+        <li><strong>Lebenslange Lernfähigkeit</strong> — kontinuierlich neues Wissen aufnehmen</li>
+      </ul>
+      <blockquote>Starte jetzt und entdecke, wie Speedreading deine Effizienz und Produktivität steigern kann.</blockquote>
 
-  const isPremium = profile?.subscription_plan && profile.subscription_plan !== 'FREE';
-  const hasSeminarAccess = isPremium || (profile?.purchased_products || []).includes('SEMINAR');
+      <h4>Voraussetzungen</h4>
+      <p>Grundlegende Lesefähigkeiten, ein digitales Gerät mit Internetzugang sowie <strong>Motivation und Offenheit</strong> für neue Techniken. Der Kurs ist für Anfänger und Fortgeschrittene gleichermaßen geeignet.</p>
+    `,
+  },
+  {
+    id: 'sem-achtsamkeit',
+    iconName: 'leaf',
+    title: 'Achtsamkeit',
+    subtitle: 'Raus aus dem Kopfkarussell — innere Ruhe, die hält',
+    description: 'Zeit für dich und die eigenen Bedürfnisse — neben Beruf und reizüberflutetem Alltag.',
+    next_date: '2026-08-08',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/achtsamkeit-gelassenheit-ist-trainierbar-48',
+    bookableUntil: 'Fr. 7. August 2026, 21:59',
+    longDescription: `
+      <h4>Achtsamkeit beginnt im Moment</h4>
+      <p>Im Seminar <strong>„Achtsamkeit"</strong> entdeckst du, wie wohltuend es sein kann, <strong>bewusst innezuhalten</strong> und den Moment wirklich wahrzunehmen.</p>
+      <p>Gemeinsam erlernen wir wirkungsvolle Techniken wie <strong>Atemübungen, Meditation und Körperwahrnehmung</strong>, um mit mehr Ruhe, Klarheit und Präsenz durch den Alltag zu gehen.</p>
 
-  async function bookSeminar(seminarId) {
-    setBookingLoading(seminarId);
-    try {
-      if (hasSeminarAccess) {
-        // Premium oder SEMINAR gekauft → direkt registrieren
-        const res = await fetch('/api/webinar/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ seminarId }),
-        });
-        const data = await res.json();
-        if (data.success || data.alreadyRegistered) {
-          setBookedSeminars(prev => new Set([...prev, seminarId]));
-        } else {
-          alert(data.error || 'Buchung fehlgeschlagen');
-        }
-      } else {
-        // Free → Stripe Checkout
-        const res = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productKey: 'SEMINAR', seminarId }),
-        });
-        const data = await res.json();
-        if (data.url) window.location.href = data.url;
-        else alert(data.error || 'Checkout fehlgeschlagen');
-      }
-    } catch { alert('Fehler bei der Buchung'); }
-    finally { setBookingLoading(null); }
-  }
+      <h4>Ziel des Seminars</h4>
+      <p>Achtsamkeit nicht nur als kurzfristige Entspannung erleben, sondern <strong>nachhaltig in den eigenen Alltag integrieren</strong> — sei es im Beruf, in Beziehungen oder im Umgang mit sich selbst. Du lernst, <strong>bewusst Zeit für dich selbst zu schaffen</strong>, Körper, Geist und Emotionen in Einklang zu bringen und besser mit Stress und innerer Anspannung umzugehen.</p>
 
-  // Build a Set of completed lesson IDs
-  const completedSet = useMemo(
-    () => new Set((progress || []).filter((p) => p.completed).map((p) => p.lesson_id)),
-    [progress]
-  );
+      <h4>Die Vorteile</h4>
+      <p><strong>Weniger Stress. Mehr Fokus. Mehr Lebensfreude.</strong></p>
+      <blockquote>Wer regelmäßig Achtsamkeit praktiziert, schafft Raum für echte Veränderung — hin zu einem achtsameren, gesünderen und erfüllteren Leben.</blockquote>
 
-  // Personalisierung berechnen
-  const personalisierung = useMemo(
-    () => berechnePersonalisierung(analysisResults, profile?.phase),
-    [analysisResults, profile?.phase]
-  );
+      <h4>Voraussetzungen</h4>
+      <p>5–10 Minuten vor Beginn einwählen, Technik-Check (Audio, Kamera, Internet), Kamera aktiv halten und sich mit Wortbeiträgen einbringen. Die Interaktion mit Referenten und Teilnehmenden ist zentral für den Praxistransfer.</p>
+    `,
+  },
+  {
+    id: 'sem-rhetorik',
+    iconName: 'mic',
+    title: 'Rhetorik, Dialektik, Kinesik',
+    subtitle: 'Wenn du sprichst, hören alle zu',
+    description: 'Wirkungsvoll, passend und adressatengerecht kommunizieren in jeder Situation.',
+    next_date: '2026-09-12',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/rhetorik-dialektik-kinesik-%C3%BCberzeugen-mit-worten-und-wirkung-30',
+    rating: '4.9',
+    ratingCount: 19,
+    bookableUntil: 'Fr. 11. September 2026, 21:59',
+    longDescription: `
+      <h4>Souverän auftreten, überzeugend kommunizieren</h4>
+      <p>Du möchtest in Gesprächen <strong>sicherer auftreten</strong>, deine <strong>Sprache gezielter einsetzen</strong> und mit deiner <strong>Körpersprache bewusst wirken</strong>? Dieses Seminar richtet sich speziell an <strong>Studenten und Berufseinsteiger</strong>, die ihre mündlichen Kommunikationsfähigkeiten verbessern und ihre Wirkung auf andere gezielt stärken möchten.</p>
 
-  // Relevanz-Map: kursId → {relevanz, istSchwaeche, empfehlung, rang}
-  const relevanzMap = useMemo(() => {
-    const map = {};
-    (personalisierung.empfohleneKurse || []).forEach((k, i) => {
-      map[k.kursId] = { relevanz: k.relevanz, istSchwaeche: k.istSchwaeche, empfehlung: k.empfehlung, rang: i };
-    });
-    return map;
-  }, [personalisierung]);
+      <h4>Das erwartet dich</h4>
+      <ul>
+        <li><strong>Grundlagen der Rhetorik</strong> — klar sprechen, stark argumentieren, gezielt überzeugen</li>
+        <li><strong>Einführung in die Dialektik</strong> — souverän argumentieren, Einwände entkräften, Gespräche führen statt verlieren</li>
+        <li><strong>Kinesik verstehen und nutzen</strong> — Körpersprache erkennen, bewusst einsetzen, Wirkung steigern</li>
+        <li>Tipps & Techniken für <strong>Vorstellungsgespräch, Smalltalk, Konflikt und Präsentation</strong></li>
+        <li><strong>Praktische Übungen & individuelles Feedback</strong> — direkt anwenden, direkt verbessern</li>
+      </ul>
 
-  // Enrich E-Learning courses with progress + Relevanz-Sortierung
-  const eLearnings = useMemo(() => {
-    return (courses || [])
-      .filter((c) => !c.category || c.category === 'E-Learning' || c.category === 'e-learning')
-      .map((c) => {
-        const total = (c.modules || []).reduce((s, m) => s + (m.lessons || []).length, 0);
-        const done = (c.modules || []).reduce(
-          (s, m) => s + (m.lessons || []).filter((l) => completedSet.has(l.id)).length,
-          0
-        );
-        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      <h4>Dein Ziel</h4>
+      <p>Du lernst, wie <strong>Sprache, Argumentation und Körpersprache</strong> zusammenspielen — und wie du diese drei Elemente in unterschiedlichen Situationen gezielt einsetzt, um mehr Wirkung zu erzielen.</p>
+      <blockquote>Kommunikation ist kein Talent — sondern ein Handwerk. Und du kannst es lernen.</blockquote>
 
-        const rel = relevanzMap[c.id];
-        const isPrio = rel?.istSchwaeche || false;
-        const isTopEmpfehlung = rel?.rang === 0 && analysisResults?.length > 0;
+      <h4>Voraussetzungen</h4>
+      <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen — entscheidend für den Praxistransfer.</p>
+    `,
+  },
+  {
+    id: 'sem-motivation',
+    iconName: 'flame',
+    title: 'Selbstmotivation',
+    subtitle: 'Wenn der innere Schweinehund verliert',
+    description: 'Wie du dich effektiv motivierst und langfristig diszipliniert an deinen Zielen arbeitest.',
+    next_date: '2026-10-10',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/selbstmotivation-dein-warum-dein-motor-55',
+    rating: '4.7',
+    ratingCount: 17,
+    bookableUntil: 'Fr. 9. Oktober 2026, 21:59',
+    longDescription: `
+      <h4>Dein Schlüssel zu mehr Antrieb und Leistung</h4>
+      <p>In diesem inspirierenden Seminar lernst du, wie du deine <strong>innere Kraftquelle aktivierst</strong> und dich selbst immer wieder neu motivierst — ganz ohne äußeren Druck. Du entdeckst, wie du deine <strong>Leistungsfähigkeit nachhaltig steigerst</strong> und selbst in anspruchsvollen Zeiten <strong>fokussiert und energiegeladen</strong> bleibst.</p>
+      <p>Wir stellen dir <strong>wirkungsvolle Methoden und Motivationstechniken</strong> vor, die du direkt im Alltag anwenden kannst. Mit praktischen Übungen stärkst du dein Bewusstsein für deine eigenen Motive und findest neue Wege, dich selbst ins Handeln zu bringen.</p>
 
-        return { ...c, total, done, pct, isPrio, isTopEmpfehlung, relevanz: rel?.relevanz ?? 0, empfehlung: rel?.empfehlung || '' };
-      })
-      // Sortiere nach Relevanz (höchste zuerst), falls Analyse vorhanden
-      .sort((a, b) => {
-        if (!analysisResults || analysisResults.length === 0) return 0;
-        return b.relevanz - a.relevanz;
-      });
-  }, [courses, completedSet, analysisResults, relevanzMap]);
+      <h4>Diese Themen erwarten dich</h4>
+      <ul>
+        <li>Die <strong>Grundlagen der Motivation</strong> — was Menschen wirklich antreibt</li>
+        <li><strong>Motivationstheorien</strong> praktisch erklärt und angewendet</li>
+        <li>Eigene <strong>Bedürfnisse und innere Motive</strong> besser verstehen</li>
+        <li><strong>Konkrete Werkzeuge</strong>, um Motivation gezielt zu aktivieren</li>
+        <li>Strategien zum Umgang mit <strong>Motivationskillern und inneren Widerständen</strong></li>
+      </ul>
 
-  // Find in-progress course for "Weiterlernen" banner
-  const inProgressCourse = useMemo(
-    () => eLearnings.find((c) => c.pct > 0 && c.pct < 100) || null,
-    [eLearnings]
-  );
+      <h4>Dein Ziel</h4>
+      <p>Schluss mit <strong>Aufschieberitis und Selbstzweifeln</strong> — entwickle eine Motivation, die von innen kommt. Für mehr <strong>Klarheit, Energie und Selbstbestimmung</strong>.</p>
+      <blockquote>Selbstmotivation ist kein Zufall — sie ist erlernbar.</blockquote>
 
-  // XP: each completed lesson = 10 XP
-  const totalCompletedLessons = eLearnings.reduce((s, c) => s + c.done, 0);
-  const completedCourses = eLearnings.filter((c) => c.pct === 100).length;
-  const xp = totalCompletedLessons * 10;
-  const milestone = getMilestone(completedCourses);
+      <h4>Voraussetzungen</h4>
+      <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen.</p>
+    `,
+  },
+  {
+    id: 'sem-kommunikation',
+    iconName: 'speech',
+    title: 'Kommunikation',
+    subtitle: 'Sag, was du meinst — werd verstanden',
+    description: 'Effektive Kommunikation mit Kollegen und Geschäftspartnern.',
+    next_date: '2026-11-14',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/kommunikation-verst%C3%A4ndigung-als-schl%C3%BCssel-zum-erfolg-21',
+    rating: '4.6',
+    ratingCount: 10,
+    bookableUntil: 'Fr. 13. November 2026, 22:59',
+    longDescription: `
+      <h4>Klar, empathisch und wirkungsvoll kommunizieren</h4>
+      <p>Dieses Seminar richtet sich an <strong>Fach- und Führungskräfte</strong>, die ihre Kommunikationsfähigkeiten gezielt weiterentwickeln möchten, um im Berufsalltag <strong>klarer, empathischer und überzeugender</strong> zu kommunizieren — ob im Team, mit Kunden oder Geschäftspartnern.</p>
+      <p>Du lernst die Grundlagen erfolgreicher Kommunikation kennen und erfährst, wie du <strong>Missverständnisse vermeidest</strong>, Gespräche zielgerichtet führst und eine <strong>vertrauensvolle Zusammenarbeit</strong> förderst.</p>
 
-  const tabs = [
-    { key: 'alle', label: 'Alle' },
-    { key: 'e-learnings', label: 'E-Learnings' },
-    { key: 'seminare', label: 'Seminare' },
+      <h4>Im Fokus</h4>
+      <ul>
+        <li><strong>Aktives Zuhören</strong> und klare Botschaften</li>
+        <li><strong>Wertschätzendes Feedback</strong> geben und empfangen</li>
+        <li>Konstruktiver Umgang mit <strong>Konflikten und Spannungen</strong></li>
+        <li>Bewusste Gesprächsführung und nonverbale Signale richtig deuten</li>
+      </ul>
+
+      <h4>Dein Ziel</h4>
+      <p>Du erhältst praxisnahe Werkzeuge, mit denen du in jeder Situation <strong>sicher, klar und empathisch kommunizieren</strong> kannst. Ob in Mitarbeitergesprächen, Kundenkontakten oder Team-Meetings — deine Kommunikation wird wirksamer, klarer und verbindlicher.</p>
+      <blockquote>Für mehr Klarheit, Vertrauen und Erfolg im Berufsalltag.</blockquote>
+
+      <h4>Voraussetzungen</h4>
+      <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen.</p>
+    `,
+  },
+  {
+    id: 'sem-konflikt',
+    iconName: 'shield',
+    title: 'Konfliktmanagement',
+    subtitle: 'Wenn’s knallt, bleibst du cool',
+    description: 'Strategien und Techniken zur erfolgreichen Konfliktbewältigung.',
+    next_date: '2026-12-12',
+    linkUrl: 'https://www.daskarriereinstitut.de/de/e/konfliktmanagement-aus-krisen-chancen-machen-52',
+    rating: '5.0',
+    ratingCount: 6,
+    bookableUntil: 'Fr. 11. Dezember 2026, 22:59',
+    longDescription: `
+      <h4>Souverän und lösungsorientiert mit Konflikten umgehen</h4>
+      <p>Konflikte gehören zum Berufsleben — entscheidend ist, <strong>wie du mit ihnen umgehst</strong>. In diesem Seminar lernst du die wichtigsten <strong>Strategien und Techniken zur erfolgreichen Konfliktbewältigung</strong> — von der frühzeitigen Vermeidung bis zur professionellen Lösung bereits entstandener Konflikte.</p>
+      <p>Du erfährst, wie du <strong>Konfliktsituationen richtig analysierst</strong>, konstruktiv kommunizierst und <strong>Konfliktgespräche zielgerichtet und deeskalierend führst</strong>.</p>
+
+      <h4>Besonderer Fokus</h4>
+      <ul>
+        <li><strong>Reflexion eigener Konflikterfahrungen</strong> — beruflich wie privat</li>
+        <li>Entwicklung <strong>praxisnaher, individueller Lösungsansätze</strong></li>
+        <li>Mit <strong>emotionalen Situationen ruhig und empathisch</strong> umgehen</li>
+        <li>Auch in schwierigen Momenten eine <strong>konstruktive Haltung</strong> bewahren</li>
+      </ul>
+
+      <h4>Dein Ziel</h4>
+      <p>Du wirst befähigt, <strong>Konflikte frühzeitig zu erkennen</strong>, souverän zu handeln und Spannungen aktiv in <strong>produktive Lösungen zu verwandeln</strong>. So stärkst du deine persönliche Konfliktkompetenz und trägst aktiv zu einem besseren Miteinander im Arbeitsalltag bei.</p>
+      <blockquote>Werde zum sicheren und lösungsorientierten Konfliktmanager in deinem beruflichen Umfeld.</blockquote>
+
+      <h4>Voraussetzungen</h4>
+      <p>5–10 Minuten vor Beginn einwählen, Technik-Check, Kamera aktiv und mit Wortbeiträgen einbringen.</p>
+    `,
+  },
+  { id: 'sem-homeoffice', iconName: 'home', title: 'Arbeiten im Home Office', subtitle: 'Home-Office-Profi statt Pyjama-Falle', description: 'Ausgeglichen und effektiv arbeiten — auch von zu Hause.', next_date: '2027-01-09' },
+  { id: 'sem-prioritaeten', iconName: 'target', title: 'Prioritätenmanagement', subtitle: 'Mehr schaffen, weniger hetzen', description: 'Was wirklich wichtig ist, zuerst — wie du Wichtiges von Dringendem unterscheidest.', next_date: '2027-02-13' },
+  { id: 'sem-networking', iconName: 'users', title: 'Networking', subtitle: 'Beziehungen, die deine Karriere tragen', description: 'Strategisches Netzwerken — online und offline, ohne Schleimspur.', next_date: '2027-03-13' },
+  { id: 'sem-knigge', iconName: 'briefcase', title: 'Business-Knigge', subtitle: 'Sicher auftreten in jeder Situation', description: 'Souverän vom Meeting bis zum Geschäftsessen — moderne Umgangsformen für die Berufswelt.', next_date: '2027-04-10' },
+];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function courseGradient(title) {
+  const palette = [
+    'linear-gradient(135deg, #4a0a14 0%, #2a0508 100%)',
+    'linear-gradient(135deg, #1d4e89 0%, #0f2e4f 100%)',
+    'linear-gradient(135deg, #5d3a91 0%, #3a2266 100%)',
+    'linear-gradient(135deg, #1d4d2e 0%, #0e2818 100%)',
+    'linear-gradient(135deg, #8a4a14 0%, #4d2906 100%)',
+    'linear-gradient(135deg, #353A3B 0%, #1a1c1d 100%)',
   ];
+  const i = (title || 'x').split('').reduce((a, c) => a + c.charCodeAt(0), 0) % palette.length;
+  return palette[i];
+}
 
-  const showELearnings = activeTab === 'alle' || activeTab === 'e-learnings';
-  const showAnalyse = false;
-  const showSeminare = activeTab === 'alle' || activeTab === 'seminare';
+function Icon({ name, size = 16, stroke = 1.7 }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
+              stroke: 'currentColor', strokeWidth: stroke,
+              strokeLinecap: 'round', strokeLinejoin: 'round' };
+  switch (name) {
+    case 'play':    return (<svg {...p}><polygon points="6 3 20 12 6 21 6 3" fill="currentColor" stroke="none"/></svg>);
+    case 'cal':     return (<svg {...p}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>);
+    case 'crown':   return (<svg {...p}><path d="M2 7l4 5 6-7 6 7 4-5v12H2z"/></svg>);
+    case 'lock':    return (<svg {...p}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
+    case 'check':   return (<svg {...p}><polyline points="20 6 9 17 4 12"/></svg>);
+    case 'spark':   return (<svg {...p}><path d="M5 3v4M3 5h4M19 17v4M17 19h4M12 2l2.4 5.1L20 9l-5.1 2.4L12 16l-2.4-5L4 9l5.4-2L12 2z"/></svg>);
+    // Seminar-Icons (ersetzt frühere Emojis)
+    case 'brain':   return (<svg {...p}><path d="M9.5 2a3 3 0 0 0-3 3v0a3 3 0 0 0-2 5.2A3 3 0 0 0 6 16a3 3 0 0 0 3.5 3v3"/><path d="M14.5 2a3 3 0 0 1 3 3v0a3 3 0 0 1 2 5.2A3 3 0 0 1 18 16a3 3 0 0 1-3.5 3v3"/></svg>);
+    case 'scales':  return (<svg {...p}><line x1="12" y1="3" x2="12" y2="21"/><line x1="6" y1="3" x2="18" y2="3"/><path d="M6 3l-3 8h6z"/><path d="M18 3l-3 8h6z"/><path d="M3 11a3 3 0 0 0 6 0"/><path d="M15 11a3 3 0 0 0 6 0"/><line x1="8" y1="21" x2="16" y2="21"/></svg>);
+    case 'book':    return (<svg {...p}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>);
+    case 'leaf':    return (<svg {...p}><path d="M11 20A7 7 0 0 1 4 13a14 14 0 0 1 14-9 14 14 0 0 1-7 16Z"/><path d="M4 13c4-2 8-2 13-2"/></svg>);
+    case 'mic':     return (<svg {...p}><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>);
+    case 'flame':   return (<svg {...p}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 17c1.4 0 2.5-1.1 2.5-2.5 0-1.5-1-2.5-2-3.5-1-1-2-2.5-1.5-4.5C7 8 5 11 5 14a7 7 0 0 0 14 0c0-3-1.5-5-2-6-1 2-3 2.5-4 1"/></svg>);
+    case 'speech':  return (<svg {...p}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>);
+    case 'shield':  return (<svg {...p}><path d="M12 2l9 4v6c0 5-4 9-9 10-5-1-9-5-9-10V6z"/><polyline points="9 12 11 14 15 10"/></svg>);
+    case 'home':    return (<svg {...p}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-4v-7H10v7H6a2 2 0 0 1-2-2z"/></svg>);
+    default: return null;
+  }
+}
+
+// ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
+export default function MasterclassClient({ courses, progress, analysisResults, profile, seminars, seminarRegistrations, coaches = [] }) {
+  const router = useRouter();
+
+  const plan = profile?.subscription_plan || 'FREE';
+  const isPremium = plan !== 'FREE';
+  const registeredSeminarIds = useMemo(
+    () => new Set((seminarRegistrations || []).map(r => r.seminar_id)),
+    [seminarRegistrations]
+  );
+
+  // Filter: nur e-learning-Kurse für die Hauptansicht (Seminare separat)
+  const eLearningCourses = useMemo(
+    () => (courses || []).filter(c => !c.category || c.category === 'e-learning'),
+    [courses]
+  );
+
+  // Category-Filter
+  const allCategories = useMemo(() => {
+    const set = new Set(eLearningCourses.map(c => c.category || 'e-learning'));
+    return ['alle', ...Array.from(set)];
+  }, [eLearningCourses]);
+
+  const [activeCat, setActiveCat] = useState('alle');
+  const filteredCourses = useMemo(
+    () => activeCat === 'alle' ? eLearningCourses : eLearningCourses.filter(c => (c.category || 'e-learning') === activeCat),
+    [eLearningCourses, activeCat]
+  );
+
+  // Seminar-Modal-State + automatische Filterung vergangener Termine
+  const [openSeminar, setOpenSeminar] = useState(null);
+  const upcomingSeminars = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return SEMINARE.filter(s => new Date(s.next_date) >= today);
+  }, []);
+
+  // ESC schließt Modal + Scroll-Lock
+  useEffect(() => {
+    if (!openSeminar) return;
+    const onKey = (e) => { if (e.key === 'Escape') setOpenSeminar(null); };
+    document.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [openSeminar]);
 
   return (
-    <div className="page-container">
-      {/* ── Title ── */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-        <h1 className="page-title" style={{ marginBottom: 0 }}>Masterclass</h1>
-        <InfoTooltip moduleId="masterclass" profile={profile} />
+    <div className="masterclass-v2">
+      {/* Title block */}
+      <div className="title-kicker">
+        <span className="pulse" />
+        {isPremium ? 'Premium aktiv · alle Kurse freigeschaltet' : 'Karriere-Bildung'}
       </div>
-      <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)', marginBottom: 28 }}>
-        Lerne in deinem eigenen Tempo — E-Learnings & Live-Seminare.
+      <h1 className="page-title">
+        Masterclass.{' '}
+        <span className="faded">Lernen, das wirklich weiterbringt.</span>
+      </h1>
+      <p className="page-sub">
+        Kompakte E-Learning-Kurse, Live-Seminare und exklusive Analyse-Tools — alles, um deine Karriere gezielt zu beschleunigen.
       </p>
 
-      {/* ── Tabs ── */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 8,
-          marginBottom: 32,
-          overflowX: 'auto',
-          paddingBottom: 4,
-          scrollbarWidth: 'none',
-        }}
-      >
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            className={`btn ${activeTab === t.key ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ fontSize: 13, padding: '8px 18px', whiteSpace: 'nowrap', flexShrink: 0 }}
-            onClick={() => setActiveTab(t.key)}
-          >
-            {t.label}
-          </button>
-        ))}
+      {/* Premium Upsell (nur für FREE-User) */}
+      {!isPremium && (
+        <div className="mc-upsell">
+          <div>
+            <div className="mc-upsell-eyebrow"><Icon name="crown" size={12} /> Premium freischalten</div>
+            <h2 className="mc-upsell-title">Alle Masterclasses. Alle Seminare. Kein Limit.</h2>
+            <p className="mc-upsell-sub">
+              Zugriff auf alle E-Learning-Module, monatliches Live-Seminar (Wert 99 €), die Gehalts-Masterclass und persönliches Feedback.
+            </p>
+            <div className="mc-upsell-list">
+              <span><Icon name="check" size={12} /> Alle E-Learning-Kurse</span>
+              <span><Icon name="check" size={12} /> 1 Seminar / Monat (Wert 99 €)</span>
+              <span><Icon name="check" size={12} /> Gehalts-Masterclass</span>
+              <span><Icon name="check" size={12} /> Persönliches CV-Feedback</span>
+            </div>
+            <div className="mc-upsell-actions">
+              <a href="/angebote" className="btn btn-on-dark">Premium starten</a>
+            </div>
+          </div>
+          <div className="mc-upsell-price">
+            <div className="amount">15 €</div>
+            <div className="per">/ Monat · jederzeit kündbar</div>
+          </div>
+        </div>
+      )}
+
+      {/* Section: E-Learnings */}
+      <div className="mc-secthead">
+        <h3>E-Learnings <span className="count">{eLearningCourses.length}</span></h3>
       </div>
 
-      {/* ── No Analysis Banner ── */}
-      {!analysisResults || analysisResults.length === 0 ? (
-        <div
-          className="card animate-in"
-          style={{
-            marginBottom: 32,
-            padding: 24,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 20,
-            borderLeft: '3px solid var(--ki-warning)',
-          }}
-        >
-          <div style={{ fontSize: 36 }}>🩸</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>
-              Mach zuerst dein Karriere-Blutbild
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 12 }}>
-              Finde heraus, welche Kurse für dich wirklich Priorität haben — basierend auf deinen
-              Kompetenz-Scores.
-            </div>
-            <a href="/analyse" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 18px' }}>
-              Analyse starten →
-            </a>
+      {/* Category Filter */}
+      {allCategories.length > 2 && (
+        <div className="mc-filterbar">
+          <div className="mc-chips">
+            {allCategories.map(c => (
+              <button key={c} className={`mc-chip ${activeCat === c ? 'on' : ''}`} onClick={() => setActiveCat(c)}>
+                {c === 'alle' ? 'Alle' : c}
+              </button>
+            ))}
           </div>
-        </div>
-      ) : null}
-
-      {/* ── Weiterlernen Banner ── */}
-      {inProgressCourse && showELearnings && (
-        <div
-          className="card animate-in"
-          style={{
-            marginBottom: 32,
-            padding: 20,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 20,
-            background: 'var(--ki-bg-alt)',
-            border: '1px solid var(--ki-border)',
-          }}
-        >
-          <div style={{ fontSize: 40, flexShrink: 0 }}>{inProgressCourse.icon || '📚'}</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', fontWeight: 500, marginBottom: 2 }}>
-              Weiterlernen
-            </div>
-            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {inProgressCourse.title}
-            </div>
-            <div className="progress-bar" style={{ marginBottom: 4 }}>
-              <div
-                className="progress-bar-fill"
-                style={{ width: `${inProgressCourse.pct}%` }}
-              />
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--ki-text-secondary)' }}>
-              {inProgressCourse.done} / {inProgressCourse.total} Lektionen &mdash; {inProgressCourse.pct}%
-            </div>
-          </div>
-          <a
-            href={`/masterclass/${inProgressCourse.id}`}
-            className="btn btn-primary"
-            style={{ fontSize: 13, padding: '10px 20px', flexShrink: 0 }}
-          >
-            Fortfahren →
-          </a>
         </div>
       )}
 
-      {/* ── E-Learnings Section (3 Kategorien) ── */}
-      {showELearnings && (() => {
-        const hasAnalyseData = analysisResults && analysisResults.length > 0;
-        // Kategorisiere: Fokus (Schwächen), Booster (mittel), Stärken (hoch)
-        const fokusKurse = hasAnalyseData ? eLearnings.filter(c => c.isPrio || c.isTopEmpfehlung) : [];
-        const staerkenKurse = hasAnalyseData ? eLearnings.filter(c => !c.isPrio && !c.isTopEmpfehlung && c.relevanz < 20) : [];
-        const boosterKurse = hasAnalyseData ? eLearnings.filter(c => !fokusKurse.includes(c) && !staerkenKurse.includes(c)) : eLearnings;
+      <div className="mc-courses">
+        {filteredCourses.length === 0 ? (
+          <div className="mc-empty">Keine Kurse in dieser Kategorie.</div>
+        ) : (
+          filteredCourses.map(c => {
+            const total = (c.modules || []).reduce((s, m) => s + (m.lessons || []).length, 0);
+            const done = (c.modules || []).reduce(
+              (s, m) => s + (m.lessons || []).filter(l => (progress || []).some(p => p.lesson_id === l.id && p.completed)).length,
+              0
+            );
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+            const isPremiumLocked = c.is_premium && !isPremium &&
+              !(profile?.purchased_products || []).includes(c.id);
+            const letter = (c.title || '?').trim()[0]?.toUpperCase() || '?';
+            const moduleCount = (c.modules || []).length;
+            const badge = pct === 100 ? { text: 'Fertig', kind: 'done' }
+              : pct > 0 ? { text: 'Laufend', kind: '' }
+              : c.is_premium && !isPremium ? { text: 'Premium', kind: 'premium' }
+              : { text: 'Neu', kind: 'new' };
+            const status = pct === 100 ? '✓ Fertig'
+              : pct === 0 ? (isPremiumLocked ? 'Premium' : 'Starten →')
+              : `${pct} %`;
 
-        const CategorySection = ({ title, badge, badgeClass, description, items }) => {
-          if (items.length === 0) return null;
-          return (
-            <div style={{ marginBottom: 32 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <h3 style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h3>
-                <span className={`pill ${badgeClass}`} style={{ fontSize: 11 }}>{badge}</span>
-              </div>
-              {description && <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', marginBottom: 16 }}>{description}</p>}
-              <div className="grid-3">
-                {items.map((course, i) => (
-                  <CourseCard key={course.id} course={course} i={i} hasAnalyseData={hasAnalyseData} />
-                ))}
-              </div>
-            </div>
-          );
-        };
-
-        return (
-          <section style={{ marginBottom: 48 }}>
-            <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-              📚 E-Learnings
-              <span className="pill pill-grey" style={{ fontSize: 12 }}>{eLearnings.length} Kurse</span>
-            </h2>
-
-            {eLearnings.length === 0 ? (
-              <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--ki-text-secondary)' }}>
-                Keine E-Learnings verfügbar.
-              </div>
-            ) : hasAnalyseData ? (
-              <>
-                <CategorySection title="Dein Fokus" badge="Höchste Relevanz" badgeClass="pill-red" description="Hier liegt dein größtes Wachstumspotenzial — 2x XP!" items={fokusKurse} />
-                <CategorySection title="Karriere-Booster" badge="Empfohlen" badgeClass="pill-gold" items={boosterKurse} />
-                <CategorySection title="Deine Stärken" badge="Solide" badgeClass="pill-green" description="Bereits gut — verfeinere dein Können." items={staerkenKurse} />
-              </>
-            ) : (
-              <div className="grid-3">
-                {eLearnings.map((course, i) => (
-                  <CourseCard key={course.id} course={course} i={i} hasAnalyseData={false} />
-                ))}
-              </div>
-            )}
-          </section>
-        );
-      })()}
-
-      {/* ── Analyse-Tools Section ── */}
-      {showAnalyse && (
-        <section style={{ marginBottom: 48 }}>
-          <h2
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              letterSpacing: '-0.03em',
-              marginBottom: 16,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
-            🔍 Analyse-Tools
-            <span className="pill pill-gold" style={{ fontSize: 12 }}>
-              Premium
-            </span>
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {ANALYSE_TOOLS.map((tool, i) => (
-              <div
-                key={tool.id}
-                className="card animate-in"
-                style={{
-                  border: '1.5px solid rgba(212,160,23,0.3)',
-                  background: 'linear-gradient(135deg, var(--ki-card) 0%, rgba(212,160,23,0.03) 100%)',
-                  animationDelay: `${i * 0.08}s`,
-                  display: 'flex',
-                  gap: 24,
-                  alignItems: 'flex-start',
-                }}
-              >
-                {/* Icon */}
-                <div style={{ fontSize: 48, flexShrink: 0 }}>{tool.icon}</div>
-
-                {/* Content */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 700, fontSize: 20, letterSpacing: '-0.02em' }}>{tool.title}</span>
-                    <span className="pill pill-gold" style={{ fontSize: 12 }}>{tool.badge}</span>
-                  </div>
-                  <div style={{ fontSize: 15, color: 'var(--ki-text-secondary)', marginBottom: 4 }}>
-                    {tool.subtitle}
-                  </div>
-                  <div style={{ fontSize: 13, color: 'var(--ki-text-tertiary)', marginBottom: 16 }}>
-                    {tool.pricing}
-                  </div>
-
-                  {/* Features */}
-                  <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {tool.features.map((f, fi) => (
-                      <li key={fi} style={{ fontSize: 13, color: 'var(--ki-text-secondary)', display: 'flex', gap: 8 }}>
-                        <span style={{ color: 'var(--ki-warning)', flexShrink: 0 }}>✓</span>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* CTA */}
-                <div style={{ flexShrink: 0, alignSelf: 'center' }}>
-                  <a href={tool.link || '/angebote'} target={tool.link ? '_blank' : undefined} rel={tool.link ? 'noopener noreferrer' : undefined} className="btn btn-primary" style={{ fontSize: 13, padding: '10px 22px' }}>
-                    Mehr erfahren →
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── Seminare Section ── */}
-      {showSeminare && (
-        <section style={{ marginBottom: 48 }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-            🎓 Seminare
-            <span className="pill pill-green" style={{ fontSize: 12 }}>Live</span>
-          </h2>
-
-          {/* ── Mitgliedschaft CTA ── */}
-          <div style={{
-            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-            borderRadius: 'var(--r-lg)', padding: '20px 24px', marginBottom: 24,
-            display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
-          }}>
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 4 }}>
-                Alle {activeSeminars.length} Seminare — mit Mitgliedschaft
-              </div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>
-                Einzeln ab 99 € · Oder: Unbegrenzter Zugang mit dem Masterclass-Abo
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
-              <a href="/angebote" className="btn btn-primary" style={{ fontSize: 13, padding: '10px 20px', background: '#CC1426' }}>
-                Mitgliedschaft starten →
-              </a>
-              <a href="/angebote" style={{ fontSize: 13, padding: '10px 20px', borderRadius: 'var(--r-md)', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
-                Einzeln buchen
-              </a>
-            </div>
-          </div>
-
-          {/* ── Kalenderansicht ── */}
-          <div className="card" style={{ marginBottom: 24, padding: '0', overflow: 'hidden' }}>
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--ki-border)', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 16 }}>📅</span>
-              <span style={{ fontSize: 14, fontWeight: 700 }}>Termine 2026</span>
-              <span style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', marginLeft: 4 }}>Samstags · 09:30 – 12:00 Uhr · Online via Teams</span>
-            </div>
-            {Object.entries(groupByMonth(activeSeminars)).map(([month, sems]) => (
-              <div key={month}>
-                <div style={{ padding: '10px 20px 6px', fontSize: 11, fontWeight: 700, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', background: 'var(--ki-bg-alt)', borderBottom: '1px solid var(--ki-border)' }}>
-                  {month}
-                </div>
-                {sems.map((s, i) => {
-                  const d = new Date(s.next_date);
-                  const isLive = isSeminarLive(s.next_date);
-                  return (
-                    <div key={s.id} style={{
-                      display: 'flex', alignItems: 'center', gap: 16, padding: '12px 20px',
-                      borderBottom: '1px solid var(--ki-border)',
-                      background: isLive ? 'rgba(34,197,94,0.04)' : 'transparent',
-                    }}>
-                      <div style={{ width: 44, textAlign: 'center', flexShrink: 0 }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ki-text-tertiary)', textTransform: 'uppercase' }}>
-                          {d.toLocaleDateString('de-DE', { weekday: 'short' })}
-                        </div>
-                        <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--ki-text)', lineHeight: 1.2 }}>
-                          {d.getDate().toString().padStart(2, '0')}
-                        </div>
-                      </div>
-                      <div style={{ fontSize: 18, flexShrink: 0 }}>{s.icon}</div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ki-text)' }}>{s.title}</div>
-                        <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)' }}>{s.subtitle}</div>
-                      </div>
-                      {isLive ? (
-                        <a href={s.teams_link} target="_blank" rel="noopener noreferrer"
-                          style={{ fontSize: 12, fontWeight: 700, color: '#16a34a', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
-                          🔴 Live →
-                        </a>
-                      ) : bookedSeminars.has(s.id) ? (
-                        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-success)', flexShrink: 0 }}>Gebucht ✓</span>
-                      ) : (
-                        <button onClick={() => bookSeminar(s.id)} disabled={bookingLoading === s.id} style={{ fontSize: 12, fontWeight: 600, color: 'var(--ki-red)', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
-                          {bookingLoading === s.id ? '...' : hasSeminarAccess ? 'Buchen →' : 'Buchen · 99€'}
-                        </button>
-                      )}
+            return (
+              <div key={c.id}
+                   className={`mc-course ${isPremiumLocked ? 'locked' : ''}`}
+                   onClick={() => isPremiumLocked ? router.push('/angebote') : router.push(`/masterclass/${c.id}`)}
+                   role="button" tabIndex={0}>
+                <div className="mc-course-cover" style={{ background: courseGradient(c.title) }}>
+                  <span className="cat">{c.category || 'e-learning'}</span>
+                  <span className={`badge ${badge.kind}`}>{badge.text}</span>
+                  <span className="mc-letter">{letter}</span>
+                  {pct > 0 && (
+                    <div className="mc-course-bar">
+                      <div className={pct === 100 ? 'done' : ''} style={{ width: `${pct}%` }} />
                     </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-
-          {/* ── Seminar Cards ── */}
-          <div className="grid-2">
-            {activeSeminars.map((seminar, i) => {
-              const isLive = isSeminarLive(seminar.next_date);
-              const dateStr = seminar.next_date
-                ? new Date(seminar.next_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                : 'Termin folgt';
-              return (
-                <div key={seminar.id} className="card animate-in" style={{ animationDelay: `${i * 0.04}s`, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                      <span style={{ fontSize: 28 }}>{seminar.icon}</span>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.02em', lineHeight: 1.3 }}>{seminar.title}</div>
-                        <div style={{ fontSize: 12, color: 'var(--ki-red)', fontWeight: 500 }}>{seminar.subtitle}</div>
-                      </div>
-                    </div>
-                    {isLive && <span className="pill pill-green" style={{ fontSize: 11, flexShrink: 0 }}>🔴 Live</span>}
-                  </div>
-
-                  <p style={{ fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.5, margin: 0 }}>{seminar.description}</p>
-
-                  <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    <span>📅 {dateStr}</span>
-                    <span>· ⏰ 09:30 – 12:00</span>
-                    <span>· Inkl. Zertifikat</span>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
-                    {isLive ? (
-                      <a href={seminar.teams_link} target="_blank" rel="noopener noreferrer"
-                        className="btn btn-primary"
-                        style={{ fontSize: 13, padding: '9px 18px', background: '#CC1426', animation: 'pulse 1.5s ease-in-out infinite' }}>
-                        🔴 JETZT LIVE — Teilnehmen
-                      </a>
-                    ) : (
+                  )}
+                  {isPremiumLocked && (
+                    <div className="mc-lock"><Icon name="lock" size={18} stroke={2} /></div>
+                  )}
+                </div>
+                <div className="mc-course-body">
+                  <div className="mc-course-title">{c.title}</div>
+                  {c.description && <div className="mc-course-sub">{c.description}</div>}
+                  <div className="mc-course-meta">
+                    <span>{moduleCount} {moduleCount === 1 ? 'Modul' : 'Module'}</span>
+                    {total > 0 && (
                       <>
-                        {bookedSeminars.has(seminar.id) ? (
-                          <span className="btn" style={{ fontSize: 13, padding: '9px 18px', background: '#D1FAE5', color: '#059669', border: '1px solid #BBF7D0', fontWeight: 600 }}>
-                            Gebucht ✓
-                          </span>
-                        ) : hasSeminarAccess ? (
-                          <button onClick={() => bookSeminar(seminar.id)} disabled={bookingLoading === seminar.id} className="btn btn-primary" style={{ fontSize: 13, padding: '9px 18px' }}>
-                            {bookingLoading === seminar.id ? 'Wird gebucht...' : 'Kostenlos buchen'}
-                          </button>
-                        ) : (
-                          <>
-                            <button onClick={() => bookSeminar(seminar.id)} disabled={bookingLoading === seminar.id} className="btn btn-primary" style={{ fontSize: 13, padding: '9px 18px' }}>
-                              {bookingLoading === seminar.id ? 'Laden...' : 'Einzeln buchen · 99 €'}
-                            </button>
-                            <a href="/angebote" className="btn btn-secondary" style={{ fontSize: 13, padding: '9px 18px' }}>
-                              Mit Abo →
-                            </a>
-                          </>
-                        )}
+                        <span className="dot" />
+                        <span>{total} {total === 1 ? 'Lektion' : 'Lektionen'}</span>
                       </>
                     )}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
+                <div className="mc-course-foot">
+                  <span className={`progress ${pct === 100 ? 'done' : ''}`}>{status}</span>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
 
-      {/* ── Progress Footer ── */}
-      {showELearnings && (
-        <div
-          className="card"
-          style={{
-            padding: '20px 24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 16,
-            flexWrap: 'wrap',
-            background: 'var(--ki-bg-alt)',
-            border: '1px solid var(--ki-border)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 600, fontSize: 15 }}>
-              E-Learnings: {completedCourses}/{eLearnings.length || 6} abgeschlossen
-            </span>
-            <span style={{ fontSize: 13, color: 'var(--ki-text-secondary)' }}>
-              +{xp} XP gesammelt
-            </span>
+      {/* Section: Bald verfügbar (Coming Soon — Kauf-Anregung) */}
+      <div className="mc-secthead" style={{ marginTop: 'calc(var(--gap) * 1.5)' }}>
+        <h3>Bald verfügbar <span className="count">{COMING_SOON_MASTERCLASSES.length}</span></h3>
+        <span className="link">Vormerken — du bekommst eine Mail beim Launch</span>
+      </div>
+      <div className="mc-courses">
+        {COMING_SOON_MASTERCLASSES.map(c => (
+          <div key={c.id} className="mc-course mc-upcoming"
+               onClick={() => alert(`„${c.title}" startet ${c.launch}. Du wirst per Mail benachrichtigt sobald die Masterclass live ist.`)}
+               role="button" tabIndex={0}>
+            <div className="mc-course-cover" style={{ background: c.gradient }}>
+              <span className="cat">Coming Soon</span>
+              <span className="badge upcoming">{c.launch}</span>
+              <span className="mc-letter">{c.letter}</span>
+            </div>
+            <div className="mc-course-body">
+              <div className="mc-course-title">{c.title}</div>
+              <div className="mc-course-sub">{c.description}</div>
+              <div className="mc-course-meta">
+                <Icon name="cal" size={11} />
+                <span>Start: {c.launch}</span>
+              </div>
+            </div>
+            <div className="mc-course-foot">
+              <span className="coach-name">{c.subtitle}</span>
+              <span className="progress upcoming-cta">+ Vormerken</span>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-            <span
-              className={`pill ${completedCourses >= 1 ? 'pill-gold' : 'pill-grey'}`}
-              style={{ fontSize: 12 }}
-            >
-              🥉 1/6 Bronze
-            </span>
-            <span
-              className={`pill ${completedCourses >= 3 ? 'pill-gold' : 'pill-grey'}`}
-              style={{ fontSize: 12 }}
-            >
-              🥈 3/6 Silber
-            </span>
-            <span
-              className={`pill ${completedCourses >= 6 ? 'pill-gold' : 'pill-grey'}`}
-              style={{ fontSize: 12 }}
-            >
-              🥇 6/6 Gold
-            </span>
+        ))}
+      </div>
+
+      {/* Section: Live-Seminare (nur kommende Termine — vergangene werden automatisch ausgeblendet) */}
+      <div className="mc-secthead" style={{ marginTop: 'calc(var(--gap) * 1.5)' }}>
+        <h3>Live-Seminare <span className="count">{upcomingSeminars.length}</span></h3>
+        <span className="link">monatlich · 90 Min · interaktiv</span>
+      </div>
+      <div className="mc-seminar-list">
+        {upcomingSeminars.map(s => {
+          const registered = registeredSeminarIds.has(s.id);
+          const nextDate = new Date(s.next_date);
+          const dateStr = nextDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' });
+          const weekday = nextDate.toLocaleDateString('de-DE', { weekday: 'short' });
+          return (
+            <div key={s.id} className="mc-seminar-row" onClick={() => setOpenSeminar(s)} role="button" tabIndex={0}>
+              <div className="mc-seminar-date">
+                <span className="mc-seminar-date-day">{nextDate.getDate()}</span>
+                <span className="mc-seminar-date-month">{nextDate.toLocaleDateString('de-DE', { month: 'short' })}</span>
+                <span className="mc-seminar-date-weekday">{weekday}</span>
+              </div>
+              <div className="mc-seminar-icon"><Icon name={s.iconName} size={22} stroke={1.7} /></div>
+              <div className="mc-seminar-body">
+                <div className="mc-seminar-title">{s.title}</div>
+                <div className="mc-seminar-subtitle">{s.subtitle}</div>
+                <div className="mc-seminar-desc">{s.description}</div>
+              </div>
+              <div className="mc-seminar-side">
+                {registered ? (
+                  <span className="mc-seminar-badge done">✓ Angemeldet</span>
+                ) : !isPremium ? (
+                  <span className="mc-seminar-badge premium">Premium</span>
+                ) : (
+                  <span className="mc-seminar-badge open">Anmelden</span>
+                )}
+                <span className="mc-seminar-meta">90 Min · interaktiv</span>
+                <span className="mc-seminar-cta">Details →</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Seminar Detail Modal */}
+      {openSeminar && (() => {
+        const sem = openSeminar;
+        const registered = registeredSeminarIds.has(sem.id);
+        const nextDate = new Date(sem.next_date);
+        const dateStr = nextDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+        return (
+          <div className="mc-modal-overlay" onClick={() => setOpenSeminar(null)}>
+            <div className="mc-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={sem.title}>
+              <button className="mc-modal-close" onClick={() => setOpenSeminar(null)} aria-label="Schließen">✕</button>
+
+              <div className="mc-modal-header">
+                <div className="mc-modal-icon"><Icon name={sem.iconName} size={30} stroke={1.6} /></div>
+                <div className="mc-modal-header-text">
+                  <div className="mc-modal-eyebrow">Live-Seminar</div>
+                  <h2 className="mc-modal-title">{sem.title}</h2>
+                  <div className="mc-modal-subtitle">{sem.subtitle}</div>
+                </div>
+              </div>
+
+              <div className="mc-modal-meta">
+                <div className="mc-modal-meta-item">
+                  <span className="lbl">Nächster Termin</span>
+                  <span className="val">{dateStr}</span>
+                </div>
+                <div className="mc-modal-meta-item">
+                  <span className="lbl">Dauer</span>
+                  <span className="val">90 Minuten</span>
+                </div>
+                <div className="mc-modal-meta-item">
+                  <span className="lbl">Format</span>
+                  <span className="val">Microsoft Teams · interaktiv</span>
+                </div>
+                <div className="mc-modal-meta-item">
+                  <span className="lbl">{sem.rating ? 'Bewertung' : 'Zertifikat'}</span>
+                  <span className="val">
+                    {sem.rating
+                      ? `★ ${sem.rating}/5 · ${sem.ratingCount} Bewertungen`
+                      : 'nach Teilnahme'}
+                  </span>
+                </div>
+                {sem.bookableUntil && (
+                  <div className="mc-modal-meta-item" style={{ gridColumn: '1 / -1' }}>
+                    <span className="lbl">Buchbar bis</span>
+                    <span className="val">{sem.bookableUntil}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="mc-modal-body">
+                <p className="mc-modal-lead">{sem.description}</p>
+                {sem.longDescription && (
+                  <div className="mc-modal-long" dangerouslySetInnerHTML={{ __html: sem.longDescription }} />
+                )}
+                {!sem.longDescription && (
+                  <p className="mc-modal-placeholder">
+                    Ausführliche Beschreibung folgt — die Detail-Inhalte werden gerade aus den bestehenden Seminar-Seiten übernommen.
+                  </p>
+                )}
+
+                {(() => {
+                  const semCoaches = getCoachesForSeminar(coaches, sem.id);
+                  if (!semCoaches.length) return null;
+                  return (
+                    <div className="mc-modal-coaches">
+                      <div className="mc-modal-coaches-label">
+                        {semCoaches.length > 1 ? 'Deine Trainer' : 'Deine Trainerin / dein Trainer'}
+                      </div>
+                      <div className="mc-modal-coaches-list">
+                        {semCoaches.map(c => (
+                          <div key={c.id} className="mc-modal-coach">
+                            <div className="mc-modal-coach-avatar" style={{ background: c.gradient }}>
+                              {c.initials}
+                            </div>
+                            <div className="mc-modal-coach-info">
+                              <div className="mc-modal-coach-name">{c.name}</div>
+                              <div className="mc-modal-coach-title">{c.title}</div>
+                              <div className="mc-modal-coach-short">{c.short}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <a href="/coaches" className="mc-modal-coaches-link">Alle Coaches kennenlernen →</a>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              <div className="mc-modal-actions">
+                {registered ? (
+                  <span className="mc-seminar-badge done" style={{ padding: '10px 16px', fontSize: 13 }}>✓ Bereits angemeldet</span>
+                ) : !isPremium ? (
+                  <>
+                    <a href="/angebote" className="mc-modal-cta-primary">Premium starten · ab 15 €/Monat</a>
+                    <a href="/seminare" className="mc-modal-cta-secondary">Einzeln buchen · 99 €</a>
+                  </>
+                ) : (
+                  <a href={sem.linkUrl || '/seminare'} className="mc-modal-cta-primary" target={sem.linkUrl ? '_blank' : undefined} rel={sem.linkUrl ? 'noopener noreferrer' : undefined}>
+                    Jetzt anmelden →
+                  </a>
+                )}
+                {sem.linkUrl && (
+                  <a href={sem.linkUrl} target="_blank" rel="noopener noreferrer" className="mc-modal-cta-secondary">
+                    Vollständige Beschreibung öffnen →
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
+
+      {/* Section: Premium-Analyse-Tools */}
+      <div className="mc-secthead" style={{ marginTop: 'calc(var(--gap) * 1.5)' }}>
+        <h3>Premium-Analyse-Tools <span className="count">{ANALYSE_TOOLS.length}</span></h3>
+        <span className="link">wissenschaftlich · individuelles Coaching</span>
+      </div>
+      <div className="mc-tools-grid">
+        {ANALYSE_TOOLS.map(t => (
+          <a key={t.id} className="mc-tool" href={t.link} target="_blank" rel="noopener noreferrer">
+            <div className="mc-tool-head">
+              <div className="mc-tool-icon">{t.icon}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="mc-tool-title">{t.title}</div>
+                <div className="mc-tool-subtitle">{t.subtitle}</div>
+              </div>
+              <span className="mc-tool-badge"><Icon name="spark" size={12} /> Premium</span>
+            </div>
+            <ul className="mc-tool-features">
+              {t.features.map((f, i) => (
+                <li key={i}><Icon name="check" size={12} stroke={2} /> {f}</li>
+              ))}
+            </ul>
+            <div className="mc-tool-foot">
+              <span className="mc-tool-pricing">{t.pricing}</span>
+              <span className="mc-tool-cta">Buchen →</span>
+            </div>
+          </a>
+        ))}
+      </div>
     </div>
   );
 }

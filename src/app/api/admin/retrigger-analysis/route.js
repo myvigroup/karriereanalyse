@@ -145,11 +145,10 @@ export async function GET() {
   const admin = await authAdmin();
   if (!admin) return NextResponse.json({ error: 'Kein Zugriff' }, { status: 403 });
 
-  const { data: pending } = await admin
+  const { count } = await admin
     .from('cv_feedback')
-    .select('id, fair_lead_id, ai_parsed_at')
-    .is('ai_parsed_at', null)
-    .limit(100);
+    .select('id', { count: 'exact', head: true })
+    .is('ai_parsed_at', null);
 
-  return NextResponse.json({ pending: pending || [], count: pending?.length || 0 });
+  return NextResponse.json({ count: count || 0 });
 }

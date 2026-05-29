@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { awardPoints } from '@/lib/gamification';
 import InfoTooltip from '@/components/ui/InfoTooltip';
+import Icon from '@/components/ui/Icon';
 import { Bird, Shield, Sprout, Users as UsersIcon, Trophy, Palette, Compass, Rocket, Handshake, DollarSign, Megaphone, Dumbbell, BookOpen, Anchor, Globe, Heart, Lightbulb, Scale, Crown, Target, CheckCircle2, Star, PartyPopper } from 'lucide-react';
 
 const VALUES = [
@@ -395,7 +396,7 @@ export default function DecisionClient({ userId, existingSession }) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: isTop ? 16 : 14, fontWeight: 700,
               }}>
-                {isTop ? '👑' : i + 1}
+                {isTop ? <Icon name="crown" size={16} stroke={1.7} /> : i + 1}
               </div>
 
               {/* emoji + name */}
@@ -528,7 +529,7 @@ export default function DecisionClient({ userId, existingSession }) {
                     fontSize: 10, background: i === 0 ? 'var(--ki-red)' : 'var(--ki-bg-alt)',
                     color: i === 0 ? '#fff' : 'var(--ki-text-secondary)', border: 'none',
                   }}>
-                    {i === 0 ? '👑 ' : ''}{weight}× Gewicht
+                    {i === 0 ? <Icon name="crown" size={11} stroke={1.8} /> : null} {weight}× Gewicht
                   </span>
                 </div>
 

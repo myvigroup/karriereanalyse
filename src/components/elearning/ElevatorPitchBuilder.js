@@ -11,24 +11,24 @@ const CAREER_EXAMPLES = [
   {
     phase: 'Einsteiger',
     icon: '\u{1F680}',
-    pitch: 'Teams verlieren oft Zeit durch ineffiziente Prozesse. Ich habe in meinem ersten Jahr bei [Firma] einen Reporting-Prozess automatisiert, der 10 Stunden pro Woche spart. Wenn Sie jemanden suchen, der Probleme l\u00f6st statt nur abarbeitet \u2013 lassen Sie uns sprechen.',
+    pitch: 'Teams verlieren oft Zeit durch ineffiziente Prozesse. Ich habe in meinem ersten Jahr bei [Firma] einen Reporting-Prozess automatisiert, der 10 Stunden pro Woche spart. Wenn Sie jemanden suchen, der Probleme löst statt nur abarbeitet \u2013 lassen Sie uns sprechen.',
   },
   {
     phase: 'Professional',
     icon: '\u{1F4BC}',
-    pitch: 'Viele Projekte scheitern an der Kommunikation zwischen Tech und Business. Als Product Manager \u00fcbersetze ich seit 5 Jahren zwischen beiden Welten. Meine Projekte liefern im Schnitt 20% schneller \u2013 weil alle wirklich verstehen, was gebaut wird.',
+    pitch: 'Viele Projekte scheitern an der Kommunikation zwischen Tech und Business. Als Product Manager übersetze ich seit 5 Jahren zwischen beiden Welten. Meine Projekte liefern im Schnitt 20% schneller \u2013 weil alle wirklich verstehen, was gebaut wird.',
   },
   {
-    phase: 'F\u00fchrungskraft',
+    phase: 'Führungskraft',
     icon: '\u{1F451}',
-    pitch: 'Transformation gelingt nur, wenn Menschen mitgenommen werden. Ich habe bei [Firma] ein 50-k\u00f6pfiges Team durch eine digitale Transformation gef\u00fchrt \u2013 mit 92% Mitarbeiterzufriedenheit. Mein Ansatz: Strategie mit Empathie verbinden.',
+    pitch: 'Transformation gelingt nur, wenn Menschen mitgenommen werden. Ich habe bei [Firma] ein 50-köpfiges Team durch eine digitale Transformation geführt \u2013 mit 92% Mitarbeiterzufriedenheit. Mein Ansatz: Strategie mit Empathie verbinden.',
   },
 ];
 
 const STEPS = [
-  { id: 'problem', label: 'Problem', prompt: 'Welches Problem l\u00f6st du?', placeholder: 'z.B. "Viele Teams verlieren Zeit durch unklare Kommunikation..."', icon: '\u{1F3AF}' },
-  { id: 'loesung', label: 'L\u00f6sung', prompt: 'Wie l\u00f6st du es?', placeholder: 'z.B. "Ich entwickle klare Kommunikationsstrukturen, die..."', icon: '\u{1F4A1}' },
-  { id: 'nutzen', label: 'Nutzen', prompt: 'Was hat der Zuh\u00f6rer davon?', placeholder: 'z.B. "Sie sparen 5 Stunden pro Woche und Ihr Team..."', icon: '\u{2B50}' },
+  { id: 'problem', label: 'Problem', prompt: 'Welches Problem löst du?', placeholder: 'z.B. "Viele Teams verlieren Zeit durch unklare Kommunikation..."', icon: '\u{1F3AF}' },
+  { id: 'loesung', label: 'Lösung', prompt: 'Wie löst du es?', placeholder: 'z.B. "Ich entwickle klare Kommunikationsstrukturen, die..."', icon: '\u{1F4A1}' },
+  { id: 'nutzen', label: 'Nutzen', prompt: 'Was hat der Zuhörer davon?', placeholder: 'z.B. "Sie sparen 5 Stunden pro Woche und Ihr Team..."', icon: '\u{2B50}' },
 ];
 
 export default function ElevatorPitchBuilder({ onComplete }) {
@@ -129,7 +129,7 @@ export default function ElevatorPitchBuilder({ onComplete }) {
 
         {/* Timer section */}
         <div style={styles.timerSection}>
-          <h3 style={styles.timerTitle}>{'\u{1F3A4}'} Pitch {'\u00fc'}ben (60 Sekunden)</h3>
+          <h3 style={styles.timerTitle}>{'\u{1F3A4}'} Pitch {'ü'}ben (60 Sekunden)</h3>
           <p style={styles.timerSubtext}>
             Lies deinen Pitch laut vor. Du hast 60 Sekunden – wie im echten Aufzug.
           </p>

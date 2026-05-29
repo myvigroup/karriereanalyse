@@ -110,19 +110,26 @@ export async function analyzeCVForFair(cvText, targetPosition) {
     return getMockFairAnalysis();
   }
 
-  const system = `Du bist ein erfahrener Karrierecoach auf einer Karrieremesse. Du bist kompetent in ALLEN Branchen — von MINT/Technik (IT, Ingenieurwesen, Naturwissenschaften, Mathematik) bis BWL, Soziales und Kreativberufe. Analysiere den Lebenslauf${targetPosition ? ` speziell im Hinblick auf die Zielstelle "${targetPosition}"` : ''} branchenspezifisch und gib strukturiertes Feedback.
+  const system = `Du bist ein erfahrener Karrierecoach auf einer Karrieremesse. Du bist kompetent in ALLEN Branchen — von MINT/Technik (IT, Ingenieurwesen, Naturwissenschaften, Mathematik) bis BWL, Soziales und Kreativberufe. Analysiere den Lebenslauf${targetPosition ? ` speziell im Hinblick auf die Zielstelle "${targetPosition}"` : ''} branchenspezifisch und gib eine ausführliche, ehrliche und zugleich motivierende Auswertung. Sprich die Bewerberin/den Bewerber direkt mit "du" an.
 
 Antworte NUR als valides JSON-Objekt ohne Markdown-Backticks. Format:
 {
   "overallRating": 3,
-  "summary": "2-3 Sätze Gesamteinschätzung",
+  "summary": "3-4 Sätze Gesamteinschätzung, die den Bewerber direkt anspricht",
   "categories": {
-    "struktur": { "rating": 3, "selectedPresets": ["Klarer chronologischer Aufbau"], "comment": "Kurzer Kommentar" },
-    "inhalt": { "rating": 3, "selectedPresets": ["Relevante Erfahrungen gut hervorgehoben"], "comment": "Kurzer Kommentar" },
-    "design": { "rating": 3, "selectedPresets": ["Professionelles, modernes Layout"], "comment": "Kurzer Kommentar" },
-    "wirkung": { "rating": 3, "selectedPresets": ["Starker erster Eindruck"], "comment": "Kurzer Kommentar" }
-  }
+    "struktur": { "rating": 3, "selectedPresets": ["Klarer chronologischer Aufbau"], "comment": "Kurzer Kommentar (1 Satz)", "detail": "Ausführlicher Analyse-Absatz" },
+    "inhalt": { "rating": 3, "selectedPresets": ["Relevante Erfahrungen gut hervorgehoben"], "comment": "Kurzer Kommentar (1 Satz)", "detail": "Ausführlicher Analyse-Absatz" },
+    "design": { "rating": 3, "selectedPresets": ["Professionelles, modernes Layout"], "comment": "Kurzer Kommentar (1 Satz)", "detail": "Ausführlicher Analyse-Absatz" },
+    "wirkung": { "rating": 3, "selectedPresets": ["Starker erster Eindruck"], "comment": "Kurzer Kommentar (1 Satz)", "detail": "Ausführlicher Analyse-Absatz" }
+  },
+  "improvements": [
+    { "title": "Kurzer Titel des Verbesserungsvorschlags", "category": "inhalt", "before": "Schwache Stelle aus dem Lebenslauf — wörtlich oder sinngemäß", "after": "Konkret verbesserte Version bzw. umsetzbarer Tipp" }
+  ]
 }
+
+Zu "detail": Pro Kategorie ein konkreter Absatz von 4-6 Sätzen, der sich direkt auf DIESEN Lebenslauf bezieht (nenne konkrete Beispiele aus dem Text). Ehrlich, aber ermutigend, in der Du-Anrede.
+
+Zu "improvements": Gib 4-6 konkrete Verbesserungsvorschläge. "before" = eine konkrete schwache Stelle aus dem Lebenslauf; "after" = die verbesserte Formulierung. Hat ein Vorschlag kein sinnvolles Vorher-Beispiel (z. B. ein struktureller Tipp), lass "before" leer ("") und schreib den umsetzbaren Tipp in "after". "category" ist genau eine von: struktur, inhalt, design, wirkung.
 
 WICHTIG: selectedPresets NUR aus dieser Liste:
 Struktur: "Klarer chronologischer Aufbau", "Chronologische Lücken vorhanden", "Übersichtliche Gliederung", "Zu unübersichtlich / überladen", "Kontaktdaten vollständig", "Kontaktdaten unvollständig", "Gute Länge (1-2 Seiten)", "Zu lang / zu kurz"
@@ -130,11 +137,11 @@ Inhalt: "Relevante Erfahrungen gut hervorgehoben", "Wichtige Erfahrungen fehlen 
 Design: "Professionelles, modernes Layout", "Layout veraltet oder unprofessionell", "Gute Lesbarkeit und Schriftgröße", "Schwer lesbar / zu kleine Schrift", "Konsistente Formatierung", "Inkonsistente Formatierung", "Angemessenes Foto", "Foto fehlt oder unvorteilhaft"
 Wirkung: "Starker erster Eindruck", "Erster Eindruck verbesserungswürdig", "Persönlichkeit kommt rüber", "Wirkt austauschbar / generisch", "Klare Positionierung erkennbar", "Positionierung unklar", "Motivierender Gesamteindruck", "Gesamteindruck eher schwach"
 
-Ratings 1-5. Sei ehrlich aber konstruktiv.`;
+Ratings 1-5. Sei ehrlich, konstruktiv und motivierend.`;
 
   const userMessage = `Analysiere diesen Lebenslauf${targetPosition ? ` für die Zielstelle: "${targetPosition}"` : ''}:\n\n${cvText.substring(0, 8000)}`;
 
-  const text = await callAI({ system, userMessage, maxTokens: 2500 });
+  const text = await callAI({ system, userMessage, maxTokens: 4000 });
   const result = parseJSON(text);
   return result || getMockFairAnalysis();
 }
@@ -243,13 +250,23 @@ export async function extractTextFromImageAI(buffer, filename) {
           }],
         }),
       });
+      if (!response.ok) {
+        const errBody = await response.text();
+        console.error('[ai-provider] OpenAI vision HTTP', response.status, errBody);
+        return '';
+      }
       const data = await response.json();
-      return data.choices?.[0]?.message?.content || '';
+      const text = data.choices?.[0]?.message?.content || '';
+      if (!text) {
+        console.error('[ai-provider] OpenAI vision: leere Antwort', JSON.stringify(data).slice(0, 300));
+      }
+      return text;
     } catch (e) {
       console.error('[ai-provider] OpenAI vision error:', e);
     }
   }
 
+  console.warn('[ai-provider] extractTextFromImageAI: kein Vision-Provider verfügbar — OPENAI_API_KEY/ANTHROPIC_API_KEY prüfen');
   return '';
 }
 
@@ -259,13 +276,19 @@ export async function extractTextFromImageAI(buffer, filename) {
 function getMockFairAnalysis() {
   return {
     overallRating: 3,
-    summary: 'Der Lebenslauf bietet eine solide Basis, hat aber Optimierungspotenzial in Struktur und Wirkung.',
+    summary: 'Dein Lebenslauf bietet eine solide Basis. Mit etwas mehr Fokus auf messbare Erfolge und eine klarere Struktur kannst du deutlich mehr aus ihm herausholen.',
     categories: {
-      struktur: { rating: 3, selectedPresets: ['Klarer chronologischer Aufbau', 'Gute Länge (1-2 Seiten)'], comment: 'Grundstruktur ist vorhanden, könnte aber übersichtlicher sein.' },
-      inhalt: { rating: 3, selectedPresets: ['Relevante Erfahrungen gut hervorgehoben', 'Keine konkreten Ergebnisse / Zahlen'], comment: 'Erfahrungen sind relevant, aber es fehlen messbare Erfolge.' },
-      design: { rating: 3, selectedPresets: ['Gute Lesbarkeit und Schriftgröße'], comment: 'Design ist funktional, könnte moderner wirken.' },
-      wirkung: { rating: 3, selectedPresets: ['Erster Eindruck verbesserungswürdig', 'Positionierung unklar'], comment: 'Der CV wirkt noch etwas generisch.' },
+      struktur: { rating: 3, selectedPresets: ['Klarer chronologischer Aufbau', 'Gute Länge (1-2 Seiten)'], comment: 'Grundstruktur ist vorhanden, könnte aber übersichtlicher sein.', detail: 'Die Grundstruktur deines Lebenslaufs ist erkennbar und chronologisch aufgebaut. Eine klarere Trennung der Abschnitte und einheitliche Überschriften würden die Übersicht weiter verbessern.' },
+      inhalt: { rating: 3, selectedPresets: ['Relevante Erfahrungen gut hervorgehoben', 'Keine konkreten Ergebnisse / Zahlen'], comment: 'Erfahrungen sind relevant, aber es fehlen messbare Erfolge.', detail: 'Deine Erfahrungen sind relevant, werden aber überwiegend als Aufgaben beschrieben. Wenn du konkrete Ergebnisse und Zahlen ergänzt, wird dein Beitrag für Personaler sofort greifbar.' },
+      design: { rating: 3, selectedPresets: ['Gute Lesbarkeit und Schriftgröße'], comment: 'Design ist funktional, könnte moderner wirken.', detail: 'Das Layout ist funktional und gut lesbar. Ein etwas moderneres, konsistentes Design mit klaren Akzenten würde professioneller wirken.' },
+      wirkung: { rating: 3, selectedPresets: ['Erster Eindruck verbesserungswürdig', 'Positionierung unklar'], comment: 'Der CV wirkt noch etwas generisch.', detail: 'Der Gesamteindruck ist solide, wirkt aber noch etwas austauschbar. Ein prägnantes Profil ganz oben, das dein Ziel und deine Stärken auf den Punkt bringt, schärft deine Positionierung.' },
     },
+    improvements: [
+      { title: 'Erfolge mit Zahlen belegen', category: 'inhalt', before: 'Umsatz gesteigert', after: 'Umsatz im Verantwortungsbereich um 30 % innerhalb von 12 Monaten gesteigert' },
+      { title: 'Aufgaben in Ergebnisse umformulieren', category: 'inhalt', before: 'Zuständig für Kundenbetreuung', after: 'Über 80 Bestandskunden betreut und die Kundenzufriedenheit messbar erhöht' },
+      { title: 'Kurzprofil ergänzen', category: 'wirkung', before: '', after: 'Beginne mit einem 3-Satz-Profil, das dein Ziel, deine Kernkompetenzen und dein Alleinstellungsmerkmal beschreibt.' },
+      { title: 'Einheitliche Formatierung', category: 'design', before: '', after: 'Verwende durchgehend dieselbe Schriftart, Datumsformatierung und Aufzählungszeichen für ein ruhiges, professionelles Bild.' },
+    ],
   };
 }
 

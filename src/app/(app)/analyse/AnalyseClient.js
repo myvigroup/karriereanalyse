@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { awardPoints } from '@/lib/gamification';
 import {
@@ -10,826 +10,546 @@ import {
   getRecommendedMasterclass,
 } from './matrix';
 
-// ============================================================
-// RADAR CHART (SVG, 12 Felder)
-// ============================================================
-function RadarChart({ scores, size = 340 }) {
+// ─── Icons ───────────────────────────────────────────────────────────────────
+function Icon({ name, size = 14, stroke = 1.7 }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
+              stroke: 'currentColor', strokeWidth: stroke,
+              strokeLinecap: 'round', strokeLinejoin: 'round' };
+  switch (name) {
+    case 'chev-l':  return (<svg {...p}><polyline points="15 18 9 12 15 6"/></svg>);
+    case 'lock':    return (<svg {...p}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
+    case 'sparkle': return (<svg {...p}><path d="M5 3v4M3 5h4M19 17v4M17 19h4M12 2l2.4 5.1L20 9l-5.1 2.4L12 16l-2.4-5L4 9l5.4-2L12 2z"/></svg>);
+    case 'refresh': return (<svg {...p}><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>);
+    default: return null;
+  }
+}
+
+// ─── Radar Chart ─────────────────────────────────────────────────────────────
+function RadarChart({ scores, size = 320 }) {
   const cx = size / 2, cy = size / 2, r = size * 0.34;
   const n = KOMPETENZFELDER.length;
   const rings = [25, 50, 75, 100];
-
-  const getPoint = (i, val) => {
-    const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
-    const dist = (val / 100) * r;
-    return { x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist };
+  const point = (i, val) => {
+    const a = (Math.PI * 2 * i) / n - Math.PI / 2;
+    const d = (val / 100) * r;
+    return { x: cx + Math.cos(a) * d, y: cy + Math.sin(a) * d };
   };
-
-  const dataPoints = KOMPETENZFELDER.map((f, i) => getPoint(i, scores[f.id] || 0));
-  const path = dataPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ') + 'Z';
-
+  const pts = KOMPETENZFELDER.map((f, i) => point(i, scores[f.id] || 0));
+  const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ') + 'Z';
   return (
     <svg viewBox={`0 0 ${size} ${size}`} style={{ width: '100%', maxWidth: size }}>
       <defs>
-        <radialGradient id="radarGrad" cx="50%" cy="50%" r="50%">
+        <radialGradient id="radarG" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#CC1426" stopOpacity="0.18" />
-          <stop offset="100%" stopColor="#CC1426" stopOpacity="0.03" />
+          <stop offset="100%" stopColor="#CC1426" stopOpacity="0.04" />
         </radialGradient>
       </defs>
       {rings.map(ring => {
-        const pts = Array.from({ length: n }, (_, i) => getPoint(i, ring));
+        const rp = Array.from({ length: n }, (_, i) => point(i, ring));
         return (
-          <polygon
-            key={ring}
-            points={pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}
-            fill={ring === 100 ? 'url(#radarGrad)' : 'none'}
-            stroke="#E8E6E1"
-            strokeWidth="1"
+          <polygon key={ring}
+            points={rp.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}
+            fill={ring === 100 ? 'url(#radarG)' : 'none'}
+            stroke="var(--line-2)" strokeWidth="0.8"
           />
         );
       })}
       {KOMPETENZFELDER.map((_, i) => {
-        const p = getPoint(i, 100);
-        return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#E8E6E1" strokeWidth="1" />;
+        const p = point(i, 100);
+        return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="var(--line-2)" strokeWidth="0.8" />;
       })}
-      <path d={path} fill="rgba(204,20,38,0.12)" stroke="#CC1426" strokeWidth="2.5" strokeLinejoin="round" />
-      {dataPoints.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="4" fill="#CC1426" />)}
+      <path d={path} fill="rgba(204,20,38,0.18)" stroke="var(--ki-red)" strokeWidth="2" strokeLinejoin="round" />
+      {pts.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="3.5" fill="var(--ki-red)" />)}
       {KOMPETENZFELDER.map((f, i) => {
-        const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
-        const lx = cx + Math.cos(angle) * (r + 26);
-        const ly = cy + Math.sin(angle) * (r + 26);
+        const a = (Math.PI * 2 * i) / n - Math.PI / 2;
+        const lx = cx + Math.cos(a) * (r + 22);
+        const ly = cy + Math.sin(a) * (r + 22);
         return (
           <text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle"
-            style={{ fontSize: 13, fontFamily: 'Instrument Sans, sans-serif' }}>
-            {f.icon}
-          </text>
+                style={{ fontSize: 13 }}>{f.icon}</text>
         );
       })}
     </svg>
   );
 }
 
-// ============================================================
-// SCALE QUESTION COMPONENT (1–5 Buttons)
-// ============================================================
-function ScaleQuestion({ question, onAnswer, answered }) {
-  const [selected, setSelected] = useState(null);
+function ScoreRing({ score, size = 180 }) {
+  const r = (size - 24) / 2, c = 2 * Math.PI * r;
+  const val = Math.max(0, Math.min(100, score || 0));
+  const offset = c - (val / 100) * c;
+  return (
+    <div className="ana-ring" style={{ width: size, height: size }}>
+      <svg viewBox={`0 0 ${size} ${size}`}>
+        <circle className="track" cx={size/2} cy={size/2} r={r} />
+        <circle className="prog" cx={size/2} cy={size/2} r={r}
+                strokeDasharray={c} strokeDashoffset={offset} />
+      </svg>
+      <div className="label">
+        <div className="v">{Math.round(val)}</div>
+        <div className="o">von 100</div>
+      </div>
+    </div>
+  );
+}
 
-  const handleSelect = (val) => {
-    if (answered) return;
-    setSelected(val);
-    setTimeout(() => onAnswer(val), 300);
-  };
+function FieldCard({ field, score, locked }) {
+  const lvl = getScoreLevel(score);
+  if (locked) {
+    return (
+      <div className="ana-field-card locked">
+        <div className="ana-field-icon" style={{ background: 'var(--fill-2)', color: 'var(--label-4)' }}>
+          {field.icon}
+        </div>
+        <div className="ana-field-body">
+          <div className="ana-field-name">{field.name}</div>
+          <div className="ana-field-locked">
+            <Icon name="lock" size={13} stroke={2} />
+            Mit Premium freischalten
+          </div>
+        </div>
+        <div className="ana-field-lock-ic"><Icon name="lock" size={18} stroke={2} /></div>
+      </div>
+    );
+  }
+  return (
+    <div className="ana-field-card">
+      <div className="ana-field-icon" style={{ background: `${field.color}15`, color: field.color }}>
+        {field.icon}
+      </div>
+      <div className="ana-field-body">
+        <div className="ana-field-name">{field.name}</div>
+        <div className="ana-field-bar">
+          <div className="ana-field-bar-fill" style={{ width: `${score}%`, background: lvl.color }} />
+        </div>
+        <div className="ana-field-meta">
+          <span className="ana-field-level" style={{ color: lvl.color }}>{lvl.label}</span>
+          <span className="ana-field-score">{score}<span className="of">/100</span></span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
+function ScaleQuestion({ question, selected, onSelect, disabled }) {
   return (
     <div>
-      <p style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.6, marginBottom: 20, color: '#1A1A1A' }}>
-        {question.text}
-      </p>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+      <div className="ana-q-kicker">Selbsteinschätzung</div>
+      <div className="ana-q-text">{question.text}</div>
+      <div className="ana-q-scale-row">
         {[1, 2, 3, 4, 5].map(val => (
-          <button
-            key={val}
-            onClick={() => handleSelect(val)}
-            style={{
-              width: 52, height: 52, borderRadius: '50%', border: '2px solid',
-              borderColor: selected === val ? '#CC1426' : '#E8E6E1',
-              background: selected === val ? '#CC1426' : '#fff',
-              color: selected === val ? '#fff' : '#1A1A1A',
-              fontSize: 16, fontWeight: 700, cursor: answered ? 'default' : 'pointer',
-              transition: 'all 0.2s ease',
-              transform: selected === val ? 'scale(1.1)' : 'scale(1)',
-            }}
-          >
-            {val}
+          <button key={val} type="button"
+            className={`ana-scale-btn ${selected === val ? 'on' : ''}`}
+            onClick={() => !disabled && onSelect(val)}
+            disabled={disabled}>{val}</button>
+        ))}
+      </div>
+      <div className="ana-q-scale-labels">
+        <span>{question.low}</span>
+        <span>{question.high}</span>
+      </div>
+    </div>
+  );
+}
+
+function ScenarioQuestion({ question, selected, onSelect, disabled }) {
+  return (
+    <div>
+      <div className="ana-q-kicker">Szenario</div>
+      <div className="ana-q-text">{question.text}</div>
+      <div className="ana-q-scenarios">
+        {question.options.map((opt, i) => (
+          <button key={i} type="button"
+            className={`ana-scenario-btn ${selected === opt.score ? 'on' : ''}`}
+            onClick={() => !disabled && onSelect(opt.score)}
+            disabled={disabled}>
+            <span className="emoji">{opt.emoji}</span>
+            <span className="txt">{opt.text}</span>
           </button>
         ))}
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#86868b' }}>
-        <span style={{ maxWidth: 120 }}>{question.low}</span>
-        <span style={{ maxWidth: 120, textAlign: 'right' }}>{question.high}</span>
-      </div>
     </div>
   );
 }
 
-// ============================================================
-// LOCKED CARD
-// ============================================================
-function LockedCard({ children }) {
-  return (
-    <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden' }}>
-      <div style={{ filter: 'blur(4px)', pointerEvents: 'none', userSelect: 'none', opacity: 0.6 }}>
-        {children}
-      </div>
-      <div style={{
-        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.85)',
-        backdropFilter: 'blur(2px)',
-      }}>
-        <div style={{ fontSize: 28, marginBottom: 8 }}>🔒</div>
-        <div style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>Vollanalyse freischalten</div>
-        <div style={{ fontSize: 12, color: '#86868b' }}>Im Gespräch mit deinem Karriere-Berater</div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
-// ============================================================
-// FIELD RESULT CARD (rich per-field interpretation)
-// ============================================================
-function FieldResultCard({ field, score, isLocked }) {
-  const level = getScoreLevel(score);
-
-  const interpretation = score >= 75
-    ? `Du zeigst im Bereich ${field.name} klare Stärken. ${field.intro.was} Mit einem Score von ${score}% bist du hier deutlich besser aufgestellt als der Durchschnitt — ein echter Vorteil, den du aktiv nutzen solltest.`
-    : score >= 50
-    ? `Im Bereich ${field.name} bist du solide aufgestellt, hast aber noch konkretes Wachstumspotenzial. ${field.intro.was} Dein Score von ${score}% zeigt: die Grundlagen sind vorhanden — mit gezieltem Training kannst du hier in die Exzellenz-Zone kommen.`
-    : `${field.name} ist ein klares Wachstumsfeld für dich. ${field.intro.warum} Mit einem Score von ${score}% liegt hier enormes Entwicklungspotenzial — und genau das ist die Chance, dich von anderen abzuheben.`;
-
-  return (
-    <div className="card animate-in" style={{ padding: 0, overflow: 'hidden', marginBottom: 16 }}>
-      {/* Header row */}
-      <div style={{ padding: '18px 22px', borderLeft: `4px solid ${field.color}`, display: 'flex', alignItems: 'center', gap: 14 }}>
-        <span style={{ fontSize: 28, flexShrink: 0 }}>{field.icon}</span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{field.name}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ flex: 1, height: 6, background: '#F0EEE9', borderRadius: 3 }}>
-              <div style={{ height: '100%', width: `${score}%`, background: level.color, borderRadius: 3, transition: 'width 1s ease' }} />
-            </div>
-            <span style={{ fontSize: 16, fontWeight: 800, color: level.color, minWidth: 46 }}>{score}%</span>
-          </div>
-        </div>
-        <div style={{
-          padding: '4px 12px', borderRadius: 980, background: `${level.color}18`,
-          color: level.color, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0,
-        }}>
-          {level.badge} {level.label}
-        </div>
-      </div>
-
-      {/* Details */}
-      {isLocked ? (
-        <LockedCard>
-          <div style={{ padding: '16px 22px 24px' }}>
-            {[90, 70, 85].map((w, i) => (
-              <div key={i} style={{ height: 10, background: '#F0EEE9', borderRadius: 5, marginBottom: 10, width: `${w}%` }} />
-            ))}
-          </div>
-        </LockedCard>
-      ) : (
-        <div style={{ padding: '4px 22px 22px' }}>
-          {/* Outcome callout */}
-          <div style={{
-            background: `${field.color}0f`, border: `1px solid ${field.color}30`,
-            borderRadius: 10, padding: '10px 14px', margin: '14px 0',
-            fontSize: 13, fontWeight: 600, color: field.color, lineHeight: 1.5,
-          }}>
-            💡 {field.outcome.headline}
-          </div>
-
-          {/* Deine persönliche Auswertung */}
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 8 }}>
-            Deine persönliche Auswertung
-          </div>
-          <p style={{ fontSize: 14, lineHeight: 1.8, color: '#3d3d3d', marginBottom: 16 }}>
-            {interpretation}
-          </p>
-          <p style={{ fontSize: 13, lineHeight: 1.75, color: '#6B7280', marginBottom: score < 70 ? 16 : 0 }}>
-            {field.outcome.text}
-          </p>
-
-          {/* Schwaechen — only if score < 70 */}
-          {score < 70 && (
-            <div style={{ marginTop: 4 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 10 }}>
-                Klassische Anzeichen in diesem Feld:
-              </div>
-              {field.intro.schwaechen.map((s, i) => (
-                <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, fontSize: 13, color: '#555', lineHeight: 1.5 }}>
-                  <span style={{ color: '#CC1426', flexShrink: 0, marginTop: 1 }}>✗</span>
-                  <span>{s}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
+// ─── Main Component ──────────────────────────────────────────────────────────
 export default function AnalyseClient({ profile, existingSession, userId, hasFullAccess }) {
   const supabase = createClient();
 
-  // Phase: 1=welcome, 2=questions, 3=results
-  const [phase, setPhase] = useState(
-    existingSession?.status === 'completed' ? 3 : 1
-  );
-  const [fieldIndex, setFieldIndex] = useState(existingSession?.current_field || 0);
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [showIntro, setShowIntro] = useState(true); // show intro card per field
-  const [showFieldResult, setShowFieldResult] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [scaleAnswered, setScaleAnswered] = useState(false);
+  const initialPhase = existingSession?.status === 'completed' ? 3 : 1;
+  const [phase, setPhase] = useState(initialPhase);
+  const [currentFieldIdx, setCurrentFieldIdx] = useState(0);
+  const [questionIdx, setQuestionIdx] = useState(0);
+  const [showIntro, setShowIntro] = useState(true);
   const [answers, setAnswers] = useState(existingSession?.answers || {});
   const [fieldScores, setFieldScores] = useState(existingSession?.scores || {});
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [xpAwarded, setXpAwarded] = useState(false);
-  const [resumePrompt, setResumePrompt] = useState(existingSession?.status === 'in_progress');
+  const [xpAwarded, setXpAwarded] = useState(existingSession?.status === 'completed');
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
 
-  const currentField = KOMPETENZFELDER[fieldIndex];
-  const currentQuestion = currentField ? currentField.fragen[questionIndex] : null;
-  const isScaleQuestion = currentQuestion?.type === 'scale';
-  const totalQuestions = KOMPETENZFELDER.length * 4; // 48
-  const answeredQuestions = fieldIndex * 4 + questionIndex;
-  const overallProgress = (answeredQuestions / totalQuestions) * 100;
-
-  // Compute per-field raw score: sum of answers (scenario=1-10, scale=1-5)
-  const computeFieldScore = useCallback((fieldAnswers) => {
-    const sum = (fieldAnswers || []).reduce((a, b) => a + b, 0);
-    return scoreToPercent(sum);
-  }, []);
-
-  const finishField = useCallback((newAnswers, fieldId, currentFieldIdx) => {
-    const pct = computeFieldScore(newAnswers[fieldId]);
-    setFieldScores(prev => {
-      const newScores = { ...prev, [fieldId]: pct };
-      supabase.from('analysis_sessions').upsert({
-        user_id: userId,
-        scores: newScores,
-        answers: newAnswers,
-        overall_score: Math.round(Object.values(newScores).reduce((a, b) => a + b, 0) / Object.keys(newScores).length),
-        current_field: currentFieldIdx,
-        status: currentFieldIdx >= KOMPETENZFELDER.length - 1 ? 'completed' : 'in_progress',
-        completed_at: currentFieldIdx >= KOMPETENZFELDER.length - 1 ? new Date().toISOString() : null,
-      }, { onConflict: 'user_id' }).then(({ error }) => {
-        if (error) console.error('[Analyse] Save failed:', error.message);
-      });
-      return newScores;
-    });
-    setShowFieldResult(true);
-  }, [computeFieldScore, supabase, userId]);
-
-  const handleScenarioClick = useCallback((option) => {
-    if (selectedOption) return;
-    setSelectedOption(option);
-
-    const fieldId = currentField?.id;
-    const qIdx = questionIndex;
-    const fIdx = fieldIndex;
-    setTimeout(() => {
-      if (!fieldId) return;
-      const prev = answers[fieldId] || [];
-      const updated = [...prev];
-      updated[qIdx] = option.score;
-      const newAnswers = { ...answers, [fieldId]: updated };
-      setAnswers(newAnswers);
-      setSelectedOption(null);
-
-      if (qIdx < 3) {
-        setQuestionIndex(qIdx + 1);
-      } else {
-        finishField(newAnswers, fieldId, fIdx);
-      }
-    }, 500);
-  }, [selectedOption, currentField, answers, questionIndex, finishField, fieldIndex]);
-
-  const handleScaleAnswer = useCallback((val) => {
-    if (scaleAnswered) return;
-    setScaleAnswered(true);
-
-    const fieldId = currentField.id;
-    const prev = answers[fieldId] || [];
-    const updated = [...prev];
-    updated[questionIndex] = val;
-    const newAnswers = { ...answers, [fieldId]: updated };
-    setAnswers(newAnswers);
-
-    setTimeout(() => {
-      setScaleAnswered(false);
-      if (questionIndex < 3) {
-        setQuestionIndex(questionIndex + 1);
-      } else {
-        finishField(newAnswers, fieldId, fieldIndex);
-      }
-    }, 400);
-  }, [scaleAnswered, currentField, answers, questionIndex, finishField, fieldIndex]);
-
-  const nextField = useCallback(async () => {
-    setShowFieldResult(false);
-    if (fieldIndex >= KOMPETENZFELDER.length - 1) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 4000);
-      setPhase(3);
-      if (!xpAwarded) {
-        awardPoints(supabase, userId, 'FIRST_ANALYSIS');
-        setXpAwarded(true);
-      }
-    } else {
-      setFieldIndex(fieldIndex + 1);
-      setQuestionIndex(0);
-      setShowIntro(true);
-    }
-  }, [fieldIndex, xpAwarded, supabase, userId]);
-
-  const handleResume = (resume) => {
-    setResumePrompt(false);
-    if (resume) {
-      setPhase(2);
-      setFieldIndex((existingSession?.current_field || 0) + 1);
-      setQuestionIndex(0);
-      setShowIntro(true);
-    } else {
-      setAnswers({});
-      setFieldScores({});
-      setFieldIndex(0);
-      setQuestionIndex(0);
-      setShowIntro(true);
-    }
-  };
-
-  const sortedScores = useMemo(() => {
-    return KOMPETENZFELDER
-      .map(f => ({ ...f, score: fieldScores[f.id] || 0, level: getScoreLevel(fieldScores[f.id] || 0) }))
-      .sort((a, b) => b.score - a.score);
-  }, [fieldScores]);
-
+  const currentField = KOMPETENZFELDER[currentFieldIdx];
+  const currentQuestion = currentField?.fragen?.[questionIdx];
+  const totalFields = KOMPETENZFELDER.length;
+  const fieldsCompleted = useMemo(() => Object.keys(fieldScores).length, [fieldScores]);
   const overallScore = useMemo(() => {
     const vals = Object.values(fieldScores);
-    return vals.length > 0 ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+    return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
   }, [fieldScores]);
 
-  const recommendedMcId = useMemo(() => getRecommendedMasterclass(fieldScores), [fieldScores]);
-  const recommendedMc = MASTERCLASS_INFO[recommendedMcId];
+  function computeFieldScore(fieldAnswers) {
+    const sum = (fieldAnswers || []).reduce((a, b) => a + (b || 0), 0);
+    return scoreToPercent(sum);
+  }
 
-  // ============================================================
-  // CONFETTI
-  // ============================================================
-  const ConfettiOverlay = () => !showConfetti ? null : (
-    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 100 }}>
-      {Array.from({ length: 60 }, (_, i) => (
-        <div key={i} style={{
-          position: 'absolute', left: `${Math.random() * 100}%`, top: '-10px',
-          width: `${6 + Math.random() * 8}px`, height: `${6 + Math.random() * 8}px`,
-          borderRadius: Math.random() > 0.5 ? '50%' : '2px',
-          background: ['#CC1426', '#D4A017', '#2D6A4F', '#6366f1', '#f59e0b', '#ec4899'][Math.floor(Math.random() * 6)],
-          animation: `confFall ${2 + Math.random() * 2}s ease-in forwards`,
-          animationDelay: `${Math.random() * 1.5}s`,
-        }} />
-      ))}
-      <style>{`@keyframes confFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }`}</style>
-    </div>
+  function handleAnswer(score) {
+    if (selectedAnswer !== null) return;
+    setSelectedAnswer(score);
+
+    const fieldArr = answers[currentField.id] ? [...answers[currentField.id]] : [];
+    fieldArr[questionIdx] = score;
+    const updated = { ...answers, [currentField.id]: fieldArr };
+    setAnswers(updated);
+
+    setTimeout(() => {
+      const isLastQ = questionIdx >= currentField.fragen.length - 1;
+      if (isLastQ) {
+        const finalScore = computeFieldScore(fieldArr);
+        const newScores = { ...fieldScores, [currentField.id]: finalScore };
+        setFieldScores(newScores);
+        setSelectedAnswer(null);
+
+        const isLastField = currentFieldIdx >= totalFields - 1;
+        const overall = Math.round(Object.values(newScores).reduce((a, b) => a + b, 0) / Object.values(newScores).length);
+
+        if (isLastField) {
+          (async () => {
+            try {
+              await supabase.from('analysis_sessions').upsert({
+                user_id: userId,
+                scores: newScores,
+                answers: updated,
+                overall_score: overall,
+                current_field: currentFieldIdx,
+                status: 'completed',
+                completed_at: new Date().toISOString(),
+              }, { onConflict: 'user_id' });
+            } catch (e) { console.error('[analyse] save', e); }
+            if (!xpAwarded) {
+              try { await awardPoints(supabase, userId, 'FIRST_ANALYSIS'); } catch {}
+              setXpAwarded(true);
+            }
+            setPhase(3);
+          })();
+        } else {
+          (async () => {
+            try {
+              await supabase.from('analysis_sessions').upsert({
+                user_id: userId,
+                scores: newScores,
+                answers: updated,
+                overall_score: overall,
+                current_field: currentFieldIdx,
+                status: 'in_progress',
+                completed_at: null,
+              }, { onConflict: 'user_id' });
+            } catch (e) { console.error('[analyse] save', e); }
+          })();
+          setCurrentFieldIdx(currentFieldIdx + 1);
+          setQuestionIdx(0);
+          setShowIntro(true);
+        }
+      } else {
+        setQuestionIdx(questionIdx + 1);
+        setSelectedAnswer(null);
+      }
+    }, 350);
+  }
+
+  function handleStart() {
+    setCurrentFieldIdx(0);
+    setQuestionIdx(0);
+    setShowIntro(true);
+    setAnswers({});
+    setFieldScores({});
+    setPhase(2);
+  }
+
+  function handleResume() {
+    const last = existingSession?.current_field ?? 0;
+    const next = Math.min(last + 1, totalFields - 1);
+    setCurrentFieldIdx(next);
+    setQuestionIdx(0);
+    setShowIntro(true);
+    setPhase(2);
+  }
+
+  function handleReset() {
+    setPhase(1);
+    setCurrentFieldIdx(0);
+    setQuestionIdx(0);
+    setAnswers({});
+    setFieldScores({});
+    setXpAwarded(false);
+    setShowIntro(true);
+  }
+
+  const sortedFields = useMemo(
+    () => [...KOMPETENZFELDER].sort((a, b) => (fieldScores[b.id] || 0) - (fieldScores[a.id] || 0)),
+    [fieldScores]
   );
+  const recommendedMc = useMemo(() => {
+    if (Object.keys(fieldScores).length === 0) return null;
+    const mcId = getRecommendedMasterclass(fieldScores);
+    return MASTERCLASS_INFO[mcId] || null;
+  }, [fieldScores]);
+  const topStaerken = sortedFields.slice(0, 3);
+  const topLuecken = [...sortedFields].reverse().slice(0, 3);
 
-  // ============================================================
-  // PHASE 1: WELCOME
-  // ============================================================
-  if (phase === 1) {
-    if (resumePrompt) {
-      const completed = Object.keys(fieldScores).length;
-      return (
-        <div style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <div className="card animate-in" style={{ maxWidth: 460, textAlign: 'center', padding: 48 }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🔄</div>
-            <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Weitermachen?</h2>
-            <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)', marginBottom: 24 }}>
-              Du hast {completed} von {KOMPETENZFELDER.length} Feldern abgeschlossen.
-            </p>
-            <div style={{ display: 'flex', gap: 12 }}>
-              <button className="btn btn-secondary" onClick={() => handleResume(false)} style={{ flex: 1 }}>Neu starten</button>
-              <button className="btn btn-primary" onClick={() => handleResume(true)} style={{ flex: 1 }}>Weitermachen →</button>
-            </div>
-          </div>
-        </div>
-      );
-    }
+  return (
+    <div className="analyse-v2">
+      <div className="title-kicker">
+        <span className="pulse" />
+        {phase === 1 && (existingSession?.status === 'in_progress'
+          ? `Letzte Session: ${(existingSession.current_field || 0) + 1} von ${totalFields} Feldern`
+          : 'Karriere-Blutbild · ~10 Min')}
+        {phase === 2 && `Feld ${currentFieldIdx + 1} von ${totalFields} · Frage ${questionIdx + 1} von ${currentField.fragen.length}`}
+        {phase === 3 && `Abgeschlossen · ${fieldsCompleted}/${totalFields} Felder`}
+      </div>
+      <h1 className="page-title">
+        Karriere-Analyse.{' '}
+        <span className="faded">
+          {phase === 1 ? 'Wo stehst du wirklich?' : phase === 2 ? currentField.name : 'Dein vollständiges Profil.'}
+        </span>
+      </h1>
+      {phase === 1 && (
+        <p className="page-sub">
+          12 Kompetenzfelder, jeweils 4 Fragen — ehrlich beantwortet bekommst du danach deinen Karriere-Score, deine Stärken und ein klares Bild deiner Wachstumsfelder.
+        </p>
+      )}
 
-    return (
-      <div style={{ padding: '24px 0', maxWidth: 720, margin: '0 auto' }}>
-        {/* ── Welcome Card ── */}
-        <div className="card animate-in" style={{ textAlign: 'center', padding: 48, marginBottom: 48 }}>
-          <div style={{ fontSize: 56, marginBottom: 16 }}>🧠</div>
-          <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 8 }}>
-            Dein Karriere-Blutbild
-          </h1>
-          <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)', marginBottom: 28, lineHeight: 1.7 }}>
-            Entdecke deine 12 Karriere-Kompetenzfelder — und welche Masterclass dich am schnellsten voranbringt.
-          </p>
-
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 28, marginBottom: 32 }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#CC1426' }}>12</div>
-              <div style={{ fontSize: 11, color: 'var(--ki-text-secondary)', marginTop: 2 }}>Felder</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#CC1426' }}>48</div>
-              <div style={{ fontSize: 11, color: 'var(--ki-text-secondary)', marginTop: 2 }}>Fragen</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#CC1426' }}>~10</div>
-              <div style={{ fontSize: 11, color: 'var(--ki-text-secondary)', marginTop: 2 }}>Minuten</div>
-            </div>
-          </div>
-
-          <button
-            className="btn btn-primary"
-            onClick={() => { setPhase(2); setShowIntro(true); }}
-            style={{ padding: '14px 36px', fontSize: 16 }}
-          >
-            Analyse starten →
-          </button>
-        </div>
-
-        {/* ── Competency Overview ── */}
-        <div style={{ marginBottom: 48 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 6, textAlign: 'center' }}>
-            Was wird analysiert?
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)', textAlign: 'center', marginBottom: 28 }}>
-            In diesen 12 Kompetenzfeldern erhältst du deinen persönlichen Score
-          </p>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-            gap: 12,
-          }}>
-            {KOMPETENZFELDER.map((f) => (
-              <div
-                key={f.id}
-                className="card"
-                style={{
-                  padding: '16px 18px',
-                  borderLeft: `3px solid ${f.color}`,
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 12,
-                }}
-              >
-                <div style={{ fontSize: 26, flexShrink: 0, lineHeight: 1 }}>{f.icon}</div>
+      {/* ── PHASE 1 ─────────────────────────────────────────── */}
+      {phase === 1 && (
+        <>
+          {existingSession?.status === 'in_progress' ? (
+            <div className="ana-welcome-card">
+              <div className="ana-welcome-grid">
+                <ScoreRing score={existingSession.overall_score || 0} size={140} />
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 3, color: 'var(--ki-text)' }}>
-                    {f.name}
+                  <div className="ana-w-eyebrow">Vorherige Session gefunden</div>
+                  <h2 className="ana-w-title">
+                    Du hast {existingSession.current_field + 1} von {totalFields} Feldern abgeschlossen.
+                  </h2>
+                  <p className="ana-w-sub">Mach dort weiter wo du aufgehört hast — oder starte komplett neu.</p>
+                  <div className="ana-w-actions">
+                    <button type="button" className="ana-btn-primary" onClick={handleResume}>Weitermachen →</button>
+                    <button type="button" className="ana-btn-ghost" onClick={handleStart}>Neu starten</button>
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--ki-text-secondary)', lineHeight: 1.4 }}>
-                    {f.outcome.headline}
-                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="ana-welcome-card ana-welcome-solo">
+              <div className="ana-w-eyebrow">Dein Karriere-Blutbild</div>
+              <h2 className="ana-w-title">Wo stehst du wirklich?</h2>
+              <p className="ana-w-sub">
+                12 Felder · 48 Fragen · etwa 10 Minuten ehrliche Selbsteinschätzung. Danach bekommst du deinen Karriere-Score, eine Karte deiner Stärken und drei klare Wachstumsfelder mit passender Masterclass.
+              </p>
+              <div className="ana-w-actions">
+                <button type="button" className="ana-btn-primary" onClick={handleStart}>Analyse starten →</button>
+              </div>
+              <div className="ana-w-stats">
+                <div className="ana-w-stat"><span className="v">12</span><span className="l">Felder</span></div>
+                <div className="ana-w-stat-sep" />
+                <div className="ana-w-stat"><span className="v">48</span><span className="l">Fragen</span></div>
+                <div className="ana-w-stat-sep" />
+                <div className="ana-w-stat"><span className="v">~10</span><span className="l">Minuten</span></div>
+              </div>
+            </div>
+          )}
+
+          <div className="ana-section-head">
+            <h3>Diese 12 Felder werden analysiert</h3>
+            <span>4 Fragen je Feld</span>
+          </div>
+          <div className="ana-field-preview-grid">
+            {KOMPETENZFELDER.map(f => (
+              <div key={f.id} className="ana-field-preview">
+                <div className="ana-field-preview-icon" style={{ background: `${f.color}15`, color: f.color }}>
+                  {f.icon}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div className="ana-field-preview-name">{f.name}</div>
+                  <div className="ana-field-preview-sub">{f.outcome?.headline?.slice(0, 60) || ''}</div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    );
-  }
+        </>
+      )}
 
-  // ============================================================
-  // PHASE 2: QUESTIONS
-  // ============================================================
-  if (phase === 2) {
-    if (!currentField) return null;
+      {/* ── PHASE 2 ─────────────────────────────────────────── */}
+      {phase === 2 && currentField && (
+        <>
+          <div className="ana-progress-wrap">
+            <div className="ana-progress-info">
+              <span>Fortschritt</span>
+              <span>{fieldsCompleted} von {totalFields} Feldern · {Math.round((fieldsCompleted / totalFields) * 100)}%</span>
+            </div>
+            <div className="ana-progress-bar">
+              <div className="ana-progress-bar-fill" style={{ width: `${(fieldsCompleted / totalFields) * 100}%` }} />
+            </div>
+          </div>
 
-    // INTRO CARD per field
-    if (showIntro) {
-      return (
-        <div style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <div style={{ maxWidth: 520, width: '100%' }}>
-            {/* Progress */}
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 12, color: '#86868b' }}>
-                <span>Feld {fieldIndex + 1} von {KOMPETENZFELDER.length}</span>
-                <span>{Math.round(overallProgress)}%</span>
+          {showIntro ? (
+            <div className="ana-intro-card">
+              <div className="ana-intro-icon" style={{ background: `${currentField.color}15`, color: currentField.color }}>
+                {currentField.icon}
               </div>
-              <div style={{ height: 4, background: '#F0EEE9', borderRadius: 4 }}>
-                <div style={{ height: '100%', width: `${overallProgress}%`, background: '#CC1426', borderRadius: 4, transition: 'width 0.5s ease' }} />
+              <div className="ana-intro-eyebrow">Feld {currentFieldIdx + 1} von {totalFields}</div>
+              <h2 className="ana-intro-title">{currentField.name}</h2>
+              {currentField.outcome?.headline && (
+                <p className="ana-intro-headline">{currentField.outcome.headline}</p>
+              )}
+              {currentField.intro?.was && (
+                <div className="ana-intro-block">
+                  <div className="ana-intro-label">Was bedeutet das?</div>
+                  <p>{currentField.intro.was}</p>
+                </div>
+              )}
+              {currentField.intro?.warum && (
+                <div className="ana-intro-block">
+                  <div className="ana-intro-label">Warum ist das wichtig?</div>
+                  <p>{currentField.intro.warum}</p>
+                </div>
+              )}
+              <div className="ana-intro-actions">
+                <button type="button" className="ana-btn-primary" onClick={() => setShowIntro(false)}>
+                  4 Fragen beantworten →
+                </button>
               </div>
             </div>
-
-            <div className="card animate-in" style={{ padding: 32, borderLeft: `5px solid ${currentField.color}` }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>{currentField.icon}</div>
-              <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4, color: '#1A1A1A' }}>{currentField.name}</h2>
-
-              {/* Outcome Headline */}
-              <div style={{
-                background: `${currentField.color}12`, borderRadius: 10, padding: '10px 14px',
-                marginBottom: 16, fontSize: 14, fontWeight: 600, color: currentField.color,
-              }}>
-                💡 {currentField.outcome.headline}
-              </div>
-
-              <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.7, marginBottom: 12 }}>
-                <strong style={{ color: '#1A1A1A' }}>Was ist das?</strong> {currentField.intro.was}
-              </p>
-              <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.7, marginBottom: 16 }}>
-                <strong style={{ color: '#1A1A1A' }}>Warum wichtig?</strong> {currentField.intro.warum}
-              </p>
-
-              <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 8 }}>
-                  Typische Schwächen in diesem Feld:
-                </div>
-                {currentField.intro.schwaechen.map((s, i) => (
-                  <div key={i} style={{ fontSize: 13, color: '#6B7280', padding: '5px 0', display: 'flex', gap: 8 }}>
-                    <span style={{ color: '#CC1426', flexShrink: 0 }}>✗</span>
-                    <span>{s}</span>
-                  </div>
+          ) : (
+            <div className="ana-q-card">
+              <div className="ana-q-dots">
+                {currentField.fragen.map((_, i) => (
+                  <span key={i} className={`ana-q-dot ${i < questionIdx ? 'done' : i === questionIdx ? 'active' : ''}`} />
                 ))}
               </div>
 
-              <button
-                className="btn btn-primary"
-                onClick={() => setShowIntro(false)}
-                style={{ width: '100%', padding: '12px 24px' }}
-              >
-                Fragen beantworten →
-              </button>
+              {currentQuestion?.type === 'scenario' ? (
+                <ScenarioQuestion question={currentQuestion} selected={selectedAnswer} onSelect={handleAnswer} disabled={selectedAnswer !== null} />
+              ) : (
+                <ScaleQuestion question={currentQuestion} selected={selectedAnswer} onSelect={handleAnswer} disabled={selectedAnswer !== null} />
+              )}
+
+              <div className="ana-q-foot">
+                {questionIdx > 0 ? (
+                  <button type="button" className="ana-btn-back" onClick={() => { setQuestionIdx(questionIdx - 1); setSelectedAnswer(null); }}>
+                    <Icon name="chev-l" size={14} /> Zurück
+                  </button>
+                ) : <span />}
+                <span className="ana-q-counter">Frage {questionIdx + 1} / {currentField.fragen.length}</span>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── PHASE 3 ─────────────────────────────────────────── */}
+      {phase === 3 && (
+        <>
+          <div className="ana-results-hero">
+            <div className="hero-grain" />
+            <div className="ana-results-grid">
+              <ScoreRing score={overallScore} />
+              <div className="ana-results-meta">
+                <div className="eyebrow">Dein Karriere-Score</div>
+                <h2>
+                  {overallScore >= 75 ? 'Starkes Profil — du weißt, was du tust.'
+                    : overallScore >= 55 ? 'Solide Basis mit klaren Hebeln nach oben.'
+                    : 'Klares Wachstumsfeld — und genau dafür gibt es die Masterclass.'}
+                </h2>
+                <p>
+                  Du hast alle 12 Kompetenzfelder beantwortet. Schau dir unten deine Stärken-Karte an, die drei wichtigsten Wachstumsfelder, und welche Masterclass dir am schnellsten hilft.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      );
-    }
 
-    // FIELD RESULT (mini-feedback)
-    if (showFieldResult) {
-      const score = fieldScores[currentField.id] || 0;
-      const level = getScoreLevel(score);
-      const isLast = fieldIndex >= KOMPETENZFELDER.length - 1;
-
-      return (
-        <div style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <div className="card animate-in" style={{ maxWidth: 480, width: '100%', textAlign: 'center', padding: 40 }}>
-            <div style={{ fontSize: 48, marginBottom: 8 }}>{currentField.icon}</div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>{currentField.name}</h2>
-            <div style={{ fontSize: 13, color: '#86868b', marginBottom: 20 }}>Auswertung</div>
-
-            {/* Score */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: level.color }}>{level.badge} {level.label}</span>
-                <span style={{ fontSize: 24, fontWeight: 700, color: level.color }}>{score}%</span>
+          <div className="ana-radar-section">
+            <div className="card">
+              <div className="card-head">
+                <h3 className="card-title">Stärken-Karte<span className="kicker">12 Felder</span></h3>
               </div>
-              <div style={{ height: 8, background: '#F0EEE9', borderRadius: 4 }}>
-                <div style={{ height: '100%', width: `${score}%`, background: level.color, borderRadius: 4, transition: 'width 1s ease' }} />
+              <div className="ana-radar-grid">
+                <div className="ana-radar"><RadarChart scores={fieldScores} size={320} /></div>
+                <div className="ana-top-cols">
+                  <div className="ana-top-col">
+                    <div className="ana-top-label" style={{ color: 'var(--green-dark)' }}>Top 3 Stärken</div>
+                    {topStaerken.map(f => (
+                      <div key={f.id} className="ana-top-row">
+                        <span className="ana-top-ic" style={{ background: `${f.color}15`, color: f.color }}>{f.icon}</span>
+                        <span className="ana-top-name">{f.name}</span>
+                        <span className="ana-top-score" style={{ color: 'var(--green-dark)' }}>{fieldScores[f.id] || 0}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="ana-top-col">
+                    <div className="ana-top-label" style={{ color: 'var(--ki-red-dark)' }}>Top 3 Wachstumsfelder</div>
+                    {topLuecken.map(f => (
+                      <div key={f.id} className="ana-top-row">
+                        <span className="ana-top-ic" style={{ background: `${f.color}15`, color: f.color }}>{f.icon}</span>
+                        <span className="ana-top-name">{f.name}</span>
+                        <span className="ana-top-score" style={{ color: 'var(--ki-red-dark)' }}>{fieldScores[f.id] || 0}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* What this means concretely */}
-            <div style={{
-              background: '#F5F5F7', borderRadius: 12, padding: '14px 16px',
-              marginBottom: 20, fontSize: 14, color: '#1A1A1A', lineHeight: 1.6, textAlign: 'left',
-            }}>
-              <strong>{currentField.outcome.headline}</strong>
-              <br />
-              <span style={{ fontSize: 13, color: '#6B7280' }}>{currentField.outcome.text}</span>
-            </div>
+          <div className="ana-section-head">
+            <h3>Alle 12 Felder im Detail</h3>
+            {!hasFullAccess && <span>Top 3 frei · Rest mit Premium</span>}
+          </div>
+          <div className="ana-field-grid">
+            {sortedFields.map((f, idx) => (
+              <FieldCard key={f.id} field={f} score={fieldScores[f.id] || 0} locked={!hasFullAccess && idx >= 3} />
+            ))}
+          </div>
 
-            {score < 65 && (
-              <div style={{
-                background: `${currentField.color}10`, border: `1px solid ${currentField.color}30`,
-                borderRadius: 10, padding: '10px 14px', marginBottom: 20,
-                fontSize: 13, color: currentField.color, fontWeight: 600,
-              }}>
-                ⚡ Dieses Feld hat Potenzial für dich — wir zeigen dir am Ende wie.
+          {recommendedMc && (
+            <div className="ana-mc-card">
+              <div className="hero-grain" />
+              <div className="ana-mc-inner">
+                <div>
+                  <div className="ana-mc-eyebrow">
+                    <Icon name="sparkle" size={12} stroke={2} /> Empfohlene Masterclass
+                  </div>
+                  <div className="ana-mc-icon">{recommendedMc.icon}</div>
+                  <h2 className="ana-mc-title">{recommendedMc.name}</h2>
+                  <p className="ana-mc-sub">{recommendedMc.pitch}</p>
+                  <div className="ana-mc-fields">
+                    {recommendedMc.fields?.map(fid => {
+                      const f = KOMPETENZFELDER.find(x => x.id === fid);
+                      if (!f) return null;
+                      return <span key={fid} className="ana-mc-field">{f.icon} {f.name}</span>;
+                    })}
+                  </div>
+                </div>
+                <div className="ana-mc-cta">
+                  <a href="/masterclass" className="ana-btn-light">Masterclass öffnen →</a>
+                </div>
               </div>
-            )}
-
-            <div style={{ fontSize: 13, color: '#86868b', marginBottom: 16 }}>
-              {!isLast && (
-                <>Nächstes Feld: <strong>{KOMPETENZFELDER[fieldIndex + 1]?.icon} {KOMPETENZFELDER[fieldIndex + 1]?.name}</strong></>
-              )}
-              {isLast && '🎉 Letzes Feld abgeschlossen!'}
             </div>
+          )}
 
-            <button className="btn btn-primary" onClick={nextField} style={{ width: '100%' }}>
-              {isLast ? 'Ergebnis ansehen →' : 'Weiter →'}
+          <div className="ana-reset-row">
+            <button type="button" className="ana-btn-ghost" onClick={handleReset}>
+              <Icon name="refresh" size={13} stroke={2} /> Analyse wiederholen
             </button>
           </div>
-        </div>
-      );
-    }
-
-    // QUESTION
-    return (
-      <div style={{ maxWidth: 600, margin: '0 auto', padding: '24px 16px' }}>
-        {/* Progress bar */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 12, color: '#86868b' }}>
-            <span>{currentField.icon} {currentField.name} — Frage {questionIndex + 1}/4</span>
-            <span>{Math.round(overallProgress)}%</span>
-          </div>
-          <div style={{ height: 4, background: '#F0EEE9', borderRadius: 4 }}>
-            <div style={{ height: '100%', width: `${overallProgress}%`, background: '#CC1426', borderRadius: 4, transition: 'width 0.4s ease' }} />
-          </div>
-          {/* Question dots */}
-          <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
-            {[0, 1, 2, 3].map(i => (
-              <div key={i} style={{
-                height: 4, flex: 1, borderRadius: 2,
-                background: i < questionIndex ? '#CC1426' : i === questionIndex ? '#CC1426' : '#E8E6E1',
-                opacity: i === questionIndex ? 1 : i < questionIndex ? 0.7 : 0.3,
-              }} />
-            ))}
-          </div>
-        </div>
-
-        {/* Question label */}
-        <div style={{ fontSize: 11, fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 16 }}>
-          {isScaleQuestion ? '📊 Selbsteinschätzung' : '📍 Szenario'}
-        </div>
-
-        {/* Scenario Question */}
-        {!isScaleQuestion && (
-          <>
-            <div className="card" style={{ padding: 24, marginBottom: 20, borderLeft: `4px solid ${currentField.color}` }}>
-              <p style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.65, margin: 0 }}>
-                {currentQuestion.text}
-              </p>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-              {currentQuestion.options.map((opt, i) => {
-                const isSelected = selectedOption === opt;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => handleScenarioClick(opt)}
-                    className="card"
-                    style={{
-                      cursor: selectedOption ? 'default' : 'pointer',
-                      padding: 18, textAlign: 'left',
-                      border: `2px solid ${isSelected ? '#CC1426' : 'transparent'}`,
-                      background: isSelected ? 'rgba(204,20,38,0.06)' : 'var(--ki-card)',
-                      transition: 'all 0.2s ease',
-                      opacity: selectedOption && !isSelected ? 0.45 : 1,
-                    }}
-                  >
-                    <div style={{ fontSize: 22, marginBottom: 8 }}>{opt.emoji}</div>
-                    <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.5, color: '#1A1A1A' }}>{opt.text}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </>
-        )}
-
-        {/* Scale Question */}
-        {isScaleQuestion && (
-          <div className="card" style={{ padding: 28, borderLeft: `4px solid ${currentField.color}` }}>
-            <ScaleQuestion question={currentQuestion} onAnswer={handleScaleAnswer} answered={scaleAnswered} />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // ============================================================
-  // PHASE 3: RESULTS
-  // ============================================================
-  if (phase === 3) {
-    const top3 = sortedScores.slice(0, 3);
-    const bottom3 = sortedScores.slice(-3).reverse();
-    const overallLevel = getScoreLevel(overallScore);
-
-    return (
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px 48px' }}>
-        <ConfettiOverlay />
-
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ fontSize: 48, marginBottom: 8 }}>🧠</div>
-          <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>
-            Dein Karriere-Blutbild
-          </h1>
-          <p style={{ fontSize: 13, color: '#86868b', marginBottom: 20 }}>
-            Erstellt am {new Date().toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}
-          </p>
-          <div style={{ fontSize: 52, fontWeight: 700, color: overallLevel.color, letterSpacing: '-0.03em' }}>
-            {overallScore}%
-          </div>
-          <div style={{
-            display: 'inline-block', marginTop: 8, padding: '5px 16px', borderRadius: 980,
-            background: `${overallLevel.color}18`, color: overallLevel.color,
-            fontSize: 13, fontWeight: 700,
-          }}>
-            {overallLevel.badge} {overallLevel.label}
-          </div>
-        </div>
-
-        {/* Radar Chart */}
-        <div className="card" style={{ padding: 24, marginBottom: 20, display: 'flex', justifyContent: 'center' }}>
-          <RadarChart scores={fieldScores} />
-        </div>
-
-        {/* Top 3 Stärken + Wachstumsfelder */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
-          <div className="card" style={{ padding: 20 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 14, color: '#1A1A1A' }}>Deine Top 3 Stärken</h3>
-            {top3.map((f, i) => (
-              <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < 2 ? '1px solid #F0EEE9' : 'none' }}>
-                <span style={{ fontSize: 14 }}>{['🥇', '🥈', '🥉'][i]}</span>
-                <span style={{ fontSize: 14 }}>{f.icon}</span>
-                <span style={{ flex: 1, fontSize: 13, fontWeight: 500 }}>{f.name}</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: f.level.color }}>{f.score}%</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="card" style={{ padding: 20 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 14, color: '#1A1A1A' }}>Top 3 Wachstumsfelder</h3>
-            {bottom3.map((f, i) => (
-              <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < 2 ? '1px solid #F0EEE9' : 'none' }}>
-                <span style={{ fontSize: 14 }}>⚡</span>
-                <span style={{ fontSize: 14 }}>{f.icon}</span>
-                <span style={{ flex: 1, fontSize: 13, fontWeight: 500 }}>{f.name}</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: f.level.color }}>{f.score}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Per-field detailed cards */}
-        <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 6 }}>
-            Deine persönliche Auswertung
-          </h2>
-          <p style={{ fontSize: 13, color: '#86868b', marginBottom: 20 }}>
-            {hasFullAccess
-              ? 'Alle 12 Kompetenzfelder mit detaillierter Interpretation'
-              : 'Top 3 Felder mit detaillierter Interpretation — restliche Felder im Gespräch mit deinem Karriere-Berater'}
-          </p>
-          {sortedScores.map((f, i) => (
-            <FieldResultCard
-              key={f.id}
-              field={f}
-              score={f.score}
-              isLocked={!hasFullAccess && i >= 3}
-            />
-          ))}
-        </div>
-
-        {/* Masterclass Empfehlung */}
-        {recommendedMc && (
-          <div style={{
-            background: 'linear-gradient(135deg, #1A1A1A 0%, #2d1a1a 100%)',
-            borderRadius: 20, padding: '28px 28px', marginBottom: 20, color: '#fff',
-          }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12 }}>
-              Deine persönliche Empfehlung
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <span style={{ fontSize: 36 }}>{recommendedMc.icon}</span>
-              <div>
-                <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.3 }}>{recommendedMc.name}</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>Masterclass</div>
-              </div>
-            </div>
-            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)', lineHeight: 1.7, marginBottom: 20 }}>
-              {recommendedMc.pitch}
-            </p>
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                  <span style={{ fontSize: 28, fontWeight: 800, color: '#fff' }}>49 €</span>
-                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'line-through' }}>89 €</span>
-                </div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Messeaktion · Einmalig · Lebenslanger Zugang</div>
-              </div>
-              <a
-                href="/checkout"
-                style={{
-                  display: 'inline-block', padding: '13px 24px', background: '#CC1426',
-                  color: '#fff', borderRadius: 10, fontWeight: 700, fontSize: 14,
-                  textDecoration: 'none', whiteSpace: 'nowrap',
-                }}
-              >
-                Jetzt starten →
-              </a>
-            </div>
-          </div>
-        )}
-
-        {/* Restart */}
-        <div style={{ textAlign: 'center' }}>
-          <button
-            onClick={() => {
-              setPhase(1);
-              setAnswers({});
-              setFieldScores({});
-              setFieldIndex(0);
-              setQuestionIndex(0);
-              setShowIntro(true);
-            }}
-            style={{ fontSize: 13, color: '#86868b', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
-          >
-            Analyse wiederholen
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
+        </>
+      )}
+    </div>
+  );
 }

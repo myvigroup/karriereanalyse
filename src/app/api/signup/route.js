@@ -58,10 +58,10 @@ export async function POST(request) {
         user_id: newUser.user.id,
       }).eq('id', lead.id);
 
-      // CV-Dokumente dem User zuordnen
+      // CV-Dokumente dem User zuordnen (Live-DB: cv_documents.lead_id, nicht fair_lead_id)
       await admin.from('cv_documents').update({
         user_id: newUser.user.id,
-      }).eq('fair_lead_id', lead.id);
+      }).eq('lead_id', lead.id);
     }
 
     // Lead-Status aktualisieren

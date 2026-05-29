@@ -60,15 +60,15 @@ export default async function LeadsPage({ searchParams }) {
 
   // Alle Messen laden (Admin sieht alle, andere nur ihre)
   const { data: fairs } = isSuperAdmin
-    ? await admin.from('fairs').select('id, name').order('start_date', { ascending: false })
+    ? await admin.from('fairs').select('id, name, city, status, start_date, end_date').order('start_date', { ascending: false })
     : fairIds.length > 0
-      ? await admin.from('fairs').select('id, name').in('id', fairIds).order('start_date', { ascending: false })
+      ? await admin.from('fairs').select('id, name, city, status, start_date, end_date').in('id', fairIds).order('start_date', { ascending: false })
       : { data: [] };
 
   // Leads laden — Admin sieht alle, Messeleiter alle seiner Messen, Berater nur eigene
   let query = admin
     .from('fair_leads')
-    .select('id, first_name, last_name, email, phone, status, follow_up_status, fair_id, advisor_user_id, created_at, updated_at')
+    .select('id, first_name, last_name, email, phone, status, follow_up_status, fair_id, advisor_user_id, source, created_at, updated_at')
     .order('created_at', { ascending: false });
 
   if (isSuperAdmin) {
@@ -78,11 +78,11 @@ export default async function LeadsPage({ searchParams }) {
     const isManagerForFair = managerFairIds.includes(fairFilter);
     query = query.eq('fair_id', fairFilter);
     if (!isManagerForFair) query = query.eq('advisor_user_id', user.id);
-  } else if (fairIds.length > 0 && managerFairIds.length > 0) {
-    query = query.in('fair_id', fairIds);
   } else {
+    // Default-View: eigene Leads aller Quellen (Messe + Direkt + Affiliate)
+    // — nicht mehr auf Messe-Leads beschränken für Messeleiter,
+    //   das wäre dann ein expliziter Messe-Filter
     query = query.eq('advisor_user_id', user.id);
-    if (fairIds.length > 0) query = query.in('fair_id', fairIds);
   }
 
   if (statusFilter === 'open') {
@@ -159,6 +159,13 @@ export default async function LeadsPage({ searchParams }) {
 
   const fairById = (fairs || []).reduce((acc, f) => { acc[f.id] = f; return acc; }, {});
 
+  // Stats für Dashboard-Sektion oben
+  const today = new Date().toISOString().split('T')[0];
+  const todayCount = (rawLeads || []).filter(l => (l.created_at || '').startsWith(today)).length;
+  const openCount = (rawLeads || []).filter(l => ['new', 'analyzing', 'feedback_pending'].includes(l.status)).length;
+  const totalCount = (rawLeads || []).length;
+  const activeFairs = (fairs || []).filter(f => ['upcoming', 'active'].includes(f.status));
+
   const TZ = 'Europe/Berlin';
   const formatDate = (d) => new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: TZ });
   const formatTime = (d) => new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: TZ });
@@ -177,16 +184,23 @@ export default async function LeadsPage({ searchParams }) {
   };
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 4 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
-          Lebenslauf-Checks
-        </h1>
-        {isSuperAdmin && <RetriggerButton />}
+    <div className="admin-coaches">
+      <div className="admin-pageheader">
+        <div>
+          <div className="title-kicker"><span className="pulse" /> Berater · CV-Checks</div>
+          <h1 className="page-title">CV-Checks <span className="faded">{leads.length + (selfChecks?.length || 0)}</span></h1>
+          <p className="page-sub">
+            Alle Lebenslauf-Auswertungen in zwei Gruppen: aus Beratungsgesprächen (Messe + Direkt) und
+            Self-Service-Checks (Affiliate-Link oder QR-Code).
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Link href="/advisor/cv-check/new" className="admin-cta-primary" style={{ whiteSpace: 'nowrap' }}>
+            + Neuer CV-Check
+          </Link>
+          {isSuperAdmin && <RetriggerButton />}
+        </div>
       </div>
-      <p style={{ color: '#86868b', marginBottom: duplicateCount > 0 ? 8 : 32 }}>
-        Alle Gespräche und CV-Checks im Überblick.
-      </p>
       {duplicateCount > 0 && (
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -196,6 +210,70 @@ export default async function LeadsPage({ searchParams }) {
         }}>
           <span>⚠️</span>
           <span>{duplicateCount} Duplikat{duplicateCount !== 1 ? 'e' : ''} ausgeblendet — es wird jeweils nur der neueste/fortgeschrittenste Eintrag pro Person angezeigt.</span>
+        </div>
+      )}
+
+      {/* === Stats-Sektion (war früher Messe-Dashboard) === */}
+      <div className="admin-stats-row" data-tour="stats" style={{ marginBottom: 24 }}>
+        <div className="admin-stat highlight">
+          <div className="admin-stat-icon" style={{ color: 'var(--ki-red)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div className="admin-stat-body">
+            <div className="admin-stat-value">{todayCount}</div>
+            <div className="admin-stat-label">Gespräche heute</div>
+          </div>
+        </div>
+        <div className="admin-stat">
+          <div className="admin-stat-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div className="admin-stat-body">
+            <div className="admin-stat-value">{openCount}</div>
+            <div className="admin-stat-label">Offene CV-Checks</div>
+          </div>
+        </div>
+        <div className="admin-stat">
+          <div className="admin-stat-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div className="admin-stat-body">
+            <div className="admin-stat-value">{totalCount}</div>
+            <div className="admin-stat-label">Gespräche gesamt</div>
+          </div>
+        </div>
+        <div className="admin-stat">
+          <div className="admin-stat-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          </div>
+          <div className="admin-stat-body">
+            <div className="admin-stat-value">{activeFairs.length}</div>
+            <div className="admin-stat-label">Aktive Messen</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Aktive Messen als kleine Karten */}
+      {activeFairs.length > 0 && (
+        <div data-tour="fairs" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 32 }}>
+          {activeFairs.map(fair => (
+            <Link
+              key={fair.id}
+              href={`/advisor/fair/${fair.id}`}
+              style={{
+                textDecoration: 'none', color: 'inherit',
+                background: '#FFF7ED', border: '1px solid #FDBA74',
+                borderRadius: 10, padding: '10px 14px',
+                display: 'inline-flex', alignItems: 'center', gap: 10,
+                fontSize: 13,
+              }}
+            >
+              <span style={{ fontSize: 16 }}>🎪</span>
+              <span style={{ fontWeight: 600, color: '#9A3412' }}>{fair.name}</span>
+              {fair.city && <span style={{ color: '#9A3412', opacity: 0.7 }}>· {fair.city}</span>}
+              <span style={{ color: '#CC1426', fontWeight: 600, marginLeft: 6 }}>Messe-Sitzung öffnen →</span>
+            </Link>
+          ))}
         </div>
       )}
 
@@ -300,6 +378,16 @@ export default async function LeadsPage({ searchParams }) {
         )}
       </div>
 
+      {/* === BOX 1: Aus Beratungsgesprächen (Messe + Direkt) === */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
+          Aus Beratungsgesprächen
+        </h2>
+        <span style={{ fontSize: 13, color: '#86868b' }}>
+          {leads.length} · Messe-Leads und direkte CV-Checks
+        </span>
+      </div>
+
       {/* Tabelle */}
       {(!leads || leads.length === 0) ? (
         <div style={{
@@ -310,10 +398,10 @@ export default async function LeadsPage({ searchParams }) {
           border: '1px solid #E8E6E1',
           color: '#86868b',
         }}>
-          Keine Einträge gefunden.
+          Noch keine CV-Checks aus Beratungsgesprächen.
         </div>
       ) : (
-        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden' }}>
+        <div data-tour="leads-table" style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden' }}>
           {/* Tabellen-Header */}
           <div style={{
             display: 'grid',
@@ -379,12 +467,37 @@ export default async function LeadsPage({ searchParams }) {
                   )}
                 </div>
 
-                {/* Messe */}
-                <div style={{ padding: '14px 0', position: 'relative', zIndex: 1 }}>
-                  <div style={{ fontSize: 13, color: '#6B7280' }}>{fair?.name || '–'}</div>
+                {/* Quelle (Messe / Direkt / Affiliate) + Status */}
+                <div style={{ padding: '14px 0', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {fair ? (
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 980,
+                      background: '#FEF3C7', color: '#92400E', whiteSpace: 'nowrap',
+                      display: 'inline-block', alignSelf: 'flex-start',
+                    }} title={`Messe-Lead — ${fair.name}`}>
+                      🎪 {fair.name}
+                    </span>
+                  ) : lead.source === 'affiliate' ? (
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 980,
+                      background: '#F3E8FF', color: '#7C3AED', whiteSpace: 'nowrap',
+                      display: 'inline-block', alignSelf: 'flex-start',
+                    }} title="Über Affiliate-Link erfasst">
+                      🔗 Affiliate
+                    </span>
+                  ) : (
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 980,
+                      background: '#CCFBF1', color: '#0F766E', whiteSpace: 'nowrap',
+                      display: 'inline-block', alignSelf: 'flex-start',
+                    }} title="Direkter CV-Check ohne Messe-Kontext">
+                      ⚡ Direkt
+                    </span>
+                  )}
                   <span style={{
                     fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 980,
                     background: statusInfo.bg, color: statusInfo.color, whiteSpace: 'nowrap',
+                    display: 'inline-block', alignSelf: 'flex-start',
                   }}>
                     {statusInfo.label}
                   </span>
@@ -435,13 +548,15 @@ export default async function LeadsPage({ searchParams }) {
         </div>
       )}
 
-      {/* Self-Service Checks (QR-Code Scans) */}
+      {/* === BOX 2: Self-Service CV-Checks (Kunden machen den Check selbst) === */}
       {selfChecks && selfChecks.length > 0 && (
-        <div style={{ marginTop: 40 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>QR-Code Selbst-Scans</h2>
-            <span style={{ background: '#F0FDF4', color: '#059669', fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 980, border: '1px solid #A7F3D0' }}>
-              {selfChecks.length} neu
+        <div data-tour="self-service" style={{ marginTop: 48 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
+              Self-Service CV-Checks
+            </h2>
+            <span style={{ fontSize: 13, color: '#86868b' }}>
+              {selfChecks.length} · Kunden haben selbst gescannt (QR-Code oder Affiliate-Link)
             </span>
           </div>
           <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden' }}>
