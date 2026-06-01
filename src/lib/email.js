@@ -9,7 +9,7 @@ export async function sendEmail({ to, subject, html }) {
   try {
     const brevo = new BrevoClient({ apiKey: process.env.BREVO_API_KEY });
     const result = await brevo.transactionalEmails.sendTransacEmail({
-      sender: { name: 'Karriere-Institut', email: 'noreply@daskarriereinstitut.de' },
+      sender: { name: 'Karriere-Institut', email: 'info@daskarriereinstitut.de' },
       to: [{ email: to }],
       subject,
       htmlContent: html,
