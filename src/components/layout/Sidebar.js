@@ -35,6 +35,7 @@ const NAV_ITEMS = [
 ];
 
 const ADMIN_ITEMS = [
+  { label: 'Admin Dashboard',   path: '/admin',           icon: 'grid' },
   { label: 'Userverwaltung',    path: '/admin/users',     icon: 'users' },
   { label: 'Kursverwaltung',    path: '/admin/courses',   icon: 'book' },
   { label: 'Seminarverwaltung', path: '/admin/content',   icon: 'cal' },
@@ -46,6 +47,10 @@ const ADMIN_ITEMS = [
 const ADVISOR_ITEMS = [
   { label: 'Lebenslauf-Checks', path: '/advisor/leads',     icon: 'doc' },
   { label: 'Affiliate',         path: '/advisor/affiliate', icon: 'chart' },
+];
+
+const MESSE_ITEMS = [
+  { label: 'Messe-Admin',       path: '/advisor/admin',    icon: 'grid' },
 ];
 
 const SB_STYLE = {
@@ -64,6 +69,7 @@ export default function Sidebar({ profile, analysisResults }) {
   const supabase = createClient();
   const isAdmin = profile?.role === 'admin' || profile?.role === 'coach';
   const isAdvisor = ['advisor', 'messeleiter', 'admin'].includes(profile?.role);
+  const isMesseleiter = ['messeleiter', 'admin'].includes(profile?.role);
   const initials = (profile?.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
   const [notifications, setNotifications] = useState([]);
@@ -171,6 +177,7 @@ export default function Sidebar({ profile, analysisResults }) {
               Berater
             </div>
             {ADVISOR_ITEMS.map(navItem)}
+            {isMesseleiter && MESSE_ITEMS.map(navItem)}
           </>
         )}
 
