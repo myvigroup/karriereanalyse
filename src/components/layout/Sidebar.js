@@ -43,6 +43,11 @@ const ADMIN_ITEMS = [
   { label: 'FK Dashboard',      path: '/coach-dashboard', icon: 'grid' },
 ];
 
+const ADVISOR_ITEMS = [
+  { label: 'Lebenslauf-Checks', path: '/advisor/leads',     icon: 'doc' },
+  { label: 'Affiliate',         path: '/advisor/affiliate', icon: 'chart' },
+];
+
 const SB_STYLE = {
   width: 240, height: '100vh',
   background: 'linear-gradient(180deg, #FAFAFC 0%, #F2F2F5 100%)',
@@ -58,6 +63,7 @@ export default function Sidebar({ profile, analysisResults }) {
   const router = useRouter();
   const supabase = createClient();
   const isAdmin = profile?.role === 'admin' || profile?.role === 'coach';
+  const isAdvisor = ['advisor', 'messeleiter', 'admin'].includes(profile?.role);
   const initials = (profile?.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
   const [notifications, setNotifications] = useState([]);
@@ -158,6 +164,15 @@ export default function Sidebar({ profile, analysisResults }) {
           Lernen
         </div>
         {NAV_ITEMS.map(navItem)}
+
+        {isAdvisor && (
+          <>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ki-text-tertiary)', padding: '16px 12px 6px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Berater
+            </div>
+            {ADVISOR_ITEMS.map(navItem)}
+          </>
+        )}
 
         {isAdmin && (
           <>
