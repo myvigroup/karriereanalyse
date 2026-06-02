@@ -2,10 +2,26 @@
 import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
+const Ic = ({ d, size = 20, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+    stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">{d}</svg>
+);
+
+const ICONS = {
+  cpu:       <><rect x="9" y="9" width="6" height="6"/><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></>,
+  star:      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/>,
+  lightbulb: <><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.5-1.3 4.7-3.3 6L15 17H9l-.7-2C6.3 13.7 5 11.5 5 9a7 7 0 0 1 7-7z"/></>,
+  file:      <><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></>,
+  check:     <><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></>,
+  clock:     <><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></>,
+  upload:    <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></>,
+  scan:      <><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></>,
+};
+
 const BENEFITS = [
-  { icon: '🤖', title: 'KI-Analyse in Sekunden', desc: 'Sofortiges Feedback zu Struktur, Inhalt, Design und Wirkung' },
-  { icon: '⭐', title: 'Gesamtbewertung 1–5', desc: 'Klare Einschätzung deines Lebenslaufs auf einen Blick' },
-  { icon: '💡', title: 'Konkrete Verbesserungen', desc: 'Individuelle Hinweise, was du direkt verbessern kannst' },
+  { icon: 'cpu',       title: 'KI-Analyse in Sekunden', desc: 'Sofortiges Feedback zu Struktur, Inhalt, Design und Wirkung' },
+  { icon: 'star',      title: 'Gesamtbewertung 1–5',    desc: 'Klare Einschätzung deines Lebenslaufs auf einen Blick' },
+  { icon: 'lightbulb', title: 'Konkrete Verbesserungen', desc: 'Individuelle Hinweise, was du direkt verbessern kannst' },
 ];
 
 function StepIndicator({ currentStep }) {
@@ -148,7 +164,9 @@ export default function CvCheckPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
             {BENEFITS.map(b => (
               <div key={b.icon} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', background: '#FFF8F8', borderRadius: 14, border: '1px solid #FDECEA' }}>
-                <span style={{ fontSize: 22, flexShrink: 0 }}>{b.icon}</span>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: '#CC1426', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Ic d={ICONS[b.icon]} size={18} color="#fff" />
+                </div>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A' }}>{b.title}</div>
                   <div style={{ fontSize: 13, color: '#6B7280', marginTop: 2 }}>{b.desc}</div>
@@ -191,7 +209,9 @@ export default function CvCheckPage() {
                 transition: 'all 0.2s', marginBottom: 20,
               }}
             >
-              <div style={{ fontSize: 40, marginBottom: 12 }}>{selectedFile ? '✅' : '📄'}</div>
+              <div style={{ width: 52, height: 52, borderRadius: 14, background: selectedFile ? '#DCFCE7' : '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                <Ic d={selectedFile ? ICONS.check : ICONS.file} size={26} color={selectedFile ? '#15803D' : '#6B7280'} />
+              </div>
               {selectedFile ? (
                 <div>
                   <div style={{ fontWeight: 600, fontSize: 15, color: '#15803D', marginBottom: 4 }}>{selectedFile.name}</div>
@@ -226,7 +246,9 @@ export default function CvCheckPage() {
       {step === 3 && (
         <div style={{ textAlign: 'center', padding: '40px 16px' }}>
           <div style={cardStyle}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🤖</div>
+            <div style={{ width: 72, height: 72, borderRadius: 20, background: '#FFF0F1', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <Ic d={ICONS.cpu} size={36} color="#CC1426" />
+            </div>
             <h2 style={{ fontSize: 22, fontWeight: 800, color: '#1A1A1A', margin: '0 0 12px' }}>KI analysiert deinen Lebenslauf...</h2>
             <p style={{ color: '#6B7280', fontSize: 15, margin: '0 0 28px', lineHeight: 1.6 }}>Das dauert nur wenige Sekunden. Dein Ergebnis wird gleich angezeigt.</p>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
@@ -240,7 +262,9 @@ export default function CvCheckPage() {
                 { label: 'Feedback zusammenstellen', done: false },
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 10, background: item.done ? '#F0FDF4' : '#F9FAFB' }}>
-                  <span style={{ fontSize: 16 }}>{item.done ? '✅' : '⏳'}</span>
+                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: item.done ? '#DCFCE7' : '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Ic d={item.done ? ICONS.check : ICONS.clock} size={13} color={item.done ? '#15803D' : '#9CA3AF'} />
+                  </div>
                   <span style={{ fontSize: 14, color: item.done ? '#15803D' : '#6B7280', fontWeight: item.done ? 600 : 400 }}>{item.label}</span>
                 </div>
               ))}
