@@ -9,7 +9,7 @@ import { useRouter, usePathname } from 'next/navigation';
 const SESSION_KEY = 'ki_analyse_popup_shown_this_session';
 const SHOW_AFTER_MS = 30 * 1000;
 
-const HIDDEN_ON_PATHS = ['/analyse', '/onboarding', '/auth', '/r/', '/start/', '/upload', '/cv-upload', '/scan', '/cv-check', '/admin'];
+const HIDDEN_ON_PATHS = ['/analyse', '/onboarding', '/auth', '/r/', '/start/', '/upload', '/cv-upload', '/scan', '/admin'];
 
 export default function AnalysePopup({ hasAnalysis }) {
   const router = useRouter();
