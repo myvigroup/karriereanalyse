@@ -1,11 +1,25 @@
 'use client';
 import { useState } from 'react';
 
+const Ic = ({ d, size = 18, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+    stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">{d}</svg>
+);
+const ICONS = {
+  struktur: <><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></>,
+  inhalt:   <><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M12 12v4M10 14h4"/></>,
+  design:   <><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="13.5" cy="17.5" r="2.5"/><path d="M9 12h9M9 6.5h-3.5M9 17.5H6"/></>,
+  wirkung:  <><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></>,
+  fallback: <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>,
+  lock:     <><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>,
+  rocket:   <><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></>,
+};
+
 const CATEGORY_LABELS = {
-  struktur: { label: 'Struktur', icon: '📋', desc: 'Aufbau & Vollständigkeit' },
-  inhalt:   { label: 'Inhalt',   icon: '💼', desc: 'Erfahrungen & Kompetenzen' },
-  design:   { label: 'Design',   icon: '🎨', desc: 'Optik & Lesbarkeit' },
-  wirkung:  { label: 'Wirkung',  icon: '✨', desc: 'Gesamteindruck & Positionierung' },
+  struktur: { label: 'Struktur', iconKey: 'struktur', desc: 'Aufbau & Vollständigkeit' },
+  inhalt:   { label: 'Inhalt',   iconKey: 'inhalt',   desc: 'Erfahrungen & Kompetenzen' },
+  design:   { label: 'Design',   iconKey: 'design',   desc: 'Optik & Lesbarkeit' },
+  wirkung:  { label: 'Wirkung',  iconKey: 'wirkung',  desc: 'Gesamteindruck & Positionierung' },
 };
 
 function ScoreGauge({ rating }) {
@@ -35,7 +49,7 @@ function StarRating({ rating }) {
 }
 
 function CategoryCard({ category, items }) {
-  const meta = CATEGORY_LABELS[category] || { label: category, icon: '📌', desc: '' };
+  const meta = CATEGORY_LABELS[category] || { label: category, iconKey: 'fallback', desc: '' };
   const ratingItem = items.find(it => it.content.startsWith('__rating_'));
   const rating = ratingItem ? parseInt(ratingItem.content.replace('__rating_', '')) : null;
   const presets = items.filter(it => it.type === 'preset' && !it.content.startsWith('__rating_'));
@@ -47,7 +61,9 @@ function CategoryCard({ category, items }) {
     <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E6E1', overflow: 'hidden' }}>
       <div style={{ padding: '16px 20px', borderBottom: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 22 }}>{meta.icon}</span>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Ic d={ICONS[meta.iconKey]} size={18} color="#4B5563" />
+          </div>
           <div>
             <div style={{ fontWeight: 700, fontSize: 15, color: '#1A1A1A' }}>{meta.label}</div>
             <div style={{ fontSize: 12, color: '#9CA3AF' }}>{meta.desc}</div>
@@ -83,6 +99,7 @@ export default function ScanResultClient({ check, itemsByCategory, token }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [loginUrl, setLoginUrl] = useState(null);
+  const [existingUser, setExistingUser] = useState(false);
 
   const categories = ['struktur', 'inhalt', 'design', 'wirkung'];
 
@@ -97,8 +114,9 @@ export default function ScanResultClient({ check, itemsByCategory, token }) {
         body: JSON.stringify({ token, phone }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Fehler');
+      if (!res.ok) throw new Error(data.error || 'Fehler beim Freischalten');
       setLoginUrl(data.loginUrl);
+      setExistingUser(data.existingUser === true);
       setUnlocked(true);
     } catch (err) {
       setError(err.message);
@@ -152,7 +170,9 @@ export default function ScanResultClient({ check, itemsByCategory, token }) {
               border: '1px solid #E8E6E1',
               textAlign: 'center',
             }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div>
+              <div style={{ width: 56, height: 56, borderRadius: 16, background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                <Ic d={ICONS.lock} size={26} color="#4B5563" />
+              </div>
               <h3 style={{ fontSize: 20, fontWeight: 800, color: '#1A1A1A', margin: '0 0 8px' }}>Detailanalyse freischalten</h3>
               <p style={{ fontSize: 14, color: '#6B7280', margin: '0 0 20px', lineHeight: 1.6 }}>
                 Gib deine Telefonnummer ein und erhalte sofort Zugang zur vollständigen Analyse — kostenlos.<br />
@@ -204,8 +224,10 @@ export default function ScanResultClient({ check, itemsByCategory, token }) {
       {/* CTA nach Freischaltung */}
       {unlocked && (
         <div style={{ background: 'linear-gradient(135deg, #CC1426 0%, #A01020 100%)', borderRadius: 20, padding: '28px 24px', textAlign: 'center', color: '#fff' }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>🚀</div>
-          <h3 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 8px' }}>Dein Konto ist fertig!</h3>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+            <Ic d={ICONS.rocket} size={28} color="#fff" />
+          </div>
+          <h3 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 8px' }}>{existingUser ? 'Willkommen zurück!' : 'Dein Konto ist fertig!'}</h3>
           <p style={{ fontSize: 14, margin: '0 0 20px', opacity: 0.9, lineHeight: 1.6 }}>
             Erhalte Zugang zu Masterclass, KI-Coach und allen Karriere-Tools.
           </p>

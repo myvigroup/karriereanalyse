@@ -22,13 +22,12 @@ export async function POST(request) {
   if (check.registered) return NextResponse.json({ success: true, alreadyRegistered: true });
 
   try {
-    // Prüfen ob User schon existiert
-    const { data: existingUsers } = await admin.auth.admin.listUsers();
-    const existing = existingUsers?.users?.find(u => u.email === check.email);
+    // Prüfen ob User schon existiert (über profiles, da listUsers paginiert)
+    const { data: existingProfile } = await admin.from('profiles').select('id').eq('email', check.email).maybeSingle();
 
     let userId;
-    if (existing) {
-      userId = existing.id;
+    if (existingProfile) {
+      userId = existingProfile.id;
       // Profil updaten falls vorhanden
       await admin.from('profiles').upsert({
         id: userId,
@@ -76,6 +75,21 @@ export async function POST(request) {
     });
   } catch (err) {
     console.error('self-check/register error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    const msg = err.message || '';
+    if (msg.includes('already been registered') || msg.includes('already registered')) {
+      // User existiert bereits → Magic Link generieren statt Fehler
+      try {
+        const { data: linkData } = await admin.auth.admin.generateLink({
+          type: 'magiclink',
+          email: check.email,
+          options: { redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard` },
+        });
+        await admin.from('self_service_checks').update({ registered: true, phone: phone.trim() }).eq('id', check.id);
+        return NextResponse.json({ success: true, existingUser: true, loginUrl: linkData?.properties?.action_link || '/auth/login' });
+      } catch {
+        return NextResponse.json({ success: true, existingUser: true, loginUrl: '/auth/login' });
+      }
+    }
+    return NextResponse.json({ error: 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.' }, { status: 500 });
   }
 }
