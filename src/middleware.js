@@ -21,7 +21,7 @@ export async function middleware(request) {
   const isPublicUpload = pathname.startsWith('/upload') || pathname.startsWith('/cv-upload');
   const isAffiliateRoute = pathname.startsWith('/r/') || pathname.startsWith('/start/');
   const isDemoRoute = pathname === '/demo' || pathname.startsWith('/demo/');
-  const isPublicPage = pathname.startsWith('/agb') || pathname.startsWith('/datenschutz') || pathname.startsWith('/impressum') || pathname.startsWith('/widerruf') || pathname.startsWith('/angebote') || pathname.startsWith('/gehaltsverhandlung') || pathname.startsWith('/seminare') || pathname.startsWith('/scan') || pathname === '/qr-anleitung.html';
+  const isPublicPage = pathname.startsWith('/agb') || pathname.startsWith('/datenschutz') || pathname.startsWith('/impressum') || pathname.startsWith('/widerruf') || pathname.startsWith('/angebote') || pathname.startsWith('/gehaltsverhandlung') || pathname.startsWith('/seminare') || pathname.startsWith('/scan') || pathname.startsWith('/cv-check') || pathname === '/qr-anleitung.html';
   if (!user && !isAuthPage && !isBeraterAuthPage && !isPublicUpload && !isAffiliateRoute && !isDemoRoute && !isPublicPage) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
