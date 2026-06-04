@@ -92,6 +92,19 @@ export default async function FairDashboard({ params }) {
   if (!isManager) countQuery = countQuery.eq('advisor_user_id', user.id);
   const { count: totalLeads } = await countQuery;
 
+  // Self-Service Checks für diese Messe (QR-Code Scans)
+  const { data: todaySelfChecks } = await admin
+    .from('self_service_checks')
+    .select('id, name, email, overall_rating, result_token, created_at, registered')
+    .eq('fair_id', fairId)
+    .gte('created_at', today)
+    .order('created_at', { ascending: false });
+
+  const { count: totalSelfChecks } = await admin
+    .from('self_service_checks')
+    .select('*', { count: 'exact', head: true })
+    .eq('fair_id', fairId);
+
   const formatDate = (d) => new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const formatTime = (d) => new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
@@ -112,27 +125,21 @@ export default async function FairDashboard({ params }) {
 
       {/* Counter + CTA */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
-        <div style={{
-          background: '#fff',
-          borderRadius: 16,
-          padding: 24,
-          border: '1px solid #E8E6E1',
-          flex: '1 1 200px',
-          textAlign: 'center',
-        }}>
+        <div style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #E8E6E1', flex: '1 1 140px', textAlign: 'center' }}>
           <div style={{ fontSize: 48, fontWeight: 700, color: '#1A1A1A' }}>{(todayLeads || []).length}</div>
           <div style={{ fontSize: 14, color: '#86868b' }}>Gespräche heute</div>
         </div>
-        <div style={{
-          background: '#fff',
-          borderRadius: 16,
-          padding: 24,
-          border: '1px solid #E8E6E1',
-          flex: '1 1 200px',
-          textAlign: 'center',
-        }}>
+        <div style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #E8E6E1', flex: '1 1 140px', textAlign: 'center' }}>
           <div style={{ fontSize: 48, fontWeight: 700, color: '#1A1A1A' }}>{totalLeads || 0}</div>
           <div style={{ fontSize: 14, color: '#86868b' }}>Gespräche gesamt</div>
+        </div>
+        <div style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #E8E6E1', flex: '1 1 140px', textAlign: 'center' }}>
+          <div style={{ fontSize: 48, fontWeight: 700, color: '#CC1426' }}>{(todaySelfChecks || []).length}</div>
+          <div style={{ fontSize: 14, color: '#86868b' }}>QR-Scans heute</div>
+        </div>
+        <div style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #E8E6E1', flex: '1 1 140px', textAlign: 'center' }}>
+          <div style={{ fontSize: 48, fontWeight: 700, color: '#CC1426' }}>{totalSelfChecks || 0}</div>
+          <div style={{ fontSize: 14, color: '#86868b' }}>QR-Scans gesamt</div>
         </div>
       </div>
 
@@ -181,14 +188,7 @@ export default async function FairDashboard({ params }) {
       </h2>
 
       {(!todayLeads || todayLeads.length === 0) ? (
-        <div style={{
-          background: '#fff',
-          borderRadius: 16,
-          padding: 32,
-          textAlign: 'center',
-          border: '1px solid #E8E6E1',
-          color: '#86868b',
-        }}>
+        <div style={{ background: '#fff', borderRadius: 16, padding: 32, textAlign: 'center', border: '1px solid #E8E6E1', color: '#86868b' }}>
           Noch keine Gespräche heute. Starte jetzt!
         </div>
       ) : (
@@ -196,43 +196,51 @@ export default async function FairDashboard({ params }) {
           {todayLeads.map(lead => {
             const statusInfo = STATUS_LABELS[lead.status] || STATUS_LABELS.new;
             return (
-              <Link
-                key={lead.id}
-                href={getNextStep(lead)}
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                <div style={{
-                  background: '#fff',
-                  borderRadius: 12,
-                  padding: '16px 20px',
-                  border: '1px solid #E8E6E1',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  transition: 'background 0.15s',
-                }}>
+              <Link key={lead.id} href={getNextStep(lead)} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div style={{ background: '#fff', borderRadius: 12, padding: '16px 20px', border: '1px solid #E8E6E1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: 15 }}>{lead.first_name} {lead.last_name || ''}</div>
-                    <div style={{ fontSize: 13, color: '#86868b' }}>
-                      {lead.email} · {formatTime(lead.created_at)}
-                    </div>
+                    <div style={{ fontSize: 13, color: '#86868b' }}>{lead.email} · {formatTime(lead.created_at)}</div>
                   </div>
-                  <span style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    padding: '4px 12px',
-                    borderRadius: 980,
-                    background: statusInfo.bg,
-                    color: statusInfo.color,
-                    whiteSpace: 'nowrap',
-                  }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 12px', borderRadius: 980, background: statusInfo.bg, color: statusInfo.color, whiteSpace: 'nowrap' }}>
                     {statusInfo.label}
                   </span>
                 </div>
               </Link>
             );
           })}
+        </div>
+      )}
+
+      {/* QR-Code Self-Service Checks */}
+      {(todaySelfChecks || []).length > 0 && (
+        <div style={{ marginTop: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: '#1A1A1A', marginBottom: 16 }}>
+            Selbst-Scans heute (QR-Code)
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {(todaySelfChecks || []).map(sc => {
+              const ratingColor = !sc.overall_rating ? '#9CA3AF' : sc.overall_rating <= 2 ? '#EF4444' : sc.overall_rating === 3 ? '#F59E0B' : '#22C55E';
+              return (
+                <div key={sc.id} style={{ background: '#fff', borderRadius: 12, padding: '16px 20px', border: '1px solid #E8E6E1', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 15 }}>{sc.name || '–'}</div>
+                    <div style={{ fontSize: 13, color: '#86868b' }}>{sc.email} · {formatTime(sc.created_at)}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {sc.registered && <span style={{ fontSize: 11, fontWeight: 600, color: '#059669', background: '#F0FDF4', padding: '2px 8px', borderRadius: 980, border: '1px solid #A7F3D0' }}>Registriert</span>}
+                    {sc.overall_rating ? (
+                      <a href={`/scan/result/${sc.result_token}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, fontWeight: 700, color: ratingColor, textDecoration: 'none' }}>
+                        {sc.overall_rating}/5 →
+                      </a>
+                    ) : (
+                      <span style={{ fontSize: 12, color: '#9CA3AF' }}>Ausstehend</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
