@@ -4,6 +4,7 @@ import Link from 'next/link';
 import RetriggerButton from './RetriggerButton';
 import CollapsibleLeadsList from './CollapsibleLeadsList';
 import CollapsibleSelfChecks from './CollapsibleSelfChecks';
+import FairFilterSelect from './FairFilterSelect';
 
 
 export default async function LeadsPage({ searchParams }) {
@@ -324,43 +325,14 @@ export default async function LeadsPage({ searchParams }) {
           );
         })}
 
-        {/* Messe-Filter */}
-        {(fairs || []).length > 1 && (
-          <div style={{ marginLeft: 8, display: 'flex', gap: 6 }}>
-            <Link
-              href={filterHref({ fair: undefined })}
-              style={{
-                padding: '7px 14px',
-                borderRadius: 980,
-                fontSize: 13,
-                textDecoration: 'none',
-                background: !fairFilter ? '#E8E6E1' : '#fff',
-                color: '#1A1A1A',
-                border: '1px solid #E8E6E1',
-                fontWeight: !fairFilter ? 600 : 400,
-              }}
-            >
-              Alle Messen
-            </Link>
-            {(fairs || []).map(f => (
-              <Link
-                key={f.id}
-                href={filterHref({ fair: f.id })}
-                style={{
-                  padding: '7px 14px',
-                  borderRadius: 980,
-                  fontSize: 13,
-                  textDecoration: 'none',
-                  background: fairFilter === f.id ? '#E8E6E1' : '#fff',
-                  color: '#1A1A1A',
-                  border: '1px solid #E8E6E1',
-                  fontWeight: fairFilter === f.id ? 600 : 400,
-                }}
-              >
-                {f.name}
-              </Link>
-            ))}
-          </div>
+        {/* Messe-Filter als Dropdown */}
+        {(fairs || []).length > 0 && (
+          <FairFilterSelect
+            fairs={fairs}
+            currentFairId={fairFilter}
+            statusFilter={statusFilter}
+            followUpFilter={followUpFilter}
+          />
         )}
       </div>
 
