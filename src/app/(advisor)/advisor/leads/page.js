@@ -145,7 +145,16 @@ export default async function LeadsPage({ searchParams }) {
   const todayCount = (rawLeads || []).filter(l => (l.created_at || '').startsWith(today)).length;
   const openCount = (rawLeads || []).filter(l => ['new', 'analyzing', 'feedback_pending'].includes(l.status)).length;
   const totalCount = (rawLeads || []).length;
-  const activeFairs = (fairs || []).filter(f => ['upcoming', 'active'].includes(f.status));
+  const activeFairs = (fairs || []).filter(f => {
+    if (f.status === 'active') return true;
+    if (f.status === 'upcoming') {
+      // Nur zeigen wenn Messe heute, morgen oder max. 2 Tage vorbei
+      const start = new Date(f.start_date);
+      const diffDays = (new Date() - start) / (1000 * 60 * 60 * 24);
+      return diffDays <= 2;
+    }
+    return false;
+  });
 
   const filterHref = (params) => {
     const base = {
