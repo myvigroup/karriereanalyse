@@ -20,7 +20,7 @@ export async function POST(request) {
       .from('fairs')
       .select('id')
       .lte('start_date', today)
-      .or(`end_date.gte.${today},status.eq.active`)
+      .gte('end_date', today)
       .limit(2);
     if (activeFairs?.length === 1) resolvedFairId = activeFairs[0].id;
   }
