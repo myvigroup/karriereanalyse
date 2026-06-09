@@ -93,10 +93,11 @@ export default function CvCheckPage() {
     setError(null);
     setSubmitting(true);
     try {
+      const fairId = new URLSearchParams(window.location.search).get('fair') || null;
       const res = await fetch('/api/self-check/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fairId: null, name, email, targetPosition }),
+        body: JSON.stringify({ fairId, name, email, targetPosition }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Fehler');

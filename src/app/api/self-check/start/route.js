@@ -12,8 +12,21 @@ export async function POST(request) {
   if (!email?.trim()) return NextResponse.json({ error: 'E-Mail ist erforderlich' }, { status: 400 });
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return NextResponse.json({ error: 'Ungültige E-Mail-Adresse' }, { status: 400 });
 
+  // When no fair specified, auto-assign to the one fair active today (if unambiguous)
+  let resolvedFairId = fairId || null;
+  if (!resolvedFairId) {
+    const today = new Date().toISOString().split('T')[0];
+    const { data: activeFairs } = await admin
+      .from('fairs')
+      .select('id')
+      .lte('start_date', today)
+      .or(`end_date.gte.${today},status.eq.active`)
+      .limit(2);
+    if (activeFairs?.length === 1) resolvedFairId = activeFairs[0].id;
+  }
+
   const { data, error } = await admin.from('self_service_checks').insert({
-    fair_id: fairId || null,
+    fair_id: resolvedFairId,
     name: name.trim(),
     email: email.trim().toLowerCase(),
     target_position: targetPosition?.trim() || null,
