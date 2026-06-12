@@ -1,22 +1,15 @@
-import Link from 'next/link';
-
 export const metadata = {
   title: 'Das Karriere-Institut — Werde die beste Version deines beruflichen Selbst',
   description: 'Live-Seminare, Video-Masterclasses und persönliches Coaching. 18.000+ Mitglieder. Starte mit dem kostenlosen Lebenslauf-Check.',
 };
 
-function Icon({ name, size = 20 }) {
-  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round' };
+function Icon({ name, size = 20, color = 'currentColor' }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: color, strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round' };
   switch (name) {
-    case 'play':    return <svg {...p}><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>;
-    case 'users':   return <svg {...p}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
-    case 'target':  return <svg {...p}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>;
-    case 'doc':     return <svg {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>;
-    case 'star':    return <svg {...p}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor" stroke="none"/></svg>;
-    case 'check':   return <svg {...p}><polyline points="20 6 9 17 4 12"/></svg>;
-    case 'arrow':   return <svg {...p}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
-    case 'clock':   return <svg {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
-    case 'award':   return <svg {...p}><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>;
+    case 'play':   return <svg {...p}><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill={color} stroke="none"/></svg>;
+    case 'users':  return <svg {...p}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+    case 'target': return <svg {...p}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>;
+    case 'arrow':  return <svg {...p}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
     default: return null;
   }
 }
@@ -30,120 +23,104 @@ const PRODUCTS = [
     price: 'Ab 99 € · oder inklusive in der Mitgliedschaft',
     cta: 'Seminare ansehen',
     href: '/seminare',
-    highlight: false,
+    featured: false,
   },
   {
     tag: 'Auf Abruf · Video-Kurs',
     icon: 'play',
     title: 'Video-Masterclasses',
-    desc: 'Tiefgehende Kurse zu Gehaltsverhandlung, Rhetorik und mehr — strukturiert, praxisnah, auf Abruf.',
+    desc: 'Tiefgehende Kurse zu Gehaltsverhandlung, Rhetorik und mehr — strukturiert, praxisnah, jederzeit verfügbar.',
     price: 'Ab 49 € · oder inklusive in der Mitgliedschaft',
     cta: 'Masterclasses entdecken',
     href: '/masterclasses',
-    highlight: true,
+    featured: true,
   },
   {
     tag: '1:1 · Persönlich',
     icon: 'target',
     title: 'Coaching mit Experten',
     desc: 'Persönliche Beratung mit einem lizenzierten Karriere-Coach — für konkrete Situationen und schnelle Ergebnisse.',
-    price: 'Auf Anfrage · kostenlose Erstgespräch',
+    price: 'Kostenloses Erstgespräch',
     cta: 'Coach finden',
     href: '/auth/register',
-    highlight: false,
+    featured: false,
   },
 ];
 
 const STEPS = [
-  { num: '01', title: 'Kostenloser Lebenslauf-Check', desc: 'Lade deinen CV hoch — die KI analysiert in Sekunden Struktur, Inhalt, Design und Wirkung.' },
-  { num: '02', title: 'Seminar besuchen', desc: 'Wähle ein Thema, das dir gerade am wichtigsten ist. Live, interaktiv, mit echten Ergebnissen.' },
-  { num: '03', title: 'Masterclass vertiefen', desc: 'Geh tiefer in das Thema mit einem Video-Kurs — mit Skripten, Workbooks und Zertifikat.' },
-  { num: '04', title: 'Mit Coach umsetzen', desc: 'Bei Bedarf: 1:1 mit einem Experten die Erkenntnisse im echten Kontext anwenden.' },
+  { num: '01', title: 'Gratis Lebenslauf-Check', desc: 'KI analysiert deinen CV in 60 Sekunden — Struktur, Inhalt, Design, Wirkung.' },
+  { num: '02', title: 'Seminar besuchen', desc: 'Das Thema wählen, das gerade am dringendsten ist. Live, interaktiv.' },
+  { num: '03', title: 'Masterclass vertiefen', desc: 'Video-Kurs mit Skripten, Workbooks und Zertifikat — auf deinem Tempo.' },
+  { num: '04', title: 'Mit Coach umsetzen', desc: 'Bei Bedarf 1:1 mit einem Experten im echten Kontext anwenden.' },
 ];
 
 const TRUST = [
-  { value: '18.000+', label: 'Mitglieder vertrauen uns' },
+  { value: '18.000+', label: 'Mitglieder' },
   { value: '100+', label: 'lizenzierte Coaches' },
-  { value: '13', label: 'Live-Seminare pro Jahr' },
-  { value: '★ 4.9', label: 'Durchschnittsbewertung' },
+  { value: '13', label: 'Live-Seminare' },
+  { value: '★ 4.9', label: 'Bewertung' },
 ];
 
 const SEMINARE_PREVIEW = [
-  'Rhetorik & Überzeugen',
-  'Gehaltsverhandlung',
-  'Personal Leadership',
-  'Kommunikation',
-  'Selbstmotivation',
-  'Konfliktmanagement',
+  'Rhetorik & Überzeugen', 'Gehaltsverhandlung', 'Personal Leadership',
+  'Kommunikation', 'Selbstmotivation', 'Konfliktmanagement',
 ];
+
+const HERO_BG = `
+  radial-gradient(600px 280px at 80% 20%, rgba(214,48,72,0.3), transparent 70%),
+  radial-gradient(500px 300px at 5% 120%, rgba(130,3,28,0.85), transparent 70%),
+  linear-gradient(160deg, #1d1d1f 0%, #2b1114 55%, #82031C 100%)
+`;
+const GRAIN = {
+  position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.4,
+  backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0)',
+  backgroundSize: '3px 3px',
+};
 
 export default function HomePage() {
   return (
-    <div style={{ minHeight: '100vh', background: '#FAFAF8', fontFamily: "'Instrument Sans', sans-serif" }}>
+    <div style={{ minHeight: '100vh', background: 'var(--ki-bg)', fontFamily: "'Instrument Sans', -apple-system, sans-serif", color: 'var(--ki-text)' }}>
 
       {/* Nav */}
-      <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 48px', maxWidth: 1100, margin: '0 auto', borderBottom: '1px solid #F0EFE9' }}>
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#CC1426', textTransform: 'uppercase' }}>
+      <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 48px', maxWidth: 1100, margin: '0 auto', borderBottom: '0.5px solid var(--ki-border-light)' }}>
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'var(--ki-red)', textTransform: 'uppercase' }}>
           Das Karriere-Institut
         </span>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-          <a href="/seminare" style={{ fontSize: 13, color: '#6B6B6B', textDecoration: 'none', fontWeight: 500 }}>Seminare</a>
-          <a href="/masterclasses" style={{ fontSize: 13, color: '#6B6B6B', textDecoration: 'none', fontWeight: 500 }}>Masterclasses</a>
-          <a href="/auth/login" style={{ fontSize: 13, color: '#6B6B6B', textDecoration: 'none' }}>Einloggen</a>
-          <a href="/scan" style={{ fontSize: 13, fontWeight: 600, padding: '8px 20px', borderRadius: 999, background: '#CC1426', color: 'white', textDecoration: 'none' }}>
-            Gratis CV-Check
-          </a>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          <a href="/seminare" style={{ fontSize: 13, color: 'var(--ki-text-secondary)', padding: '7px 14px', borderRadius: '980px', textDecoration: 'none', fontWeight: 500 }}>Seminare</a>
+          <a href="/masterclasses" style={{ fontSize: 13, color: 'var(--ki-text-secondary)', padding: '7px 14px', borderRadius: '980px', textDecoration: 'none', fontWeight: 500 }}>Masterclasses</a>
+          <a href="/auth/login" style={{ fontSize: 13, color: 'var(--ki-text-secondary)', padding: '7px 14px', borderRadius: '980px', textDecoration: 'none' }}>Einloggen</a>
+          <a href="/scan" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 18px' }}>Gratis CV-Check</a>
         </div>
       </nav>
 
       {/* Hero */}
-      <section style={{
-        background: 'linear-gradient(160deg, #1A1A1A 0%, #2C1810 55%, #1A1A1A 100%)',
-        padding: '88px 24px 80px',
-      }}>
-        <div style={{ maxWidth: 780, margin: '0 auto', textAlign: 'center' }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px',
-            borderRadius: 999, background: 'rgba(204,20,38,0.2)', border: '1px solid rgba(204,20,38,0.35)',
-            fontSize: 12, fontWeight: 600, color: '#ff7a7a', marginBottom: 28,
-          }}>
+      <section style={{ position: 'relative', overflow: 'hidden', padding: '88px 24px 80px', background: HERO_BG }}>
+        <div style={GRAIN} />
+        <div style={{ maxWidth: 780, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: '980px', background: 'rgba(255,255,255,0.12)', border: '0.5px solid rgba(255,255,255,0.18)', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.9)', marginBottom: 28, backdropFilter: 'blur(12px)' }}>
             Kostenlos starten · Kein Account nötig
           </div>
-          <h1 style={{ fontSize: 52, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.08, color: 'white', marginBottom: 20 }}>
+          <h1 style={{ fontSize: 52, fontWeight: 600, letterSpacing: '-0.04em', lineHeight: 1.08, color: '#fff', marginBottom: 20 }}>
             Werde die beste Version<br />
-            <span style={{ color: '#CC1426' }}>deines beruflichen Selbst.</span>
+            <span style={{ color: 'var(--ki-red)' }}>deines beruflichen Selbst.</span>
           </h1>
-          <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.5)', maxWidth: 520, margin: '0 auto 40px', lineHeight: 1.65 }}>
+          <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.55)', maxWidth: 500, margin: '0 auto 40px', lineHeight: 1.55, letterSpacing: '-0.01em' }}>
             Seminare, Masterclasses und persönliches Coaching — strukturiert, praxisnah und auf dich zugeschnitten.
           </p>
-
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 48 }}>
-            <a href="/scan" style={{
-              fontSize: 15, fontWeight: 700, padding: '15px 32px', borderRadius: 999,
-              background: '#CC1426', color: 'white', textDecoration: 'none',
-              boxShadow: '0 4px 24px rgba(204,20,38,0.4)',
-            }}>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 52 }}>
+            <a href="/scan" className="btn btn-on-dark" style={{ fontSize: 15, padding: '14px 28px' }}>
               Kostenlosen Lebenslauf-Check starten →
             </a>
-            <a href="/seminare" style={{
-              fontSize: 14, fontWeight: 500, padding: '15px 24px', borderRadius: 999,
-              background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.75)', textDecoration: 'none',
-              border: '1px solid rgba(255,255,255,0.12)',
-            }}>
+            <a href="/seminare" style={{ display: 'inline-flex', alignItems: 'center', fontSize: 14, fontWeight: 500, padding: '14px 22px', borderRadius: '980px', background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.75)', border: '0.5px solid rgba(255,255,255,0.14)', textDecoration: 'none' }}>
               Seminare entdecken
             </a>
           </div>
-
-          {/* Trust Bar */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 0, borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', display: 'inline-flex', flexWrap: 'wrap' }}>
+          <div style={{ display: 'inline-flex', borderRadius: '16px', overflow: 'hidden', border: '0.5px solid rgba(255,255,255,0.1)' }}>
             {TRUST.map(({ value, label }, i) => (
-              <div key={label} style={{
-                padding: '14px 24px', textAlign: 'center',
-                background: i % 2 === 0 ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.07)',
-                borderRight: i < TRUST.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none',
-              }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>{value}</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{label}</div>
+              <div key={label} style={{ padding: '13px 22px', textAlign: 'center', background: i % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.09)', borderRight: i < TRUST.length - 1 ? '0.5px solid rgba(255,255,255,0.1)' : 'none' }}>
+                <div style={{ fontSize: 19, fontWeight: 600, color: '#fff', letterSpacing: '-0.025em' }}>{value}</div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2, fontWeight: 500 }}>{label}</div>
               </div>
             ))}
           </div>
@@ -152,135 +129,97 @@ export default function HomePage() {
 
       {/* Products */}
       <section style={{ maxWidth: 1060, margin: '0 auto', padding: '72px 24px 0' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <h2 style={{ fontSize: 32, fontWeight: 800, letterSpacing: '-0.04em', marginBottom: 10 }}>Dein Weg zur nächsten Karrierestufe</h2>
-          <p style={{ fontSize: 16, color: '#6B6B6B', maxWidth: 440, margin: '0 auto' }}>Drei Formate — je nach Lernstil, Zeit und Ziel.</p>
+        <div style={{ textAlign: 'center', marginBottom: 44 }}>
+          <h2 style={{ fontSize: 30, fontWeight: 600, letterSpacing: '-0.035em', marginBottom: 8 }}>Dein Weg zur nächsten Karrierestufe</h2>
+          <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)', maxWidth: 400, margin: '0 auto', lineHeight: 1.5 }}>Drei Formate — je nach Lernstil, Zeit und Ziel.</p>
         </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
           {PRODUCTS.map((p) => (
-            <div key={p.title} style={{
-              background: p.highlight ? '#1A1A1A' : 'white',
-              borderRadius: 18, padding: '32px 28px',
-              border: p.highlight ? '2px solid #CC1426' : '1px solid #E8E6E1',
-              display: 'flex', flexDirection: 'column',
-              position: 'relative',
+            <div key={p.title} className="card" style={{
+              display: 'flex', flexDirection: 'column', position: 'relative',
+              ...(p.featured ? { background: '#1d1d1f', border: '0.5px solid rgba(204,20,38,0.35)', boxShadow: '0 0 0 1px rgba(204,20,38,0.12), var(--sh-md)' } : {}),
             }}>
-              {p.highlight && (
-                <div style={{
-                  position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
-                  background: '#CC1426', color: 'white', fontSize: 11, fontWeight: 700,
-                  padding: '4px 14px', borderRadius: 999, whiteSpace: 'nowrap',
-                }}>
+              {p.featured && (
+                <div style={{ position: 'absolute', top: -11, left: '50%', transform: 'translateX(-50%)', background: 'var(--ki-red)', color: '#fff', fontSize: 11, fontWeight: 600, padding: '3px 12px', borderRadius: '980px', whiteSpace: 'nowrap' }}>
                   Bestseller
                 </div>
               )}
-              <div style={{ fontSize: 11, fontWeight: 600, color: p.highlight ? 'rgba(255,255,255,0.35)' : '#9A9A9A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>
-                {p.tag}
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 14, color: p.featured ? 'rgba(255,255,255,0.3)' : 'var(--ki-text-tertiary)' }}>{p.tag}</div>
+              <div style={{ width: 40, height: 40, borderRadius: '8px', marginBottom: 14, background: p.featured ? 'rgba(204,20,38,0.2)' : '#FDEDEF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name={p.icon} size={20} color="#CC1426" />
               </div>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: p.highlight ? 'rgba(204,20,38,0.2)' : '#FFF0F1', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, color: '#CC1426' }}>
-                <Icon name={p.icon} size={22} />
-              </div>
-              <h3 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 10, color: p.highlight ? 'white' : '#1A1A1A' }}>{p.title}</h3>
-              <p style={{ fontSize: 14, color: p.highlight ? 'rgba(255,255,255,0.5)' : '#6B6B6B', lineHeight: 1.6, marginBottom: 20, flex: 1 }}>{p.desc}</p>
-              <div style={{ fontSize: 12, color: p.highlight ? 'rgba(255,255,255,0.25)' : '#9A9A9A', marginBottom: 20 }}>{p.price}</div>
-              <a href={p.href} style={{
-                display: 'block', textAlign: 'center', fontSize: 14, fontWeight: 600,
-                padding: '12px 20px', borderRadius: 10, textDecoration: 'none',
-                background: p.highlight ? '#CC1426' : '#F0EFE9',
-                color: p.highlight ? 'white' : '#1A1A1A',
-              }}>
-                {p.cta} →
-              </a>
+              <h3 style={{ fontSize: 19, fontWeight: 600, letterSpacing: '-0.025em', marginBottom: 8, color: p.featured ? '#fff' : 'var(--ki-text)' }}>{p.title}</h3>
+              <p style={{ fontSize: 14, color: p.featured ? 'rgba(255,255,255,0.5)' : 'var(--ki-text-secondary)', lineHeight: 1.55, marginBottom: 16, flex: 1 }}>{p.desc}</p>
+              <div style={{ fontSize: 12, color: p.featured ? 'rgba(255,255,255,0.22)' : 'var(--ki-text-tertiary)', marginBottom: 18 }}>{p.price}</div>
+              <a href={p.href} className={`btn ${p.featured ? 'btn-primary' : 'btn-secondary'}`} style={{ fontSize: 14, padding: '10px 18px', textDecoration: 'none' }}>{p.cta} →</a>
             </div>
           ))}
         </div>
       </section>
 
       {/* How it works */}
-      <section style={{ maxWidth: 1060, margin: '0 auto', padding: '80px 24px 0' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <h2 style={{ fontSize: 32, fontWeight: 800, letterSpacing: '-0.04em', marginBottom: 10 }}>So funktioniert das Karriere-Institut</h2>
-          <p style={{ fontSize: 16, color: '#6B6B6B' }}>Ein klarer Weg — von der ersten Analyse bis zur Umsetzung.</p>
+      <section style={{ maxWidth: 1060, margin: '0 auto', padding: '72px 24px 0' }}>
+        <div style={{ textAlign: 'center', marginBottom: 44 }}>
+          <h2 style={{ fontSize: 30, fontWeight: 600, letterSpacing: '-0.035em', marginBottom: 8 }}>So funktioniert das Karriere-Institut</h2>
+          <p style={{ fontSize: 15, color: 'var(--ki-text-secondary)' }}>Ein klarer Weg — von der ersten Analyse bis zur Umsetzung.</p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2 }}>
-          {STEPS.map((step, i) => (
-            <div key={step.num} style={{
-              background: 'white',
-              borderRadius: i === 0 ? '14px 4px 4px 14px' : i === STEPS.length - 1 ? '4px 14px 14px 4px' : 4,
-              padding: '28px 24px',
-              border: '1px solid #E8E6E1',
-              borderLeft: '3px solid #CC1426',
-            }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#CC1426', letterSpacing: '0.06em', marginBottom: 10 }}>SCHRITT {step.num}</div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A', marginBottom: 8, lineHeight: 1.3 }}>{step.title}</div>
-              <div style={{ fontSize: 13, color: '#6B6B6B', lineHeight: 1.55 }}>{step.desc}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          {STEPS.map((step) => (
+            <div key={step.num} className="card" style={{ borderLeft: '2.5px solid var(--ki-red)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ki-red)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>Schritt {step.num}</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ki-text)', marginBottom: 6, lineHeight: 1.3, letterSpacing: '-0.01em' }}>{step.title}</div>
+              <div style={{ fontSize: 13, color: 'var(--ki-text-secondary)', lineHeight: 1.55 }}>{step.desc}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Seminar Preview */}
-      <section style={{ maxWidth: 1060, margin: '0 auto', padding: '80px 24px 0' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
+      {/* Seminare preview */}
+      <section style={{ maxWidth: 1060, margin: '0 auto', padding: '72px 24px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 6 }}>Live-Seminare</h2>
-            <p style={{ fontSize: 15, color: '#6B6B6B' }}>Jeden Samstag · 09:30–12:00 Uhr · Live via Microsoft Teams</p>
+            <h2 style={{ fontSize: 26, fontWeight: 600, letterSpacing: '-0.03em', marginBottom: 4 }}>Live-Seminare</h2>
+            <p style={{ fontSize: 14, color: 'var(--ki-text-secondary)' }}>Jeden Samstag · 09:30–12:00 Uhr · Live via Microsoft Teams</p>
           </div>
-          <a href="/seminare" style={{ fontSize: 13, fontWeight: 600, padding: '10px 22px', borderRadius: 999, background: '#F0EFE9', color: '#1A1A1A', textDecoration: 'none', border: '1px solid #E8E6E1' }}>
-            Alle 13 Seminare →
-          </a>
+          <a href="/seminare" className="btn btn-secondary" style={{ fontSize: 13, padding: '8px 18px', textDecoration: 'none' }}>Alle 13 Seminare →</a>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
           {SEMINARE_PREVIEW.map((title) => (
-            <div key={title} style={{ background: 'white', borderRadius: 12, padding: '16px 20px', border: '1px solid #E8E6E1', borderLeft: '3px solid #CC1426', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>{title}</span>
-              <Icon name="arrow" size={16} />
+            <div key={title} className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderLeft: '2.5px solid var(--ki-red)' }}>
+              <span style={{ fontSize: 14, fontWeight: 500, letterSpacing: '-0.01em' }}>{title}</span>
+              <Icon name="arrow" size={15} color="var(--ki-text-tertiary)" />
             </div>
           ))}
         </div>
       </section>
 
-      {/* Free CV Check CTA */}
-      <section style={{ maxWidth: 1060, margin: '80px auto 0', padding: '0 24px' }}>
-        <div style={{ background: 'linear-gradient(135deg, #1A1A1A 0%, #2C2C2E 100%)', borderRadius: 22, padding: '56px 48px', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 40, flexWrap: 'wrap' }}>
-          <div style={{ maxWidth: 500 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 14 }}>
-              Kostenlos · Kein Account · Sofortiges Ergebnis
-            </div>
-            <h2 style={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 12, lineHeight: 1.15 }}>
-              Starte mit dem<br /><span style={{ color: '#CC1426' }}>Lebenslauf-Check.</span>
+      {/* CTA */}
+      <section style={{ maxWidth: 1060, margin: '72px auto 0', padding: '0 24px' }}>
+        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '28px', padding: '52px 48px', background: HERO_BG, boxShadow: '0 20px 50px rgba(130,3,28,0.2), var(--sh-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 40, flexWrap: 'wrap' }}>
+          <div style={GRAIN} />
+          <div style={{ maxWidth: 480, position: 'relative' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 14 }}>Kostenlos · Kein Account · Sofortiges Ergebnis</div>
+            <h2 style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.035em', marginBottom: 10, lineHeight: 1.12, color: '#fff' }}>
+              Starte mit dem<br /><span style={{ color: 'var(--ki-red)' }}>Lebenslauf-Check.</span>
             </h2>
-            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.45)', lineHeight: 1.65, marginBottom: 0 }}>
-              Lade deinen CV hoch — die KI gibt dir in 60 Sekunden Feedback zu Struktur, Inhalt, Design und Wirkung. Gratis, anonym, ohne Registrierung.
+            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, letterSpacing: '-0.01em' }}>
+              Lade deinen CV hoch — die KI gibt dir in 60 Sekunden Feedback zu Struktur, Inhalt, Design und Wirkung.
             </p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flexShrink: 0 }}>
-            <a href="/scan" style={{
-              fontSize: 15, fontWeight: 700, padding: '16px 32px', borderRadius: 999,
-              background: '#CC1426', color: 'white', textDecoration: 'none',
-              boxShadow: '0 4px 20px rgba(204,20,38,0.5)', whiteSpace: 'nowrap',
-            }}>
-              Jetzt kostenlos starten →
-            </a>
-            <a href="/auth/register" style={{
-              fontSize: 13, fontWeight: 500, padding: '13px 24px', borderRadius: 999,
-              background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.65)', textDecoration: 'none',
-              border: '1px solid rgba(255,255,255,0.12)', textAlign: 'center', whiteSpace: 'nowrap',
-            }}>
-              Premium-Mitgliedschaft
-            </a>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', flexShrink: 0 }}>
+            <a href="/scan" className="btn btn-on-dark" style={{ fontSize: 15, padding: '14px 28px', whiteSpace: 'nowrap', textDecoration: 'none' }}>Jetzt kostenlos starten →</a>
+            <a href="/auth/register" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 500, padding: '12px 22px', borderRadius: '980px', background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.65)', border: '0.5px solid rgba(255,255,255,0.12)', textDecoration: 'none', whiteSpace: 'nowrap' }}>Premium-Mitgliedschaft</a>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={{ borderTop: '1px solid #E8E6E1', padding: '32px 48px', maxWidth: 1100, margin: '56px auto 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-        <div style={{ fontSize: 12, color: '#9A9A9A' }}>© 2026 Das Karriere-Institut · +49 511 5468 4547 · info@daskarriereinstitut.de</div>
+      <footer style={{ borderTop: '0.5px solid var(--ki-border-light)', padding: '28px 48px', maxWidth: 1100, margin: '56px auto 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+        <div style={{ fontSize: 12, color: 'var(--ki-text-tertiary)' }}>© 2026 Das Karriere-Institut · +49 511 5468 4547 · info@daskarriereinstitut.de</div>
         <div style={{ display: 'flex', gap: 20, fontSize: 13 }}>
-          <a href="/impressum" style={{ color: '#9A9A9A', textDecoration: 'none' }}>Impressum</a>
-          <a href="/datenschutz" style={{ color: '#9A9A9A', textDecoration: 'none' }}>Datenschutz</a>
-          <a href="/agb" style={{ color: '#9A9A9A', textDecoration: 'none' }}>AGB</a>
+          {[['Impressum', '/impressum'], ['Datenschutz', '/datenschutz'], ['AGB', '/agb']].map(([label, href]) => (
+            <a key={label} href={href} style={{ color: 'var(--ki-text-tertiary)', textDecoration: 'none' }}>{label}</a>
+          ))}
         </div>
       </footer>
     </div>
