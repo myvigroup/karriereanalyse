@@ -152,24 +152,32 @@ async function generateAndSendInvite(admin, email, name, appUrl) {
   });
 }
 
-// Alle Berater auf einmal mit neuen Zugangsdaten versorgen
+// Beraterliste für Rollout-Preview
+export async function getAdvisorsForRollout() {
+  const admin = await requireAdmin();
+  const { data: advisors } = await admin.from('advisors').select('user_id, display_name, email').order('display_name');
+  return advisors || [];
+}
+
+// Alle Berater auf einmal mit neuen Zugangsdaten versorgen (mit per-Berater Ergebnis)
 export async function resendAllAdvisorInvites() {
   const admin = await requireAdmin();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.daskarriereinstitut.de';
 
-  const { data: advisors } = await admin.from('advisors').select('user_id, display_name, email');
-  if (!advisors?.length) return { sent: 0 };
+  const { data: advisors } = await admin.from('advisors').select('user_id, display_name, email').order('display_name');
+  if (!advisors?.length) return { sent: 0, results: [] };
 
-  let sent = 0;
+  const results = [];
   for (const adv of advisors) {
     try {
       await generateAndSendInvite(admin, adv.email, adv.display_name, appUrl);
-      sent++;
+      results.push({ name: adv.display_name, email: adv.email, ok: true });
     } catch (e) {
       console.error('Failed to send invite to', adv.email, e);
+      results.push({ name: adv.display_name, email: adv.email, ok: false, error: e?.message });
     }
   }
-  return { sent };
+  return { sent: results.filter(r => r.ok).length, results };
 }
 
 function buildAdvisorInviteEmail(name, email, tempPassword, appUrl) {
