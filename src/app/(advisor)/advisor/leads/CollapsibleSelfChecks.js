@@ -38,7 +38,7 @@ export default function CollapsibleSelfChecks({ selfChecks, fairById }) {
               </div>
               <div style={{ padding: '14px 20px 14px 0' }}>
                 {sc.overall_rating ? (
-                  <a href={`/scan/result/${sc.result_token}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 700, color: ratingColor, textDecoration: 'none' }}>
+                  <a href={`/advisor/scan/${sc.id}`} style={{ fontSize: 13, fontWeight: 700, color: ratingColor, textDecoration: 'none' }}>
                     {sc.overall_rating}/5 →
                   </a>
                 ) : (
