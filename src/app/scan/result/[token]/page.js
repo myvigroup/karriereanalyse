@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
-import ScanResultClient from './ScanResultClient';
+import ScanResultClient from '../ScanResultClient';
 
 // Unused — kept only for pending/error states below
 function ScoreGauge({ rating }) {
